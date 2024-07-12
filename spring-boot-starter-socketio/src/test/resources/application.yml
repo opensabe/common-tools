@@ -1,0 +1,39 @@
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [test,%X{traceId},%X{spanId}] [%t][%C:%L]: %m%n"
+
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+server:
+  port: 9700
+  socketio:
+    # 前端连接地址，默认是 socket.io
+    # 路径必须包含 socket.io，原因参考 2. 怎么通过 api-gateway 访问
+    context: /socket.io
+    # 提供服务的端口
+    port: 4001
+    # 心跳间隔，24h
+    pingInterval: 15000
+    # 心跳超时，24h
+    pingTimeout: 45000
+    # 2*1024*1024
+    maxHttpContentLength: 2097152
+    maxFramePayloadLength: 2097152
+    # netty 主线程个数
+    bossThreads: 32
+    # netty 额外工作线程个数
+    workerThreads: 32
+    # 是否使用原生的 epoll 库，只有 epoll 存在才会启用
+    useLinuxNativeEpoll: true
+    ackMode: MANUAL
+    origin: ':*:'
+    transports:
+      - polling
+      - websocket
+    name-space: ${spring.application.name}

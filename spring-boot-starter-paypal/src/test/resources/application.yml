@@ -1,0 +1,52 @@
+paypal:
+  api:
+    # PayPal api的url地址
+    url: https://api-m.sandbox.paypal.com/v1
+    # PayPal 的 client_id
+    client_id: ${client_id}
+    # PayPal 的 client secret
+    client_secret: ${client_secret}
+spring:
+  main:
+    allow-circular-references: true
+  redis:
+    redisson:
+      aop:
+        order: 100000
+  data:
+    redis: #redis相关配置
+      timeout: 60000
+      host: 127.0.0.1
+      port: 6379
+
+################ resilience配置 ################
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      registerHealthIndicator: true
+      slidingWindowSize: 10
+      minimumNumberOfCalls: 5
+      slidingWindowType: TIME_BASED
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 2s
+      failureRateThreshold: 30
+      eventConsumerBufferSize: 10
+      recordExceptions:
+        - java.lang.Exception
+resilience4j.retry:
+  configs:
+    default:
+      ## 最大重试次数，包括第一次调用
+      maxAttempts: 2
+      ## 重试等待时间
+      waitDuration: 500ms
+      ## 启用随机等待时间，范围是 waitDuration - randomizedWaitFactor*waitDuration ~ waitDuration + randomizedWaitFactor*waitDuration
+      enableRandomizedWait: true
+      randomizedWaitFactor: 0.5
+resilience4j.thread-pool-bulkhead:
+  configs:
+    default:
+      maxThreadPoolSize: 50
+      coreThreadPoolSize: 10
+      queueCapacity: 1000

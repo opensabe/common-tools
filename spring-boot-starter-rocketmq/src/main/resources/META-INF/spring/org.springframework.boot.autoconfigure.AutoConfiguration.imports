@@ -1,0 +1,2 @@
+io.github.opensabe.spring.boot.starter.rocketmq.autoconf.RocketMQAutoConfiguration
+io.github.opensabe.spring.boot.starter.rocketmq.autoconf.RocketMQAutoConfigSpring6Support

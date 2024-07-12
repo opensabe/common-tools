@@ -1,0 +1,149 @@
+package io.github.opensabe.spring.boot.starter.socketio.conf;
+
+import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.annotation.SpringAnnotationScanner;
+import com.corundumstudio.socketio.listener.DefaultExceptionListener;
+import com.corundumstudio.socketio.listener.ExceptionListener;
+import com.corundumstudio.socketio.store.StoreFactory;
+import com.netflix.discovery.EurekaClient;
+import io.github.opensabe.spring.boot.starter.rocketmq.MQProducer;
+import io.github.opensabe.spring.boot.starter.socketio.SocketIoMessageTemplate;
+import io.github.opensabe.spring.boot.starter.socketio.tracing.extend.NamespaceExtend;
+import io.github.opensabe.spring.boot.starter.socketio.util.ForceDisconnectConsumer;
+import io.github.opensabe.spring.boot.starter.socketio.util.ForceDisconnectProducer;
+import io.github.opensabe.spring.boot.starter.socketio.util.SocketConnectionUtil;
+import io.netty.channel.epoll.Epoll;
+import lombok.extern.log4j.Log4j2;
+import org.redisson.api.RedissonClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.SmartLifecycle;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Log4j2
+@Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(SocketIoServerProperties.class)
+public class SocketIoConfiguration {
+
+    @Bean
+    public SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketIOServer) {
+        return new SpringAnnotationScanner(socketIOServer);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ExceptionListener exceptionListener() {
+        return new DefaultExceptionListener();
+    }
+
+    @Bean
+    public SocketIOServer server(SocketIoServerProperties socketIoServerProperties, StoreFactory storeFactory, ExceptionListener exceptionListener) {
+        socketIoServerProperties.setStoreFactory(storeFactory);
+        socketIoServerProperties.setExceptionListener(exceptionListener);
+
+        if (socketIoServerProperties.isUseLinuxNativeEpoll()
+                && !Epoll.isAvailable()) {
+            log.warn("SocketIoConfiguration-server: Epoll library not available, disabling native epoll");
+            socketIoServerProperties.setUseLinuxNativeEpoll(false);
+        }
+
+        // config specific namespace
+        socketIoServerProperties.setDefaultNamespace(new NamespaceExtend(NamespaceExtend.DEFAULT_NAME,socketIoServerProperties.cloneForNamespace()));
+
+        SocketIOServer socketIOServer = new SocketIOServer(socketIoServerProperties);
+
+        return socketIOServer;
+    }
+
+    @Bean
+    public SocketIoMessageTemplate socketIoMessageTemplate(SocketIOServer server) {
+        return new SocketIoMessageTemplate(server);
+    }
+
+    @Bean
+    public SocketIOServerLifecycle serverLifecycle(SocketIOServer socketIOServer) {
+        return new SocketIOServerLifecycle(socketIOServer);
+    }
+
+    @Bean
+    public AttributedSocketIoClientFactory attributedSocketIoClientFactory() {
+        return new AttributedSocketIoClientFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RedissonStoreFactory redissonStoreFactory(RedissonClient redissonClient, SocketIoServerProperties serverProperties) {
+        return new RedissonStoreFactory(redissonClient, serverProperties);
+    }
+
+    @Bean
+    @ConditionalOnClass(EurekaClient.class)
+    public SocketIoEurekaMetadataModifier socketIoEurekaMetadataModifier(SocketIoServerProperties serverProperties) {
+        return new SocketIoEurekaMetadataModifier(serverProperties);
+    }
+
+    /**
+     * 通过 SmartLifecycle 实现对于优雅关闭的兼容
+     */
+    @Log4j2
+    public static class SocketIOServerLifecycle implements SmartLifecycle {
+
+        private final SocketIOServer server;
+
+        private volatile boolean running = false;
+
+        public SocketIOServerLifecycle(SocketIOServer server) {
+            this.server = server;
+        }
+
+        @Override
+        public void start() {
+            try {
+                server.start();
+            } catch (Throwable e) {
+                log.fatal("SocketIOServerLifecycle-start failed, {}", e.getMessage(), e);
+            }
+            running = true;
+        }
+
+        @Override
+        public void stop() {
+            try {
+                server.stop();
+            } catch (Throwable e) {
+                log.fatal("SocketIOServerLifecycle-stop failed, {}", e.getMessage(), e);
+            }
+            running = false;
+        }
+
+        @Override
+        public boolean isRunning() {
+            return running;
+        }
+    }
+
+    @Bean
+    public ForceDisconnectProducer forceDisconnectProducer(MQProducer mqProducer) {
+        return new ForceDisconnectProducer(mqProducer);
+    }
+
+    @Bean
+    public ForceDisconnectConsumer forceDisconnectConsumer(SocketIOServer socketIOServer) {
+        return new ForceDisconnectConsumer(socketIOServer);
+    }
+
+    @Bean
+    public SocketConnectionUtil socketConnectionUtil(SocketIOServer socketIOServer, ForceDisconnectProducer forceDisconnectProducer) {
+
+        return new SocketConnectionUtil(socketIOServer, forceDisconnectProducer);
+    }
+
+    @Bean
+    public SocketIoHealthCheck socketIoHealthCheck() {
+
+        return new SocketIoHealthCheck();
+    }
+
+}

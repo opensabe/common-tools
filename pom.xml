@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <!-- 使用spring3.0.9版本 -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.9</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>io.github.opensabe-tech</groupId>
+    <artifactId>common-tools</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>${project.artifactId}</name>
+
+    <url>https://github.com/opensabe/common-tools</url>
+
+    <!--仅单向指定 parent 与模块关系，将 deploy 属性放在当前 common-tools 下-->
+    <!--所有的 module 的 parent 都不是 common-tools，这样防止 common-tools 的 deploy 对于将子模块作为 parent 的项目的 deploy 受影响-->
+    <!--由于 modules 的存在，开源部署的相关配置都可以放在 common-tools 下，进行开源发布-->
+    <modules>
+        <module>common-id-generator</module>
+        <module>common-location</module>
+        <module>common-tools-job-scheduler</module>
+        <module>common-utils</module>
+        <module>netty-push-client</module>
+        <module>netty-push-protobuf</module>
+        <module>spring-boot-starter-aliveclient</module>
+        <module>spring-boot-starter-aws</module>
+        <module>spring-boot-starter-cache</module>
+        <module>spring-boot-starter-elasticsearch</module>
+        <module>spring-boot-starter-mybatis</module>
+        <module>spring-boot-starter-redisson</module>
+        <module>spring-boot-starter-rocketmq</module>
+        <module>spring-boot-starter-socketio</module>
+        <module>spring-boot-starter-thread-pool</module>
+        <module>spring-boot-web-config</module>
+        <module>spring-cloud-node-manager</module>
+        <module>spring-cloud-parent</module>
+        <module>spring-cloud-starter-3rd-client</module>
+        <module>apple-spring-boot</module>
+        <module>spring-boot-starter-paypal</module>
+        <module>spring-boot-starter-google</module>
+        <module>mapstruct-bom</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2022.0.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>maven-central</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <configuration>
+                            <!-- do not deploy common-tools pom.xml (this file) -->
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+
+                    <!-- 生成Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.4.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <level>public</level>
+                            <doclint>none</doclint>
+                            <quiet>true</quiet>
+                        </configuration>
+                    </plugin>
+
+                    <!-- 生成source -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- 工程文件自动签名-->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <gpgArguments>
+                                <argument>--pinentry-mode</argument>
+                                <argument>loopback</argument>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                    <!-- 使用sonatype发布插件 -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.4.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>ossrh</publishingServerId>
+                            <tokenAuth>true</tokenAuth>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <reportSets>
+                    <reportSet>
+                        <id>aggregate</id>
+                        <inherited>false</inherited>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                    <reportSet>
+                        <id>default</id>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <scm>
+        <!--指向项目的可浏览SCM库（例如ViewVC或者Fisheye）的URL。-->
+        <url>https://github.com/opensabe/common-tools</url>
+        <!--SCM的URL,该URL描述了版本库和如何连接到版本库。欲知详情，请看SCMs提供的URL格式和列表。该连接只读。-->
+        <connection>https://github.com/opensabe/common-tools.git</connection>
+        <!--给开发者使用的，类似connection元素。即该连接不仅仅只读-->
+        <developerConnection>https://github.com/opensabe/common-tools.git</developerConnection>
+        <!--当前代码的标签，在开发阶段默认为HEAD-->
+        <tag>HEAD</tag>
+    </scm>
+
+    <!--项目开发者列表-->
+    <developers>
+        <developer>
+            <!--SCM里项目开发者的唯一标识符-->
+            <id>opensabe</id>
+            <!--项目开发者的全名-->
+            <name>opensabe-tech</name>
+            <!--项目开发者的email-->
+            <email>tech@sabegeek.com</email>
+            <roles>
+                <role>Project Manager</role>
+                <role>Developer</role>
+            </roles>
+            <!--项目开发者所在时区， -11到12范围内的整数。-->
+            <timezone>+8</timezone>
+        </developer>
+        <developer>
+            <id>maheng-hub</id>
+            <name>heng.ma</name>
+            <email>253286440@qq.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+        </developer>
+        <developer>
+            <id>chaoqun123</id>
+            <name>chaoqun.du</name>
+            <email>867282333@qq.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+        </developer>
+        <developer>
+            <id>leaon.liu@aliyun.com</id>
+            <name>Leaon Liu</name>
+            <email>leaon.liu@aliyun.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+        </developer>
+        <developer>
+            <id>wangrushuang</id>
+            <name>wangrushuang</name>
+            <email>1204213346@qq.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+        </developer>
+        <developer>
+            <name>houjianpo</name>
+            <!--项目开发者的email-->
+            <email>houjianpo510@163.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+    </developers>
+</project>

@@ -1,0 +1,13 @@
+google:
+  youtobe:
+    api:
+      # 通过谷歌提供的data api search 请求地址
+      search: https://www.googleapis.com/youtube/v3/search
+      # 通过谷歌提供的data api list 请求地址
+      list: https://www.googleapis.com/youtube/v3/videos
+      # 设置视频所在区域，暂时先设置成HK
+      regionCode: HK
+      # 谷歌授权的api key
+      keys:
+        - key1
+        - key2

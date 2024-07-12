@@ -1,0 +1,40 @@
+
+spring:
+  cloud:
+    loadbalancer:
+      zone: zone1
+    openfeign:
+      jfr:
+        enabled: false
+      client:
+        config:
+          default:
+            connectTimeout: 500
+            readTimeout: 2000
+          testServiceCircuitbreakerClient:
+            readTimeout: 4000
+  servlet:
+    jfr:
+      enabled: false
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failureRateThreshold: 50
+        slidingWindowType: TIME_BASED
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 2
+      testServiceCircuitbreakerClient:
+        failureRateThreshold: 30
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 10000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: all
+
+eureka:
+  client:
+    enabled: false

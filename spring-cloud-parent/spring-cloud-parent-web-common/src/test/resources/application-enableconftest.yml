@@ -1,0 +1,36 @@
+spring:
+  cloud:
+    loadbalancer:
+      zone: zone1
+    openfeign:
+      jfr:
+        enabled: false
+      client:
+        config:
+          default:
+            connectTimeout: 500
+            readTimeout: 2000
+  servlet:
+    jfr:
+      enabled: false
+resilience4j:
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 500ms
+        enableRandomizedWait: true
+        randomizedWaitFactor: 0.5
+      RetryTestService2Client2:
+        maxAttempts: 6
+management:
+  endpoints:
+    web:
+      exposure:
+        include: all
+
+eureka:
+  client:
+    enabled: false
+
+

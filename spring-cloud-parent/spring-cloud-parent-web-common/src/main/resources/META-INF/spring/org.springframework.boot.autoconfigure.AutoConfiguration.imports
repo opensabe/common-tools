@@ -1,0 +1,3 @@
+io.github.opensabe.spring.cloud.parent.web.common.auto.OpenFeignAutoConfiguration
+io.github.opensabe.spring.cloud.parent.web.common.auto.UndertowAutoConfiguration
+io.github.opensabe.spring.cloud.parent.web.common.auto.FeignClientPreheatingAutoConfiguration

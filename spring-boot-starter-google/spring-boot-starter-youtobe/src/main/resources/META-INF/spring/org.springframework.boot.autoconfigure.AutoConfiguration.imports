@@ -1,0 +1,3 @@
+io.github.opensabe.youtobe.config.OkHttpClientAutoConfig
+io.github.opensabe.youtobe.config.YouToBeSearchAutoConfig
+io.github.opensabe.youtobe.config.YouToBeListAutoConfig

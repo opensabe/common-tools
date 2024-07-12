@@ -1,0 +1,58 @@
+spring:
+  cloud:
+    loadbalancer:
+      retry:
+        # 不用loadbalancer自带的retry，用我们自己的resilience4j的retry
+        enabled: false
+      zone: zone1
+      cache:
+        # 本地微服务实例列表缓存时间
+        ttl: 1
+        # 缓存大小，你的微服务调用多少个其他微服务，大小就设置为多少，默认256
+        capacity: 256
+    openfeign:
+      jfr:
+        enabled: false
+      client:
+        config:
+          default:
+            connectTimeout: 500
+            readTimeout: 2000
+  servlet:
+    jfr:
+      enabled: false
+resilience4j:
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 500ms
+        enableRandomizedWait: true
+        randomizedWaitFactor: 0.5
+#      testService2Client1:
+#        maxAttempts: 6
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        slidingWindowType: TIME_BASED
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 2s
+        failureRateThreshold: 30
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - java.lang.Exception
+management:
+  endpoints:
+    web:
+      exposure:
+        include: all
+
+eureka:
+  client:
+    enabled: false
+
+

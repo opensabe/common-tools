@@ -1,0 +1,2 @@
+io.github.opensabe.common.cache.autoconfig.CustomCacheAutoConfiguration
+io.github.opensabe.common.cache.autoconfig.RedisCacheAopAutoConfiguration

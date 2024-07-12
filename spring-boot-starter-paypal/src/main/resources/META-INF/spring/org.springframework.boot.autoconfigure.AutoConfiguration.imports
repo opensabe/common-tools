@@ -1,0 +1,2 @@
+io.github.opensabe.paypal.config.OkHttpClientAutoConfig
+io.github.opensabe.paypal.config.PayPalAutoConfig

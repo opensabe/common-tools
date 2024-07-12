@@ -1,0 +1,38 @@
+spring:
+  cloud:
+    loadbalancer:
+      zone: zone1
+    openfeign:
+      jfr:
+        enabled: false
+      client:
+        config:
+          default:
+            connectTimeout: 500
+            readTimeout: 2000
+  servlet:
+    jfr:
+      enabled: false
+resilience4j:
+    thread-pool-bulkhead:
+      configs:
+        default:
+          coreThreadPoolSize: 10
+          maxThreadPoolSize: 10
+        ThreadPoolTestService2Client1:
+          coreThreadPoolSize: 5
+          maxThreadPoolSize: 5
+        ThreadPoolTestService3Client1:
+          coreThreadPoolSize: 1
+          maxThreadPoolSize: 1
+          queue-capacity: 1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: all
+
+eureka:
+  client:
+    enabled: false
