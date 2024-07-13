@@ -1,13 +1,18 @@
 package io.github.opensabe.spring.cloud.parent.web.common.handler;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.utils.json.JsonUtil;
+import io.github.opensabe.spring.cloud.parent.web.common.undertow.HttpServletResponseImplUtil;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.servlet.spec.HttpServletResponseImpl;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -20,7 +25,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Log4j2
 public class GenericHttpMessageConverterSecretCheckPostProcessor implements BeanPostProcessor {
     private final GlobalSecretManager globalSecretManager;
 
@@ -92,37 +99,60 @@ public class GenericHttpMessageConverterSecretCheckPostProcessor implements Bean
             delegate.write(o, contentType, outputMessage);
         }
 
-        private void checkSecret(Object o, MediaType contentType, HttpOutputMessage outputMessage) throws IOException {
-            if (outputMessage instanceof ServletServerHttpResponse) {
-                Collection<String> headerNames = ((ServletServerHttpResponse) outputMessage).getServletResponse().getHeaderNames();
-                for (String headerName : headerNames) {
-                    String header = ((ServletServerHttpResponse) outputMessage).getServletResponse().getHeader(headerName);
-                    if (header != null) {
-                        FilterSecretStringResult headerNameFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(headerName);
-                        FilterSecretStringResult headerFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(header);
-                        if (headerNameFilterSecretStringResult.isFoundSensitiveString() || headerFilterSecretStringResult.isFoundSensitiveString()) {
-                            ((ServletServerHttpResponse) outputMessage).getServletResponse().sendError(HttpServletResponse.SC_FORBIDDEN, "Sensitive api forbidden");
-                        }
-                    }
-                }
+        private final Cache<String, Boolean> cache = Caffeine.newBuilder().expireAfterWrite(2, TimeUnit.SECONDS).build();
 
-                if (contentType != null) {
-                    String contentTypeString = contentType.toString();
-                    if (
-                            StringUtils.containsIgnoreCase(contentTypeString, "json")
-                            || StringUtils.containsIgnoreCase(contentTypeString, "xml")
-                            || StringUtils.containsIgnoreCase(contentTypeString, "text")
-                            || StringUtils.containsIgnoreCase(contentTypeString, "html")
-                            || StringUtils.containsIgnoreCase(contentTypeString, "form")
-                            || StringUtils.containsIgnoreCase(contentTypeString, "urlencoded")
-                    ) {
-                        String jsonString = JsonUtil.toJSONString(o);
-                        FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(jsonString);
-                        if (filterSecretStringResult.isFoundSensitiveString()) {
-                            ((ServletServerHttpResponse) outputMessage).getServletResponse().sendError(HttpServletResponse.SC_FORBIDDEN, "Sensitive api forbidden");
+        private void checkSecret(Object o, MediaType contentType, HttpOutputMessage outputMessage) throws IOException {
+            boolean checked = false;
+            if (outputMessage instanceof ServletServerHttpResponse) {
+                ServletServerHttpResponse servletServerHttpResponse = (ServletServerHttpResponse) outputMessage;
+                HttpServletResponse servletResponse = servletServerHttpResponse.getServletResponse();
+                if (servletResponse instanceof HttpServletResponseImpl httpServletResponse) {
+                    checked = true;
+                    HttpServerExchange httpServerExchange = HttpServletResponseImplUtil.getExchange(httpServletResponse);
+                    String requestPath = httpServerExchange.getRequestPath();
+                    Boolean ifPresent = cache.getIfPresent(requestPath);
+                    if (ifPresent != null && !ifPresent) {
+                        log.debug("GenericHttpMessageConverterSecretCheckPostProcessor {} is cached and not check", requestPath);
+                        return;
+                    } else {
+                        log.debug("GenericHttpMessageConverterSecretCheckPostProcessor {} is not cached or need check", requestPath);
+                    }
+                    Collection<String> headerNames = servletResponse.getHeaderNames();
+                    for (String headerName : headerNames) {
+                        String header = servletResponse.getHeader(headerName);
+                        if (header != null) {
+                            FilterSecretStringResult headerNameFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(headerName);
+                            FilterSecretStringResult headerFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(header);
+                            if (headerNameFilterSecretStringResult.isFoundSensitiveString() || headerFilterSecretStringResult.isFoundSensitiveString()) {
+                                cache.put(requestPath, true);
+                                servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Sensitive api forbidden");
+                            }
                         }
                     }
+
+                    if (contentType != null) {
+                        String contentTypeString = contentType.toString();
+                        if (
+                                StringUtils.containsIgnoreCase(contentTypeString, "json")
+                                        || StringUtils.containsIgnoreCase(contentTypeString, "xml")
+                                        || StringUtils.containsIgnoreCase(contentTypeString, "text")
+                                        || StringUtils.containsIgnoreCase(contentTypeString, "html")
+                                        || StringUtils.containsIgnoreCase(contentTypeString, "form")
+                                        || StringUtils.containsIgnoreCase(contentTypeString, "urlencoded")
+                        ) {
+                            String jsonString = JsonUtil.toJSONString(o);
+                            FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(jsonString);
+                            if (filterSecretStringResult.isFoundSensitiveString()) {
+                                cache.put(requestPath, true);
+                                servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Sensitive api forbidden");
+                            }
+                        }
+                    }
+                    cache.put(requestPath, false);
                 }
+            }
+            if (!checked) {
+                log.error("GenericHttpMessageConverterSecretCheckPostProcessor can not check because type incompatible");
             }
         }
     }
