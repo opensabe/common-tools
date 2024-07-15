@@ -7,19 +7,19 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.1</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>common-tools-job-scheduler</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <spring-boot-starter-redisson.version>1.0.0-SNAPSHOT</spring-boot-starter-redisson.version>
-        <common-utils.version>1.0.0-SNAPSHOT</common-utils.version>
+        <spring-boot-starter-redisson.version>1.0.1</spring-boot-starter-redisson.version>
+        <common-utils.version>1.0.1</common-utils.version>
     </properties>
 
     <dependencies>
