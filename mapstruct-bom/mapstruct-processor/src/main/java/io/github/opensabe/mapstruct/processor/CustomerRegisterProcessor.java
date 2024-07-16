@@ -68,6 +68,7 @@ public class CustomerRegisterProcessor extends FreeMarkerProcessor {
             Element interfaceName = elementUtils.getTypeElement(MapperRegister.class.getName());
             String className = interfaceName.toString() + "Impl";
             writeClass(className, MapperRegister.class.getSimpleName()+".ftl", Map.of("mappers", this.mappers));
+            mappers.clear();
         }
         return false;
     }
