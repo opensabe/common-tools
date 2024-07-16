@@ -1,20 +1,16 @@
 package io.github.opensabe.mapstruct.processor;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
-import freemarker.template.Version;
 import io.github.opensabe.mapstruct.core.Binding;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,24 +21,21 @@ import java.util.stream.Collectors;
  * @author heng.ma
  */
 @SupportedAnnotationTypes("io.github.opensabe.mapstruct.core.Binding")
-public class MapperGeneratorProcessor extends AbstractProcessor {
+public class MapperGeneratorProcessor extends FreeMarkerProcessor {
 
     private Elements elementUtils;
-
-    private Filer filer;
 
     private Types typeUtils;
 
     private TypeMirror bindingMirror;
 
     //保存已经创建过的mapper
-    final static MapperRep mappers = new MapperRep();
+    static MapperRep mappers = new MapperRep();
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         elementUtils = processingEnv.getElementUtils();
-        filer = processingEnv.getFiler();
         typeUtils = processingEnv.getTypeUtils();
         bindingMirror = elementUtils.getTypeElement(Binding.class.getName()).asType();
     }
@@ -65,22 +58,12 @@ public class MapperGeneratorProcessor extends AbstractProcessor {
             for (AbstractMapper mapper : maps) {
                 if (!mappers.contains(mapper)) {
                     String className = mapper.getPackageName() + "." + mapper.getMapperName();
-                    try (Writer writer = filer.createSourceFile(className)
-                            .openWriter()) {
-                        Configuration cfg = new Configuration(new Version("2.3.32"));
-                        cfg.setClassForTemplateLoading(MapperGeneratorProcessor.class, "/");
-                        cfg.setDefaultEncoding("UTF-8");
-
-                        Template template = cfg.getTemplate(mapper.template());
-                        template.process(mapper, writer);
-                        writer.flush();
-                        mappers.add(mapper);
-
-                    } catch (TemplateException | IOException ex) {
-                        throw new IllegalStateException(ex);
-                    }
+                    writeClass(className, mapper.template(), mapper);
+                    mappers.add(mapper);
                 }
             }
+        }else {
+
         }
         return false;
     }
