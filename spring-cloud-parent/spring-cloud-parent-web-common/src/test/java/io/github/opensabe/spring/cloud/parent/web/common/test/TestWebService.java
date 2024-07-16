@@ -392,24 +392,24 @@ public class TestWebService {
 
     @Test
     public void testSecret() throws InterruptedException {
-        ResponseEntity<Object> forEntity = testRestTemplate.getForEntity("/test-secret-string", Object.class);
-        assertEquals(forEntity.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody().toString(), SECRET));
+        ResponseEntity<String> forEntity = testRestTemplate.getForEntity("/test-secret-string", String.class);
+        assertEquals(forEntity.getStatusCode(), HttpStatus.OK);
+        assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody(), SECRET));
         assertFalse(StringUtils.containsIgnoreCase(forEntity.getHeaders().toString(), SECRET));
 
-        forEntity = testRestTemplate.getForEntity("/test-secret-obj", Object.class);
-        assertEquals(forEntity.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody().toString(), SECRET));
+        forEntity = testRestTemplate.getForEntity("/test-secret-obj", String.class);
+        assertEquals(forEntity.getStatusCode(), HttpStatus.OK);
+        assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody(), SECRET));
         assertFalse(StringUtils.containsIgnoreCase(forEntity.getHeaders().toString(), SECRET));
 
-        forEntity = testRestTemplate.getForEntity("/test-secret-header-key", Object.class);
-        assertEquals(forEntity.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody().toString(), SECRET));
+        forEntity = testRestTemplate.getForEntity("/test-secret-header-key", String.class);
+        assertEquals(forEntity.getStatusCode(), HttpStatus.OK);
+        assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody(), SECRET));
         assertFalse(StringUtils.containsIgnoreCase(forEntity.getHeaders().toString(), SECRET));
 
-        forEntity = testRestTemplate.getForEntity("/test-secret-header-value", Object.class);
-        assertEquals(forEntity.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody().toString(), SECRET));
+        forEntity = testRestTemplate.getForEntity("/test-secret-header-value", String.class);
+        assertEquals(forEntity.getStatusCode(), HttpStatus.OK);
+        assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody(), SECRET));
         assertFalse(StringUtils.containsIgnoreCase(forEntity.getHeaders().toString(), SECRET));
     }
 }

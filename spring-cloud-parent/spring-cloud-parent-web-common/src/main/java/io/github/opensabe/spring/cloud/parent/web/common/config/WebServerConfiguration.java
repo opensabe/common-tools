@@ -1,13 +1,12 @@
 package io.github.opensabe.spring.cloud.parent.web.common.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.spring.cloud.parent.web.common.handler.GenericHttpMessageConverterSecretCheckPostProcessor;
 import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerJFRProperties;
 import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerRequestObservationToJFRGenerator;
 import io.github.opensabe.spring.cloud.parent.web.common.undertow.DefaultWebServerFactoryCustomizer;
 import io.github.opensabe.spring.cloud.parent.web.common.undertow.UndertowGracefulShutdownHandler;
 import io.github.opensabe.spring.cloud.parent.web.common.undertow.UndertowGracefulShutdownInitializer;
+import io.github.opensabe.spring.cloud.parent.web.common.handler.SecretCheckResponseAdvice;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.embedded.undertow.ConfigurableUndertowWebServerFactory;
@@ -54,8 +53,8 @@ public class WebServerConfiguration {
     }
 
     @Bean
-    public GenericHttpMessageConverterSecretCheckPostProcessor genericHttpMessageConverterSecretCheckPostProcessor(GlobalSecretManager globalSecretManager) {
-        return new GenericHttpMessageConverterSecretCheckPostProcessor(globalSecretManager);
+    public SecretCheckResponseAdvice secretCheckResponseAdvice(GlobalSecretManager globalSecretManager) {
+        return new SecretCheckResponseAdvice(globalSecretManager);
     }
 
     //这里原来有 JFRFilter，用于通过 JFR 记录每个 HTTP 请求的详细信息
