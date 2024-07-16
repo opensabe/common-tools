@@ -1,6 +1,9 @@
 package io.github.opensabe.mapstruct;
 
 
+import io.github.opensabe.mapstruct.core.Binding;
+
+@Binding
 public class Job {
 
     private String name;
