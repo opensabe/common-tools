@@ -80,11 +80,15 @@ public class User {
 value可以为多个，意思是User对象可以复制成多种类型的对象
 
 ```
-
+// 对象A转对象B
 CommonCopyMapper<User, Student> mapper = MapperRepository.getInstance().getMapper(User.class, Student.class);
 Student student = mapper.map(user);
+
+// Map转对象
 FromMapMapper<User, Student> mapper = MapperRepository.getInstance().getMapMapper(User.class);
 User user = mapper.fromMap(Map.of("name","n1"));
+
+//同类型对象复制
 SelfCopyMapper<User> mapper = MapperRepository.getInstance().getMapper(User.class);
 User user1 = mapper.map(user);
 ```
