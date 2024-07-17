@@ -99,3 +99,39 @@ public interface JobMapper extends FromMapMapper<Job> {
 }
 ```
 如果在自己的Mapper上添加了 @RegisterRepository 注解，同时又实现了上面三个接口中的一个，那么，自定义的Mapper会替换掉自动生成的Mapper
+
+# 使用
+
+```java
+    /**
+     * transform source to target and return a new Object of target
+     * @param source    source object
+     * @param target    Type of target
+     * @return          instance of target
+     * @param <S>   Type of source
+     * @param <T>   Type of target
+     * @throws io.github.opensabe.mapstruct.core.MapperNotFoundException if source or target class not contains annotation of {@link io.github.opensabe.mapstruct.core.Binding}
+     */
+    @SuppressWarnings("unchecked")
+    public static <S, T> T transform (S source, Class<T> target) {
+        return mapperRepository.getMapper((Class<S>) source.getClass(), target).map(source);
+    }
+
+    /**
+     * create object by map
+     * <p>
+     *     key must marches of the target fields and the type of map value' type should same as field's type.
+     * </p>
+     * <b>no deep copy, so the map value(Map < String, Map < String, ?>) is not resolved.</b>
+     * @param map       the map contains the field of target
+     * @param target    target type
+     * @return          instance of target
+     * @param <T>       Type of target
+     * @throws io.github.opensabe.mapstruct.core.MapperNotFoundException if target class not contains annotation of {@link io.github.opensabe.mapstruct.core.Binding}
+     */
+    public static <T> T fromMap (Map<String, Object> map, Class<T> target) {
+        return mapperRepository.getMapMapper(target).fromMap(map);
+    }
+```
+我们在使用的时候直接调用 BeanUtils.transform 已经 fromMap方法即可，如果遇到 MapperNotFoundException 异常，按照提示
+查库source类上是否有@Binding注解，如果有，执行 mvn clean compile 即可解决
