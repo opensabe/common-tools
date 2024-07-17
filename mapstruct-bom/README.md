@@ -138,4 +138,4 @@ public interface JobMapper extends FromMapMapper<Job> {
     }
 ```
 我们在使用的时候直接调用 BeanUtils.transform 以及 fromMap方法即可，如果遇到 MapperNotFoundException 异常，按照提示
-查库source类上是否有@Binding注解，如果有，执行 mvn clean compile 即可解决
+查看source类上是否有@Binding注解，如果有，执行 mvn clean compile 即可解决
