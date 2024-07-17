@@ -60,4 +60,18 @@ public class MapperRepositoryImpl implements MapperRepository {
         return (FromMapMapper<T>)mapper;
     }
 
+    @Override
+    public <S, T> void register(Class<S> source, Class<T> target, CommonCopyMapper<S, T> mapper) {
+        commonMapper.put(new FromToKey(source, target), mapper);
+    }
+
+    @Override
+    public <T> void register(Class<T> target, FromMapMapper<T> mapper) {
+        mapMapper.put(target, mapper);
+        }
+
+    @Override
+    public <T> void register(Class<T> target, SelfCopyMapper<T> mapper) {
+        selfMapper.put(target, mapper);
+    }
 }

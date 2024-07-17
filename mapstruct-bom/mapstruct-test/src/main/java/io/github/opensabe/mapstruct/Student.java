@@ -2,7 +2,7 @@ package io.github.opensabe.mapstruct;
 
 import io.github.opensabe.mapstruct.core.Binding;
 
-@Binding(User.class)
+@Binding
 public class Student {
     private String name;
 

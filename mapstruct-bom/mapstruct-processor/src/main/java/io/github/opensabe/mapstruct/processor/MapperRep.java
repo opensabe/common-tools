@@ -100,4 +100,12 @@ public class MapperRep {
     public Set<String> getImports() {
         return imports;
     }
+
+    public void destroy () {
+        targetSource.clear();
+        common.clear();
+        map.clear();
+        self.clear();
+        imports.clear();
+    }
 }

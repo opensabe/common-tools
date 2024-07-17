@@ -1,6 +1,7 @@
 package io.github.opensabe.mapstruct.processor;
 
 import com.google.common.collect.Sets;
+import org.springframework.util.StringUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -21,7 +22,7 @@ public class MetaDataFactory {
     static Set<? extends AbstractMapper> create (Elements elementUtils, Element bean, List<? extends AnnotationMirror> binding) {
         String packageName = elementUtils.getPackageOf(bean).toString()+".mapper";
         Set<AbstractMapper> result = new HashSet<>();
-        BindRelation relations = BindRelation.resolveBinding(binding).stream().reduce(reducer).orElseThrow();
+        BindRelation relations = BindRelation.resolveBinding(elementUtils, binding).stream().reduce(reducer).orElseThrow();
         result.add(relations.createMapMapper(packageName, bean));
         result.addAll(relations.createCommonMapper(packageName, bean));
         return result;
@@ -46,7 +47,7 @@ public class MetaDataFactory {
             if (values.isEmpty()) {
                 return list;
             }
-            list.addAll(values.stream().map(v -> {
+            list.addAll(values.stream().filter(StringUtils::hasText).map(v -> {
                 String name = bean.getSimpleName()+v.substring(v.lastIndexOf(".")+1)+"Mapper";
                 return new CommonMapper(packageName, bean.toString(), name, v, cycle);
             }).toList());
@@ -59,12 +60,12 @@ public class MetaDataFactory {
 
 
 
-        static List<BindRelation> resolveBinding (List<? extends AnnotationMirror> binding) {
+        static List<BindRelation> resolveBinding (Elements elementUtils, List<? extends AnnotationMirror> binding) {
             List<BindRelation> eles = new ArrayList<>();
             for (AnnotationMirror b : binding) {
                 boolean cycle = false;
                 Set<String> values = new HashSet<>();
-                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> e: b.getElementValues().entrySet()) {
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> e: elementUtils.getElementValuesWithDefaults(b).entrySet()) {
                     switch (e.getKey().getSimpleName().toString()) {
                         case "value":
                             values.addAll(resolveElements(e.getValue().toString()));
