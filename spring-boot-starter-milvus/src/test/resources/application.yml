@@ -1,0 +1,12 @@
+langchain4j:
+  milvus:
+    # 是否启用量化的EmbeddingModel,true:启用、false:不启用
+    quantized: true
+    # aws中zilliz的Public Endpoint
+    uri: ${ZILLIZ_PUBLIC_ENDPOINT}
+    # aws中zilliz的Token
+    token: ${ZILLIZ_TOKEN}
+    # 创建的collection名字，默认是default
+    collection-name: test_collection
+    # 当进行相似性索搜期间，是否搜索embeddings，默认false。开启后，将影响索搜的性能，但能提高准确度。
+    retrieve-embeddings-on-search: true
