@@ -7,17 +7,17 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-boot-starter-google</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>spring-boot-starter-youtobe</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <common-utils.version>1.0.2-SNAPSHOT</common-utils.version>
+        <common-utils.version>1.0.3-SNAPSHOT</common-utils.version>
     </properties>
 
     <dependencies>
