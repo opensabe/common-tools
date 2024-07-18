@@ -120,38 +120,35 @@ public class CommonLogFilter extends AbstractTracedFilter {
         }).response(new ServerHttpResponseDecorator(response) {
             @Override
             public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-                    Observation observation = TraceIdFilter.getObservation(exchange);
-                    return observation.scoped(() -> {
-                        HttpHeaders responseHeaders = super.getHeaders();
-                        long elapsed = System.currentTimeMillis() - (long) exchange.getAttributes().get(START_TIME);
-                        long threshold = getSlowCallThreshold(path.value());
-                        if (elapsed < threshold) {
-                            log.info("response: {} -> {} {} header: {}, time: {}ms", method, path, getStatusCode(), responseHeaders.toString(), elapsed);
-                        } else {
-                            //报警有相似度聚合算法，为了防止报警聚合错误（将不同的 path 聚合在一起），将 path 多输出几遍
-                            log.error("response: {} ->  {} {} {} {} {} {} {} header: {}, time: {}ms", method, path, path, path, path, path, path, getStatusCode(), JSON.toJSONString(responseHeaders), elapsed);
-                        }
-                        final MediaType contentType = responseHeaders.getContentType();
-                        if (contentType != null && body instanceof Flux && LEGAL_LOG_MEDIA_TYPES.contains(contentType) && log.isDebugEnabled()) {
-                            //有TCP粘包拆包问题，这个body是多次写入的，一次调用拿不到完整的body，所以这里转换成fluxBody利用其中的buffer来接受完整的body
-                            Flux<? extends DataBuffer> fluxBody = tracedPublisherFactory.getTracedFlux(Flux.from(body), observation);
-                            return super.writeWith(
-                                    fluxBody.buffer().map(buffers -> {
-                                        try {
-                                            var buffer = dataBufferFactory.join(buffers);
-                                            String s = CommonFilterUtil.dataBufferToString(buffer);
-                                            log.debug("response: body: {}", s);
-                                            return dataBufferFactory.wrap(s.getBytes(StandardCharsets.UTF_8));
-                                        } catch (Exception e) {
-                                            log.error("error while encrypt response: {}", e.getMessage(), e);
-                                        }
-                                        return null;
-                                    })
-                            );
-                        }
-                        // if body is not a flux. never got there.
-                        return super.writeWith(body);
-                    });
+                    HttpHeaders responseHeaders = super.getHeaders();
+                    long elapsed = System.currentTimeMillis() - (long) exchange.getAttributes().get(START_TIME);
+                    long threshold = getSlowCallThreshold(path.value());
+                    if (elapsed < threshold) {
+                        log.info("response: {} -> {} {} header: {}, time: {}ms", method, path, getStatusCode(), responseHeaders.toString(), elapsed);
+                    } else {
+                        //报警有相似度聚合算法，为了防止报警聚合错误（将不同的 path 聚合在一起），将 path 多输出几遍
+                        log.error("response: {} ->  {} {} {} {} {} {} {} header: {}, time: {}ms", method, path, path, path, path, path, path, getStatusCode(), JSON.toJSONString(responseHeaders), elapsed);
+                    }
+                    final MediaType contentType = responseHeaders.getContentType();
+                    if (contentType != null && body instanceof Flux && LEGAL_LOG_MEDIA_TYPES.contains(contentType) && log.isDebugEnabled()) {
+                        //有TCP粘包拆包问题，这个body是多次写入的，一次调用拿不到完整的body，所以这里转换成fluxBody利用其中的buffer来接受完整的body
+                        Flux<? extends DataBuffer> fluxBody = tracedPublisherFactory.getTracedFlux(Flux.from(body), observation);
+                        return super.writeWith(
+                                fluxBody.buffer().map(buffers -> {
+                                    try {
+                                        var buffer = dataBufferFactory.join(buffers);
+                                        String s = CommonFilterUtil.dataBufferToString(buffer);
+                                        log.debug("response: body: {}", s);
+                                        return dataBufferFactory.wrap(s.getBytes(StandardCharsets.UTF_8));
+                                    } catch (Exception e) {
+                                        log.error("error while encrypt response: {}", e.getMessage(), e);
+                                    }
+                                    return null;
+                                })
+                        );
+                    }
+                    // if body is not a flux. never got there.
+                    return super.writeWith(body);
             }
         }).build());
     }
