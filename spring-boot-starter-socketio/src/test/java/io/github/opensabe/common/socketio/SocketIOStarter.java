@@ -35,7 +35,7 @@ import org.testcontainers.containers.GenericContainer;
         "defaultOperId=0",
         "jdbc.config.common.base-packages[0]=io.github.opensabe.common.config.dal.db.dao",
         "jdbc.config.common.data-source[0].cluster-name=public",
-        "jdbc.config.common.data-source[0].driver-class-name=com.mysql.jdbc.Driver",
+        "jdbc.config.common.data-source[0].driver-class-name=com.mysql.cj.jdbc.Driver",
         "jdbc.config.common.data-source[0].is-write-allowed=true",
         "jdbc.config.common.data-source[0].name=user-1",
         "jdbc.config.common.data-source[0].username=root",
@@ -81,17 +81,24 @@ public class SocketIOStarter {
             .withFixedExposedPort(10911,10911)
             .withExposedPorts(9876,10911)
             ;
+    @ClassRule
+    public static GenericContainer<?> zipkin = new FixedHostPortGenericContainer<>("openzipkin/zipkin:2.21.7")
+            .withFixedExposedPort(9411,9411)
+            .withExposedPorts(9411,9411)
+            ;
     @BeforeAll
     static void setup() {
         redisServer.start();
         mysql.start();
         rocketmq.start();
+        zipkin.start();
     }
     @AfterAll
     static void destroy() {
         redisServer.stop();
         mysql.stop();
         rocketmq.stop();
+        zipkin.stop();
     }
 
     @BeforeEach
