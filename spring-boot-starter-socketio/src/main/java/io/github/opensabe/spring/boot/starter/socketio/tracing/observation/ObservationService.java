@@ -15,10 +15,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Log4j2
-@Component
 public class ObservationService {
-    @Autowired
+
     private UnifiedObservationFactory unifiedObservationFactory;
+
+    public ObservationService(UnifiedObservationFactory unifiedObservationFactory) {
+        this.unifiedObservationFactory = unifiedObservationFactory;
+    }
 
     public void observation(SocketIOClient socketIOClient, SocketIOExecuteDocumentation socketIOExecuteDocumentation, String eventName, String annotationName, Consumer<SocketIOClient> consumer) {
         SocketIOExecuteContext context = new SocketIOExecuteContext(socketIOClient, eventName, EventEnum.getInstance(annotationName));
