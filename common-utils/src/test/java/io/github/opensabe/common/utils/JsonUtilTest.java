@@ -10,11 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +34,15 @@ public class JsonUtilTest {
     @Test
     void testSerialize () {
         System.out.println(JsonUtil.toJSONString(new User("lily", 10, LocalDateTime.now())));
+    }
+
+    @Test
+    void toJSONBytesTest() {
+        Map<String, String> data = new HashMap<>();
+        data.put("id", "Test\\String");
+        System.out.println(Arrays.toString(JsonUtil.toJSONBytes(data)));
+        // 下面是与fastjson的toJSONBytes比较，返回true
+        // System.out.println(Arrays.toString(JsonUtil.toJSONBytes(data)).equals(Arrays.toString(JSON.toJSONBytes(data))));
     }
 
     @Test
