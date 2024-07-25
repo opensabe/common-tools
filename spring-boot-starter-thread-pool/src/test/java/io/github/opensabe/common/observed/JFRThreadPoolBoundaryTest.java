@@ -63,7 +63,8 @@ public class JFRThreadPoolBoundaryTest {
     @Test
     public void testNormal() {
         jfrEvents.reset();
-        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 2);
+        String threadPrefix = threadNamePrefix + "testNormal";
+        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadPrefix, 2);
         Observation currentOrCreateEmptyObservation1 = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         TraceContext traceContext = UnifiedObservationFactory.getTraceContext(currentOrCreateEmptyObservation1);
         String traceIdSpinId = traceContext.traceId() + "|" + traceContext.spanId();
@@ -123,6 +124,7 @@ public class JFRThreadPoolBoundaryTest {
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
+                .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
                 .collect(Collectors.toList());
         assertEquals(3, events.size());
@@ -164,7 +166,8 @@ public class JFRThreadPoolBoundaryTest {
     @Test
     public void testDurationRunnable() throws InterruptedException {
         jfrEvents.reset();
-        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 2);
+        String threadPrefix = threadNamePrefix + "testDurationRunnable";
+        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadPrefix, 2);
 
         Observation currentOrCreateEmptyObservation1 = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         TraceContext traceContext = UnifiedObservationFactory.getTraceContext(currentOrCreateEmptyObservation1);
@@ -216,6 +219,7 @@ public class JFRThreadPoolBoundaryTest {
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
+                .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
                 .collect(Collectors.toList());;
         assertEquals(3, events.size());
@@ -255,7 +259,8 @@ public class JFRThreadPoolBoundaryTest {
     @Test
     public void testCallableDurationException() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
-        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 2);
+        String threadPrefix = threadNamePrefix + "testCallableDurationException";
+        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadPrefix, 2);
         Future<Integer> futureOne = null;
         Future<Integer> futureTwo = null;
         Future<Integer> futureThree = null;
@@ -313,6 +318,7 @@ public class JFRThreadPoolBoundaryTest {
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
+                .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
                 .collect(Collectors.toList());;
         assertEquals(3, events.size());
@@ -354,7 +360,8 @@ public class JFRThreadPoolBoundaryTest {
     @Test
     public void testRunnableDurationException() throws InterruptedException {
         jfrEvents.reset();
-        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 1);
+        String threadPrefix = threadNamePrefix + "testRunnableDurationException";
+        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadPrefix, 1);
         executorService.execute(() -> {
             logger.info("task1 run...");
             try {
@@ -383,6 +390,7 @@ public class JFRThreadPoolBoundaryTest {
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
+                .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
                 .collect(Collectors.toList());;
         assertEquals(2, events.size());
@@ -422,7 +430,8 @@ public class JFRThreadPoolBoundaryTest {
     @Test
     public void testCallableDurationThrowable() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
-        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 2);
+        String threadPrefix = threadNamePrefix + "testCallableDurationThrowable";
+        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadPrefix, 2);
         //创建三个可被执行的callable
         Future<Integer> futureOne = null;
         Future<Integer> futureTwo = null;
@@ -481,6 +490,7 @@ public class JFRThreadPoolBoundaryTest {
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
+                .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
                 .collect(Collectors.toList());;
         assertEquals(3, events.size());
@@ -521,7 +531,8 @@ public class JFRThreadPoolBoundaryTest {
     @Test
     public void testRunnableDurationThrowable() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
-        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 1);
+        String threadPrefix = threadNamePrefix + "testRunnableDurationThrowable";
+        ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadPrefix, 1);
         try {
             executorService.execute(() -> {
                 logger.info("task1 run...");
@@ -555,6 +566,7 @@ public class JFRThreadPoolBoundaryTest {
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
+                .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
                 .collect(Collectors.toList());;
         assertEquals(2, events.size());
