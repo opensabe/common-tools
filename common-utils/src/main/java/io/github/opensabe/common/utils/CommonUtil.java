@@ -1,8 +1,7 @@
 package io.github.opensabe.common.utils;
 
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import io.github.opensabe.common.utils.exception.BusinessException;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -901,17 +900,15 @@ public class CommonUtil {
      * @param userName 用户名
      * @param bind     是否已绑定手机
      * @return JSON格式的字符串
-     * @throws JSONException JSON转换异常
      */
-    public static String identityInfo2JSON(String name, String id, String mobile, String bind, String userName)
-            throws JSONException {
-        JSONObject jsonObj = new JSONObject();
+    public static String identityInfo2JSON(String name, String id, String mobile, String bind, String userName) {
+        Map jsonObj = new HashMap();
         jsonObj.put("name", StringUtils.isNotBlank(name) ? name : "");
         jsonObj.put("mobile", StringUtils.isNotBlank(mobile) ? mobile : "");
         jsonObj.put("id", StringUtils.isNotBlank(id) ? id : "");
         jsonObj.put("bind", StringUtils.isNotBlank(bind) ? bind : "");
         jsonObj.put("userName", StringUtils.isNotBlank(userName) ? userName : "");
-        return jsonObj.toString();
+        return JsonUtil.toJSONString(jsonObj);
     }
 
     /**
