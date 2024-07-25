@@ -62,6 +62,7 @@ public class JFRThreadPoolBoundaryTest {
 
     @Test
     public void testNormal() {
+        jfrEvents.reset();
         ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 2);
         Observation currentOrCreateEmptyObservation1 = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         TraceContext traceContext = UnifiedObservationFactory.getTraceContext(currentOrCreateEmptyObservation1);
@@ -162,6 +163,7 @@ public class JFRThreadPoolBoundaryTest {
      */
     @Test
     public void testDurationRunnable() throws InterruptedException {
+        jfrEvents.reset();
         ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 2);
 
         Observation currentOrCreateEmptyObservation1 = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
@@ -252,6 +254,7 @@ public class JFRThreadPoolBoundaryTest {
      */
     @Test
     public void testCallableDurationException() throws InterruptedException, ExecutionException {
+        jfrEvents.reset();
         ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 2);
         Future<Integer> futureOne = null;
         Future<Integer> futureTwo = null;
@@ -350,6 +353,7 @@ public class JFRThreadPoolBoundaryTest {
      */
     @Test
     public void testRunnableDurationException() throws InterruptedException {
+        jfrEvents.reset();
         ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 1);
         executorService.execute(() -> {
             logger.info("task1 run...");
@@ -417,6 +421,7 @@ public class JFRThreadPoolBoundaryTest {
      */
     @Test
     public void testCallableDurationThrowable() throws InterruptedException, ExecutionException {
+        jfrEvents.reset();
         ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 2);
         //创建三个可被执行的callable
         Future<Integer> futureOne = null;
@@ -515,6 +520,7 @@ public class JFRThreadPoolBoundaryTest {
      */
     @Test
     public void testRunnableDurationThrowable() throws InterruptedException, ExecutionException {
+        jfrEvents.reset();
         ExecutorService executorService = threadPoolFactory.createNormalThreadPool(threadNamePrefix, 1);
         try {
             executorService.execute(() -> {
