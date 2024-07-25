@@ -7,21 +7,21 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.4-SNAPSHOT</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-boot-starter-mybatis</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <common-utils.version>1.0.3-SNAPSHOT</common-utils.version>
-        <common-id-generator.version>1.0.3-SNAPSHOT</common-id-generator.version>
-        <spring-boot-starter-dynamodb.version>1.0.3-SNAPSHOT</spring-boot-starter-dynamodb.version>
-        <spring-boot-starter-s3.version>1.0.3-SNAPSHOT</spring-boot-starter-s3.version>
+        <common-utils.version>1.0.4-SNAPSHOT</common-utils.version>
+        <common-id-generator.version>1.0.4-SNAPSHOT</common-id-generator.version>
+        <spring-boot-starter-dynamodb.version>1.0.4-SNAPSHOT</spring-boot-starter-dynamodb.version>
+        <spring-boot-starter-s3.version>1.0.4-SNAPSHOT</spring-boot-starter-s3.version>
         <tk.mybatis.springboot.starter.version>4.2.3</tk.mybatis.springboot.starter.version>
         <pagehelper.version>5.3.2</pagehelper.version>
         <druid.version>1.2.18</druid.version>
