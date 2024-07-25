@@ -50,6 +50,11 @@ public final class JsonUtil {
     }
 
     @SneakyThrows
+    public static byte[] toJSONBytes(Object object) {
+        return objectMapper.writeValueAsBytes(object);
+    }
+
+    @SneakyThrows
     public static <T> T parseObject (String src, Class<T> type) {
         return objectMapper.readerFor(type).readValue(src);
     }
