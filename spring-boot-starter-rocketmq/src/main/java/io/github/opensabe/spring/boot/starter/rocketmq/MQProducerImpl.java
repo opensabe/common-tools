@@ -1,6 +1,5 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.config.dal.db.dao.MqFailLogEntityMapper;
 import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
@@ -8,6 +7,7 @@ import io.github.opensabe.common.idgenerator.service.UniqueID;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageProduce;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
@@ -216,7 +216,7 @@ public class MQProducerImpl implements MQProducer {
                 baseMQMessage = (BaseMQMessage) o;
             } else {
                 baseMQMessage = new BaseMQMessage();
-                baseMQMessage.setData(JSON.toJSONString(o));
+                baseMQMessage.setData(JsonUtil.toJSONString(o));
                 baseMQMessage.setAction("default");
             }
             FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(baseMQMessage.getData());
@@ -298,7 +298,7 @@ public class MQProducerImpl implements MQProducer {
                 baseMQMessage = (BaseMQMessage) body;
             } else {
                 baseMQMessage = new BaseMQMessage();
-                baseMQMessage.setData(JSON.toJSONString(body));
+                baseMQMessage.setData(JsonUtil.toJSONString(body));
                 baseMQMessage.setAction("default");
             }
             MessageProduce messageProduceJfrEvent = new MessageProduce(traceId, spanId, topic);
@@ -340,7 +340,7 @@ public class MQProducerImpl implements MQProducer {
 
     private void failThenPersist(MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString, BaseMQMessage baseMQMessage) {
         if (mqSendConfig.getPersistence()) {
-            String baseMQMessageJson = JSON.toJSONString(baseMQMessage);
+            String baseMQMessageJson = JsonUtil.toJSONString(baseMQMessage);
             MqFailLogEntity mqFailLogEntity = new MqFailLogEntity();
             mqFailLogEntity.setId(uniqueID.getUniqueId("remq"));
             mqFailLogEntity.setTopic(topic);
@@ -349,7 +349,7 @@ public class MQProducerImpl implements MQProducer {
             }
             mqFailLogEntity.setTraceId(traceIdString);
             mqFailLogEntity.setBody(baseMQMessageJson);
-            mqFailLogEntity.setSendConfig(JSON.toJSONString(mqSendConfig));
+            mqFailLogEntity.setSendConfig(JsonUtil.toJSONString(mqSendConfig));
             mqFailLogEntity.setRetryNum(rocketMQTemplate.getProducer().getRetryTimesWhenSendFailed());
             mqFailLogEntityMapper.insertSelective(mqFailLogEntity);
         }

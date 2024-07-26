@@ -1,9 +1,9 @@
 package io.github.opensabe.common.mybatis.test;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.mybatis.test.mapper.user.UserMapper;
 import io.github.opensabe.common.mybatis.test.po.User;
 import io.github.opensabe.common.mybatis.test.service.UserMapperService;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class ReadOnlyTest extends BaseDataSourceTest {
         //因为docker的mysql并没有做主从复制，因此主库插入以后从库依然为空
         Assertions.assertEquals(0,list.size());
         var user = userMapper.selectByPrimaryKey("id");
-        System.out.println("--------------" + JSON.toJSONString(user));
+        System.out.println("--------------" + JsonUtil.toJSONString(user));
         Assertions.assertNotNull(user);
     }
     @Test
@@ -43,7 +43,7 @@ public class ReadOnlyTest extends BaseDataSourceTest {
         //因为docker的mysql并没有做主从复制，因此主库插入以后从库依然为空
         Assertions.assertNull(list);
         var user = userMapperService.selectById("id");
-        System.out.println("--------------" + JSON.toJSONString(user));
+        System.out.println("--------------" + JsonUtil.toJSONString(user));
         Assertions.assertEquals(user, record);
     }
 
@@ -57,7 +57,7 @@ public class ReadOnlyTest extends BaseDataSourceTest {
             //因为docker的mysql并没有做主从复制，因此主库插入以后从库依然为空
             Assertions.assertEquals(list.size(),0);
             var user = userMapper.selectByPrimaryKey("id"+i);
-            System.out.println("write--------------" + JSON.toJSONString(user));
+            System.out.println("write--------------" + JsonUtil.toJSONString(user));
             Assertions.assertNotNull(user);
         }
     }
@@ -75,7 +75,7 @@ public class ReadOnlyTest extends BaseDataSourceTest {
                 //因为docker的mysql并没有做主从复制，因此主库插入以后从库依然为空
                 Assertions.assertEquals(readOnly.size(),0);
                 var user = userMapper.selectByPrimaryKey("id"+c);
-                System.out.println("write--------------" + JSON.toJSONString(user));
+                System.out.println("write--------------" + JsonUtil.toJSONString(user));
                 Assertions.assertNotNull(user);
                 return null;
             }));

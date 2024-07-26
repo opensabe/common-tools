@@ -2,6 +2,7 @@ package io.github.opensabe.common.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -20,7 +21,7 @@ public class ExcelUtil {
             int colNo = 0;
             Set<String> keys = null;
             for (T t : objects) {
-                JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(t));
+                JSONObject jsonObject = JSONObject.parseObject(JsonUtil.toJSONString(t));
                 HSSFRow row = sheet.createRow(rowNo++);
                 // 创建HSSFCell对象
                 if (keys == null) {

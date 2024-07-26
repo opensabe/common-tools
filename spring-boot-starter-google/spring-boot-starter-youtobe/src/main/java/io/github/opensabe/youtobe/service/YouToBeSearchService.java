@@ -3,6 +3,7 @@ package io.github.opensabe.youtobe.service;
 import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.core.AppException;
 import io.github.opensabe.common.core.ErrorCode;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.youtobe.dto.search.YouToBeSearchReqDTO;
 import io.github.opensabe.youtobe.dto.search.YouToBeSearchRespDTO;
 import io.github.opensabe.youtobe.properties.YouToBeDataApiProperties;
@@ -72,7 +73,7 @@ public class YouToBeSearchService {
             return null;
         }
 
-        log.info("YouToBeSearchService.getSearch response.code:{}, result:{}", response.code(), JSON.toJSONString(result));
+        log.info("YouToBeSearchService.getSearch response.code:{}, result:{}", response.code(), JsonUtil.toJSONString(result));
 
         return result;
     }

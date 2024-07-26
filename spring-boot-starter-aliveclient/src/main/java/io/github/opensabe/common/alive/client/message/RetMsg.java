@@ -2,6 +2,7 @@ package io.github.opensabe.common.alive.client.message;
 
 import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.alive.client.message.enumeration.PushType;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +31,7 @@ public class RetMsg extends MqMessage{
         retMsg.setBody("aaaa");
         retMsg.setMessageId(111);
         retMsg.setPushType(PushType.SPECIAL);
-        String s = JSON.toJSONString(retMsg);
+        String s = JsonUtil.toJSONString(retMsg);
         System.out.println(s);
         RetMsg retMsg1 = JSON.parseObject(s, RetMsg.class);
         System.out.println(retMsg1);

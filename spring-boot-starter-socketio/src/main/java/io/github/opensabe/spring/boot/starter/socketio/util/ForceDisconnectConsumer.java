@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.AbstractMQConsumer;
 import lombok.extern.log4j.Log4j2;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
@@ -33,7 +34,7 @@ public class ForceDisconnectConsumer extends AbstractMQConsumer {
 
     @Override
     protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
-        log.info("ForceDisconnectConsumer-onBaseMQMessage {}", JSON.toJSONString(baseMQMessage));
+        log.info("ForceDisconnectConsumer-onBaseMQMessage {}", JsonUtil.toJSONString(baseMQMessage));
         ForceDisconnectProducer.ForceDisconnectDTO forceDisconnectDTO = JSON.parseObject(baseMQMessage.getData(),
                 ForceDisconnectProducer.ForceDisconnectDTO.class);
         Collection<SocketIOClient> clients = socketIOServer.getRoomOperations(forceDisconnectDTO.getRoomId()).getClients();
