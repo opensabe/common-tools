@@ -1,6 +1,5 @@
 package io.github.opensabe.youtobe.service;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.core.AppException;
 import io.github.opensabe.common.core.ErrorCode;
 import io.github.opensabe.common.utils.json.JsonUtil;
@@ -64,7 +63,7 @@ public class YouToBeListService {
         YouToBeListRespDTO result = null;
         try {
 //            if (200 == response.code()) {
-                result = JSON.parseObject(response.body().string(), YouToBeListRespDTO.class);
+                result = JsonUtil.parseObject(response.body().string(), YouToBeListRespDTO.class);
 //            } else {
 //                log.warn("YouToBeListService.getList google data api http code:{}", response.code());
 //            }
