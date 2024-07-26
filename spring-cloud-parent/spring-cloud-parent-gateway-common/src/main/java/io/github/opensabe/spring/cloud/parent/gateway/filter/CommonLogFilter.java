@@ -1,10 +1,10 @@
 package io.github.opensabe.spring.cloud.parent.gateway.filter;
 
-import com.alibaba.fastjson.JSON;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.opensabe.base.RespUtil;
 import io.github.opensabe.common.utils.AlarmUtil;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.cloud.parent.gateway.common.CommonFilterUtil;
 import io.github.opensabe.spring.cloud.parent.gateway.config.GatewayLogProperties;
 import io.github.opensabe.spring.cloud.parent.webflux.common.TracedPublisherFactory;
@@ -127,7 +127,7 @@ public class CommonLogFilter extends AbstractTracedFilter {
                         log.info("response: {} -> {} {} header: {}, time: {}ms", method, path, getStatusCode(), responseHeaders.toString(), elapsed);
                     } else {
                         //报警有相似度聚合算法，为了防止报警聚合错误（将不同的 path 聚合在一起），将 path 多输出几遍
-                        log.error("response: {} ->  {} {} {} {} {} {} {} header: {}, time: {}ms", method, path, path, path, path, path, path, getStatusCode(), JSON.toJSONString(responseHeaders), elapsed);
+                        log.error("response: {} ->  {} {} {} {} {} {} {} header: {}, time: {}ms", method, path, path, path, path, path, path, getStatusCode(), JsonUtil.toJSONString(responseHeaders), elapsed);
                     }
                     final MediaType contentType = responseHeaders.getContentType();
                     if (contentType != null && body instanceof Flux && LEGAL_LOG_MEDIA_TYPES.contains(contentType) && log.isDebugEnabled()) {
@@ -238,7 +238,7 @@ public class CommonLogFilter extends AbstractTracedFilter {
                             operation = specificOperation.getOperation();
                             message = paramCheck.getPattern() + ":" + paramCheck.getInvalidParamValues() + ", "
                                     + specificOperation.getPlatform() + ":"
-                                    + JSON.toJSONString(specificOperation.getVersions());
+                                    + JsonUtil.toJSONString(specificOperation.getVersions());
                         } else {
                             operation = paramCheck.getDefaultOperation();
                             message = paramCheck.getPattern() + ":" + paramCheck.getInvalidParamValues();

@@ -1,8 +1,8 @@
 package io.github.opensabe.spring.cloud.parent.gateway.common;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Charsets;
 import io.github.opensabe.base.vo.BaseRsp;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -56,7 +56,7 @@ public class CommonFilterUtil {
         response.getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
         return response.writeWith(Mono.just(
                 dataBufferFactory.wrap(
-                        JSON.toJSONString(baseRsp).getBytes()
+                        JsonUtil.toJSONString(baseRsp).getBytes()
                 )
         ));
     }
