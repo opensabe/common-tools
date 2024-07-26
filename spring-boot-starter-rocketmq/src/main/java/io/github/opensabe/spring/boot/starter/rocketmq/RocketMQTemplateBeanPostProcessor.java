@@ -1,7 +1,7 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.executor.ThreadPoolFactory;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import jakarta.annotation.Nonnull;
 import lombok.extern.log4j.Log4j2;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
@@ -26,7 +26,7 @@ public class RocketMQTemplateBeanPostProcessor implements BeanPostProcessor {
             producer.setAsyncSenderExecutor(asyncSenderExecutor);
             // 设置超时时间为5秒
             producer.setMqClientApiTimeout(5 * 1000);
-            log.info("RocketMQTemplateBeanPostProcessor-postProcessAfterInitialization: {} producer: {}", beanName, JSON.toJSONString(producer));
+            log.info("RocketMQTemplateBeanPostProcessor-postProcessAfterInitialization: {} producer: {}", beanName, JsonUtil.toJSONString(producer));
 
         }
         return bean;

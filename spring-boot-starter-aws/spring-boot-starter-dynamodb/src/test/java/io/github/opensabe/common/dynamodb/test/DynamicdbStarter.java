@@ -1,6 +1,6 @@
 package io.github.opensabe.common.dynamodb.test;
 
-import com.alibaba.fastjson.JSON;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
@@ -76,7 +76,7 @@ public class DynamicdbStarter {
 
         }));
 
-        log.info("DynamicDBTest-createTable result {}", JSON.toJSONString(table));
+        log.info("DynamicDBTest-createTable result {}", JsonUtil.toJSONString(table));
 
         dynamoDbClient.createTable(builder ->
                 builder.tableName("dynamodb_"+aws_env+"_"+defaultOperId+"_typehandler")

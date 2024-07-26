@@ -1,9 +1,9 @@
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
-import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.google.common.collect.Maps;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.socketio.annotation.EventExceptionHandler;
 import io.github.opensabe.spring.boot.starter.socketio.annotation.EventExceptionHandlerAdvice;
 import lombok.extern.log4j.Log4j2;
@@ -40,7 +40,7 @@ public class EventExceptionAop {
         Pair<SocketIOClient, Pair<AckRequest, List<Object>>> pair = getArgsFromJoinPoint(pjp);
         List<Object> args = pair.getValue().getValue();
         UUID sessionId = pair.getKey().getSessionId();
-        log.info("{}#{},sessionId={},args={}", pjp.getSignature().getDeclaringTypeName(), pjp.getSignature().getName(), sessionId, JSON.toJSONString(args));
+        log.info("{}#{},sessionId={},args={}", pjp.getSignature().getDeclaringTypeName(), pjp.getSignature().getName(), sessionId, JsonUtil.toJSONString(args));
         return pjp.proceed();
     }
 
@@ -67,7 +67,7 @@ public class EventExceptionAop {
     @Order(1)
     @AfterReturning(value = "exceptionSocketIoAnnotation()", returning = "returnData")
     public void afterReturningSocketIoExceptionAnnotationPointCut(JoinPoint pjp, Object returnData) {
-        log.info("{}#{},returnData={}", pjp.getSignature().getDeclaringTypeName(), pjp.getSignature().getName(), JSON.toJSONString(returnData));
+        log.info("{}#{},returnData={}", pjp.getSignature().getDeclaringTypeName(), pjp.getSignature().getName(), JsonUtil.toJSONString(returnData));
     }
 
     private Pair<Object, Method> getEventExceptionHandler(Object ex) {

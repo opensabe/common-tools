@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.location.vo.GeoLocationData;
 import io.github.opensabe.common.location.vo.IpLocation;
 import com.sun.istack.NotNull;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -49,7 +50,7 @@ public class IpToLocationImpl implements IpToLocation {
 
     private void putLocationToRedis(String ip, @NotNull IpLocation location) {
         location.setIp(ip);
-        redisTemplate.opsForValue().setIfAbsent(getKey(ip), JSON.toJSONString(location), 7, TimeUnit.DAYS);
+        redisTemplate.opsForValue().setIfAbsent(getKey(ip), JsonUtil.toJSONString(location), 7, TimeUnit.DAYS);
     }
 
     @Nullable
