@@ -3,6 +3,7 @@ package io.github.opensabe.paypal.service;
 import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.core.AppException;
 import io.github.opensabe.common.core.ErrorCode;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.paypal.bo.PayPalTokenResponseBO;
 import io.github.opensabe.paypal.config.PayPalProperties;
 import io.github.opensabe.paypal.dto.PayPalPlanDTO;
@@ -260,7 +261,7 @@ public class PayPalService {
 
         // 返回请求结果
         try (Response response = call.execute()) {
-            return JSON.parseObject(response.body().string(), PayPalPlanDetailResponseDTO.class);
+            return JsonUtil.parseObject(response.body().string(), PayPalPlanDetailResponseDTO.class);
         } catch (IOException e) {
             log.error("PayPalService.obtainPlansDetailFromApi error:{}", e);
         }
