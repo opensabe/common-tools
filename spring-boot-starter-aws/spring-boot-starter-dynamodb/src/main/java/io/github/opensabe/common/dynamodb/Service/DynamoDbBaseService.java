@@ -13,7 +13,6 @@ import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteContext;
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteDocumentation;
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteObservationConvention;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.utils.json.JsonUtil;
 import io.micrometer.observation.Observation;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.extern.log4j.Log4j2;
@@ -77,7 +76,7 @@ public abstract class DynamoDbBaseService<T> {
                 .parentObservation(unifiedObservationFactory.getCurrentObservation())
                 .start();
 
-        String jsonParam = JsonUtil.toJSONString(t);
+        String jsonParam = JSON.toJSONString(t);
         log.info("select table:{},param:{}", tableName, jsonParam);
         Class<T> clazz = (Class<T>) t.getClass();
         T object = null;
@@ -108,7 +107,7 @@ public abstract class DynamoDbBaseService<T> {
     public List<T> selectList(T t) {
         long startTime = System.currentTimeMillis();
         String tableName = getRealTableName(t);
-        String jsonParam = JsonUtil.toJSONString(t);
+        String jsonParam = JSON.toJSONString(t);
         log.info("select table:{},param:{}", tableName, jsonParam);
 
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName + "#" + "selectList");
@@ -142,7 +141,7 @@ public abstract class DynamoDbBaseService<T> {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName + "#" + "save");
         Observation observation = DynamodbExecuteDocumentation.SQL_EXECUTE_INSERT.observation(null, DynamodbExecuteObservationConvention.DEFAULT, () -> context, unifiedObservationFactory.getObservationRegistry()).parentObservation(unifiedObservationFactory.getCurrentObservation()).start();
         try {
-            String jsonParam = JsonUtil.toJSONString(t);
+            String jsonParam = JSON.toJSONString(t);
             log.info("save table:{},param:{}", tableName, jsonParam);
             //封装数据
             Map<String, AttributeValue> item = buildAttributeValues(t, context);
@@ -169,7 +168,7 @@ public abstract class DynamoDbBaseService<T> {
                 map.put(key, returnedItem.get(key).s());
             }
         }
-        T object = JSON.parseObject(JsonUtil.toJSONString(map), clazz);
+        T object = JSON.parseObject(JSON.toJSONString(map), clazz);
         return object;
     }
 
