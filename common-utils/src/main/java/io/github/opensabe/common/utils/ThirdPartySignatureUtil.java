@@ -1,7 +1,7 @@
 package io.github.opensabe.common.utils;
 
 import cn.hutool.crypto.digest.MD5;
-import com.alibaba.fastjson.JSON;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -18,14 +18,14 @@ public class ThirdPartySignatureUtil {
         if (requestBody instanceof String) {
             var str = (String)requestBody;
             if (str.trim().startsWith("[") || str.trim().startsWith("{")){
-                return MD5.create().digestHex(JSON.toJSONBytes(str));
+                return MD5.create().digestHex(JsonUtil.toJSONBytes(str));
             }else {
                 return MD5Util.md5WithoutSalt(str);
             }
         }else if (requestBody instanceof byte[]){
             return MD5.create().digestHex((byte[]) requestBody);
         }
-        return MD5.create().digestHex(JSON.toJSONBytes(requestBody));
+        return MD5.create().digestHex(JsonUtil.toJSONBytes(requestBody));
     }
 
     public static String generateSignature(String hashKey, String method, Object requestBody) {

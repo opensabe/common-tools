@@ -1,10 +1,10 @@
 package io.github.opensabe.common.redisson.aop;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName;
 import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -66,7 +66,7 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
         ) {
             log.warn(
                     "RedissonRateLimiterInterceptor-invoke RRateLimiter config {} does not equal to current config {}, reset it. If this happens all the time, please check if you set various configuration for RRateLimiter of same name",
-                    JSON.toJSONString(redissonRateLimiter), JSON.toJSONString(config)
+                    JsonUtil.toJSONString(redissonRateLimiter), JsonUtil.toJSONString(config)
             );
             rateLimiter.setRate(
                     redissonRateLimiter.rateType(),
@@ -81,11 +81,11 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
         } else if (redissonRateLimiter.type() == RedissonRateLimiter.Type.TRY) {
             if (redissonRateLimiter.waitTime() < 0) {
                 if (!rateLimiter.tryAcquire(redissonRateLimiter.permits())) {
-                    throw new RedissonClientException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JSON.toJSONString(config));
+                    throw new RedissonClientException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
                 }
             } else {
                 if (!rateLimiter.tryAcquire(redissonRateLimiter.permits(), redissonRateLimiter.waitTime(), redissonRateLimiter.timeUnit())) {
-                    throw new RedissonClientException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JSON.toJSONString(config));
+                    throw new RedissonClientException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
                 }
             }
         }

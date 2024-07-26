@@ -1,6 +1,6 @@
 package io.github.opensabe.spring.cloud.parent.common.system;
 
-import com.alibaba.fastjson.JSON;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
 import io.github.opensabe.spring.cloud.parent.common.system.jfr.MemoryStatJfrEvent;
 import io.github.opensabe.spring.cloud.parent.common.system.jfr.MemorySwStatJfrEvent;
@@ -78,7 +78,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
         List<String> limitInBytes = FileUtils.readLines(new File("/sys/fs/cgroup/memory/memory.memsw.limit_in_bytes"), Charset.defaultCharset());
         MemorySwStatJfrEvent event = new MemorySwStatJfrEvent(Long.parseLong(usageInBytes.get(0)), Long.parseLong(maxUsageInBytes.get(0)), Long.parseLong(limitInBytes.get(0)));
         event.commit();
-        log.info("MonitorMemoryRSS, memorySwStat: {}", JSON.toJSONString(event));
+        log.info("MonitorMemoryRSS, memorySwStat: {}", JsonUtil.toJSONString(event));
     }
 
     private void memoryStatProcess() throws IOException {
