@@ -1,12 +1,3 @@
----
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
----
-
 ## 修改类型
 
 在这里选择你的修改类型（bug修复、功能新增、性能优化等）。
