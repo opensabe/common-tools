@@ -29,6 +29,7 @@ public class SpringCommonUtilConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(ObjectMapper.class)
     public CommandLineRunner initializeJsonUtil(ObjectMapper objectMapper) {
         return args -> {
             JsonUtil.setGlobalObjectMapper(objectMapper);
