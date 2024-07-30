@@ -51,6 +51,7 @@ public final class JsonUtil {
      */
     public static void setGlobalObjectMapper(ObjectMapper objectMapper) {
         JsonUtil.objectMapper = objectMapper;
+        configureObjectMapper(objectMapper);
     }
 
     @SneakyThrows
