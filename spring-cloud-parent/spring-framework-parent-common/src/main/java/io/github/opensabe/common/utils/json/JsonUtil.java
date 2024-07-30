@@ -3,6 +3,7 @@ package io.github.opensabe.common.utils.json;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.opensabe.common.jackson.TimestampModule;
@@ -28,10 +29,19 @@ public final class JsonUtil {
     static {
         //就算不在 Spring 环境中，也可以使用 ObjectMapper
         objectMapper = new ObjectMapper();
-        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        objectMapper.disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES);
-        objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        configureObjectMapper(objectMapper);
         objectMapper.registerModule(new TimestampModule());
+    }
+
+    private static void configureObjectMapper(ObjectMapper objectMapper) {
+        // 忽略未知属性
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        // 忽略 null 创建者属性
+        objectMapper.disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES);
+        // 日期格式化为时间戳
+        objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        // 忽略大小写
+        objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
     }
 
     /**
@@ -39,8 +49,7 @@ public final class JsonUtil {
      *
      * @param objectMapper
      */
-    public JsonUtil(ObjectMapper objectMapper) {
-        log.info("Using Spring ObjectMapper Bean");
+    public static void setGlobalObjectMapper(ObjectMapper objectMapper) {
         JsonUtil.objectMapper = objectMapper;
     }
 
