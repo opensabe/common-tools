@@ -7,14 +7,22 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## 修改内容
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+在这里写下你的修改内容。
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+## 目标分支
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+将要合并到的目标分支。
+
+## 测试计划
+
+描述你的测试计划。
+
+## 提醒
+
+提醒特定的团队成员进行代码审查。
+
+## 相关链接
+
+与该Pull Request相关的链接或文档。
