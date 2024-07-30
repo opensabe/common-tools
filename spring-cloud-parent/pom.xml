@@ -6,12 +6,12 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>common-tools</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>1.0.3.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-cloud-parent</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.3.2</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>pom</packaging>
@@ -31,7 +31,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
 
-        <this.version>1.0.4-SNAPSHOT</this.version>
+        <this.version>1.0.3.2</this.version>
 
         <disruptor.version>3.4.4</disruptor.version>
         <!--通过覆盖属性的方式修改依赖版本，参考 https://docs.spring.io/spring-boot/docs/2.7.7/reference/htmlsingle/#dependency-versions-properties 可以通过这种方式替换默认的依赖版本-->
