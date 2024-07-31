@@ -1,5 +1,6 @@
 package io.github.opensabe.common.utils;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.opensabe.common.utils.json.JsonUtil;
@@ -206,5 +207,17 @@ public class JsonUtilTest {
         return """
                 {"brithDay": "%s"}
                 """.formatted(now.format(DateTimeFormatter.ofPattern(format)));
+    }
+
+    /**
+     * 测试fastjson序列化：
+     * 针对fastjson 1.2.83  以及兼容的2.0.51 版本结果
+     */
+    @Test
+    void testFastjsonSerialize () {
+        // fastjson(1.2.83)  序列化结果：{}  不支持record
+        // fastjson(2.0.51)  序列化结果：{"age":10,"brithDay":1722396158549,"name":"lily"}   支持record
+        // JsonUtil  序列化结果：{"name":"lily","age":10,"brithDay":1722396388723}           支持record
+        System.out.println(JSON.toJSONString(new User("lily", 10, LocalDateTime.now())));
     }
 }
