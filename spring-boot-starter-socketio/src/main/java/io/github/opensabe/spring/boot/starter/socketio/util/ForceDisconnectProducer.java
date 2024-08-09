@@ -14,6 +14,7 @@ import java.util.UUID;
 public class ForceDisconnectProducer {
 
     public static final String MQ_TOPIC_FORCE_DISCONNECT = "force_disconnect";
+    public static final String MQ_TOPIC_LOGOUT = "force_logout";
 
     private MQProducer mqProducer;
 
@@ -35,6 +36,25 @@ public class ForceDisconnectProducer {
         });
     }
 
+    /**
+     * 用户在主站退出登录以后踢下线
+     * @param userId
+     * @author hengma
+     * @time 2023/9/26 14:40
+     */
+    public void logout (String userId) {
+        mqProducer.sendAsync(MQ_TOPIC_LOGOUT, new ForceDisconnectDTO(userId, null, null), new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                log.info("ForceDisconnectProducer-logout [success], msgId:{}", sendResult.getMsgId());
+            }
+
+            @Override
+            public void onException(Throwable throwable) {
+                log.info("ForceDisconnectProducer-logout [exception]", throwable);
+            }
+        });
+    }
     @Setter
     @Getter
     public static class ForceDisconnectDTO implements Serializable {

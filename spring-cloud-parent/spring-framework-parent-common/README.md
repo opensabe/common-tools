@@ -16,3 +16,22 @@ Spring boot 中，事件主要包括：
 # Secret 相关
 
 所有依赖会在对应的依赖拦截将一些 secret 不小心打印出来或者保存到某些存储的问题。只需要在对应的依赖模块中，或者微服务中增加 [SecretProvider.java](src%2Fmain%2Fjava%2Fio%2Fgithub%2Fopensabe%2Fcommon%2Fsecret%2FSecretProvider.java) 的继承，并且注册到 ApplicationContext 作为一个 Bean 即可。
+
+# Webflux 链路信息相关
+
+Micrometer 社区做了很多兼容各种框架的工作，我们首先添加依赖：
+
+```xml
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>context-propagation</artifactId>
+    <version>1.0.4</version>
+</dependency>
+```
+
+然后，通过以下代码启用 Project Reactor 的 ContextPropagation：
+
+```java
+Hooks.enableAutomaticContextPropagation();
+```
+以上代码的作用是，在 WebFlux 的各种操作符的时候，会自动把当前的 Context 传递到下游中。

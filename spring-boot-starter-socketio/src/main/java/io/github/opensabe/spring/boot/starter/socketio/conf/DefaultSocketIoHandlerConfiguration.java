@@ -1,12 +1,12 @@
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
-import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnEvent;
 import io.github.opensabe.base.code.BizCodeEnum;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.socketio.AttributedSocketIoClient;
 import io.github.opensabe.spring.boot.starter.socketio.BaseAck;
 import io.github.opensabe.spring.boot.starter.socketio.SocketIoMessageTemplate;
@@ -61,7 +61,7 @@ public class DefaultSocketIoHandlerConfiguration {
     @OnEvent("sub")
     public void sub(SocketIOClient client, AckRequest request, String topic) {
         client.joinRoom(topic);
-        log.info("DefaultSocketIoHandlerConfiguration-sub: client.id: {}, topic {}, allTopics: {}", client.getSessionId(), topic, JSON.toJSONString(client.getAllRooms()));
+        log.info("DefaultSocketIoHandlerConfiguration-sub: client.id: {}, topic {}, allTopics: {}", client.getSessionId(), topic, JsonUtil.toJSONString(client.getAllRooms()));
         //需要发送确认，这个由客户端决定是否处理
         request.sendAckData(BaseAck.builder().b(BizCodeEnum.SUCCESS.getVal()).build());
     }
@@ -69,7 +69,7 @@ public class DefaultSocketIoHandlerConfiguration {
     @OnEvent("unsub")
     public void unsub(SocketIOClient client, AckRequest request, String topic) {
         client.leaveRoom(topic);
-        log.info("DefaultSocketIoHandlerConfiguration-unsub: client.id: {}, topic {}, allTopics: {}", client.getSessionId(), topic, JSON.toJSONString(client.getAllRooms()));
+        log.info("DefaultSocketIoHandlerConfiguration-unsub: client.id: {}, topic {}, allTopics: {}", client.getSessionId(), topic, JsonUtil.toJSONString(client.getAllRooms()));
         //需要发送确认，这个由客户端决定是否处理
         request.sendAckData(BaseAck.builder().b(BizCodeEnum.SUCCESS.getVal()).build());
     }

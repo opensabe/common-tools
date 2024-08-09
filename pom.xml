@@ -13,7 +13,7 @@
 
     <groupId>io.github.opensabe-tech</groupId>
     <artifactId>common-tools</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 
@@ -46,6 +46,7 @@
         <module>spring-boot-starter-paypal</module>
         <module>spring-boot-starter-google</module>
         <module>mapstruct-bom</module>
+        <module>spring-boot-starter-milvus</module>
     </modules>
 
     <dependencyManagement>

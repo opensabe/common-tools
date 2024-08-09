@@ -1,15 +1,13 @@
 package io.github.opensabe.youtobe.service;
 
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.core.AppException;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.youtobe.App;
 import io.github.opensabe.youtobe.dto.list.YouToBeListReqDTO;
 import io.github.opensabe.youtobe.dto.list.YouToBeListRespDTO;
 import io.github.opensabe.youtobe.dto.search.YouToBeSearchReqDTO;
 import io.github.opensabe.youtobe.dto.search.YouToBeSearchRespDTO;
-import io.github.opensabe.youtobe.service.YouToBeListService;
-import io.github.opensabe.youtobe.service.YouToBeSearchService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -47,9 +45,9 @@ public class YouToBeTest {
 
         Response response = okHttpClient.newCall(request).execute();
 
-        YouToBeSearchRespDTO result = JSON.parseObject(response.body().string(), YouToBeSearchRespDTO.class);
+        YouToBeSearchRespDTO result = JsonUtil.parseObject(response.body().string(), YouToBeSearchRespDTO.class);
 
-        System.out.println(JSON.toJSONString(result));
+        System.out.println(JsonUtil.toJSONString(result));
     }
 
     /**
@@ -64,7 +62,7 @@ public class YouToBeTest {
         reqDTO.setMaxResults(25);
         reqDTO.setRegionCode("HK");
         YouToBeSearchRespDTO result = youToBeSearchService.getSearch(reqDTO);
-        System.out.println(JSON.toJSONString(result));
+        System.out.println(JsonUtil.toJSONString(result));
     }
 
     /**
@@ -78,6 +76,6 @@ public class YouToBeTest {
         reqDTO.setId("Ks-_Mh1QhMc,c0KYU2j0TM4,eIho2S0ZahI");
         reqDTO.setRegionCode("HK");
         YouToBeListRespDTO result = youToBeListService.getList(reqDTO);
-        System.out.println(JSON.toJSONString(result));
+        System.out.println(JsonUtil.toJSONString(result));
     }
 }

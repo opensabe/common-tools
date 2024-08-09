@@ -1,9 +1,9 @@
 package io.github.opensabe.common.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import it.unimi.dsi.fastutil.Pair;
@@ -119,7 +119,7 @@ public class AlarmUtil {
                 .spanId(traceSpan.right())
                 .template(message)
                 .build();
-        AlarmLog.log.fatal(JSON.toJSONString(alarmLogContent));
+        AlarmLog.log.fatal(JsonUtil.toJSONString(alarmLogContent));
     }
 
     private static Pair<String, String> analysisTraceSpan() {
@@ -155,7 +155,7 @@ public class AlarmUtil {
                 .spanId(traceSpan.right())
                 .template(message)
                 .build();
-        AlarmLog.log.fatal(JSON.toJSONString(alarmLogContent));
+        AlarmLog.log.fatal(JsonUtil.toJSONString(alarmLogContent));
     }
 
     private static final Pattern UNIQUE_PATTERN = Pattern.compile("\\bUNIQUE\\b", Pattern.CASE_INSENSITIVE);

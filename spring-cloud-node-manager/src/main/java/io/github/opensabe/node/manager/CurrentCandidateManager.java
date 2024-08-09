@@ -1,7 +1,7 @@
 package io.github.opensabe.node.manager;
 
 
-import com.alibaba.fastjson.JSON;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +32,7 @@ public class CurrentCandidateManager {
 	public boolean isLeader(Comparator<ServiceInstance> instanceComparator) {
 		List<ServiceInstance> instances = this.discoveryClient.getInstances(serviceId);
 		List<ServiceInstance> sorted = instances.stream().sorted(instanceComparator).collect(Collectors.toList());
-		log.info("CurrentCandidateManager-isLeader: candidates: {}, sorted: {}, current instanceId: {}", JSON.toJSONString(instances), JSON.toJSONString(sorted), this.instanceId);
+		log.info("CurrentCandidateManager-isLeader: candidates: {}, sorted: {}, current instanceId: {}", JsonUtil.toJSONString(instances), JsonUtil.toJSONString(sorted), this.instanceId);
 		if (CollectionUtils.isNotEmpty(sorted)) {
 			return StringUtils.endsWithIgnoreCase(sorted.get(0).getInstanceId(), this.instanceId);
 		} else {

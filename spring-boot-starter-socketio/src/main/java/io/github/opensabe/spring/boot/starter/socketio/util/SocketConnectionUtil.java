@@ -55,4 +55,7 @@ public class SocketConnectionUtil {
         ONE_USER_ONE_PLATFORM;
     }
 
+    public void logout (String userId) {
+        forceDisconnectProducer.logout(userId);
+    }
 }

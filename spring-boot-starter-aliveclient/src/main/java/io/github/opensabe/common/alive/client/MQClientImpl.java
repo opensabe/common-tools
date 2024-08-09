@@ -1,6 +1,5 @@
 package io.github.opensabe.common.alive.client;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.alive.client.message.MessageVo;
 import io.github.opensabe.common.alive.client.message.Publish;
 import io.github.opensabe.common.alive.client.message.Response;
@@ -9,6 +8,7 @@ import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 import io.github.opensabe.common.alive.client.message.enumeration.RetCode;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageProduce;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
@@ -64,7 +64,7 @@ public class MQClientImpl implements Client {
         final BaseMQMessage baseMQMessage = new BaseMQMessage();
         wrapTraceInfo(baseMQMessage,message.getTopic());
         baseMQMessage.setTs(System.currentTimeMillis());
-        baseMQMessage.setData(JSON.toJSONString(message));
+        baseMQMessage.setData(JsonUtil.toJSONString(message));
         baseMQMessage.setAction("default");
         return baseMQMessage;
     }
