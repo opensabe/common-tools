@@ -1,7 +1,7 @@
 package io.github.opensabe.spring.cloud.parent.webflux.common.config;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.Resilience4jUtil;
 import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
@@ -215,7 +215,7 @@ public class WebClientDefaultConfiguration {
                                 } catch (ConfigurationNotFoundException e) {
                                     circuitBreaker = circuitBreakerRegistry.circuitBreaker(instanceId);
                                 }
-                                log.info("webclient circuit breaker [{}-{}] status: {}, data: {}", finalServiceName, instanceId, circuitBreaker.getState(), JSON.toJSONString(circuitBreaker.getMetrics()));
+                                log.info("webclient circuit breaker [{}-{}] status: {}, data: {}", finalServiceName, instanceId, circuitBreaker.getState(), JsonUtil.toJSONString(circuitBreaker.getMetrics()));
                                 return exchangeFunction.exchange(clientRequest).transform(ClientResponseCircuitBreakerOperator.of(circuitBreaker, serviceInstance, webClientProperties));
                             });
                 }).baseUrl(baseUrl);

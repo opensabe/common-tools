@@ -15,10 +15,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Log4j2
-@Component
 public class ObservationService {
-    @Autowired
+
     private UnifiedObservationFactory unifiedObservationFactory;
+
+    public ObservationService(UnifiedObservationFactory unifiedObservationFactory) {
+        this.unifiedObservationFactory = unifiedObservationFactory;
+    }
 
     public void observation(SocketIOClient socketIOClient, SocketIOExecuteDocumentation socketIOExecuteDocumentation, String eventName, String annotationName, Consumer<SocketIOClient> consumer) {
         SocketIOExecuteContext context = new SocketIOExecuteContext(socketIOClient, eventName, EventEnum.getInstance(annotationName));
@@ -29,7 +32,7 @@ public class ObservationService {
                         unifiedObservationFactory.getObservationRegistry()).parentObservation(unifiedObservationFactory.getCurrentObservation())
                 .start();
         try {
-            consumer.accept(socketIOClient);
+            observation.scoped(() -> consumer.accept(socketIOClient));
         } catch (Throwable e) {
             log.error("OberVationService-observation failed ", e.getMessage(), e);
             observation.error(e);
@@ -38,7 +41,7 @@ public class ObservationService {
         }
     }
 
-    public void observationEvent(NamespaceClient socketIOClient, SocketIOExecuteDocumentation socketIOExecuteDocumentation, String eventName, String annotationName, List<Object> args, AckRequest ackRequest, MultiConsumer<NamespaceClient,String, List<Object>, AckRequest> consumer) {
+    public void observationEvent(NamespaceClient socketIOClient, SocketIOExecuteDocumentation socketIOExecuteDocumentation, String eventName, String annotationName, List<Object> args, AckRequest ackRequest, MultiConsumer<NamespaceClient, String, List<Object>, AckRequest> consumer) {
         SocketIOExecuteContext context = new SocketIOExecuteContext(socketIOClient, eventName, EventEnum.getInstance(annotationName));
         Observation observation = socketIOExecuteDocumentation.observation(
                         null,
@@ -47,7 +50,7 @@ public class ObservationService {
                         unifiedObservationFactory.getObservationRegistry()).parentObservation(unifiedObservationFactory.getCurrentObservation())
                 .start();
         try {
-            observation.scoped(()-> consumer.accept(socketIOClient,eventName,args,ackRequest));
+            observation.scoped(() -> consumer.accept(socketIOClient, eventName, args, ackRequest));
         } catch (Throwable e) {
             log.error("OberVationService-observation failed ", e.getMessage(), e);
             observation.error(e);

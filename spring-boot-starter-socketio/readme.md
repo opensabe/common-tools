@@ -72,7 +72,7 @@ socket.io 中有 room 概念，处于同一个 room 的会话，会收到来自�
 public void sub(SocketIOClient client, AckRequest request, String topic) {
 //加入这个 topic 对应的
 client.joinRoom(topic);
-log.info("DefaultSocketIoHandlerConfiguration-sub: client.id: {}, topic {}, allTopics: {}", client.getSessionId(), topic, JSON.toJSONString(client.getAllRooms()));
+log.info("DefaultSocketIoHandlerConfiguration-sub: client.id: {}, topic {}, allTopics: {}", client.getSessionId(), topic, JsonUtil.toJSONString(client.getAllRooms()));
 //需要发送确认，这个由客户端决定是否处理
 request.sendAckData(BaseAck.builder().b(BizCodeEnum.SUCCESS.getVal()).build());
 }

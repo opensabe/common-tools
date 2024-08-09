@@ -1,5 +1,6 @@
 package io.github.opensabe.common.dynamodb.test;
 
+import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.dynamodb.test.po.EightDataTypesPo;
 import io.github.opensabe.common.dynamodb.typehandler.DynamoDbOBService;
 import io.github.opensabe.common.typehandler.OBSTypeEnum;
@@ -72,9 +73,9 @@ public class DynamicDBTest extends DynamicdbStarter {
         eightDataTypesPo.setDb1(2.2);
         eightDataTypesPo.setFt1(222.2f);
         eightDataTypesPo.setFlag1(Boolean.TRUE);
-        dynamoDbOBService.insert(OBSTypeEnum.DYNAMODB.getIdShortName() + "key1", JsonUtil.toJSONString(eightDataTypesPo));
+        dynamoDbOBService.insert(OBSTypeEnum.DYNAMODB.getIdShortName() + "key1", JSON.toJSONString(eightDataTypesPo));
         String key1 = dynamoDbOBService.select(OBSTypeEnum.DYNAMODB.getIdShortName() + "key1");
-        EightDataTypesPo eightDataTypesPo1 = JsonUtil.parseObject(key1, EightDataTypesPo.class);
+        EightDataTypesPo eightDataTypesPo1 = JSON.parseObject(key1, EightDataTypesPo.class);
         assertEquals(eightDataTypesPo, eightDataTypesPo1);
     }
 }

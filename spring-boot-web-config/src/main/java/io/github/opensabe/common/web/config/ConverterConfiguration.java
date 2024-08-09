@@ -4,6 +4,8 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.google.common.collect.Lists;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
@@ -11,10 +13,10 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
-//@Configuration
+@Configuration
 public class ConverterConfiguration {
     @SuppressWarnings("deprecation")
-//    @Bean
+    @Bean
     public HttpMessageConverters httpMessageConverters() {
         //创建FastJson信息转换对象
         RevoFastJsonHttpMessageConverter fastJsonHttpMessageConverter =

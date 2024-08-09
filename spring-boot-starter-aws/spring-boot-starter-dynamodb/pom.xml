@@ -7,17 +7,17 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>aws-bom</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>spring-boot-starter-dynamodb</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <common-utils.version>1.0.2-SNAPSHOT</common-utils.version>
+        <common-utils.version>1.0.4-SNAPSHOT</common-utils.version>
     </properties>
 
     <dependencies>

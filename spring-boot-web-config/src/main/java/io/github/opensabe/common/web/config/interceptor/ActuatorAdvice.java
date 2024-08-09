@@ -1,6 +1,6 @@
 package io.github.opensabe.common.web.config.interceptor;
 
-import com.alibaba.fastjson.JSON;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -23,7 +23,7 @@ public class ActuatorAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         String name = returnType.getMethod().toString().toLowerCase();
         log.info("name: {}, return: {}", name, body instanceof String
-                ? body : JSON.toJSONString(body));
+                ? body : JsonUtil.toJSONString(body));
         return body;
     }
 }

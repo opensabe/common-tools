@@ -1,7 +1,7 @@
 package io.github.opensabe.paypal.service;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.core.AppException;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.paypal.bo.PayPalTokenResponseBO;
 import io.github.opensabe.paypal.config.PayPalProperties;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ public class PayPalServiceTest {
     @Test
     public void obtainTokenFromApiTest() {
         PayPalTokenResponseBO result = payPalService.obtainTokenFromApi(properties.getUrl(), properties.getClientId(), properties.getClientSecret());
-        System.out.println(JSON.toJSONString(result));
+        System.out.println(JsonUtil.toJSONString(result));
     }
 
     /**

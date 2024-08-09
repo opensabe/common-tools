@@ -29,9 +29,9 @@ public class GlobalSecretManager {
         for (Map.Entry<String, Map<String, Set<String>>> stringMapEntry : cache.asMap().entrySet()) {
             for (Map.Entry<String, Set<String>> stringSetEntry : stringMapEntry.getValue().entrySet()) {
                 for (String sensitiveString : stringSetEntry.getValue()) {
-                    if (StringUtils.containsIgnoreCase(filteredContent, sensitiveString)) {
+                    if (StringUtils.contains(filteredContent, sensitiveString)) {
                         foundSensitiveString = true;
-                        filteredContent = StringUtils.replaceIgnoreCase(filteredContent, sensitiveString, "******");
+                        filteredContent = StringUtils.replace(filteredContent, sensitiveString, "******");
                         foundKeys.add("SecretProvider: " + stringMapEntry.getKey() + ", key: " + stringSetEntry.getKey());
                     }
                 }

@@ -2,6 +2,7 @@ package io.github.opensabe.common.redisson.util;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -97,7 +98,7 @@ public abstract class BaseBatchLoadingRedisCache<V extends BaseBatchLoadingRedis
                         action.setEx(
                                 getKey(loadValue.getKey()).getBytes(StandardCharsets.UTF_8),
                                 expireInSeconds(),
-                                JSON.toJSONString(loadValue).getBytes(StandardCharsets.UTF_8)
+                                JsonUtil.toJSONString(loadValue).getBytes(StandardCharsets.UTF_8)
                         );
                     });
                     return null;

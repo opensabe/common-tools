@@ -1,9 +1,9 @@
 package io.github.opensabe.common.redisson.test;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName;
 import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.Getter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -86,7 +86,7 @@ public class RedissonRateLimiterTest {
                 Assertions.assertEquals(1, config.getRate());
                 Assertions.assertEquals(1000, config.getRateInterval());
                 Assertions.assertEquals(RateType.OVERALL, config.getRateType());
-                System.out.println(JSON.toJSONString(config));
+                System.out.println(JsonUtil.toJSONString(config));
             } catch (Exception e) {
                 e.printStackTrace();
                 result.set(false);
@@ -109,7 +109,7 @@ public class RedissonRateLimiterTest {
                 Assertions.assertEquals(1, config.getRate());
                 Assertions.assertEquals(1000, config.getRateInterval());
                 Assertions.assertEquals(RateType.OVERALL, config.getRateType());
-                System.out.println(JSON.toJSONString(config));
+                System.out.println(JsonUtil.toJSONString(config));
             } catch (Exception e) {
                 e.printStackTrace();
                 result.set(false);
@@ -132,7 +132,7 @@ public class RedissonRateLimiterTest {
                 Assertions.assertEquals(1, config.getRate());
                 Assertions.assertEquals(1000, config.getRateInterval());
                 Assertions.assertEquals(RateType.OVERALL, config.getRateType());
-                System.out.println(JSON.toJSONString(config));
+                System.out.println(JsonUtil.toJSONString(config));
             } catch (Exception e) {
                 e.printStackTrace();
                 result.set(false);
@@ -157,7 +157,7 @@ public class RedissonRateLimiterTest {
                 Assertions.assertEquals(1, config.getRate());
                 Assertions.assertEquals(1000, config.getRateInterval());
                 Assertions.assertEquals(RateType.OVERALL, config.getRateType());
-                System.out.println(JSON.toJSONString(config));
+                System.out.println(JsonUtil.toJSONString(config));
             } catch (Exception e) {
                 e.printStackTrace();
                 result.set(false);
