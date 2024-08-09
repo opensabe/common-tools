@@ -47,49 +47,49 @@ public class SwaggerDatetimeResolveConfiguration {
             if (isTime(annotatedType.getType())) {
                 Schema schema = PrimitiveType.LONG.createProperty();
                 resolveSchemaMembers(schema, annotatedType);
+                schema.setDefault(System.currentTimeMillis());
                 return schema;
             }
             return super.resolve(annotatedType, context, next);
         }
 
-
-        @Override
-        protected Object resolveDefaultValue(Annotated a, Annotation[] annotations, io.swagger.v3.oas.annotations.media.Schema schema) {
-            if (Objects.isNull(schema)) {
-                if (isTime(a.getRawType())) {
-                    return System.currentTimeMillis();
-                }
-            }else {
-                try {
-                    ObjectMapper mapper = ObjectMapperFactory.buildStrictGenericObjectMapper();
-                    mapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                    return mapper.readTree(schema.defaultValue());
-                } catch (IOException e) {
-                    return schema.defaultValue();
-                }
-            }
-            return super.resolveDefaultValue(a, annotations, schema);
-        }
-
-        @Override
-        protected Object resolveExample(Annotated a, Annotation[] annotations, io.swagger.v3.oas.annotations.media.Schema schema) {
-            if (Objects.isNull(schema)) {
-                if (isTime(a.getRawType())) {
-                    return System.currentTimeMillis();
-                }
-            }else {
-                if (!schema.example().isEmpty()) {
-                    try {
-                        ObjectMapper mapper = ObjectMapperFactory.buildStrictGenericObjectMapper();
-                        return mapper.readTree(schema.example());
-                    } catch (IOException e) {
-                        return schema.example();
-                    }
-                }
-            }
-            return null;
-        }
-
+//
+//        @Override
+//        protected Object resolveDefaultValue(Annotated a, Annotation[] annotations, io.swagger.v3.oas.annotations.media.Schema schema) {
+//            if (Objects.isNull(schema)) {
+//                if (isTime(a.getRawType())) {
+//                    return System.currentTimeMillis();
+//                }
+//            }else {
+//                try {
+//                    ObjectMapper mapper = ObjectMapperFactory.buildStrictGenericObjectMapper();
+//                    mapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+//                    return mapper.readTree(schema.defaultValue());
+//                } catch (IOException e) {
+//                    return schema.defaultValue();
+//                }
+//            }
+//            return super.resolveDefaultValue(a, annotations, schema);
+//        }
+//
+//        @Override
+//        protected Object resolveExample(Annotated a, Annotation[] annotations, io.swagger.v3.oas.annotations.media.Schema schema) {
+//            if (Objects.isNull(schema)) {
+//                if (isTime(a.getRawType())) {
+//                    return System.currentTimeMillis();
+//                }
+//            }else {
+//                if (!schema.example().isEmpty()) {
+//                    try {
+//                        ObjectMapper mapper = ObjectMapperFactory.buildStrictGenericObjectMapper();
+//                        return mapper.readTree(schema.example());
+//                    } catch (IOException e) {
+//                        return schema.example();
+//                    }
+//                }
+//            }
+//            return null;
+//        }
 
         private boolean isTime (Type rawType) {
             PrimitiveType primitiveType = PrimitiveType.fromName(rawType.getTypeName());
