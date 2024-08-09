@@ -24,7 +24,7 @@
         <fastutil.version>8.5.12</fastutil.version>
         <transmittable-thread-local.version>2.14.2</transmittable-thread-local.version>
         <joda-time.version>2.12.5</joda-time.version>
-        <swagger.annotaion.version>2.2.19</swagger.annotaion.version>
+        <swagger.version>2.2.22</swagger.version>
     </properties>
 
     <dependencies>
@@ -102,8 +102,15 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations-jakarta</artifactId>
-            <version>${swagger.annotaion.version}</version>
+            <version>${swagger.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <!--  swagger的demo将时间显示为long,但是线上没有swagger,因此scope设置为   provided    -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-core-jakarta</artifactId>
+            <version>${swagger.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!--时间处理类-->
         <dependency>

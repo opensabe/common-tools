@@ -95,6 +95,9 @@ public class BaseDataSourceTest {
     public static GenericContainer awsS3 = new FixedHostPortGenericContainer("localstack/localstack")
             .withFixedExposedPort(4566, 4566)
             .withExposedPorts(4566);
+    public static GenericContainer zipkin = new FixedHostPortGenericContainer("openzipkin/zipkin")
+            .withFixedExposedPort(9411, 9411)
+            .withExposedPorts(9411);
     @Autowired
     private S3Client s3Client;
     @Autowired
@@ -141,6 +144,8 @@ public class BaseDataSourceTest {
         REDIS.start();
         dynamodb.start();
         awsS3.start();
+        zipkin.start();
+
     }
 
     @AfterAll
@@ -150,5 +155,6 @@ public class BaseDataSourceTest {
         REDIS.stop();
         dynamodb.stop();
         awsS3.stop();
+        zipkin.stop();
     }
 }
