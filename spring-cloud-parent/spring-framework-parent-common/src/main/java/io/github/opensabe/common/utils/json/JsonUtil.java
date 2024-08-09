@@ -48,10 +48,6 @@ public final class JsonUtil {
     public static String toJSONString (Object value) {
         return objectMapper.writeValueAsString(value);
     }
-    @SneakyThrows
-    public static byte[] toJSONBytes (Object value) {
-        return objectMapper.writeValueAsBytes(value);
-    }
 
     @SneakyThrows
     public static byte[] toJSONBytes(Object object) {
