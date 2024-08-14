@@ -39,7 +39,7 @@
         <hikaricp.version>5.0.1</hikaricp.version>
         <testcontaniers.version>1.19.3</testcontaniers.version>
         <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
-        <springdoc.version>2.3.0</springdoc.version>
+        <springdoc.version>2.6.0</springdoc.version>
         <common.io.version>2.11.0</common.io.version>
         <mockito.version>5.2.0</mockito.version>
     </properties>
