@@ -34,7 +34,7 @@ public class SwaggerDatetimeResolveConfiguration {
          * update the return result while the type matches
          * {@link PrimitiveType#DATE}
          * {@link PrimitiveType#DATE_TIME}
-         * {@link PrimitiveType#PARTIAL_TIME}
+         * {@link PrimitiveType#PARTIAL_TIME}x
          * and replace it with {@link PrimitiveType#LONG}
          */
         @Override

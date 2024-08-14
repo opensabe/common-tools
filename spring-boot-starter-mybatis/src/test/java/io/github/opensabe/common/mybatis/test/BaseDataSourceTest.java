@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.containers.GenericContainer;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -46,6 +47,7 @@ import java.util.Optional;
         "jdbc.config.user.data-source[0].name=user-1",
         "jdbc.config.user.data-source[0].min-idle=1",
         "jdbc.config.user.data-source[0].initial-size=1",
+        "jdbc.config.user.data-source[0].max-active=2",
         "jdbc.config.user.data-source[0].username=root",
         "jdbc.config.user.data-source[0].password=123456",
         "jdbc.config.user.data-source[0].url=jdbc:mysql://localhost:3307/sys",
@@ -55,6 +57,7 @@ import java.util.Optional;
         "jdbc.config.user.data-source[1].name=user-2",
         "jdbc.config.user.data-source[1].min-idle=1",
         "jdbc.config.user.data-source[1].initial-size=1",
+        "jdbc.config.user.data-source[1].max-active=2",
         "jdbc.config.user.data-source[1].username=root",
         "jdbc.config.user.data-source[1].password=123456",
         "jdbc.config.user.data-source[1].url=jdbc:mysql://localhost:3308/sys",
@@ -79,17 +82,19 @@ public class BaseDataSourceTest {
     protected DynamicRoutingDataSource dynamicRoutingDataSource;
 
     @ClassRule
-    public static GenericContainer<?> REDIS = new FixedHostPortGenericContainer<>("redis")
+    public static GenericContainer<?> REDIS = new FixedHostPortGenericContainer<>("redis:7.4")
             .withFixedExposedPort(6379, 6379)
             .withExposedPorts(6379);
     @ClassRule
     public static GenericContainer<?> MYSQL_WRITE = new FixedHostPortGenericContainer<>("mysql:8.4.2")
+            .withFileSystemBind(BaseDataSourceTest.class.getResource("/init.sql").getPath(),"/docker-entrypoint-initdb.d/init.sql", BindMode.READ_ONLY)
             .withFixedExposedPort(3307, 3306)
             .withExposedPorts(3306)
             .withEnv("MYSQL_ROOT_PASSWORD", "123456");
 
     @ClassRule
     public static GenericContainer<?> MYSQL_READ = new FixedHostPortGenericContainer<>("mysql:8.4.2")
+            .withFileSystemBind(BaseDataSourceTest.class.getResource("/init.sql").getPath(),"/docker-entrypoint-initdb.d/init.sql", BindMode.READ_ONLY)
             .withFixedExposedPort(3308, 3306)
             .withExposedPorts(3306)
             .withEnv("MYSQL_ROOT_PASSWORD", "123456");
@@ -101,9 +106,6 @@ public class BaseDataSourceTest {
     public static GenericContainer awsS3 = new FixedHostPortGenericContainer("localstack/localstack")
             .withFixedExposedPort(4566, 4566)
             .withExposedPorts(4566);
-    public static GenericContainer zipkin = new FixedHostPortGenericContainer("openzipkin/zipkin")
-            .withFixedExposedPort(9411, 9411)
-            .withExposedPorts(9411);
     @Autowired
     private S3Client s3Client;
     @Autowired
@@ -150,7 +152,6 @@ public class BaseDataSourceTest {
         REDIS.start();
         dynamodb.start();
         awsS3.start();
-        zipkin.start();
 
     }
 
@@ -161,6 +162,5 @@ public class BaseDataSourceTest {
         REDIS.stop();
         dynamodb.stop();
         awsS3.stop();
-        zipkin.stop();
     }
 }
