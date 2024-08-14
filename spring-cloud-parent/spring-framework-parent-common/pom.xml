@@ -19,8 +19,8 @@
     <properties>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-text.version>1.10.0</commons-text.version>
-        <!--   fastjson不能升级到2.0，必须在1.x的基础上升级     -->
-        <fastjson.version>1.2.83</fastjson.version>
+        <!-- 使用兼容fastjson1的2.x版本：https://mvnrepository.com/artifact/com.alibaba/fastjson/2.0.51 -->
+        <fastjson.version>2.0.51</fastjson.version>
         <fastutil.version>8.5.12</fastutil.version>
         <transmittable-thread-local.version>2.14.2</transmittable-thread-local.version>
         <joda-time.version>2.12.5</joda-time.version>
