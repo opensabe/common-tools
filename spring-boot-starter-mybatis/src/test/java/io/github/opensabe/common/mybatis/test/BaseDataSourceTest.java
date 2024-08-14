@@ -4,6 +4,7 @@ import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
 import io.github.opensabe.common.s3.properties.S3Properties;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,21 +78,26 @@ public class BaseDataSourceTest {
     @Qualifier("user.dataSource")
     protected DynamicRoutingDataSource dynamicRoutingDataSource;
 
+    @ClassRule
     public static GenericContainer<?> REDIS = new FixedHostPortGenericContainer<>("redis")
             .withFixedExposedPort(6379, 6379)
             .withExposedPorts(6379);
-    public static GenericContainer<?> MYSQL_WRITE = new FixedHostPortGenericContainer<>("mysql")
+    @ClassRule
+    public static GenericContainer<?> MYSQL_WRITE = new FixedHostPortGenericContainer<>("mysql:8.4.2")
             .withFixedExposedPort(3307, 3306)
             .withExposedPorts(3306)
             .withEnv("MYSQL_ROOT_PASSWORD", "123456");
 
-    public static GenericContainer<?> MYSQL_READ = new FixedHostPortGenericContainer<>("mysql")
+    @ClassRule
+    public static GenericContainer<?> MYSQL_READ = new FixedHostPortGenericContainer<>("mysql:8.4.2")
             .withFixedExposedPort(3308, 3306)
             .withExposedPorts(3306)
             .withEnv("MYSQL_ROOT_PASSWORD", "123456");
+    @ClassRule
     public static GenericContainer dynamodb = new FixedHostPortGenericContainer("amazon/dynamodb-local")
             .withFixedExposedPort(8000, 8000)
             .withExposedPorts(8000);
+    @ClassRule
     public static GenericContainer awsS3 = new FixedHostPortGenericContainer("localstack/localstack")
             .withFixedExposedPort(4566, 4566)
             .withExposedPorts(4566);
