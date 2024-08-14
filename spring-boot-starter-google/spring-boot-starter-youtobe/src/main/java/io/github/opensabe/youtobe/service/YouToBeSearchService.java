@@ -1,8 +1,8 @@
 package io.github.opensabe.youtobe.service;
 
+import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.core.AppException;
 import io.github.opensabe.common.core.ErrorCode;
-import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.youtobe.dto.search.YouToBeSearchReqDTO;
 import io.github.opensabe.youtobe.dto.search.YouToBeSearchRespDTO;
 import io.github.opensabe.youtobe.properties.YouToBeDataApiProperties;
@@ -63,7 +63,7 @@ public class YouToBeSearchService {
         YouToBeSearchRespDTO result = null;
         try {
 //            if (200 == response.code()) {
-                result = JsonUtil.parseObject(response.body().string(), YouToBeSearchRespDTO.class);
+                result = JSON.parseObject(response.body().string(), YouToBeSearchRespDTO.class);
 //            } else {
 //                log.warn("YouToBeSearchService.getSearch google data api http code:{}", response.code());
 //            }
@@ -72,7 +72,7 @@ public class YouToBeSearchService {
             return null;
         }
 
-        log.info("YouToBeSearchService.getSearch response.code:{}, result:{}", response.code(), JsonUtil.toJSONString(result));
+        log.info("YouToBeSearchService.getSearch response.code:{}, result:{}", response.code(), JSON.toJSONString(result));
 
         return result;
     }
