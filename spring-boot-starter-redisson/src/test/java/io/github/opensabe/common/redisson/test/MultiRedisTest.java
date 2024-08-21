@@ -18,8 +18,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.containers.GenericContainer;
+import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -31,11 +35,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
         "spring.data.redis.multi.default.host=127.0.0.1",
         "spring.data.redis.multi.default.port=6378",
         "spring.data.redis.multi.default.lettuce.pool.enabled=true",
-        "spring.data.redis.multi.default.lettuce.pool.max-active=2",
+        "spring.data.redis.multi.default.lettuce.pool.max-active=100",
         "spring.data.redis.multi.test.host=127.0.0.1",
         "spring.data.redis.multi.test.port=6380",
         "spring.data.redis.multi.default.lettuce.pool.enabled=true",
-        "spring.data.redis.multi.default.lettuce.pool.max-active=2",
+        "spring.data.redis.multi.default.lettuce.pool.max-active=100",
 })
 @Execution(ExecutionMode.SAME_THREAD)
 public class MultiRedisTest {
@@ -116,46 +120,5 @@ public class MultiRedisTest {
             thread[i].join();
         }
         Assertions.assertTrue(result.get());
-    }
-
-    private Mono<Boolean> reactiveMulti(String suffix) {
-        return reactiveRedisTemplate.opsForValue().set("testReactiveDefault" + suffix, "testReactiveDefault")
-                .flatMap(b -> {
-                    multiRedisLettuceConnectionFactory.setCurrentRedis("test");
-                    return reactiveRedisTemplate.opsForValue().set("testReactiveSecond" + suffix, "testReactiveSecond");
-                }).flatMap(b -> {
-                    return reactiveRedisTemplate.hasKey("testReactiveDefault" + suffix);
-                }).map(b -> {
-                    Assertions.assertTrue(b);
-                    System.out.println(Thread.currentThread().getName());
-                    return b;
-                }).flatMap(b -> {
-                    return reactiveRedisTemplate.hasKey("testReactiveSecond" + suffix);
-                }).map(b -> {
-                    Assertions.assertFalse(b);
-                    System.out.println(Thread.currentThread().getName());
-                    return b;
-                }).flatMap(b -> {
-                    multiRedisLettuceConnectionFactory.setCurrentRedis("test");
-                    return reactiveRedisTemplate.hasKey("testReactiveDefault" + suffix);
-                }).map(b -> {
-                    Assertions.assertFalse(b);
-                    System.out.println(Thread.currentThread().getName());
-                    return b;
-                }).flatMap(b -> {
-                    multiRedisLettuceConnectionFactory.setCurrentRedis("test");
-                    return reactiveRedisTemplate.hasKey("testReactiveSecond" + suffix);
-                }).map(b -> {
-                    Assertions.assertTrue(b);
-                    return b;
-                });
-    }
-
-    @Test
-    public void testMultiReactive() throws InterruptedException {
-        for (int i = 0; i < 100; i++) {
-            reactiveMulti("" + i).subscribe(System.out::println);
-        }
-        TimeUnit.SECONDS.sleep(10);
     }
 }

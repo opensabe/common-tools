@@ -2,6 +2,7 @@ package io.github.opensabe.common.redisson.test;
 
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -26,26 +28,11 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@JfrEventTest
-@AutoConfigureObservability
-@ExtendWith({SpringExtension.class, SingleRedisIntegrationTest.class})
-@SpringBootTest(properties = {
-        //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
-        "spring.main.allow-circular-references=true",
-        "spring.redis.redisson.aop.order=" + RedissonRateLimiterTest.ORDER,
-        "spring.data.redis.host=127.0.0.1",
-        "spring.data.redis.lettuce.pool.enabled=true",
-        "spring.data.redis.lettuce.pool.max-active=2",
-        "spring.data.redis.port=" + SingleRedisIntegrationTest.PORT,
-})
-public class RedissonRateLimiterTest {
-    public static final int ORDER = -100000;
+@Import(RedissonRateLimiterTest.Config.class)
+public class RedissonRateLimiterTest extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
-    public JfrEvents jfrEvents = new JfrEvents();
 
-    @EnableAutoConfiguration
-    @Configuration
-    public static class App {
+    public static class Config {
         @Autowired
         private RedissonClient redissonClient;
         @Autowired
