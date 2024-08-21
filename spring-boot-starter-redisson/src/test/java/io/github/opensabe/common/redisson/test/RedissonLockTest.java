@@ -4,56 +4,35 @@ import io.github.opensabe.common.redisson.annotation.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.RedissonLockName;
 import io.github.opensabe.common.redisson.config.RedissonAopConfiguration;
 import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
-import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.moditect.jfrunit.JfrEventTest;
-import org.moditect.jfrunit.JfrEvents;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@AutoConfigureObservability
-@JfrEventTest
-@ExtendWith({SpringExtension.class, SingleRedisIntegrationTest.class})
-@SpringBootTest(properties = {
-        //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
-        "spring.main.allow-circular-references=true",
-        "spring.redis.redisson.aop.order=" + RedissonLockTest.ORDER,
-        "spring.data.redis.host=127.0.0.1",
-        "spring.data.redis.lettuce.pool.enabled=true",
-        "spring.data.redis.lettuce.pool.max-active=2",
-        "spring.data.redis.port="+ SingleRedisIntegrationTest.PORT,
-})
-public class RedissonLockTest {
-    public static final int ORDER = -100000;
+@Import(RedissonLockTest.Config.class)
+public class RedissonLockTest extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     private static final int ADD_COUNT = 10000;
-
-    public JfrEvents jfrEvents = new JfrEvents();
 
     @Autowired
     private RedissonAopConfiguration redissonAopConfiguration;
 
-    @EnableAutoConfiguration
-    @Configuration
-    public static class App {
+    public static class Config {
         @Autowired
         private RedissonClient redissonClient;
 
@@ -220,7 +199,7 @@ public class RedissonLockTest {
 
     @Test
     public void testAopConfiguration() {
-        Assertions.assertEquals(redissonAopConfiguration.getOrder(), ORDER);
+        Assertions.assertEquals(redissonAopConfiguration.getOrder(), BaseRedissonTest.AOP_ORDER);
     }
 
     @Test
@@ -232,8 +211,7 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClass.testNoLock();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
                 }
             });
             threads[i].start();
@@ -248,8 +226,7 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClass.testBlockLock("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
                 }
             });
             threads[i].start();
@@ -264,8 +241,7 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClass.testBlockLockWithNoName();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
                 }
             });
             threads[i].start();
@@ -280,8 +256,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClass.testBlockSpinLock("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -296,8 +272,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClass.testBlockFairLock("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -313,8 +289,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClass.testTryLock("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -329,10 +305,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClass.testTryLockNoWait("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (RedissonClientException e) {
-                    System.out.println(e.getMessage());
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -348,10 +322,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockInterfaceImpl.testBlockLockWithName("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (RedissonClientException e) {
-                    System.out.println(e.getMessage());
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -367,10 +339,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockInterfaceImpl.testBlockSpinLock("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (RedissonClientException e) {
-                    System.out.println(e.getMessage());
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -386,10 +356,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockInterface1.testBlockLockWithName("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (RedissonClientException e) {
-                    System.out.println(e.getMessage());
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -405,10 +373,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockInterface2.testBlockSpinLock("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (RedissonClientException e) {
-                    System.out.println(e.getMessage());
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -426,8 +392,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClassExtends.testBlockLock("same");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -442,8 +408,8 @@ public class RedissonLockTest {
             threads[i] = new Thread(() -> {
                 try {
                     testRedissonLockClassExtends.testBlockLockWithNoName();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();
@@ -473,8 +439,8 @@ public class RedissonLockTest {
         Thread thread = new Thread(() -> {
             try {
                 testRedissonLockClass.testWaitTime("same");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                
             }
         });
         thread.start();
@@ -494,8 +460,8 @@ public class RedissonLockTest {
                 try {
                     //相当于没有锁住
                     testRedissonLockClass.testBlockLock(threads[finalI].getName());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    
                 }
             });
             threads[i].start();

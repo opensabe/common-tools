@@ -1,50 +1,33 @@
 package io.github.opensabe.common.redisson.test;
 
-import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
-import io.github.opensabe.common.redisson.util.LuaLimitCache;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Import(RedisSecretFilterTest.TestConfig.class)
+public class RedisSecretFilterTest extends BaseRedissonTest {
 
-@ExtendWith({SpringExtension.class, SingleRedisIntegrationTest.class})
-@AutoConfigureObservability
-@SpringBootTest(properties = {
-        //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
-        "spring.main.allow-circular-references=true",
-        "spring.data.redis.host=localhost",
-        "spring.data.redis.lettuce.pool.enabled=true",
-        "spring.data.redis.lettuce.pool.max-active=2",
-        "spring.data.redis.port=" + SingleRedisIntegrationTest.PORT,
-},classes = RedisSecretFilterTest.App.class)
-public class RedisSecretFilterTest {
+    private static final String SECRET = "secretString";
 
-    @SpringBootApplication
-    public static class App {
+    public static class TestConfig {
         @Bean
         public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
             return new TestSecretProvider(globalSecretManager);
         }
     }
 
-    private static final String SECRET = "secretString";
 
     public static class TestSecretProvider extends SecretProvider {
         protected TestSecretProvider(GlobalSecretManager globalSecretManager) {
