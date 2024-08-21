@@ -103,6 +103,12 @@
             <artifactId>mapstruct-core</artifactId>
             <version>${opensabe.mapstruct.version}</version>
         </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+            <version>2.2</version>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 

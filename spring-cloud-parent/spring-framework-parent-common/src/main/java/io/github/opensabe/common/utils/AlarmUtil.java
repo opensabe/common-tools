@@ -172,7 +172,7 @@ public class AlarmUtil {
     }
 
     private static final Set<String> ALL_GROUPS = Set.of(
-            "pm", "op", "mk", "rd", "td", "ad"
+            "pm", "op", "mk", "rd", "td", "ad", "pr"
     );
     private static final Pattern EXTRACT_GROUP_PATTERN = Pattern.compile("\\[(.*?)\\]");
 
