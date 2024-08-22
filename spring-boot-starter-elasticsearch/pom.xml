@@ -35,8 +35,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>elasticsearch</artifactId>
+            <groupId>io.github.opensabe-tech</groupId>
+            <artifactId>common-testcontainers</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

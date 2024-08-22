@@ -1,11 +1,13 @@
 package io.github.opensabe.common.redisson.test.jfr;
 
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
@@ -18,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -27,28 +30,16 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith({
-        SpringExtension.class, SingleRedisIntegrationTest.class
-})
-@AutoConfigureObservability
-@JfrEventTest
 @Execution(ExecutionMode.SAME_THREAD)
-@SpringBootTest(properties = {
-        //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
-        "spring.main.allow-circular-references=true",
-        "spring.data.redis.host=127.0.0.1",
-        "spring.data.redis.lettuce.pool.enabled=true",
-        "spring.data.redis.lettuce.pool.max-active=2",
-        "spring.data.redis.port=" + SingleRedisIntegrationTest.PORT,
-})
-public class TestRedissonSemaphoreJFR {
+@Import(TestRedissonSemaphoreJFR.Config.class)
+//JFR 测试最好在本地做
+@Disabled
+public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
     public JfrEvents jfrEvents = new JfrEvents();
 
     private static final int THREAD_COUNT = 10;
 
-    @EnableAutoConfiguration
-    @Configuration
-    public static class App {
+    public static class Config {
         @Bean
         public TestRedissonSemaphoreBean testRedissonSemaphoreBean() {
             return new TestRedissonSemaphoreBean();
@@ -83,7 +74,7 @@ public class TestRedissonSemaphoreJFR {
                 observation.scoped(() -> {
                     try {
                         testRedissonSemaphoreBean.testTryAcquire();
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         //ignore
                     }
                 });

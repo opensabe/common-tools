@@ -6,6 +6,7 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import jdk.jfr.consumer.RecordedEvent;
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
@@ -27,9 +28,11 @@ import static org.junit.Assert.assertTrue;
 @JfrEventTest
 @ActiveProfiles("jfr")
 @AutoConfigureObservability
-@SpringBootTest(properties = {"eureka.client.register-with-eureka=false",
-        "eureka.client.fetch-registry=false"}
-)
+@SpringBootTest(properties = {
+        "eureka.client.enabled=false",
+})
+//JFR 测试最好在本地做
+@Disabled
 public class TheadPoolStatTest {
 
     @SpringBootApplication

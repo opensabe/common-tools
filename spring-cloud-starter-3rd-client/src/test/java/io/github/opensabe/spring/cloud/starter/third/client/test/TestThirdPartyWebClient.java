@@ -4,18 +4,22 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.moditect.jfrunit.JfrEventTest;
-import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,13 +27,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @AutoConfigureObservability
 @SpringBootTest(properties = {
         "management.tracing.sampling.probability=1",
-        "third-party.webclient.configs.http-bin.base-url=http://httpbin.org"
 })
-public class TestThirdPartyWebClient {
+@Log4j2
+public class TestThirdPartyWebClient extends CommonMicroServiceTest {
 
     @EnableAutoConfiguration
     @Configuration
     public static class App {
+    }
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        registry.add("third-party.webclient.configs.http-bin.base-url", () -> "http://" + GOOD_HOST + ":" + GOOD_PORT);
     }
 
     @Autowired
@@ -37,7 +46,6 @@ public class TestThirdPartyWebClient {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
-    public JfrEvents jfrEvents = new JfrEvents();
     /**
      * 测试发出请求 Header 中包含 Accept-Encoding: gzip
      */
@@ -59,7 +67,7 @@ public class TestThirdPartyWebClient {
                         .anyMatch(entry -> {
                             boolean b = StringUtils.equalsIgnoreCase(entry.getKey(), UnifiedObservationFactory.TRACE_PARENT);
                             if (b) {
-                                System.out.println(entry);
+                                log.info("traceparent: {}", entry.getValue());
                             }
                             return b;
                         })
@@ -75,12 +83,13 @@ public class TestThirdPartyWebClient {
                             .anyMatch(entry -> {
                                 boolean b = StringUtils.equalsIgnoreCase(entry.getKey(), UnifiedObservationFactory.TRACE_PARENT);
                                 if (b) {
-                                    System.out.println(entry);
+                                    log.info("traceparent: {}", entry.getValue());
                                     //发送的请求的 Header，traceId 是一样的，但是 spanId 是新的
-                                    assertTrue(entry.getValue().contains(
+                                    String collect = entry.getValue().stream().collect(Collectors.joining());
+                                    assertTrue(collect.contains(
                                             traceContext.traceId() + UnifiedObservationFactory.TRACEPARENT_DELIMITER
                                     ));
-                                    assertTrue(!entry.getValue().contains(
+                                    assertTrue(!collect.contains(
                                             UnifiedObservationFactory.TRACEPARENT_DELIMITER + traceContext.spanId()
                                     ));
                                 }

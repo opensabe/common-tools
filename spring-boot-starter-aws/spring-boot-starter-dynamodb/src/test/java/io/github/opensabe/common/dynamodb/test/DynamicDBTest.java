@@ -1,6 +1,8 @@
 package io.github.opensabe.common.dynamodb.test;
 
 import com.alibaba.fastjson.JSON;
+import io.github.opensabe.common.dynamodb.test.common.DynamicdbStarter;
+import io.github.opensabe.common.dynamodb.test.common.EightDataTypesManager;
 import io.github.opensabe.common.dynamodb.test.po.EightDataTypesPo;
 import io.github.opensabe.common.dynamodb.typehandler.DynamoDbOBService;
 import io.github.opensabe.common.typehandler.OBSTypeEnum;
@@ -14,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Log4j2
 public class DynamicDBTest extends DynamicdbStarter {
-
 
     private EightDataTypesManager eightDataTypesManager;
     @Autowired
