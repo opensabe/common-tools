@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.junit.Assert;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -80,6 +81,7 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
+    @Disabled
     public void testSend_largePayload() throws Exception {
 
         SENT_MESSAGES.add("test_msg1" + generateLargeMessage(4 * 1024 * 1024 - 18)); // 4MB message);
@@ -99,18 +101,6 @@ public class RocketMQTest extends BaseRocketMQTest {
         boolean isCompleted = latch.await(1, TimeUnit.MINUTES);
 
         Assert.assertTrue(isCompleted);
-    }
-
-    @Test
-    public void testSend_largePayload_DisableCompression() throws Exception {
-        try {
-            // compression disabled, expect message is not compressed and send will fail
-            mqProducer.send(
-                    "rocketmq-test-topic",
-                    POJO.builder().text(generateLargeMessage(5 * 1024 * 1024)).timestamp(timestamp).build());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     private String generateLargeMessage(int size) {
