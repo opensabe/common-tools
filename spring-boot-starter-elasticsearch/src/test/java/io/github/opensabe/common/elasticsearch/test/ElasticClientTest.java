@@ -2,6 +2,7 @@ package io.github.opensabe.common.elasticsearch.test;
 
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
+import io.github.opensabe.common.testcontainers.integration.SingleElasticSearchIntegrationTest;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.elasticsearch.action.search.SearchRequest;
@@ -21,12 +22,14 @@ import org.elasticsearch.xcontent.XContentType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.io.IOException;
@@ -42,6 +45,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(
         classes = ElasticClientTest.Main.class
 )
+@ExtendWith({
+        SingleElasticSearchIntegrationTest.class,
+        SpringExtension.class
+})
 @Log4j2
 public class ElasticClientTest {
     @SpringBootApplication
@@ -52,30 +59,9 @@ public class ElasticClientTest {
         }
     }
 
-    private static final ElasticsearchContainer container = new ElasticsearchContainer("elasticsearch:7.17.8")
-            .withEnv("discovery.type", "single-node")
-            .withEnv("xpack.security.enabled", "false")
-            .withEnv("xpack.security.http.ssl.enabled", "false")
-            .withEnv("logger.level", "TRACE");
-
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.elasticsearch.addresses", () -> {
-            String httpHostAddress = container.getHttpHostAddress();
-            return httpHostAddress;
-        });
-    }
-
-    @BeforeAll
-    public static void beforeAll() {
-        container.start();
-        log.info("Elasticsearch container started");
-    }
-
-    @AfterAll
-    public static void afterAll() {
-        container.stop();
-        log.info("Elasticsearch container stopped");
+        SingleElasticSearchIntegrationTest.setProperties(registry);
     }
 
     @Autowired

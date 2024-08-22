@@ -2,13 +2,13 @@ package io.github.opensabe.common.idgenerator.service;
 
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.idgenerator.exception.IdGenerateException;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+@Log4j2
 public class UniqueIDImpl implements UniqueID {
 
     public static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyMMddHHmmss");
@@ -105,8 +106,11 @@ public class UniqueIDImpl implements UniqueID {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NEVER)
     public String getShortUniqueId(String bizType) {
+        boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+        if (actualTransactionActive) {
+            log.error("Do not use getUniqueId in transaction, because it may block the transaction because of slow redis response");
+        }
         if (StringUtils.isBlank(bizType)) {
             throw new IdGenerateException("biz type is empty");
         }
@@ -118,8 +122,11 @@ public class UniqueIDImpl implements UniqueID {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NEVER)
     public String getUniqueId(String bizType) {
+        boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+        if (actualTransactionActive) {
+            log.error("Do not use getUniqueId in transaction, because it may block the transaction because of slow redis response");
+        }
         if (StringUtils.isBlank(bizType)) {
             throw new IdGenerateException("biz type is empty");
         }
@@ -131,8 +138,11 @@ public class UniqueIDImpl implements UniqueID {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NEVER)
     public String getLongUniqueId(String bizType) {
+        boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+        if (actualTransactionActive) {
+            log.error("Do not use getUniqueId in transaction, because it may block the transaction because of slow redis response");
+        }
         if (StringUtils.isBlank(bizType)) {
             throw new IdGenerateException("biz type is empty");
         }

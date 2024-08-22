@@ -1,15 +1,8 @@
-logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [test,%X{traceId},%X{spanId}] [%t][%C:%L]: %m%n"
-
 management:
   tracing:
     enabled: true
     sampling:
       probability: 1
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans
 server:
   port: 9700
   socketio:
@@ -37,3 +30,6 @@ server:
       - polling
       - websocket
     name-space: ${spring.application.name}
+spring:
+  application:
+    name: socket-io

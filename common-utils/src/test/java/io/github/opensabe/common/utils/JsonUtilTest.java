@@ -18,7 +18,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(classes = JsonUtilTest.App.class)
+@SpringBootTest(
+        classes = JsonUtilTest.App.class,
+        properties = {
+                "eureka.client.enabled=false"
+        }
+)
 public class JsonUtilTest {
 
     @SpringBootApplication

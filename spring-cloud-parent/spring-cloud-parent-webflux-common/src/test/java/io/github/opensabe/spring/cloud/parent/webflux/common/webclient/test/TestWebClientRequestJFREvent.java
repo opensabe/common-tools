@@ -11,6 +11,7 @@ import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -53,6 +54,8 @@ import static org.mockito.Mockito.when;
 }, classes = TestWebClientRequestJFREvent.MockConfig.class)
 //jfr 测试需要串行，因为收集的是进程纬度的数据，如果并行会导致数据错乱
 @Execution(ExecutionMode.SAME_THREAD)
+//JFR 测试最好在本地做
+@Disabled
 public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
     @SpringBootApplication
     public static class MockConfig {

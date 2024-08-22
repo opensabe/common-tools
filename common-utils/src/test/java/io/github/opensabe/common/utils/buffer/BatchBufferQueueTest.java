@@ -11,6 +11,7 @@ import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.EnableEvent;
@@ -38,7 +39,12 @@ import static org.junit.Assert.assertTrue;
 @JfrEventTest
 @AutoConfigureObservability
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = BatchBufferQueueTest.App.class)
+@SpringBootTest(
+        classes = BatchBufferQueueTest.App.class,
+        properties = {
+                "eureka.client.enabled=false"
+        }
+)
 public class BatchBufferQueueTest {
     public JfrEvents jfrEvents = new JfrEvents();
     @SpringBootApplication
@@ -151,6 +157,8 @@ public class BatchBufferQueueTest {
     private static final CountDownLatch countDownLatch = new CountDownLatch(EVENT_COUNT);
     @Test
     @EnableEvent("io.github.opensabe.common.buffer.BufferedElementJFREvent")
+    //JFR 测试最好在本地做
+    @Disabled
     void testBufferedQueueAndJFR () throws InterruptedException {
         Thread[] threads = new Thread[EVENT_COUNT];
         Set<String> traceIds = Sets.newConcurrentHashSet();

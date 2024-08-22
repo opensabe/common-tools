@@ -42,6 +42,11 @@
             <version>${spring-boot-starter-redisson.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.github.opensabe-tech</groupId>
+            <artifactId>common-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 

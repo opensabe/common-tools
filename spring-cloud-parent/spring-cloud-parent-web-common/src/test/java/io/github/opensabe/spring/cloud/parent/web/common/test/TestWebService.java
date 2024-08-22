@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureObservability
 @SpringBootTest(
         properties = {
+                "eureka.client.enabled=false",
                 "spring.cloud.openfeign.jfr.enabled=false",
                 "spring.servlet.jfr.enabled=false"
         },

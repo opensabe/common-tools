@@ -1,6 +1,7 @@
 package io.github.opensabe.common.s3.test;
 
 import io.github.opensabe.common.s3.service.S3ClientWrapper;
+import io.github.opensabe.common.s3.test.common.S3BaseTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

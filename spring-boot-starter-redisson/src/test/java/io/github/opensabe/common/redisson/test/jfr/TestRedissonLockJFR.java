@@ -1,47 +1,36 @@
 package io.github.opensabe.common.redisson.test.jfr;
 
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.RedissonLockName;
-import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith({
-        SpringExtension.class, SingleRedisIntegrationTest.class
-})
-@AutoConfigureObservability
-@JfrEventTest
+@Import(TestRedissonLockJFR.Config.class)
 @Execution(ExecutionMode.SAME_THREAD)
-@SpringBootTest(properties = {
-        //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
-        "spring.main.allow-circular-references=true",
-        "spring.data.redis.host=127.0.0.1",
-        "spring.data.redis.lettuce.pool.enabled=true",
-        "spring.data.redis.lettuce.pool.max-active=2",
-        "spring.data.redis.port=" + SingleRedisIntegrationTest.PORT,
-})
-public class TestRedissonLockJFR {
+//JFR 测试最好在本地做
+@Disabled
+public class TestRedissonLockJFR extends BaseRedissonTest {
     static class TestBean {
         @RedissonLock(
                 lockType = RedissonLock.BLOCK_LOCK
@@ -77,8 +66,8 @@ public class TestRedissonLockJFR {
             TimeUnit.MILLISECONDS.sleep(100);
         }
     }
-    @SpringBootApplication
-    public static class App {
+
+    public static class Config {
         @Bean
         public TestBean testBean() {
             return new TestBean();
@@ -104,7 +93,7 @@ public class TestRedissonLockJFR {
                 observation.scoped(() -> {
                     try {
                         testBean.testBlockLock(String.valueOf(finalI));
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         //ignore
                     }
                 });
@@ -114,7 +103,7 @@ public class TestRedissonLockJFR {
         for (int i = 0; i < threads.length; i++) {
             try {
                 threads[i].join();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 //ignore
             }
         }
@@ -174,7 +163,7 @@ public class TestRedissonLockJFR {
         for (int i = 0; i < threads.length; i++) {
             try {
                 threads[i].join();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 //ignore
             }
         }
@@ -226,7 +215,7 @@ public class TestRedissonLockJFR {
                 observation.scoped(() -> {
                     try {
                         testBean.testTryLock(String.valueOf(finalI));
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         //ignore
                     }
                 });
@@ -236,7 +225,7 @@ public class TestRedissonLockJFR {
         for (int i = 0; i < threads.length; i++) {
             try {
                 threads[i].join();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 //ignore
             }
         }
@@ -288,7 +277,7 @@ public class TestRedissonLockJFR {
                 observation.scoped(() -> {
                     try {
                         testBean.testTryLockWaitTimeOut(String.valueOf(finalI));
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         //ignore
                     }
                 });
@@ -298,7 +287,7 @@ public class TestRedissonLockJFR {
         for (int i = 0; i < threads.length; i++) {
             try {
                 threads[i].join();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 //ignore
             }
         }

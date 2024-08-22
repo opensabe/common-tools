@@ -3,6 +3,7 @@ package io.github.opensabe.common.cache.test;
 import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.service.CacheService;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
+import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
@@ -16,6 +17,8 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.containers.GenericContainer;
@@ -27,9 +30,10 @@ import java.util.concurrent.TimeUnit;
 import static io.github.opensabe.common.cache.utils.CacheHelper.CACHE_NAME_PREFIX;
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({
+        SpringExtension.class, SingleRedisIntegrationTest.class
+})
 @SpringBootTest(properties = {
-        "spring.main.allow-circular-references=true",
         "caches.enabled=true",
         "caches.custom[0].type=caffeine",
         "caches.custom[0].cacheNames=test_caffeine",
@@ -42,14 +46,13 @@ import static org.junit.jupiter.api.Assertions.*;
         "caches.custom[2].cacheNames=test_redis2",
         "caches.custom[2].redis.timeToLive=3s",
         "caches.custom[2].redis.cacheNullValues=false",
-        "spring.data.redis.host=127.0.0.1",
-        "spring.data.redis.port=6378",
 }, classes = App.class)
 public class SpringCacheTest {
+    @DynamicPropertySource
+    public static void setProperties(DynamicPropertyRegistry registry) {
+        SingleRedisIntegrationTest.setProperties(registry);
+    }
 
-    @ClassRule
-    static GenericContainer redisServer = new FixedHostPortGenericContainer("redis")
-            .withFixedExposedPort(6378,6379);
     @Autowired
     private CacheManager cacheManager;
 
@@ -69,20 +72,6 @@ public class SpringCacheTest {
     public static final String REDIS_CACHE_KEY_PREFIX2 = CACHE_NAME_PREFIX + "test_redis2::";
 
     public static final String CAFFEINE_CACHE_NAME = "test_caffeine";
-
-    @BeforeAll
-    public static void setUp() throws Exception {
-        System.out.println("start redis");
-        redisServer.start();
-        System.out.println("redis started");
-    }
-
-    @AfterAll
-    public static void tearDown() throws Exception {
-        System.out.println("stop redis");
-        redisServer.stop();
-        System.out.println("redis stopped");
-    }
 
     @Test
     public void test_cacheable_caffeine_without_key_and_field(){

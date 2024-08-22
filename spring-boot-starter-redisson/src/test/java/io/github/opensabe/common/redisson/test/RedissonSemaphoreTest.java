@@ -1,48 +1,25 @@
 package io.github.opensabe.common.redisson.test;
 
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
-import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import lombok.Getter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.moditect.jfrunit.JfrEventTest;
-import org.moditect.jfrunit.JfrEvents;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@JfrEventTest
-@AutoConfigureObservability
-@ExtendWith({SpringExtension.class, SingleRedisIntegrationTest.class})
-@SpringBootTest(properties = {
-        //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
-        "spring.main.allow-circular-references=true",
-        "spring.redis.redisson.aop.order=" + RedissonSemaphoreTest.ORDER,
-        "spring.data.redis.host=127.0.0.1",
-        "spring.data.redis.lettuce.pool.enabled=true",
-        "spring.data.redis.lettuce.pool.max-active=2",
-        "spring.data.redis.port=" + SingleRedisIntegrationTest.PORT,
-})
-public class RedissonSemaphoreTest {
-    public static final int ORDER = -100000;
+@Import(RedissonSemaphoreTest.Config.class)
+public class RedissonSemaphoreTest extends BaseRedissonTest {
     private static final int THREAD_COUNT = 16;
 
-    public JfrEvents jfrEvents = new JfrEvents();
-
-    @EnableAutoConfiguration
-    @Configuration
-    public static class App {
+    public static class Config {
         @Autowired
         private RedissonClient redissonClient;
         @Autowired
@@ -78,8 +55,7 @@ public class RedissonSemaphoreTest {
             int i = count.incrementAndGet();
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
             }
             if (i > 10) {
                 result.set(false);
