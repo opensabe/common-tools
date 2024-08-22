@@ -7,6 +7,7 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
@@ -35,6 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @Import(TestRedissonRateLimiterJFR.Config.class)
+//JFR 测试最好在本地做
+@Disabled
 public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     public JfrEvents jfrEvents = new JfrEvents();

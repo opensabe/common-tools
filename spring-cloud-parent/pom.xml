@@ -186,6 +186,11 @@
                 <artifactId>spring-cloud-starter-3rd-client</artifactId>
                 <version>${opensabe.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.github.opensabe-tech</groupId>
+                <artifactId>common-testcontainers</artifactId>
+                <version>${opensabe.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.springdoc</groupId>

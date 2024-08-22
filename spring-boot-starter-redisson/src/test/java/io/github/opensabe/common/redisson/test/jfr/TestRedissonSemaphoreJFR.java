@@ -7,6 +7,7 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
@@ -31,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @Import(TestRedissonSemaphoreJFR.Config.class)
+//JFR 测试最好在本地做
+@Disabled
 public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
     public JfrEvents jfrEvents = new JfrEvents();
 

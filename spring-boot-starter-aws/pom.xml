@@ -22,6 +22,14 @@
         <module>spring-boot-starter-s3</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.github.opensabe-tech</groupId>
+            <artifactId>common-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

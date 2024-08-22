@@ -19,11 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @Log4j2
-//目前的 rocketmq 镜像仅仅支持 mac OS，先禁用
-@Disabled
 public class SocketIOTest extends SocketIOStarter {
-    private static final int SOCKET_IO_CLIENTS = 1;
-//    private static final String URL = "http://localhost:" + 4001 + "/socket.io/?EIO=4&transport=websocket";
     private static final String URL = "http://localhost:";
     @Autowired
     private SocketIoServerProperties socketIoServerProperties;
