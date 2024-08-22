@@ -63,6 +63,12 @@
             <version>${geodesy.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.github.opensabe-tech</groupId>
+            <artifactId>common-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>
