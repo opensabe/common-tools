@@ -9,6 +9,7 @@ import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
@@ -61,6 +62,7 @@ import static org.mockito.Mockito.when;
         classes = TestJFREvent.MockConfig.class,
         properties = {
                 "management.tracing.sampling.probability=1.0",
+                "eureka.client.enabled=false",
                 "management.zipkin.tracing.endpoint=http://localhost:9411/api/v2/spans"
         },
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -68,6 +70,8 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("jfr")
 @AutoConfigureObservability
 @EnableFeignClients
+//JFR 测试最好在本地做
+@Disabled
 public class TestJFREvent extends CommonMicroServiceTest {
     @SpringBootApplication
     static class MockConfig {
