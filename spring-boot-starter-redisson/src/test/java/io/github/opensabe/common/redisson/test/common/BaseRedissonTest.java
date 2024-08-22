@@ -12,7 +12,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith({SpringExtension.class, SingleRedisIntegrationTest.class})
 @AutoConfigureObservability
-@SpringBootTest(classes = BaseRedissonTest.App.class)
+@SpringBootTest(
+        classes = BaseRedissonTest.App.class,
+        properties = {
+                "eureka.client.enabled=false",
+        }
+)
 @JfrEventTest
 public abstract class BaseRedissonTest {
     @SpringBootApplication

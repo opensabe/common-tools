@@ -7,6 +7,7 @@ import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -27,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Import(TestRedissonLockJFR.Config.class)
 @Execution(ExecutionMode.SAME_THREAD)
+//JFR 测试最好在本地做
+@Disabled
 public class TestRedissonLockJFR extends BaseRedissonTest {
     static class TestBean {
         @RedissonLock(

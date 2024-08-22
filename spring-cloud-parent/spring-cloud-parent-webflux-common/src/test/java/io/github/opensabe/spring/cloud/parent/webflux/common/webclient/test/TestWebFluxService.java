@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
         properties = {
                 "webclient.jfr.enabled=false",
                 "spring.server.jfr.enabled=false",
+                "eureka.client.enabled=false",
         },
         classes = TestWebFluxService.TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT

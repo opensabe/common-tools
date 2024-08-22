@@ -1,19 +1,22 @@
 package io.github.opensabe.common.mybatis.test;
 
 import com.alibaba.fastjson.JSONObject;
+import io.github.opensabe.common.mybatis.test.common.BaseMybatisTest;
 import io.github.opensabe.common.mybatis.test.mapper.user.ActivityMapper;
 import io.github.opensabe.common.mybatis.test.po.Activity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public class ActivityTest extends BaseDataSourceTest{
+public class ActivityTest extends BaseMybatisTest {
     @Autowired
     private ActivityMapper activityMapper;
 
     @Test
+    @Transactional
     public void testInsertSelect () {
         var id = "activity1";
         //insert

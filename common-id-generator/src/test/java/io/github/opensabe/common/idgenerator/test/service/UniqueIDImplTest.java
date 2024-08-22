@@ -1,60 +1,28 @@
-package io.github.opensabe.common.idgenerator.service;
+package io.github.opensabe.common.idgenerator.test.service;
 
 import cn.hutool.core.collection.ConcurrentHashSet;
 import io.github.opensabe.common.idgenerator.service.UniqueID;
+import io.github.opensabe.common.idgenerator.test.common.BaseUniqueIdTest;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.containers.GenericContainer;
 
 import java.util.Set;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(properties = {
-        //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
-        "spring.main.allow-circular-references=true",
-        "defaultOperId=2"
-})
-public class UniqueIDImplTest {
-
-    @ClassRule
-    @SuppressWarnings({"deprecation", "resource"})
-    public static GenericContainer<?> redis = new FixedHostPortGenericContainer<>("redis")
-                .withFixedExposedPort(6379, 6379)
-                .withExposedPorts(6379)
-                .withCommand("redis-server");
-
-
-    @EnableAutoConfiguration
-    @Configuration
-    public static class App {
-    }
+public class UniqueIDImplTest extends BaseUniqueIdTest {
 
     @Autowired
     private UniqueID uniqueID;
 
     private static final int THREAD_COUNT = 15;
     private static final int GET_COUNT = 100;
-
-
-    @BeforeAll
-    static void setup () {
-        redis.start();
-    }
-
-    @AfterAll
-    static void destroy () {
-        redis.stop();
-    }
 
     @Test
     public void testMultiThreadGetUniqueId() throws InterruptedException {
