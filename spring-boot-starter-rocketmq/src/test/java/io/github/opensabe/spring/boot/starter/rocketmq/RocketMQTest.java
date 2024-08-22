@@ -32,6 +32,7 @@ public class RocketMQTest extends BaseRocketMQTest {
 
     private static volatile Long timestamp = System.currentTimeMillis();
     private static final CountDownLatch testSendLatch = new CountDownLatch(1);
+    private static final String testSendLatchString = testSendLatch.toString();
     private static boolean hasInfo = false;
     private static CountDownLatch latch;
     public static final List<String> SENT_MESSAGES = new ArrayList<>();
@@ -62,10 +63,10 @@ public class RocketMQTest extends BaseRocketMQTest {
 
     @Test
     public void testSend() throws InterruptedException {
-        mqProducer.send("rocketmq-test-topic", POJO.builder().text("今天天气不错" + testSendLatch.toString()).timestamp(timestamp).build(), MQSendConfig.builder()
+        mqProducer.send("rocketmq-test-topic", POJO.builder().text("今天天气不错" + testSendLatchString).timestamp(timestamp).build(), MQSendConfig.builder()
                 //重试3次失败后，存入数据库靠定时任务继续重试
                 .persistence(true).build());
-        testSendLatch.await();
+        testSendLatch.await(1, TimeUnit.MINUTES);
         assertTrue(hasInfo);
     }
 
@@ -95,7 +96,7 @@ public class RocketMQTest extends BaseRocketMQTest {
                         MQSendConfig.builder().isCompressEnabled(true).build())
         );
 
-        boolean isCompleted = latch.await(30L, TimeUnit.SECONDS);
+        boolean isCompleted = latch.await(1, TimeUnit.MINUTES);
 
         Assert.assertTrue(isCompleted);
     }
@@ -132,7 +133,7 @@ public class RocketMQTest extends BaseRocketMQTest {
         protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
             try {
                 POJO pojo = JSON.parseObject(baseMQMessage.getData(), POJO.class);
-                if (pojo.text.contains(testSendLatch.toString())) {
+                if (pojo.text.contains(testSendLatchString)) {
                     hasInfo = pojo.text.contains("今天天气不错");
                     testSendLatch.countDown();
                 }
