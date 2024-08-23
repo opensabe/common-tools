@@ -7,8 +7,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLContainer> {
@@ -44,12 +43,10 @@ public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLCo
     @SneakyThrows
     private void executeSql(Resource[] resources) {
         for (Resource resource : resources) {
-            Path path = resource.getFile().toPath();
-            System.out.println("MySQL init file: " + path);
-            String content = new String(Files.readAllBytes(path));
-            //将 Windows 下的换行符替换为 Linux 下的换行符
-            content = content.replace("\r\n", "\n");
+            System.out.println("MySQL init file: " + resource);
+            String content = resource.getContentAsString(Charset.defaultCharset());
             Container.ExecResult mysql = null;
+            content = content.replace("\r\n", "\n");
             //直到执行成功
             while (
                     mysql == null
@@ -69,7 +66,7 @@ public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLCo
                 TimeUnit.SECONDS.sleep(3);
             }
             if (mysql.getExitCode() != 0) {
-                throw new RuntimeException("MySQL init failed at " + path);
+                throw new RuntimeException("MySQL init failed at " + resource);
             }
         }
     }
