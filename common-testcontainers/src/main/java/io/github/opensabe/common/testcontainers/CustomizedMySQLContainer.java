@@ -8,6 +8,11 @@ import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLContainer> {
@@ -42,33 +47,55 @@ public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLCo
 
     @SneakyThrows
     private void executeSql(Resource[] resources) {
+        ExecutorService executorService = Executors.newFixedThreadPool(resources.length);
+        List<Future> futures = new ArrayList<>();
         for (Resource resource : resources) {
-            System.out.println("MySQL init file: " + resource);
-            String content = resource.getContentAsString(Charset.defaultCharset());
-            Container.ExecResult mysql = null;
-            content = content.replace("\r\n", "\n");
-            //直到执行成功
-            while (
-                    mysql == null
-                            || (
-                            mysql.getExitCode() == 1
-                                    && (
-                                    //需要一定时间启动
-                                    mysql.getStderr().contains("connect to")
-                                            //需要一定时间设置 ROOT 密码
-                                            || mysql.getStderr().contains("Access denied")
+            futures.add(executorService.submit(() -> {
+                try {
+                    String content = resource.getContentAsString(Charset.defaultCharset());
+                    Container.ExecResult mysql = null;
+                    content = content.replace("\r\n", "\n");
+                    //直到执行成功
+                    while (
+                            mysql == null
+                                    || (
+                                    mysql.getExitCode() == 1
+                                            && (
+                                            //需要一定时间启动
+                                            mysql.getStderr().contains("connect to")
+                                                    //需要一定时间设置 ROOT 密码
+                                                    || mysql.getStderr().contains("Access denied")
+                                    )
                             )
-                    )
-            ) {
-                mysql = execInContainer("mysql", "-uroot", "-p" + MYSQL_ROOT_PASSWORD, "-e", content);
-                System.out.println("MySQL init result: " + mysql.getStdout());
-                System.out.println("MySQL init error: " + mysql.getStderr());
-                TimeUnit.SECONDS.sleep(3);
-            }
-            if (mysql.getExitCode() != 0) {
-                throw new RuntimeException("MySQL init failed at " + resource);
-            }
+                    ) {
+                        mysql = execInContainer("mysql", "-uroot", "-p" + MYSQL_ROOT_PASSWORD, "-e", content);
+                        System.out.println(
+                                "-----------------------------------------------------------------------------------------"
+                                        + "\nMySQL command: " + resource
+                                        + "\nMySQL init result: " + mysql.getStdout()
+                                        + "\nMySQL init error: " + mysql.getStderr()
+                                        + "\nMySQL init exit code: " + mysql.getExitCode()
+                        );
+                        TimeUnit.SECONDS.sleep(3);
+                    }
+                    if (mysql.getExitCode() != 0) {
+                        throw new RuntimeException("MySQL init failed at " + resource);
+                    }
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }));
         }
+        futures.forEach(future -> {
+            try {
+                future.get();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        executorService.shutdownNow();
     }
 
 
