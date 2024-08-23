@@ -47,6 +47,8 @@ public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLCo
             Path path = resource.getFile().toPath();
             System.out.println("MySQL init file: " + path);
             String content = new String(Files.readAllBytes(path));
+            //将 Windows 下的换行符替换为 Linux 下的换行符
+            content = content.replace("\r\n", "\n");
             Container.ExecResult mysql = null;
             //直到执行成功
             while (
