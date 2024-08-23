@@ -29,8 +29,20 @@ public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLCo
     @SneakyThrows
     protected void containerIsStarted(InspectContainerResponse containerInfo) {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        //加载所有 init*.sql 文件
-        Resource[] resources = resolver.getResources("classpath*:init*.sql");
+        //加载所有 init*.sql 文件和 data*.sql 文件，先执行 init*.sql 文件，再执行 data*.sql 文件
+        Resource[] init = resolver.getResources("classpath*:init*.sql");
+        Resource[] data = resolver.getResources("classpath*:data*.sql");
+
+        //执行 init*.sql 文件
+        executeSql(init);
+        //执行 data*.sql 文件
+        executeSql(data);
+
+        System.out.println("MySQL started at port: " + getMysqlPort());
+    }
+
+    @SneakyThrows
+    private void executeSql(Resource[] resources) {
         for (Resource resource : resources) {
             Path path = resource.getFile().toPath();
             System.out.println("MySQL init file: " + path);
@@ -58,8 +70,8 @@ public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLCo
                 throw new RuntimeException("MySQL init failed at " + path);
             }
         }
-        System.out.println("MySQL started at port: " + getMysqlPort());
     }
+
 
     @Override
     public void stop() {
