@@ -47,6 +47,9 @@ public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLCo
 
     @SneakyThrows
     private void executeSql(Resource[] resources) {
+        if (resources == null || resources.length == 0) {
+            return;
+        }
         ExecutorService executorService = Executors.newFixedThreadPool(resources.length);
         List<Future> futures = new ArrayList<>();
         for (Resource resource : resources) {
