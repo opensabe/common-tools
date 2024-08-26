@@ -7,12 +7,12 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.4.8</version>
+        <version>1.0.4.9</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>aws-bom</artifactId>
-    <version>1.0.4.8</version>
+    <version>1.0.4.9</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>pom</packaging>
