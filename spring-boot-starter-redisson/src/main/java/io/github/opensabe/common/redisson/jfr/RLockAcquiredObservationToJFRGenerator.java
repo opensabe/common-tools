@@ -34,6 +34,8 @@ public class RLockAcquiredObservationToJFRGenerator extends ObservationToJFRGene
 
     @Override
     protected void generateOnStart(RLockAcquiredContext context) {
-        context.put(RLockAcquiredJFREvent.class, new RLockAcquiredJFREvent(context));
+        RLockAcquiredJFREvent rLockAcquiredJFREvent = new RLockAcquiredJFREvent(context);
+        rLockAcquiredJFREvent.begin();
+        context.put(RLockAcquiredJFREvent.class, rLockAcquiredJFREvent);
     }
 }

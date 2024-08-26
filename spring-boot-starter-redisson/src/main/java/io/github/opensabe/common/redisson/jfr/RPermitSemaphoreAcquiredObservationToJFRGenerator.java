@@ -35,6 +35,8 @@ public class RPermitSemaphoreAcquiredObservationToJFRGenerator extends Observati
 
     @Override
     protected void generateOnStart(RPermitSemaphoreAcquiredContext context) {
-        context.put(RPermitSemaphoreAcquiredJFREvent.class, new RPermitSemaphoreAcquiredJFREvent(context));
+        RPermitSemaphoreAcquiredJFREvent rPermitSemaphoreAcquiredJFREvent = new RPermitSemaphoreAcquiredJFREvent(context);
+        rPermitSemaphoreAcquiredJFREvent.begin();
+        context.put(RPermitSemaphoreAcquiredJFREvent.class, rPermitSemaphoreAcquiredJFREvent);
     }
 }
