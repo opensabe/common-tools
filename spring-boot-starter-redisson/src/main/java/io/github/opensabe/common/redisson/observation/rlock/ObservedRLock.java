@@ -238,7 +238,7 @@ public class ObservedRLock implements RLock {
 
     @Override
     public RFuture<Void> unlockAsync(long threadId) {
-        return delegate.unlockAsync();
+        return delegate.unlockAsync(threadId);
     }
 
     @Override
