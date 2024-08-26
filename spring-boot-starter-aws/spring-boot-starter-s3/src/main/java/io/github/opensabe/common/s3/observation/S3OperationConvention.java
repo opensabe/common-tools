@@ -17,8 +17,7 @@ public class S3OperationConvention implements ObservationConvention<S3OperationC
     public KeyValues getLowCardinalityKeyValues(S3OperationContext context) {
         return KeyValues.of(
                 S3OperationObservationDocumentation.S3_File_OPERATE_TAG.OPERATE_SUCCESSFULLY.withValue(String.valueOf(context.isSuccess())),
-                S3OperationObservationDocumentation.S3_File_OPERATE_TAG.OPERATE_TYPE.withValue(context.getOperateType()),
-                S3OperationObservationDocumentation.S3_File_OPERATE_TAG.FILE_SIZE.withValue(String.valueOf(context.getFileSize()))
+                S3OperationObservationDocumentation.S3_File_OPERATE_TAG.OPERATE_TYPE.withValue(context.getOperateType())
         );
     }
 

@@ -16,7 +16,7 @@ public class SocketIOExecuteObservationConnectConvention implements ObservationC
 
     @Override
     public KeyValues getLowCardinalityKeyValues(SocketIOExecuteContext context) {
-        return KeyValues.of(TAG_SESSION_ID, context.getSessionId());
+        return KeyValues.of("socketio", "connect");
     }
 
     @Override
