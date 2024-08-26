@@ -19,7 +19,7 @@ public class DynamodbExecuteObservationConvention implements ObservationConventi
 
     @Override
     public KeyValues getLowCardinalityKeyValues(DynamodbExecuteContext context) {
-        return KeyValues.of(TAG_METHOD,context.getMethod(),TAG_RANGE_KEY,context.getRangeKey(),TAG_HASH_KEY,context.getHashKey());
+        return KeyValues.of(TAG_METHOD,context.getMethod());
     }
 
     @Override
