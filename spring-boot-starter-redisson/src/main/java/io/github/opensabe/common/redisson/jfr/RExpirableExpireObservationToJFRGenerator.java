@@ -36,6 +36,8 @@ public class RExpirableExpireObservationToJFRGenerator extends ObservationToJFRG
 
     @Override
     protected void generateOnStart(RExpirableExpireContext context) {
-        context.put(RExpirableExpireJFREvent.class, new RExpirableExpireJFREvent(context));
+        RExpirableExpireJFREvent rExpirableExpireJFREvent = new RExpirableExpireJFREvent(context);
+        rExpirableExpireJFREvent.begin();
+        context.put(RExpirableExpireJFREvent.class, rExpirableExpireJFREvent);
     }
 }

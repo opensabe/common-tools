@@ -34,6 +34,8 @@ public class RRateLimiterSetRateObservationToJFRGenerator extends ObservationToJ
 
     @Override
     protected void generateOnStart(RRateLimiterSetRateContext context) {
-        context.put(RRateLimiterSetRateJFREvent.class, new RRateLimiterSetRateJFREvent(context));
+        RRateLimiterSetRateJFREvent rRateLimiterSetRateJFREvent = new RRateLimiterSetRateJFREvent(context);
+        rRateLimiterSetRateJFREvent.begin();
+        context.put(RRateLimiterSetRateJFREvent.class, rRateLimiterSetRateJFREvent);
     }
 }

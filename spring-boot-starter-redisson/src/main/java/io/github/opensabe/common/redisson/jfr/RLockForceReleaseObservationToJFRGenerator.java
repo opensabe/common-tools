@@ -34,6 +34,8 @@ public class RLockForceReleaseObservationToJFRGenerator extends ObservationToJFR
 
     @Override
     protected void generateOnStart(RLockForceReleaseContext context) {
-        context.put(RLockForceReleaseJFREvent.class, new RLockForceReleaseJFREvent(context));
+        RLockForceReleaseJFREvent rLockForceReleaseJFREvent = new RLockForceReleaseJFREvent(context);
+        rLockForceReleaseJFREvent.begin();
+        context.put(RLockForceReleaseJFREvent.class, rLockForceReleaseJFREvent);
     }
 }
