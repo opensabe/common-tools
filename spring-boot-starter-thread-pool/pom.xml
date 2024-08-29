@@ -22,6 +22,7 @@
         <dependency>
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>spring-cloud-parent-web-common</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
