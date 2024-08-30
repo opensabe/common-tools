@@ -7,18 +7,18 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.4.13</version>
+        <version>1.0.4.14</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-boot-starter-cache</artifactId>
-    <version>1.0.4.13</version>
+    <version>1.0.4.14</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <spring-boot-starter-redisson.version>1.0.4.13</spring-boot-starter-redisson.version>
+        <spring-boot-starter-redisson.version>1.0.4.14</spring-boot-starter-redisson.version>
     </properties>
 
     <dependencies>
