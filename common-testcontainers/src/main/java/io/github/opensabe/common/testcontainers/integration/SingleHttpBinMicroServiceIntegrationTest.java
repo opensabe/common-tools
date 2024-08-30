@@ -13,6 +13,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 public class SingleHttpBinMicroServiceIntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
     public static CustomizedHttpBinContainer HTTP_BIN = new CustomizedHttpBinContainer();
     public static final String HTTP_BIN_SERVICE_NAME = "httpbin";
+    public static final String HTTP_BIN_SERVICE_ZONE = "test";
+    public static final String HTTP_BIN_SERVICE_INSTANCE_ID = "test-httpbin-1";
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
@@ -31,6 +33,12 @@ public class SingleHttpBinMicroServiceIntegrationTest implements BeforeAllCallba
                 "spring.cloud.discovery.client.simple.instances." + HTTP_BIN_SERVICE_NAME + "[0].uri",
                 () -> "http://localhost:" + HTTP_BIN.getHttpBinPort()
         );
+        registry.add("spring.cloud.discovery.client.simple.instances.httpbin[0].metadata.zone", () -> {
+            return HTTP_BIN_SERVICE_ZONE;
+        });
+        registry.add("spring.cloud.discovery.client.simple.instances.httpbin[0].instance-id", () -> {
+            return HTTP_BIN_SERVICE_INSTANCE_ID;
+        });
     }
 
     @Override
