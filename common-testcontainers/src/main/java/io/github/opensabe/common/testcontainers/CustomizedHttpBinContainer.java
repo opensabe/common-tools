@@ -22,15 +22,7 @@ public class CustomizedHttpBinContainer extends GenericContainer<CustomizedHttpB
     @Override
     @SneakyThrows
     protected void containerIsStarted(InspectContainerResponse containerInfo) {
-        ExecResult execResult = null;
-        //直到执行成功
-        while (execResult == null || execResult.getExitCode() != 0) {
-            TimeUnit.SECONDS.sleep(1);
-            execResult = execInContainer("curl", "http://localhost:" + HTTP_BIN_PORT);
-            System.out.println("stdout: " + execResult.getStdout());
-            System.out.println("stderr: " + execResult.getStderr());
-        }
-        System.out.println("DynamoDB started at port: " + getHttpBinPort());
+        System.out.println("HTTP_BIN started at port: " + getHttpBinPort());
     }
 
     @Override
