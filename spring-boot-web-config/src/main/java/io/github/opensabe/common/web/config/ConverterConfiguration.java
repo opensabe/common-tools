@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,6 +46,14 @@ public class ConverterConfiguration {
                 //是否双引号包装field
                 SerializerFeature.QuoteFieldNames
         );
+
+        //LocalDateTime 格式化
+        fastJsonConfig.getSerializeConfig().put(LocalDateTime.class, (serializer, object, fieldName, fieldType, features) -> {
+            if (object != null) {
+                long timestamp = ((LocalDateTime) object).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                serializer.write(timestamp);
+            }
+        });
 
         return new HttpMessageConverters(fastJsonHttpMessageConverter, stringHttpMessageConverter);
     }
