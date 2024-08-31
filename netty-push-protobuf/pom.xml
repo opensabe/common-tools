@@ -7,12 +7,12 @@
 	<parent>
 		<groupId>io.github.opensabe-tech</groupId>
 		<artifactId>spring-cloud-parent</artifactId>
-		<version>1.0.4.14</version>
+		<version>1.0.4.15</version>
 		<relativePath>../spring-cloud-parent/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>alive-protobuf</artifactId>
-	<version>1.0.4.14</version>
+	<version>1.0.4.15</version>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 	<packaging>jar</packaging>
