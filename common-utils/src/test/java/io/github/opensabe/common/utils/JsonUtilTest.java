@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(
         classes = JsonUtilTest.App.class,
@@ -224,5 +224,18 @@ public class JsonUtilTest {
         // fastjson(2.0.51)  序列化结果：{"age":10,"brithDay":1722396158549,"name":"lily"}   支持record
         // JsonUtil  序列化结果：{"name":"lily","age":10,"brithDay":1722396388723}           支持record
         System.out.println(JSON.toJSONString(new User("lily", 10, LocalDateTime.now())));
+    }
+
+    /**
+     * 验证字符串是否是json格式 单测
+     */
+    @Test
+    public void isJsonValidTest() {
+        String str = "{\"name\":\"John\", \"age\":30}";
+        boolean isValid = JsonUtil.isJsonValid(str);
+        assertTrue(isValid);
+        str = "{abc}";
+        isValid = JsonUtil.isJsonValid(str);
+        assertFalse(isValid);
     }
 }

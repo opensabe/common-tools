@@ -105,4 +105,20 @@ public final class JsonUtil {
         return objectMapper.reader().readTree(content);
     }
 
+    /**
+     * 验证字符串是否是json格式
+     *
+     * @param str 要验证的字符串
+     * @return true:是json格式。false:不是json格式
+     */
+    @SneakyThrows
+    public static boolean isJsonValid(String str) {
+        try {
+            objectMapper.readTree(str);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }
