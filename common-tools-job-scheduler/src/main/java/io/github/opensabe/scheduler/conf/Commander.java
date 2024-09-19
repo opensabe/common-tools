@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Log4j2
 public class Commander {
 
-    @Autowired
     private SchedulerProperties schedulerProperties;
 
     private final RedissonClient redissonClient;
@@ -23,10 +22,11 @@ public class Commander {
 
     private volatile boolean isLeader;
 
-    public Commander(RedissonClient redissonClient) {
+    public Commander(RedissonClient redissonClient, SchedulerProperties schedulerProperties) {
         this.redissonClient = redissonClient;
         this.isLeader = false;
         this.exceptionCount.set(0);
+        this.schedulerProperties = schedulerProperties;
     }
 
     public void closeCommander() {
