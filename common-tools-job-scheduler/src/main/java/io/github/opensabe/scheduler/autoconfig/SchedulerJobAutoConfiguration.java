@@ -48,7 +48,7 @@ public class SchedulerJobAutoConfiguration {
     @Bean(destroyMethod = "closeCommander")
     @ConditionalOnProperty(prefix = "scheduler.job", name = "enable", havingValue = "true")
     public Commander commander(final RedissonClient redissonClient) {
-        Commander commander = new Commander(redissonClient);
+        Commander commander = new Commander(redissonClient, schedulerProperties);
         commander.setUp();
         return commander;
     }
