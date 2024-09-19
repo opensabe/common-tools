@@ -4,12 +4,16 @@ import lombok.extern.log4j.Log4j2;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
 public class Commander {
+
+    @Autowired
+    private SchedulerProperties schedulerProperties;
 
     private final RedissonClient redissonClient;
 
@@ -45,7 +49,7 @@ public class Commander {
     }
 
     public void setUp() {
-        lock = redissonClient.getLock("taskCenter-commander:leader:lock");
+        lock = redissonClient.getLock(schedulerProperties.getBusinessLine() + "taskCenter-commander:leader:lock");
         //直接忽略
         //查看这个锁是否被此子线程获取，实际就是判断objectMonitor的_owner的值和此线程的id是否同一个
         //获取到锁，则把标识赋值为true
