@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.opensabe.common.utils.json.JsonUtil;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -237,5 +238,25 @@ public class JsonUtilTest {
         str = "{abc}";
         isValid = JsonUtil.isJsonValid(str);
         assertFalse(isValid);
+    }
+
+    @Data
+    public class CUser {
+
+        private String userName;
+    }
+
+    /**
+     * fastjson驼峰属性测试
+     * 注意：fastjson2不在默认支持驼峰属性赋值的兼容了
+     */
+    @Test
+    public void fastJsonCamelCaseTest() {
+        String str = "{\"user_name\":\"zhangsan\"}";
+
+        CUser cUser = com.alibaba.fastjson2.JSON.parseObject(str, CUser.class);
+        System.out.println("--fastjson2--" + cUser);
+        CUser cUser1 = com.alibaba.fastjson.JSON.parseObject(str, CUser.class);
+        System.out.println("--fastjson--" + cUser1);
     }
 }
