@@ -13,7 +13,7 @@ public class CustomizedRedisContainer extends GenericContainer<CustomizedRedisCo
     public static final int REDIS_PORT = 6379;
 
     public CustomizedRedisContainer() {
-        super("redis");
+        super("valkey/valkey:8.0.1-bookworm");
     }
 
     @Override
