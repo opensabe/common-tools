@@ -51,12 +51,12 @@ public class MultiRedisTest {
     }
 
     @ClassRule
-    static GenericContainer redis1 = new FixedHostPortGenericContainer("redis")
+    public static GenericContainer redis1 = new FixedHostPortGenericContainer("valkey/valkey:8.0.1-bookworm")
             .withFixedExposedPort(6378,6379)
             .withExposedPorts(6379)
             .withCommand("redis-server");
     @ClassRule
-    static GenericContainer redis2 = new FixedHostPortGenericContainer("redis")
+    public static GenericContainer redis2 = new FixedHostPortGenericContainer("valkey/valkey:8.0.1-bookworm")
             .withFixedExposedPort(6380,6379)
             .withExposedPorts(6379)
             .withCommand("redis-server");
