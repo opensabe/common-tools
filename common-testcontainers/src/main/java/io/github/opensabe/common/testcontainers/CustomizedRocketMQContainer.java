@@ -15,6 +15,7 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
     public static final int BROKER_PORT = 10911;
 
     public CustomizedRocketMQContainer() {
+        // mac m1芯片(ARM64) 可以使用 "dyrnq/rocketmq:5.2.0" 来跑单测
         super("apache/rocketmq:5.2.0");
         withExposedPorts(NAMESRV_PORT, BROKER_PORT, BROKER_PORT - 2);
     }
