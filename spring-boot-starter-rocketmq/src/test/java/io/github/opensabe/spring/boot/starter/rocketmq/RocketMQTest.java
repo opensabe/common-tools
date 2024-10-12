@@ -12,7 +12,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.junit.Assert;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -72,7 +71,6 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
-
     public void testSendSecret() throws InterruptedException {
         assertThrows(RuntimeException.class, () -> {
             mqProducer.send("rocketmq-test-topic", POJO.builder().text(SECRET + "test").timestamp(timestamp).build(), MQSendConfig.builder()
@@ -81,7 +79,6 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
-    @Disabled
     public void testSend_largePayload() throws Exception {
 
         SENT_MESSAGES.add("test_msg1" + generateLargeMessage(4 * 1024 * 1024 - 18)); // 4MB message);
