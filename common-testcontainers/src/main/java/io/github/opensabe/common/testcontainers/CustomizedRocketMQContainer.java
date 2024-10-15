@@ -33,9 +33,9 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
         List<String> updateBrokerConfigCommands = new ArrayList<>();
         // Update the brokerAddr and the clients can use the mapped address to connect the broker.
         updateBrokerConfigCommands.add(updateBrokerConfig("brokerIP1", getHost()));
-        updateBrokerConfigCommands.add(updateBrokerConfig("listenPort", getMappedPort(BROKER_PORT)));
         // Make the changes take effect immediately.
         updateBrokerConfigCommands.add(updateBrokerConfig("brokerPermission", defaultBrokerPermission));
+        updateBrokerConfigCommands.add(updateBrokerConfig("listenPort", getMappedPort(BROKER_PORT)));
 
         final String command = String.join(" && ", updateBrokerConfigCommands);
         ExecResult result = null;
