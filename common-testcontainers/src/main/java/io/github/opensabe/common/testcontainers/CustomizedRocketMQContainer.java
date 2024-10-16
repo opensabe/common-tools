@@ -15,7 +15,7 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
     public static final int BROKER_PORT = 10911;
 
     public CustomizedRocketMQContainer() {
-        super("dyrnq/rocketmq:5.2.0");
+        super("apache/rocketmq:5.2.0");
         withExposedPorts(NAMESRV_PORT, BROKER_PORT, BROKER_PORT - 2);
     }
 
