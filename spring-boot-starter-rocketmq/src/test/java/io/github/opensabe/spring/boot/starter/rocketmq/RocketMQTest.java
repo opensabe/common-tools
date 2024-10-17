@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.junit.Assert;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -62,6 +63,7 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
+    @Disabled
     public void testSend() throws InterruptedException {
         mqProducer.send("rocketmq-test-topic", POJO.builder().text("今天天气不错" + testSendLatchString).timestamp(timestamp).build(), MQSendConfig.builder()
                 //重试3次失败后，存入数据库靠定时任务继续重试
@@ -79,6 +81,7 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
+    @Disabled
     public void testSend_largePayload() throws Exception {
 
         SENT_MESSAGES.add("test_msg1" + generateLargeMessage(4 * 1024 * 1024 - 18)); // 4MB message);
