@@ -14,8 +14,7 @@ public class RPermitSemaphoreAcquiredObservationConvention implements Observatio
     @Override
     public KeyValues getLowCardinalityKeyValues(RPermitSemaphoreAcquiredContext context) {
         return KeyValues.of(
-                RPermitSemaphoreObservationDocumentation.SEMAPHORE_ACQUIRE_TAG.TRY_ACQUIRE.withValue(String.valueOf(context.isTryAcquire())),
-                RPermitSemaphoreObservationDocumentation.SEMAPHORE_ACQUIRE_TAG.PERMIT_ID.withValue(String.valueOf(context.getPermitId()))
+                RPermitSemaphoreObservationDocumentation.SEMAPHORE_ACQUIRE_TAG.TRY_ACQUIRE.withValue(String.valueOf(context.isTryAcquire()))
         );
     }
 

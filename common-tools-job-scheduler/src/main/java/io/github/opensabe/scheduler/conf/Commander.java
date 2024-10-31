@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Log4j2
 public class Commander {
 
+    private SchedulerProperties schedulerProperties;
+
     private final RedissonClient redissonClient;
 
     private final AtomicInteger exceptionCount = new AtomicInteger();
@@ -19,10 +21,11 @@ public class Commander {
 
     private volatile boolean isLeader;
 
-    public Commander(RedissonClient redissonClient) {
+    public Commander(RedissonClient redissonClient, SchedulerProperties schedulerProperties) {
         this.redissonClient = redissonClient;
         this.isLeader = false;
         this.exceptionCount.set(0);
+        this.schedulerProperties = schedulerProperties;
     }
 
     public void closeCommander() {
@@ -45,7 +48,7 @@ public class Commander {
     }
 
     public void setUp() {
-        lock = redissonClient.getLock("taskCenter-commander:leader:lock");
+        lock = redissonClient.getLock(schedulerProperties.getBusinessLine() + "taskCenter-commander:leader:lock");
         //直接忽略
         //查看这个锁是否被此子线程获取，实际就是判断objectMonitor的_owner的值和此线程的id是否同一个
         //获取到锁，则把标识赋值为true

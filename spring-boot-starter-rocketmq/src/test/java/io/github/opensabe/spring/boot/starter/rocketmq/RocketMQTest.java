@@ -72,7 +72,6 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
-
     public void testSendSecret() throws InterruptedException {
         assertThrows(RuntimeException.class, () -> {
             mqProducer.send("rocketmq-test-topic", POJO.builder().text(SECRET + "test").timestamp(timestamp).build(), MQSendConfig.builder()
