@@ -1,7 +1,9 @@
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
 import com.corundumstudio.socketio.SocketIOServer;
-import com.corundumstudio.socketio.annotation.SpringAnnotationScanner;
+import com.corundumstudio.socketio.annotation.OnConnect;
+import com.corundumstudio.socketio.annotation.OnDisconnect;
+import com.corundumstudio.socketio.annotation.OnEvent;
 import com.corundumstudio.socketio.listener.DefaultExceptionListener;
 import com.corundumstudio.socketio.listener.ExceptionListener;
 import com.corundumstudio.socketio.store.StoreFactory;
@@ -15,21 +17,111 @@ import io.github.opensabe.spring.boot.starter.socketio.util.SocketConnectionUtil
 import io.netty.channel.epoll.Epoll;
 import lombok.extern.log4j.Log4j2;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.util.ReflectionUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(SocketIoServerProperties.class)
 public class SocketIoConfiguration {
 
+//    @Bean
+//    public SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketIOServer) {
+//        return new SpringAnnotationScanner(socketIOServer);
+//    }
+
+
+
     @Bean
-    public SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketIOServer) {
-        return new SpringAnnotationScanner(socketIOServer);
+    @ConditionalOnMissingBean
+    public OrderedSpringAnnotationScanner springAnnotationScanner() {
+        return new OrderedSpringAnnotationScanner();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ListenerAdder listenerAdder (SocketIOServer server, OrderedSpringAnnotationScanner scanner) {
+        return new ListenerAdder(server, scanner);
+    }
+
+    public static class ListenerAdder implements InitializingBean, Ordered {
+        private final OrderedSpringAnnotationScanner scanner;
+        private final SocketIOServer server;
+        public ListenerAdder(SocketIOServer server,OrderedSpringAnnotationScanner scanner) {
+            this.server = server;
+            this.scanner = scanner;
+        }
+
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            List<Object> list = new ArrayList<>(scanner.listeners.size());
+            list.addAll(scanner.listeners);
+            //排序
+            AnnotationAwareOrderComparator.sort(list);
+            list.forEach(l -> {
+                log.info("{} bean listeners added", l.getClass());
+                server.addListeners(l, l.getClass());
+            });
+        }
+
+        @Override
+        public int getOrder() {
+            return Ordered.LOWEST_PRECEDENCE;
+        }
+    }
+
+    public static class OrderedSpringAnnotationScanner implements BeanPostProcessor {
+
+        private final List<Class<? extends Annotation>> annotations =
+                Arrays.asList(OnConnect.class, OnDisconnect.class, OnEvent.class);
+
+        private final Set<Object> listeners = new HashSet<>();
+
+
+        @Override
+        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            AtomicBoolean add = new AtomicBoolean();
+            ReflectionUtils.doWithMethods(bean.getClass(),
+                    new ReflectionUtils.MethodCallback() {
+                        @Override
+                        public void doWith(Method method) throws IllegalArgumentException,
+                                IllegalAccessException {
+                            add.set(true);
+                        }
+                    },
+                    new ReflectionUtils.MethodFilter() {
+                        @Override
+                        public boolean matches(Method method) {
+                            for (Class<? extends Annotation> annotationClass : annotations) {
+                                if (method.isAnnotationPresent(annotationClass)) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+                    });
+
+            if (add.get()) {
+                listeners.add(bean);
+            }
+
+            return bean;
+        }
     }
 
     @Bean
@@ -39,6 +131,7 @@ public class SocketIoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public SocketIOServer server(SocketIoServerProperties socketIoServerProperties, StoreFactory storeFactory, ExceptionListener exceptionListener) {
         socketIoServerProperties.setStoreFactory(storeFactory);
         socketIoServerProperties.setExceptionListener(exceptionListener);
