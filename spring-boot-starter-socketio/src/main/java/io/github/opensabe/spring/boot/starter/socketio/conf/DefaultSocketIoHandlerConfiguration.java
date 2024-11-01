@@ -15,10 +15,16 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import java.util.UUID;
 
+/**
+ * 设置order为HIGHEST_PRECEDENCE + 1000
+ */
 @Log4j2
+@Order(Ordered.HIGHEST_PRECEDENCE+1000)
 @Configuration(proxyBeanMethods = false)
 public class DefaultSocketIoHandlerConfiguration {
     @Autowired

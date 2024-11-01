@@ -1,3 +1,6 @@
+eureka:
+  client:
+    enabled: false
 management:
   tracing:
     enabled: true
@@ -30,6 +33,7 @@ server:
       - polling
       - websocket
     name-space: ${spring.application.name}
+
 spring:
   application:
     name: socket-io
