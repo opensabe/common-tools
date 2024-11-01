@@ -3,15 +3,22 @@ package io.github.opensabe.common.socketio;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.annotation.OnEvent;
+import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.moditect.jfrunit.JfrEventTest;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -23,8 +30,18 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Log4j2
 @Import(ListenerSortTest.Conf.class)
-public class ListenerSortTest extends SocketIOStarter {
+@SpringBootTest(classes = SocketIOStarter.App.class, properties = {
+        "server.socketio.port=4002"
+})
+@JfrEventTest
+@AutoConfigureObservability
+@ExtendWith(SingleRedisIntegrationTest.class)
+public class ListenerSortTest {
 
+    @DynamicPropertySource
+    public static void setProperties(DynamicPropertyRegistry registry) {
+        SingleRedisIntegrationTest.setProperties(registry);
+    }
 
     public static List<String> list = new CopyOnWriteArrayList<>();
 
@@ -75,28 +92,22 @@ public class ListenerSortTest extends SocketIOStarter {
     }
 
 
-    @Test
-    void test1 () throws URISyntaxException, InterruptedException {
-    private static final String SERVER_URL = "ws://localhost:4001";
+    private static final String SERVER_URL = "ws://localhost:4002";
     private static final String HEADER_UID = "uid";
     private static final String USER_ID = "u1";
 
     @Test
-    void test1() throws URISyntaxException, InterruptedException {
+    void test1() throws URISyntaxException {
         IO.Options options = new IO.Options();
         options.extraHeaders = Map.of(HEADER_UID, List.of(USER_ID));
         Socket socket = IO.socket(SERVER_URL, options);
 
         //这里服务器会收到两次connect事件，因此我们用event事件来测试
-        if (!socket.connected()) {
-            socket.connect();
-        }
+        socket.connect();
 
         socket.emit("aa", ArrayUtils.toArray(3), ack -> {
             log.info("receive data {}", ack[0]);
         });
-
-        Thread.sleep(1000L);
 
         Assertions.assertThat(list)
                 .hasSize(3)

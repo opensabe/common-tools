@@ -217,6 +217,7 @@ public class SocketIoConfiguration {
 
     @Bean
     @ConditionalOnClass(AbstractMQConsumer.class)
+    @ConditionalOnBean(MQProducer.class)
     public ForceDisconnectConsumer forceDisconnectConsumer(SocketIOServer socketIOServer) {
         return new ForceDisconnectConsumer(socketIOServer);
     }
