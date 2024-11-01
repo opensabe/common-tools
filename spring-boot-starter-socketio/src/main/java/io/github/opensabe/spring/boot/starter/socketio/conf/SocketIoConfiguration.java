@@ -70,8 +70,7 @@ public class SocketIoConfiguration {
 
         @Override
         public void afterPropertiesSet() throws Exception {
-            List<Object> list = new ArrayList<>(scanner.listeners.size());
-            list.addAll(scanner.listeners);
+            List<Object> list = new ArrayList<>(scanner.listeners);
             //排序
             AnnotationAwareOrderComparator.sort(list);
             list.forEach(l -> {
