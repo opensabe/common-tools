@@ -77,9 +77,15 @@ public class ListenerSortTest extends SocketIOStarter {
 
     @Test
     void test1 () throws URISyntaxException, InterruptedException {
+    private static final String SERVER_URL = "ws://localhost:4001";
+    private static final String HEADER_UID = "uid";
+    private static final String USER_ID = "u1";
+
+    @Test
+    void test1() throws URISyntaxException, InterruptedException {
         IO.Options options = new IO.Options();
-        options.extraHeaders = Map.of("uid", List.of("u1"));
-        Socket socket = IO.socket("ws://localhost:4001", options);
+        options.extraHeaders = Map.of(HEADER_UID, List.of(USER_ID));
+        Socket socket = IO.socket(SERVER_URL, options);
 
         //这里服务器会收到两次connect事件，因此我们用event事件来测试
         if (!socket.connected()) {
