@@ -59,6 +59,7 @@
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>spring-boot-starter-rocketmq</artifactId>
             <version>${spring-boot-starter-rocketmq.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

@@ -1,7 +1,6 @@
 package io.github.opensabe.spring.boot.starter.socketio.util;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.SocketIOServer;
 import io.github.opensabe.spring.boot.starter.socketio.CommonAttribute;
 import io.netty.handler.codec.http.HttpHeaders;
 import lombok.extern.log4j.Log4j2;
@@ -12,12 +11,10 @@ import java.util.UUID;
 @Log4j2
 public class SocketConnectionUtil {
 
-    private SocketIOServer socketIOServer;
 
     private ForceDisconnectProducer forceDisconnectProducer;
 
-    public SocketConnectionUtil(SocketIOServer socketIOServer, ForceDisconnectProducer forceDisconnectProducer) {
-        this.socketIOServer = socketIOServer;
+    public SocketConnectionUtil(ForceDisconnectProducer forceDisconnectProducer) {
         this.forceDisconnectProducer = forceDisconnectProducer;
     }
 

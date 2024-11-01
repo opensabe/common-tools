@@ -8,6 +8,7 @@ import com.corundumstudio.socketio.listener.DefaultExceptionListener;
 import com.corundumstudio.socketio.listener.ExceptionListener;
 import com.corundumstudio.socketio.store.StoreFactory;
 import com.netflix.discovery.EurekaClient;
+import io.github.opensabe.spring.boot.starter.rocketmq.AbstractMQConsumer;
 import io.github.opensabe.spring.boot.starter.rocketmq.MQProducer;
 import io.github.opensabe.spring.boot.starter.socketio.SocketIoMessageTemplate;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.extend.NamespaceExtend;
@@ -20,6 +21,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -31,7 +33,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -97,23 +98,14 @@ public class SocketIoConfiguration {
         public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
             AtomicBoolean add = new AtomicBoolean();
             ReflectionUtils.doWithMethods(bean.getClass(),
-                    new ReflectionUtils.MethodCallback() {
-                        @Override
-                        public void doWith(Method method) throws IllegalArgumentException,
-                                IllegalAccessException {
-                            add.set(true);
-                        }
-                    },
-                    new ReflectionUtils.MethodFilter() {
-                        @Override
-                        public boolean matches(Method method) {
-                            for (Class<? extends Annotation> annotationClass : annotations) {
-                                if (method.isAnnotationPresent(annotationClass)) {
-                                    return true;
-                                }
+                    method -> add.set(true),
+                    method -> {
+                        for (Class<? extends Annotation> annotationClass : annotations) {
+                            if (method.isAnnotationPresent(annotationClass)) {
+                                return true;
                             }
-                            return false;
                         }
+                        return false;
                     });
 
             if (add.get()) {
@@ -218,19 +210,22 @@ public class SocketIoConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(MQProducer.class)
     public ForceDisconnectProducer forceDisconnectProducer(MQProducer mqProducer) {
         return new ForceDisconnectProducer(mqProducer);
     }
 
     @Bean
+    @ConditionalOnClass(AbstractMQConsumer.class)
     public ForceDisconnectConsumer forceDisconnectConsumer(SocketIOServer socketIOServer) {
         return new ForceDisconnectConsumer(socketIOServer);
     }
 
     @Bean
-    public SocketConnectionUtil socketConnectionUtil(SocketIOServer socketIOServer, ForceDisconnectProducer forceDisconnectProducer) {
+    @ConditionalOnBean(ForceDisconnectProducer.class)
+    public SocketConnectionUtil socketConnectionUtil(ForceDisconnectProducer forceDisconnectProducer) {
 
-        return new SocketConnectionUtil(socketIOServer, forceDisconnectProducer);
+        return new SocketConnectionUtil(forceDisconnectProducer);
     }
 
     @Bean
