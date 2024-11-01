@@ -107,7 +107,7 @@ public class ListenerSortTest {
     @Test
     void test1() throws URISyntaxException, InterruptedException {
 
-        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(1);
         IO.Options options = new IO.Options();
         options.extraHeaders = Map.of(HEADER_UID, List.of(USER_ID));
         Socket socket = IO.socket(SERVER_URL, options);
