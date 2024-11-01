@@ -44,6 +44,11 @@ public class ListenerSortTest {
     }
 
     public static List<String> list = new CopyOnWriteArrayList<>();
+    
+    @BeforeEach
+    void setUp() {
+        list.clear();
+    }
 
 
     public static class Conf {
