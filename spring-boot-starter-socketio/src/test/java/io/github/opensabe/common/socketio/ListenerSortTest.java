@@ -113,7 +113,7 @@ public class ListenerSortTest {
         Socket socket = IO.socket(SERVER_URL, options);
         //这里服务器会收到两次connect事件，因此我们用event事件来测试
         socket.connect();
-
+        TimeUnit.SECONDS.sleep(2);
         socket.emit("aa", ArrayUtils.toArray(3), ack -> {
             log.info("receive data {}", ack[0]);
         });
