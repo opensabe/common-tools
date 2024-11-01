@@ -25,6 +25,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author heng.ma
@@ -103,13 +105,20 @@ public class ListenerSortTest {
     private static final String USER_ID = "u1";
 
     @Test
-    void test1() throws URISyntaxException {
+    void test1() throws URISyntaxException, InterruptedException {
+
+
         IO.Options options = new IO.Options();
         options.extraHeaders = Map.of(HEADER_UID, List.of(USER_ID));
         Socket socket = IO.socket(SERVER_URL, options);
-
-        //这里服务器会收到两次connect事件，因此我们用event事件来测试
+        CountDownLatch count = new CountDownLatch(1);
+        socket.on(Socket.EVENT_CONNECT, o -> count.countDown());
         socket.connect();
+        //这里服务器会收到两次connect事件，因此我们用event事件来测试
+
+        Assertions.assertThat(count.await(5, TimeUnit.SECONDS))
+                .withFailMessage(() -> "connect to "+SERVER_URL+" error")
+                .isTrue();
 
         socket.emit("aa", ArrayUtils.toArray(3), ack -> {
             log.info("receive data {}", ack[0]);
