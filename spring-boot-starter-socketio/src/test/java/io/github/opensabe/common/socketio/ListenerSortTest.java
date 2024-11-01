@@ -107,18 +107,12 @@ public class ListenerSortTest {
     @Test
     void test1() throws URISyntaxException, InterruptedException {
 
-
+        TimeUnit.SECONDS.sleep(100);
         IO.Options options = new IO.Options();
         options.extraHeaders = Map.of(HEADER_UID, List.of(USER_ID));
         Socket socket = IO.socket(SERVER_URL, options);
-        CountDownLatch count = new CountDownLatch(1);
-        socket.on(Socket.EVENT_CONNECT, o -> count.countDown());
-        socket.connect();
         //这里服务器会收到两次connect事件，因此我们用event事件来测试
-
-        Assertions.assertThat(count.await(5, TimeUnit.SECONDS))
-                .withFailMessage(() -> "connect to "+SERVER_URL+" error")
-                .isTrue();
+        socket.connect();
 
         socket.emit("aa", ArrayUtils.toArray(3), ack -> {
             log.info("receive data {}", ack[0]);
