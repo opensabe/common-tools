@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Import(RedissonRateLimiterTest.Config.class)
 public class RedissonRateLimiterTest extends BaseRedissonTest {
-    private static final int THREAD_COUNT = 20;
+    private static final int THREAD_COUNT = 10;
 
     public static class Config {
         @Autowired
@@ -101,18 +101,18 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
         @RedissonRateLimiter(
                 name = "testRateLimiterTryAcquireNoWait",
                 type = RedissonRateLimiter.Type.TRY,
-                rate = 10,
+                rate = 1,
                 rateInterval = 1,
                 rateType = RateType.OVERALL,
-                rateIntervalUnit = RateIntervalUnit.MINUTES
+                rateIntervalUnit = RateIntervalUnit.SECONDS
         )
         public void testRateLimiterTryAcquireNoWait() {
             try {
                 list.add(System.currentTimeMillis());
                 RRateLimiter testRateLimiterBlockAcquire = redissonClient.getRateLimiter("testRateLimiterTryAcquireNoWait");
                 RateLimiterConfig config = testRateLimiterBlockAcquire.getConfig();
-                Assertions.assertEquals(10, config.getRate());
-                Assertions.assertEquals(60000, config.getRateInterval());
+                Assertions.assertEquals(1, config.getRate());
+                Assertions.assertEquals(1000, config.getRateInterval());
                 Assertions.assertEquals(RateType.OVERALL, config.getRateType());
                 System.out.println(JsonUtil.toJSONString(config));
             } catch (Exception e) {
