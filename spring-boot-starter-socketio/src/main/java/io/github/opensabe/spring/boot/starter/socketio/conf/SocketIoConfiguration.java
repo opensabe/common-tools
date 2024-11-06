@@ -19,16 +19,16 @@ import io.netty.channel.epoll.Epoll;
 import lombok.extern.log4j.Log4j2;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.ReflectionUtils;
 
@@ -60,7 +60,7 @@ public class SocketIoConfiguration {
         return new ListenerAdder(server, scanner);
     }
 
-    public static class ListenerAdder implements InitializingBean, Ordered {
+    public static class ListenerAdder implements ApplicationListener<ApplicationStartedEvent> {
         private final OrderedSpringAnnotationScanner scanner;
         private final SocketIOServer server;
         public ListenerAdder(SocketIOServer server,OrderedSpringAnnotationScanner scanner) {
@@ -69,19 +69,14 @@ public class SocketIoConfiguration {
         }
 
         @Override
-        public void afterPropertiesSet() throws Exception {
+        public void onApplicationEvent(ApplicationStartedEvent event) {
             List<Object> list = new ArrayList<>(scanner.listeners);
             //排序
             AnnotationAwareOrderComparator.sort(list);
             list.forEach(l -> {
-                log.info("{} bean listeners added", l.getClass());
                 server.addListeners(l, l.getClass());
+                log.info("{} bean listeners added", l.getClass());
             });
-        }
-
-        @Override
-        public int getOrder() {
-            return Ordered.LOWEST_PRECEDENCE;
         }
     }
 
