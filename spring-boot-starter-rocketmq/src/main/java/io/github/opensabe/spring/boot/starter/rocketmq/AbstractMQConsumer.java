@@ -1,8 +1,8 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageConsume;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
@@ -57,7 +57,7 @@ public abstract class AbstractMQConsumer implements RocketMQListener<String>, Ap
         //        BaseMQMessage<T> tBaseMQMessage = JSON.parseObject(s, new TypeReference<>() {
         //            });
         // compressed messages will have `compressed.` prefix
-        BaseMQMessage tBaseMQMessage = MQMessageUtil.decode(JSON.parseObject(s, BaseMQMessage.class));
+        BaseMQMessage tBaseMQMessage = MQMessageUtil.decode(JsonUtil.parseObject(s, BaseMQMessage.class));
         Observation observation = unifiedObservationFactory.createEmptyObservation();
         TraceContext traceContext = UnifiedObservationFactory.getTraceContext(observation);
 

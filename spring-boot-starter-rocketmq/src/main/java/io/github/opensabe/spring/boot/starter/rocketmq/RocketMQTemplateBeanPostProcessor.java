@@ -1,6 +1,5 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import jakarta.annotation.Nonnull;
 import lombok.extern.log4j.Log4j2;
@@ -26,8 +25,7 @@ public class RocketMQTemplateBeanPostProcessor implements BeanPostProcessor {
             producer.setAsyncSenderExecutor(asyncSenderExecutor);
             // 设置超时时间为5秒
             producer.setMqClientApiTimeout(5 * 1000);
-            // FIXME 对于producer的toJSONString时候需要注意，DefaultMQProducer与DefaultMQProducerImpl中循环引用了DefaultMQProducer，使用jackson进行操作时候，会报 【Infinite recursion (StackOverflowError)】
-            log.info("RocketMQTemplateBeanPostProcessor-postProcessAfterInitialization: {} producer: {}", beanName, JSON.toJSONString(producer));
+            log.info("RocketMQTemplateBeanPostProcessor-postProcessAfterInitialization: {} producer: {}", beanName, producer);
 
         }
         return bean;
