@@ -1,6 +1,5 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import io.github.opensabe.common.config.dal.db.dao.MqFailLogEntityMapper;
 import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.idgenerator.service.UniqueID;
@@ -29,19 +28,20 @@ public class MQProducerImpl implements MQProducer {
     private final UnifiedObservationFactory unifiedObservationFactory;
     private final RocketMQTemplate rocketMQTemplate;
 
-    private final MqFailLogEntityMapper mqFailLogEntityMapper;
+    private final MessagePersistent persistent;
     private final UniqueID uniqueID;
 
     private final GlobalSecretManager globalSecretManager;
 
-    public MQProducerImpl(String srcName, UnifiedObservationFactory unifiedObservationFactory, RocketMQTemplate rocketMQTemplate, MqFailLogEntityMapper mqFailLogEntityMapper, UniqueID uniqueID, GlobalSecretManager globalSecretManager) {
+    public MQProducerImpl(String srcName, UnifiedObservationFactory unifiedObservationFactory, RocketMQTemplate rocketMQTemplate, MessagePersistent persistent, UniqueID uniqueID, GlobalSecretManager globalSecretManager) {
         this.srcName = srcName;
         this.unifiedObservationFactory = unifiedObservationFactory;
         this.rocketMQTemplate = rocketMQTemplate;
-        this.mqFailLogEntityMapper = mqFailLogEntityMapper;
+        this.persistent = persistent;
         this.uniqueID = uniqueID;
         this.globalSecretManager = globalSecretManager;
     }
+
 
     @Override
     public void send(String topic, Object o) {
@@ -351,7 +351,7 @@ public class MQProducerImpl implements MQProducer {
             mqFailLogEntity.setBody(baseMQMessageJson);
             mqFailLogEntity.setSendConfig(JsonUtil.toJSONString(mqSendConfig));
             mqFailLogEntity.setRetryNum(rocketMQTemplate.getProducer().getRetryTimesWhenSendFailed());
-            mqFailLogEntityMapper.insertSelective(mqFailLogEntity);
+            persistent.persistentMessage(mqFailLogEntity);
         }
     }
 }

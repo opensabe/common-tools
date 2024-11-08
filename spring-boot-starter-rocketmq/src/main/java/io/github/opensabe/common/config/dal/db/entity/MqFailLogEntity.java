@@ -1,7 +1,5 @@
 package io.github.opensabe.common.config.dal.db.entity;
 
-import java.util.Date;
-
 public class MqFailLogEntity {
     private String id;
 
@@ -17,52 +15,14 @@ public class MqFailLogEntity {
 
     private Integer sendStatus;
 
-    private Date createTime;
-
-    private Date updateTime;
-
     private String body;
-
-    public MqFailLogEntity(String id, String topic, String hashKey, String traceId, String sendConfig, Integer retryNum, Integer sendStatus, Date createTime, Date updateTime) {
-        this.id = id;
-        this.topic = topic;
-        this.hashKey = hashKey;
-        this.traceId = traceId;
-        this.sendConfig = sendConfig;
-        this.retryNum = retryNum;
-        this.sendStatus = sendStatus;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
-    }
-
-    public MqFailLogEntity(String id, String topic, String hashKey, String traceId, String sendConfig, Integer retryNum, Integer sendStatus, Date createTime, Date updateTime, String body) {
-        this.id = id;
-        this.topic = topic;
-        this.hashKey = hashKey;
-        this.traceId = traceId;
-        this.sendConfig = sendConfig;
-        this.retryNum = retryNum;
-        this.sendStatus = sendStatus;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
-        this.body = body;
-    }
-
-    @Deprecated
-    public MqFailLogEntity(String test) {
-        this.body = test;
-    }
-
-    public MqFailLogEntity() {
-        super();
-    }
 
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
-        this.id = id == null ? null : id.trim();
+        this.id = id;
     }
 
     public String getTopic() {
@@ -70,7 +30,7 @@ public class MqFailLogEntity {
     }
 
     public void setTopic(String topic) {
-        this.topic = topic == null ? null : topic.trim();
+        this.topic = topic;
     }
 
     public String getHashKey() {
@@ -78,7 +38,7 @@ public class MqFailLogEntity {
     }
 
     public void setHashKey(String hashKey) {
-        this.hashKey = hashKey == null ? null : hashKey.trim();
+        this.hashKey = hashKey;
     }
 
     public String getTraceId() {
@@ -86,7 +46,7 @@ public class MqFailLogEntity {
     }
 
     public void setTraceId(String traceId) {
-        this.traceId = traceId == null ? null : traceId.trim();
+        this.traceId = traceId;
     }
 
     public String getSendConfig() {
@@ -94,7 +54,7 @@ public class MqFailLogEntity {
     }
 
     public void setSendConfig(String sendConfig) {
-        this.sendConfig = sendConfig == null ? null : sendConfig.trim();
+        this.sendConfig = sendConfig;
     }
 
     public Integer getRetryNum() {
@@ -113,27 +73,11 @@ public class MqFailLogEntity {
         this.sendStatus = sendStatus;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
     public String getBody() {
         return body;
     }
 
     public void setBody(String body) {
-        this.body = body == null ? null : body.trim();
+        this.body = body;
     }
 }
