@@ -68,35 +68,37 @@ public class MessageSaveTest {
     @Autowired
     private io.github.opensabe.spring.boot.starter.rocketmq.MQProducer producer;
 
+    private static final String COUNT_SQL = "select count(1) from t_common_mq_fail_log";
+    private static final String QUERY_SQL = "select * from t_common_mq_fail_log";
+
     @Test
-    void test1 () throws SQLException {
-
-        ResultSet resultSet1 = sqlSessionFactory.openSession().getConnection()
-                .prepareCall("select count(1) from t_common_mq_fail_log")
-                .executeQuery();
-
-        Assertions.assertTrue(resultSet1.next());
-
-        Assertions.assertEquals(0, resultSet1.getInt(1));
-
+    void test1() throws SQLException {
+        try (
+            var session = sqlSessionFactory.openSession();
+            var conn = session.getConnection();
+            var stmt = conn.prepareCall(COUNT_SQL);
+            var rs = stmt.executeQuery()
+        ) {
+            Assertions.assertTrue(rs.next());
+            Assertions.assertEquals(0, rs.getInt(1));
+        }
 
         String topic = "testTopic";
-
-
         String message = "xxxx";
+        producer.send(topic, message);
 
-        producer.send(topic,message);
-
-
-        ResultSet resultSet = sqlSessionFactory.openSession().getConnection()
-                .prepareCall("select * from t_common_mq_fail_log")
-                .executeQuery();
-
-        Assertions.assertTrue(resultSet.next());
-        MqFailLogEntity entity = fromResultSet(resultSet);
-        log.info(JsonUtil.toJSONString(entity));
-        Assertions.assertNotNull(entity);
-        Assertions.assertEquals(topic, entity.getTopic());
+        try (
+            var session = sqlSessionFactory.openSession();
+            var conn = session.getConnection();
+            var stmt = conn.prepareCall(QUERY_SQL);
+            var rs = stmt.executeQuery()
+        ) {
+            Assertions.assertTrue(rs.next());
+            MqFailLogEntity entity = fromResultSet(rs);
+            log.info(JsonUtil.toJSONString(entity));
+            Assertions.assertNotNull(entity);
+            Assertions.assertEquals(topic, entity.getTopic());
+        }
     }
 
     private MqFailLogEntity fromResultSet (ResultSet resultSet) throws SQLException {
