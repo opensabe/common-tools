@@ -1,6 +1,5 @@
 package io.github.opensabe.common.socketio;
 
-import io.github.opensabe.common.mybatis.autoconf.MyBatisAutoConfiguration;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import io.github.opensabe.spring.boot.starter.rocketmq.autoconf.RocketMQAutoConfiguration;
 import lombok.extern.log4j.Log4j2;
@@ -19,8 +18,8 @@ import org.springframework.test.context.DynamicPropertySource;
 @SpringBootTest(classes = SocketIOStarter.App.class)
 @ExtendWith(SingleRedisIntegrationTest.class)
 public class SocketIOStarter {
-    @SpringBootApplication(scanBasePackages = {"io.github.opensabe.spring.boot.starter.socketio"},
-            exclude = {RocketMQAutoConfiguration.class, MyBatisAutoConfiguration.class})
+    @SpringBootApplication(scanBasePackages = "io.github.opensabe.spring.boot.starter.socketio",
+            exclude = RocketMQAutoConfiguration.class)
     public static class App {
         public static void main(String[] args) {
             SpringApplication.run(App.class, args);

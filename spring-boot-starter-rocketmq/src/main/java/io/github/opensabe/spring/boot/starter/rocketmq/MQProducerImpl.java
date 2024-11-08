@@ -351,7 +351,7 @@ public class MQProducerImpl implements MQProducer {
             mqFailLogEntity.setBody(baseMQMessageJson);
             mqFailLogEntity.setSendConfig(JsonUtil.toJSONString(mqSendConfig));
             mqFailLogEntity.setRetryNum(rocketMQTemplate.getProducer().getRetryTimesWhenSendFailed());
-            persistent.persistent(mqFailLogEntity);
+            persistent.persistentMessage(mqFailLogEntity);
         }
     }
 }

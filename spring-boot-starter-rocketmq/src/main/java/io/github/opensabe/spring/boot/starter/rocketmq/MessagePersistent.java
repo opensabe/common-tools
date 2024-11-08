@@ -1,6 +1,7 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
 import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
+import jakarta.annotation.Nonnull;
 
 /**
  * 消息发送失败以后，保存到数据库，taskCenter重试。
@@ -10,5 +11,5 @@ import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
  */
 public interface MessagePersistent {
 
-    void persistent (MqFailLogEntity entity);
+    void persistentMessage (@Nonnull MqFailLogEntity entity);
 }
