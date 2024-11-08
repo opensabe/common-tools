@@ -1,41 +1,113 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import io.github.opensabe.common.config.dal.db.dao.MqFailLogEntityMapper;
-import io.github.opensabe.common.config.dal.db.dao.MqFailLogEntitySqlProvider;
 import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
+import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
+import io.github.opensabe.common.testcontainers.integration.SingleWriteMySQLIntegrationTest;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQTest;
+import lombok.extern.log4j.Log4j2;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
+import org.apache.rocketmq.client.producer.TransactionMQProducer;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.messaging.Message;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class MessageSaveTest extends BaseRocketMQTest {
+@Log4j2
+@AutoConfigureObservability
+@JfrEventTest
+@ExtendWith({
+        SpringExtension.class,
+        SingleRedisIntegrationTest.class,
+        SingleWriteMySQLIntegrationTest.class
+})
+@SpringBootTest(classes = BaseRocketMQTest.App.class)
+@Import(MessageSaveTest.Config.class)
+public class MessageSaveTest {
 
+    @DynamicPropertySource
+    public static void setProperties(DynamicPropertyRegistry registry) {
+        SingleRedisIntegrationTest.setProperties(registry);
+        SingleWriteMySQLIntegrationTest.setProperties(registry);
+    }
 
     @Autowired
-    private MqFailLogEntityMapper mapper;
+    private SqlSessionFactory sqlSessionFactory;
 
+    public static class Config {
+
+        @Bean
+        public RocketMQTemplate rocketMQTemplate () {
+            var r =  new RocketMQTemplate() {
+
+                @Override
+                public SendResult syncSend(String destination, Message<?> message) {
+                    return new SendResult(SendStatus.FLUSH_DISK_TIMEOUT, "id3", "id1",null, 100);
+                }
+            };
+            r.setProducer(new TransactionMQProducer("rocketmq-test"));
+            return r;
+        }
+    }
+
+    @Autowired
+    private io.github.opensabe.spring.boot.starter.rocketmq.MQProducer producer;
 
     @Test
-    void test1 () {
-        MqFailLogEntitySqlProvider provider = new MqFailLogEntitySqlProvider();
+    void test1 () throws SQLException {
 
+        ResultSet resultSet1 = sqlSessionFactory.openSession().getConnection()
+                .prepareCall("select count(1) from t_common_mq_fail_log")
+                .executeQuery();
+
+        Assertions.assertTrue(resultSet1.next());
+
+        Assertions.assertEquals(0, resultSet1.getInt(1));
+
+
+        String topic = "testTopic";
+
+
+        String message = "xxxx";
+
+        producer.send(topic,message);
+
+
+        ResultSet resultSet = sqlSessionFactory.openSession().getConnection()
+                .prepareCall("select * from t_common_mq_fail_log")
+                .executeQuery();
+
+        Assertions.assertTrue(resultSet.next());
+        MqFailLogEntity entity = fromResultSet(resultSet);
+        log.info(JsonUtil.toJSONString(entity));
+        Assertions.assertNotNull(entity);
+        Assertions.assertEquals(topic, entity.getTopic());
+    }
+
+    private MqFailLogEntity fromResultSet (ResultSet resultSet) throws SQLException {
         MqFailLogEntity entity = new MqFailLogEntity();
-
-        entity.setId("1");
-        entity.setTopic("22");
-        entity.setBody("xx");
-        entity.setHashKey("ss");
-        entity.setRetryNum(1);
-        entity.setSendConfig("xx");
-        entity.setSendStatus(1);
-        entity.setTraceId("xxx");
-
-        String sql = provider.insertSelective(entity);
-        System.out.printf(sql);
-
-
-        mapper.insertSelective(entity);
-
+        entity.setId(resultSet.getString("id"));
+        entity.setTopic(resultSet.getString("topic"));
+        entity.setBody(resultSet.getString("body"));
+        entity.setSendStatus(resultSet.getInt("send_status"));
+        entity.setRetryNum(resultSet.getInt("retry_num"));
+        entity.setTraceId(resultSet.getString("trace_id"));
+        entity.setSendConfig(resultSet.getString("send_config"));
+        return entity;
     }
 }

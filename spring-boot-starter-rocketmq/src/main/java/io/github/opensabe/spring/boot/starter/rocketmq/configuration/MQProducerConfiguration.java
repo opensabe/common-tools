@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class MQProducerConfiguration {
     }
 
     @Bean
-    @Primary
+    @ConditionalOnMissingBean
     public MQProducer getMQProducer(
             @Value("${spring.application.name:unknown}")
                     String srcName,
@@ -41,7 +40,7 @@ public class MQProducerConfiguration {
     }
 
     @Bean
-    @Primary
+    @ConditionalOnMissingBean
     public MQLocalTransactionListener getMQLocalTransactionListener(List<UniqueRocketMQLocalTransactionListener> uniqueRocketMQLocalTransactionListeners) {
         return new MQLocalTransactionListener(uniqueRocketMQLocalTransactionListeners);
     }
