@@ -7,8 +7,13 @@
     </Properties>
 
     <appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <ThresholdFilter level="debug" onMatch="ACCEPT"
+                             onMismatch="DENY" />
+            <PatternLayout pattern="${alarm_log_pattern}" alwaysWriteExceptions="true" />
+        </Console>
         <RollingFile name="file_alarm" append="true" immediateFlush="true"
-                     filePattern="${LOG_ROOT}/app.alarm.log-%d{yyyy.MM.dd.HH}-${sys:LOCAL_IP}">
+                     filePattern="${LOG_ROOT}/app.alarm.log-%d{yyyy.MM.dd.HH}-${sys:LOCAL_IP:-127.0.0.1}">
             <PatternLayout pattern="${alarm_log_pattern}" alwaysWriteExceptions="true"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
@@ -20,7 +25,7 @@
     <loggers>
         <AsyncLogger name="io.github.opensabe.common.utils.AlarmUtil.AlarmLog" level="info"
                      additivity="false" includeLocation="false">
-            <appender-ref ref="file_alarm"/>
+            <appender-ref ref="${env:log_root:-file_alarm}"/>
         </AsyncLogger>
     </loggers>
 </configuration>
