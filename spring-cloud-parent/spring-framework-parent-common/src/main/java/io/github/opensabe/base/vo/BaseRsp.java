@@ -17,8 +17,12 @@ public class BaseRsp<T> {
 
     @Schema(example = "10000")
     private int bizCode;                // response code RspCodeEnum.val
+
+    //考虑这里是否要加JsonIgnore
     private String innerMsg;            // response msg in systematic level
+
     @Schema(example = "success")
     private String message;             // response user msg
+
     private T data;                     // response content data
 }

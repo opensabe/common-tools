@@ -29,12 +29,12 @@ public class IException extends RuntimeException{
         this(message.code(), message.message(), innerMessage, data);
     }
     public IException(ErrorMessage message, String innerMessage) {
-        this(message, innerMessage, null);
+        this(message, innerMessage, message.data());
     }
     public IException(ErrorMessage message, Object data) {
         this(message, null, data);
     }
     public IException(ErrorMessage message) {
-        this(message, null, null);
+        this(message, null, message.data());
     }
 }

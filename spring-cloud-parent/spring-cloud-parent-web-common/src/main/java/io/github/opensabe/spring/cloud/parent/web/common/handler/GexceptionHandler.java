@@ -35,50 +35,51 @@ public class GexceptionHandler extends ErrorHandler implements PriorityOrdered {
     }
 
     @ExceptionHandler(FrontendException.class)
-    public BaseRsp onFrontendException(FrontendException e, HttpServletRequest request) {
+    public BaseRsp<?> onFrontendException(FrontendException e, HttpServletRequest request) {
         log.info("{} error inner message {} return message {}", request.getRequestURI(), e.getInnerMessage(), e.getMessage());
         return onFrontendException(e);
     }
 
     @Override
-    public BaseRsp onFrontendException(FrontendException e) {
+    public BaseRsp<?> onFrontendException(FrontendException e) {
         return BaseRsp.builder()
                 .bizCode(e.getCode())
                 .message(i18nMessageResolver.resolveMessageTemplate(e.getMessage(), e.getArgs()))
-                .innerMsg(e.getInnerMessage())
+//                .innerMsg(e.getInnerMessage())
                 .data(e.getData())
                 .build();
     }
 
     @Override
-    public BaseRsp onBackendException(BackendException e) {
+    public BaseRsp<?> onBackendException(BackendException e) {
         return BaseRsp.builder()
                 .bizCode(e.getCode())
                 .message(e.getMessage())
+                .innerMsg(e.getInnerMessage())
                 .data(e.getData())
                 .build();
     }
 
     @ExceptionHandler(BackendException.class)
-    public BaseRsp onBackendException(BackendException e, HttpServletRequest request) {
+    public BaseRsp<?> onBackendException(BackendException e, HttpServletRequest request) {
         log.info("{} error {}", request.getRequestURI(), e.getMessage());
         return onBackendException(e);
     }
 
     @Override
     @ExceptionHandler(ConstraintViolationException.class)
-    public BaseRsp onConstraintViolationException(ConstraintViolationException e) {
+    public BaseRsp<?> onConstraintViolationException(ConstraintViolationException e) {
         return constraintViolationException(e);
     }
 
     @ExceptionHandler(BindException.class)
-    public BaseRsp onBindException(BindException e) {
+    public BaseRsp<?> onBindException(BindException e) {
         var message = message(e.getBindingResult());
         return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(message).build();
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
-    public BaseRsp webExchangeBindException (WebExchangeBindException e) {
+    public BaseRsp<?> webExchangeBindException (WebExchangeBindException e) {
         var message = message(e.getBindingResult());
         return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(message).build();
     }
@@ -86,16 +87,16 @@ public class GexceptionHandler extends ErrorHandler implements PriorityOrdered {
     /**
      * 参数校验
      * @param e
-     * @return
+     * @return BaseRsp
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public BaseRsp validateException (MethodArgumentNotValidException e) {
+    public BaseRsp<?> validateException (MethodArgumentNotValidException e) {
         var message = message(e.getBindingResult());
         return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(message).build();
     }
 
     @ExceptionHandler(ServletRequestBindingException.class)
-    public BaseRsp servletRequestBindingException(ServletRequestBindingException e) {
+    public BaseRsp<?> servletRequestBindingException(ServletRequestBindingException e) {
         return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(e.getMessage()).build();
     }
 

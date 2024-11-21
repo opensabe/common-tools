@@ -34,15 +34,15 @@ public class FrontendException extends IException {
     }
 
     public FrontendException(ErrorMessage message, String innerMessage, Object ... args) {
-        this(message, innerMessage, null, args);
+        this(message, innerMessage, message.data(), args);
     }
 
     public FrontendException(ErrorMessage message, Object data, Object ... args) {
-        this(message, null, args);
+        this(message, null, data, args);
     }
 
     public FrontendException(ErrorMessage message, Object ... args) {
-        this(message, null, args);
+        this(message, message.data(), args);
     }
 
 }
