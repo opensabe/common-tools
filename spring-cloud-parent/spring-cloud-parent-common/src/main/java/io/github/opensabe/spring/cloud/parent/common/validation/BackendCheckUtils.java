@@ -196,13 +196,13 @@ public final class BackendCheckUtils {
     @Contract("null, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull (String src, T message, Object data) {
         if (StringUtils.isBlank(src)) {
-            throw new BackendException(message);
+            throw new BackendException(message, data);
         }
     }
     @Contract("null, _, _ -> fail")
     public static void notNull (String src, String message, Object data) {
         if (StringUtils.isBlank(src)) {
-            throw new BackendException(BizCodeEnum.INVALID.getVal(), message);
+            throw new BackendException(BizCodeEnum.INVALID.getVal(), message, data);
         }
     }
 }
