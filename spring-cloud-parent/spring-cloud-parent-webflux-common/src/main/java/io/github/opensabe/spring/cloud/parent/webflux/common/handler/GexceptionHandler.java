@@ -48,7 +48,7 @@ public class GexceptionHandler extends ErrorHandler implements PriorityOrdered {
         return BaseRsp.builder()
                 .data(e.getData())
                 .message(i18nMessageResolver.resolveMessageTemplate(e.getMessage(), e.getArgs()))
-                .innerMsg(e.getInnerMessage())
+//                .innerMsg(e.getInnerMessage())
                 .bizCode(e.getCode())
                 .build();
     }

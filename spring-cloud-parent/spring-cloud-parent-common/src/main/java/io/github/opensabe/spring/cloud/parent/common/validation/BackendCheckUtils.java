@@ -23,27 +23,60 @@ public final class BackendCheckUtils {
      * 判断表达式必须为true
      * @param expression    要判断的表达式
      * @param message       如果为false,抛出的异常信息
+     * @param data          返回给前端的结果
      * @throws BackendException 如果表达式为false
      */
+    @Contract("false, _, _ -> fail")
+    public static <T extends ErrorMessage> void isTrue (boolean expression, T message, Object data) {
+        if (!expression) {
+            throw new BackendException(message, data);
+        }
+    }
     @Contract("false, _ -> fail")
     public static <T extends ErrorMessage> void isTrue (boolean expression, T message) {
         if (!expression) {
             throw new BackendException(message);
         }
     }
-
-    /**
-     * 判断表达式必须为true
-     * @param expression    要判断的表达式
-     * @param message       如果为false,抛出的异常信息
-     * @throws BackendException 如果表达式为false
-     */
     @Contract("false, _ -> fail")
     public static void isTrue (boolean expression, String message) {
         if (!expression) {
             throw new BackendException(BizCodeEnum.INVALID.getVal(), message);
         }
     }
+    @Contract("false, _, _ -> fail")
+    public static void isTrue (boolean expression, String message, Object data) {
+        if (!expression) {
+            throw new BackendException(BizCodeEnum.INVALID.getVal(), message, data);
+        }
+    }
+    /**
+     * 判断表达式必须为false
+     * @param expression    要判断的表达式
+     * @param message       如果为false,抛出的异常信息
+     * @param data          返回给前端的结果
+     * @throws BackendException 如果表达式为true
+     */
+    @Contract("true, _, _ -> fail")
+    public static <T extends ErrorMessage> void isFalse (boolean expression, T message, Object data) {
+        if (expression) {
+            throw new BackendException(message, data);
+        }
+    }
+    @Contract("true, _ -> fail")
+    public static <T extends ErrorMessage> void isFalse (boolean expression, T message) {
+        if (expression) {
+            throw new BackendException(message);
+        }
+    }
+    @Contract("true, _, _ -> fail")
+    public static void isFalse (boolean expression, String message, Object data) {
+        if (expression) {
+            throw new BackendException(BizCodeEnum.INVALID.getVal(), message, data);
+        }
+    }
+
+
 
     /**
      * 判断对象不能为空
@@ -58,18 +91,22 @@ public final class BackendCheckUtils {
             throw new BackendException(message);
         }
     }
-
-    /**
-     * 判断对象不能为空
-     * @see Objects#isNull(Object) 
-     * @param src           要判断的对象
-     * @param message       如果对象为空,抛出的异常信息
-     * @throws BackendException 如果对象为空
-     */
     @Contract("null, _ -> fail")
     public static void notNull (Object src, String message) {
         if (Objects.isNull(src)) {
             throw new BackendException(BizCodeEnum.INVALID.getVal(), message);
+        }
+    }
+    @Contract("null, _, _ -> fail")
+    public static void notNull (Object src, ErrorMessage message, Object data) {
+        if (Objects.isNull(src)) {
+            throw new BackendException(message, data);
+        }
+    }
+    @Contract("null, _, _ -> fail")
+    public static void notNull (Object src, String message, Object data) {
+        if (Objects.isNull(src)) {
+            throw new BackendException(BizCodeEnum.INVALID.getVal(), message, data);
         }
     }
 
@@ -86,18 +123,22 @@ public final class BackendCheckUtils {
             throw new BackendException(message);
         }
     }
-
-    /**
-     * 判断对象不能为空
-     * @see CollectionUtils#isEmpty(Collection) 
-     * @param collection           要判断的对象
-     * @param message       如果对象为空,抛出的异常信息
-     * @throws BackendException 如果对象为空
-     */
     @Contract("null, _ -> fail")
     public static void notNull (Collection<?> collection, String message) {
         if (CollectionUtils.isEmpty(collection)) {
             throw new BackendException(BizCodeEnum.INVALID.getVal(), message);
+        }
+    }
+    @Contract("null, _, _ -> fail")
+    public static <T extends ErrorMessage> void notNull (Collection<?> collection, T message, Object data) {
+        if (CollectionUtils.isEmpty(collection)) {
+            throw new BackendException(message, data);
+        }
+    }
+    @Contract("null, _, _ -> fail")
+    public static void notNull (Collection<?> collection, String message, Object data) {
+        if (CollectionUtils.isEmpty(collection)) {
+            throw new BackendException(BizCodeEnum.INVALID.getVal(), message, data);
         }
     }
 
@@ -114,18 +155,22 @@ public final class BackendCheckUtils {
             throw new BackendException(message);
         }
     }
-
-    /**
-     * 判断map不能为空
-     * @see MapUtils#isEmpty(Map)
-     * @param map           要判断的map
-     * @param message       如果map为空,抛出的异常信息
-     * @throws BackendException 如果map为空
-     */
     @Contract("null, _ -> fail")
     public static void notNull (Map<?, ?> map, String message) {
         if (MapUtils.isEmpty(map)) {
             throw new BackendException(BizCodeEnum.INVALID.getVal(), message);
+        }
+    }
+    @Contract("null, _, _ -> fail")
+    public static <T extends ErrorMessage> void notNull (Map<?, ?> map, T message, Object data) {
+        if (MapUtils.isEmpty(map)) {
+            throw new BackendException(message, data);
+        }
+    }
+    @Contract("null, _, _ -> fail")
+    public static void notNull (Map<?, ?> map, String message, Object data) {
+        if (MapUtils.isEmpty(map)) {
+            throw new BackendException(BizCodeEnum.INVALID.getVal(), message, data);
         }
     }
 
@@ -142,18 +187,22 @@ public final class BackendCheckUtils {
             throw new BackendException(message);
         }
     }
-
-    /**
-     * 判断字符串不能为空
-     * @see StringUtils#isBlank(CharSequence)
-     * @param src           要判断的字符串
-     * @param message       如果字符串为空,抛出的异常信息
-     * @throws BackendException 如果字符串为空
-     */
     @Contract("null, _ -> fail")
     public static void notNull (String src, String message) {
         if (StringUtils.isBlank(src)) {
             throw new BackendException(BizCodeEnum.INVALID.getVal(), message);
+        }
+    }
+    @Contract("null, _, _ -> fail")
+    public static <T extends ErrorMessage> void notNull (String src, T message, Object data) {
+        if (StringUtils.isBlank(src)) {
+            throw new BackendException(message, data);
+        }
+    }
+    @Contract("null, _, _ -> fail")
+    public static void notNull (String src, String message, Object data) {
+        if (StringUtils.isBlank(src)) {
+            throw new BackendException(BizCodeEnum.INVALID.getVal(), message, data);
         }
     }
 }
