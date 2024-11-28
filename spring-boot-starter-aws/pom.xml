@@ -20,6 +20,7 @@
     <modules>
         <module>spring-boot-starter-dynamodb</module>
         <module>spring-boot-starter-s3</module>
+        <module>spring-boot-starter-location</module>
     </modules>
 
     <dependencies>

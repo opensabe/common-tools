@@ -13,7 +13,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @Log4j2
 @ExtendWith({SpringExtension.class})
 @SpringBootTest(properties = {
-        "eureka.client.enabled=false"
+        "eureka.client.enabled=false",
+        "aws.location.enabled=false"
 }, classes = GeoPlacesBaseTest.App.class)
 @AutoConfigureObservability
 public abstract class GeoPlacesBaseTest {
