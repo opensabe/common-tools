@@ -1,14 +1,16 @@
 package io.github.opensabe.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.SimpleType;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
-import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.jackson.ModelResolver;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.PrimitiveType;
 import io.swagger.v3.oas.models.media.Schema;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Type;
 import java.util.Iterator;
@@ -20,9 +22,40 @@ import java.util.Set;
  */
 public class SwaggerDatetimeResolveConfiguration {
 
-    public SwaggerDatetimeResolveConfiguration() {
-        ModelConverters.getInstance().addConverter(new DateTimeModelConverter(Json.mapper()));
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DateTimeModelConverter dateTimeModelConverter () {
+        return new DateTimeModelConverter(Json.mapper());
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public VoidModelResolver voidModelResolver () {
+        return new VoidModelResolver();
+    }
+
+
+    public static class VoidModelResolver implements ModelConverter {
+
+        private final SimpleType voidType;
+
+        public VoidModelResolver() {
+            this.voidType = SimpleType.constructUnsafe(Void.class);
+        }
+
+        @Override
+        public Schema resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
+            if (voidType.equals(type.getType())) {
+                return null;
+            }
+            if (chain.hasNext()) {
+                return chain.next().resolve(type, context, chain);
+            }
+            return null;
+        }
+    }
+
 
     public static class DateTimeModelConverter extends ModelResolver {
 
