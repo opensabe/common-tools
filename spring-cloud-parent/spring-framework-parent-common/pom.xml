@@ -86,7 +86,7 @@
         <!--调用路径记录-->
         <dependency>
             <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
         <!--跨线程ThreadLocal-->
         <dependency>
