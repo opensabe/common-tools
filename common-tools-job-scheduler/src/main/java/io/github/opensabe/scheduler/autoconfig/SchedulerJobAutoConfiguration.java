@@ -3,6 +3,8 @@ package io.github.opensabe.scheduler.autoconfig;
 import io.github.opensabe.scheduler.autoconfig.health.SchedulerServerHealthIndicator;
 import io.github.opensabe.scheduler.conf.Commander;
 import io.github.opensabe.scheduler.conf.SchedulerProperties;
+import io.github.opensabe.scheduler.health.HealthCheckJob;
+import io.github.opensabe.scheduler.health.SimpleJobHealthService;
 import io.github.opensabe.scheduler.jfr.JobExecuteObservationToJFRGenerator;
 import io.github.opensabe.scheduler.listener.JobListener;
 import io.github.opensabe.scheduler.listener.TaskCanRunListener;
@@ -89,5 +91,15 @@ public class SchedulerJobAutoConfiguration {
     @Bean
     public JobExecuteObservationToJFRGenerator jobExecuteObservationToJFRGenerator() {
         return new JobExecuteObservationToJFRGenerator();
+    }
+
+    @Bean
+    public SimpleJobHealthService simpleJobHealthService(StringRedisTemplate stringRedisTemplate, SchedulerProperties schedulerProperties) {
+        return new SimpleJobHealthService(stringRedisTemplate, schedulerProperties);
+    }
+
+    @Bean
+    public HealthCheckJob healthCheckJob(SimpleJobHealthService simpleJobHealthService) {
+        return new HealthCheckJob(simpleJobHealthService);
     }
 }
