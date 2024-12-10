@@ -5,17 +5,18 @@ import io.lettuce.core.event.DefaultEventPublisherOptions;
 import io.lettuce.core.metrics.DefaultCommandLatencyCollector;
 import io.lettuce.core.metrics.DefaultCommandLatencyCollectorOptions;
 import io.lettuce.core.resource.DefaultClientResources;
-import io.lettuce.core.tracing.Tracing;
 import io.micrometer.observation.ObservationRegistry;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.lettuce.observability.MicrometerTracingAdapter;
 
 import java.time.Duration;
 
 @Configuration(proxyBeanMethods = false)
 public class LettuceConfiguration {
+    private static final String DEFAULT_APPLICATION_NAME = "application";
+
     /**
      * 每 10s 采集一次命令统计
      *
@@ -23,8 +24,9 @@ public class LettuceConfiguration {
      */
     @Bean
     public DefaultClientResources getDefaultClientResources(
-            ObservationRegistry observationRegistry, @Value("${spring.application.name}") String applicationName
+            ObservationRegistry observationRegistry, Environment environment
     ) {
+        String applicationName = environment.getProperty("spring.application.name", DEFAULT_APPLICATION_NAME);
         DefaultClientResources build = DefaultClientResources.builder()
                 .tracing(new MicrometerTracingAdapter(observationRegistry, applicationName))
                 .commandLatencyRecorder(
