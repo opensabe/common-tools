@@ -159,7 +159,7 @@ public class MQProducerImpl implements MQProducer {
             SendCallback sendCallback, SendResult sendResult
     ) {
         if (sendResult != null) {
-            messageProduceContext.setSendResult(sendResult.toString());
+            messageProduceContext.setSendResult(sendResult.getSendStatus().toString());
             if (Objects.equals(sendResult.getSendStatus(), SendStatus.SEND_OK)) {
                 log.info("MQProducerImpl-handleSendResult: success, result: {}", sendResult);
                 if (sendCallback != null) {
