@@ -13,9 +13,7 @@ public class ElasticSearchClientConvention implements ObservationConvention<Elas
 
     @Override
     public KeyValues getLowCardinalityKeyValues(ElasticSearchClientObservationContext context) {
-        return KeyValues.of(
-                ElasticSearchClientObservationDocumentation.CLIENT_REQUEST_TAG.URI.withValue(context.getUri())
-        );
+        return KeyValues.empty();
     }
 
     @Override
