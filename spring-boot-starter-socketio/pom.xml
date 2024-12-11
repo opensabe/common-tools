@@ -7,20 +7,20 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.5.23</version>
+        <version>1.0.5.24</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-boot-starter-socketio</artifactId>
-    <version>1.0.5.23</version>
+    <version>1.0.5.24</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <common-utils.version>1.0.5.23</common-utils.version>
-        <spring-boot-starter-redisson.version>1.0.5.23</spring-boot-starter-redisson.version>
-        <spring-boot-starter-rocketmq.version>1.0.5.23</spring-boot-starter-rocketmq.version>
+        <common-utils.version>1.0.5.24</common-utils.version>
+        <spring-boot-starter-redisson.version>1.0.5.24</spring-boot-starter-redisson.version>
+        <spring-boot-starter-rocketmq.version>1.0.5.24</spring-boot-starter-rocketmq.version>
         <netty-socketio.version>2.0.4</netty-socketio.version>
     </properties>
 
