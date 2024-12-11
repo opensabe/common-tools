@@ -8,6 +8,7 @@
         <artifactId>spring-cloud-parent</artifactId>
         <version>1.0.4.19</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
+
     </parent>
     <artifactId>mapstruct-bom</artifactId>
     <packaging>pom</packaging>
