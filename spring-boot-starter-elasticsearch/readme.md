@@ -46,6 +46,4 @@ client参考文档：
 
 
 ### LowCardinalityKeyValues
-| 属性  | 类型     | 备注     |
-|-----|--------|--------|
-| elastic.search.client.request.uri | string | 请求 uri |
+无，都不适合
