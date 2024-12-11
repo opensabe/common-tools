@@ -175,3 +175,44 @@ public static class TestConsumer extends AbstractMQConsumer {
 ## 线上创建新的 topic
 
 我们配置 MQ 是自动创建 topic 的，但是**自动创建的，并不会分布在每个 broker 上**，需要我们手动修改下
+
+## Observation
+
+针对所有消息的生产和消费，增加了 Observation
+
+### Produce
+
+#### HighCardinalityKeyValues
+
+| 属性                          | 类型     | 备注               |
+|-----------------------------|--------|------------------|
+| message.produce.topic       | string | 主题               |
+| message.produce.msg.length  | long   | 消息体封装对象 data 的长度 |
+| message.produce.send.result         | string | 发送结果            |
+| message.produce.send.throwable      | string | 异常信息            |
+
+#### LowCardinalityKeyValues
+
+
+| 属性                          | 类型     | 备注               |
+|-----------------------------|--------|------------------|
+| message.produce.topic       | string | 主题               |
+| message.produce.send.result         | string | 发送结果            |
+
+## Consume
+
+### HighCardinalityKeyValues
+
+| 属性                          | 类型     | 备注             |
+|-----------------------------|--------|----------------|
+| message.consume.origin.trace.id       | string | 发消息的原始 traceId |
+| message.consume.topic  | long   | 主题             |
+| message.consume.successful         | Boolean | 是否消费成功         |
+| message.consume.throwable      | string | 异常信息           |
+
+### LowCardinalityKeyValues
+
+| 属性                          | 类型      | 备注             |
+|-----------------------------|---------|----------------|
+| message.consume.topic  | long    | 主题             |
+| message.consume.successful         | Boolean | 是否消费成功         |

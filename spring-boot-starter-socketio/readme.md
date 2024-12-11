@@ -239,9 +239,9 @@ log.error("-=================== exception handler test01");
 ```
 ##### HighCardinalityKeyValues
 
-| 属性  |类型| 备注              |
-| ------------ | ------------ |-----------------|
-| 832e8469-9d70-4258-9b6c-4a1b983572a2   | string  | 连接建立后的sessionId |
+| 属性        |类型| 备注              |
+|-----------| ------------ |-----------------|
+| sessionId | string  | 连接建立后的sessionId |
                                   |
 
 
