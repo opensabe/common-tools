@@ -7,21 +7,24 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 @Category({"RocketMQ"})
 @Label("Message Producer")
-@StackTrace(value = true)
+@StackTrace(value = false)
 public class MessageProduce extends Event {
-    @Getter
-    private final String traceId;
-    @Getter
-    private final String spanId;
-    @Getter
     private final String topic;
-    @Setter
+    private long msgLength;
+    private String traceId;
+    private String spanId;
     private String sendResult;
-    @Setter
     private Throwable throwable;
 
+
+    public MessageProduce(String topic, long msgLength) {
+        this.topic = topic;
+        this.msgLength = msgLength;
+    }
 
     public MessageProduce(String traceId, String spanId, String topic) {
         this.traceId = traceId;

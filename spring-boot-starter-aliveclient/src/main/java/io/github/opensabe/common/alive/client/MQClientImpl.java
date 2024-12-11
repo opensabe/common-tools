@@ -10,6 +10,9 @@ import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageProduce;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageProduceContext;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageProduceObservationConvention;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.RocketMQObservationDocumentation;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import org.apache.logging.log4j.LogManager;
@@ -39,13 +42,31 @@ public class MQClientImpl implements Client {
     public int pushAsync(MessageVo messageVo, ClientCallback callback) {
         final Publish message = this.build(messageVo);
         BaseMQMessage baseMQMessage = wrapMessage(message);
-        this.producer.asyncSend(this.getTopic(messageVo), baseMQMessage, new SendCallback() {
+        String topic = this.getTopic(messageVo);
+        MessageProduceContext messageProduceContext = new MessageProduceContext(topic);
+        messageProduceContext.setMsgLength(baseMQMessage.getData().length());
+        Observation observation = RocketMQObservationDocumentation.PRODUCE.observation(
+                null, MessageProduceObservationConvention.DEFAULT,
+                () -> messageProduceContext, unifiedObservationFactory.getObservationRegistry()
+        ).start();
+        TraceContext traceContext = UnifiedObservationFactory.getTraceContext(observation);
+        String traceId = traceContext.traceId();
+        String spanId = traceContext.spanId();
+        baseMQMessage.setTraceId(traceId);
+        baseMQMessage.setSpanId(spanId);
+
+        this.producer.asyncSend(topic, baseMQMessage, new SendCallback() {
             public void onSuccess(SendResult sendResult) {
+                messageProduceContext.setSendResult(sendResult.getSendStatus().name());
+                observation.stop();
                 callback.opComplete(Set.of(Response.builder().retCode(RetCode.SUCCESS).requestId(message.getRequestId()).build()));
             }
 
             public void onException(Throwable throwable) {
                 MQClientImpl.log.error(throwable);
+                messageProduceContext.setSendResult("Throwable");
+                messageProduceContext.setThrowable(throwable);
+                observation.stop();
                 callback.opComplete(Set.of(Response.builder().retCode(RetCode.FAIL).requestId(message.getRequestId()).build()));
             }
         });
@@ -62,24 +83,9 @@ public class MQClientImpl implements Client {
 
     private BaseMQMessage wrapMessage(Publish message) {
         final BaseMQMessage baseMQMessage = new BaseMQMessage();
-        wrapTraceInfo(baseMQMessage,message.getTopic());
         baseMQMessage.setTs(System.currentTimeMillis());
         baseMQMessage.setData(JsonUtil.toJSONString(message));
         baseMQMessage.setAction("default");
         return baseMQMessage;
-    }
-
-    private void wrapTraceInfo(BaseMQMessage baseMQMessage,String topic){
-        try{
-            Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
-            TraceContext traceContext = UnifiedObservationFactory.getTraceContext(observation);
-            final MessageProduce messageProduceJfrEvent = new MessageProduce(traceContext.traceId(),
-                    traceContext.spanId(), topic);
-            messageProduceJfrEvent.begin();
-            baseMQMessage.setTraceId(messageProduceJfrEvent.getTraceId());
-            baseMQMessage.setSpanId(messageProduceJfrEvent.getSpanId());
-        }catch (Throwable throwable){
-            log.warn("MQClientImpl-wrapMessage set traceId failed {} ",throwable.getMessage(),throwable);
-        }
     }
 }

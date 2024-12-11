@@ -1,9 +1,11 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import com.alibaba.fastjson.JSON;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageConsume;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeContext;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeObservationConvention;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.RocketMQObservationDocumentation;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jakarta.annotation.Nonnull;
@@ -57,55 +59,42 @@ public abstract class AbstractMQConsumer implements RocketMQListener<String>, Ap
         //        BaseMQMessage<T> tBaseMQMessage = JSON.parseObject(s, new TypeReference<>() {
         //            });
         // compressed messages will have `compressed.` prefix
-        BaseMQMessage tBaseMQMessage = MQMessageUtil.decode(JSON.parseObject(s, BaseMQMessage.class));
-        Observation observation = unifiedObservationFactory.createEmptyObservation();
+        BaseMQMessage tBaseMQMessage = MQMessageUtil.decode(JsonUtil.parseObject(s, BaseMQMessage.class));
+        MessageConsumeContext messageConsumeContext = new MessageConsumeContext(tBaseMQMessage.getTraceId(), topic);
+        Observation observation = RocketMQObservationDocumentation.CONSUME.observation(
+                null, MessageConsumeObservationConvention.DEFAULT,
+                () -> messageConsumeContext, unifiedObservationFactory.getObservationRegistry()
+        );
         TraceContext traceContext = UnifiedObservationFactory.getTraceContext(observation);
-
         //如果data为null，证明不是包装格式
         if (StringUtils.isBlank(tBaseMQMessage.getData())) {
-
-            MessageConsume messageConsume = new MessageConsume(traceContext.traceId(), traceContext.traceId(), traceContext.spanId(), topic);
-            messageConsume.begin();
             observation.observe(() -> {
-                try  {
-                    BaseMQMessage message = new BaseMQMessage();
-//                tBaseMQMessage.setOpenTracingSpanIdLong(traceContext.spanId());
-//                tBaseMQMessage.setOpenTracingTraceIdLongHigh(traceContext.traceIdHigh());
-//                tBaseMQMessage.setOpenTracingTraceIdLong(traceContext.traceId());
-                    message.setData(s);
-                    log.info("AbstractMQConsumer-onMessage: topic: {} -> message: {}", topic, s);
-                    try {
-                        onBaseMQMessage(message);
-                        messageConsume.setSuccessful(true);
-                    } catch (Throwable e) {
-                        log.error("MQ consume failed! {}, {}", s, e.getMessage(), e);
-                        messageConsume.setSuccessful(false);
-                        messageConsume.setThrowable(e);
-                        throw e;
-                    }
-                } finally {
-                    messageConsume.commit();
+                BaseMQMessage message = new BaseMQMessage();
+                message.setData(s);
+                log.info("AbstractMQConsumer-onMessage: topic: {} -> message: {}", topic, s);
+                try {
+                    onBaseMQMessage(message);
+                    messageConsumeContext.setSuccessful(true);
+                } catch (Throwable e) {
+                    log.error("MQ consume failed! {}, {}", s, e.getMessage(), e);
+                    messageConsumeContext.setSuccessful(false);
+                    messageConsumeContext.setThrowable(e);
+                    throw e;
                 }
             });
 
         } else {
             //由于保持 rocket mq 的 traceId 会导致基于 traceId 的重试效果极差，并且，同一个 traceId 的日志过多，所以这里仅仅是在日志里面记录一下初始发消息的 traceId
-            MessageConsume messageConsume = new MessageConsume(tBaseMQMessage.getTraceId(), traceContext.traceId(), traceContext.spanId(), topic);
-            messageConsume.begin();
             observation.observe(() -> {
+                log.info("AbstractMQConsumer-onMessage: topic: initial trace id {}, topic: {} -> message: {}", tBaseMQMessage.getTraceId(), topic, s);
                 try {
-                    log.info("AbstractMQConsumer-onMessage: topic: initial trace id {}, topic: {} -> message: {}", tBaseMQMessage.getTraceId(), topic, s);
-                    try {
-                        onBaseMQMessage(tBaseMQMessage);
-                        messageConsume.setSuccessful(true);
-                    } catch (Throwable e) {
-                        log.error("MQ consume failed! {}, {}", s, e.getMessage(), e);
-                        messageConsume.setSuccessful(false);
-                        messageConsume.setThrowable(e);
-                        throw e;
-                    }
-                } finally {
-                    messageConsume.commit();
+                    onBaseMQMessage(tBaseMQMessage);
+                    messageConsumeContext.setSuccessful(true);
+                } catch (Throwable e) {
+                    log.error("MQ consume failed! {}, {}", s, e.getMessage(), e);
+                    messageConsumeContext.setSuccessful(false);
+                    messageConsumeContext.setThrowable(e);
+                    throw e;
                 }
             });
         }
