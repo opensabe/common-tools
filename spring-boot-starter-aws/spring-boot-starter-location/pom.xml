@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>io.github.opensabe-tech</groupId>
 		<artifactId>aws-bom</artifactId>
-		<version>1.0.5-SNAPSHOT</version>
+		<version>1.0.5.26</version>
 	</parent>
 
 	<artifactId>spring-boot-starter-location</artifactId>
-	<version>1.0.5</version>
+	<version>1.0.5.26</version>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 	<packaging>jar</packaging>

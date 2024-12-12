@@ -7,19 +7,19 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.5.26</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>alive-client</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5.26</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <alive-protobuf.version>1.0.5-SNAPSHOT</alive-protobuf.version>
-        <spring-boot-starter-rocketmq.version>1.0.5-SNAPSHOT</spring-boot-starter-rocketmq.version>
+        <alive-protobuf.version>1.0.5.26</alive-protobuf.version>
+        <spring-boot-starter-rocketmq.version>1.0.5.26</spring-boot-starter-rocketmq.version>
     </properties>
 
     <dependencies>
