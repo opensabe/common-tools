@@ -36,29 +36,4 @@ public class GeoPlacesTest extends GeoPlacesBaseTest {
         log.info("Coordinates: {}", coordinates);
     }
 
-
-    public static void main(String[] args) {
-        RekognitionClient rekognitionClient = RekognitionClient.builder()
-                .region(Region.EU_CENTRAL_1)
-                .build();
-        LivenessOutputConfig outputConfig = LivenessOutputConfig.builder()
-                .s3Bucket("test-bucket")
-                .s3KeyPrefix("fake")
-                .build();
-        CreateFaceLivenessSessionRequestSettings settings = CreateFaceLivenessSessionRequestSettings.builder()
-                .outputConfig(outputConfig)
-                .auditImagesLimit(4)
-                .build();
-
-        CreateFaceLivenessSessionRequest request = CreateFaceLivenessSessionRequest.builder()
-                .settings(settings)
-                .kmsKeyId("233e")
-                .clientRequestToken("123")
-                .build();
-        CreateFaceLivenessSessionResponse faceLivenessSession = rekognitionClient.createFaceLivenessSession(request);
-        String sessionId = faceLivenessSession.sessionId();
-        System.out.println(sessionId);
-
-
-    }
 }
