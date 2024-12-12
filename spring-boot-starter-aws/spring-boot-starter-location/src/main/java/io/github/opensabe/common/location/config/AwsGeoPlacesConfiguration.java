@@ -13,6 +13,8 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.geoplaces.GeoPlacesClient;
 
+import java.util.Objects;
+
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
@@ -25,7 +27,7 @@ public class AwsGeoPlacesConfiguration {
     @Autowired(required = false)
     public AwsGeoPlacesConfiguration(GeoPlacesProperties geoPlacesProperties) {
         this.geoPlacesProperties = geoPlacesProperties;
-        log.info("Loaded LocationProperties: {}", geoPlacesProperties);
+//        log.info("Loaded LocationProperties: {}", geoPlacesProperties);
     }
 
 
@@ -35,16 +37,22 @@ public class AwsGeoPlacesConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public GeoPlacesClient geoPlacesClient() {
-        if (geoPlacesProperties.getAccessKey() == null || geoPlacesProperties.getSecretKey() == null) {
-            log.error("AWS access key and secret key must be provided.");
-        }
-        log.info("Initializing GeoPlacesClient for region: {}", geoPlacesProperties.getRegion());
+        validateProperties(geoPlacesProperties);
+//        log.info("Initializing GeoPlacesClient for region: {}", geoPlacesProperties.getRegion());
         return GeoPlacesClient.builder()
                 .region(Region.of(geoPlacesProperties.getRegion()))
                 .credentialsProvider(() ->
                         AwsBasicCredentials.create(geoPlacesProperties.getAccessKey(), geoPlacesProperties.getSecretKey())
                 )
                 .build();
+    }
+    private void validateProperties(GeoPlacesProperties properties) {
+        if (Objects.isNull(properties.getAccessKey()) || Objects.isNull(properties.getSecretKey())) {
+            throw new IllegalArgumentException("AWS access key and secret key must be provided.");
+        }
+        if (Objects.isNull(properties.getRegion())) {
+            throw new IllegalArgumentException("AWS region must be provided.");
+        }
     }
 
     @Bean

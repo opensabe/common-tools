@@ -46,7 +46,8 @@ public class AwsGeocodeServiceImpl implements GeocodeService {
             }
             return position;
         } catch (Throwable e) {
-            log.error("Error while fetching geocode for address: {}", address, e);
+
+            log.error("Error while fetching geocode for address: {}", address, e.getMessage());
         }
         return null;
     }
