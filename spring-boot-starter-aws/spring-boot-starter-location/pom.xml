@@ -14,7 +14,7 @@
 	<description>${project.artifactId}</description>
 	<packaging>jar</packaging>
 	<properties>
-		<common-utils.version>1.0.5</common-utils.version>
+		<common-utils.version>1.0.5-SNAPSHOT</common-utils.version>
 	</properties>
 
 	<dependencies>
