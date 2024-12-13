@@ -8,11 +8,9 @@ import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.core.util.AnnotationsUtils;
 import io.swagger.v3.core.util.PrimitiveType;
 import io.swagger.v3.oas.models.media.Schema;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.Iterator;
@@ -50,7 +48,7 @@ public class SwaggerDatetimeResolveConfiguration {
         }
 
         @Override
-        public Schema resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
+        public Schema<?> resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
             if (voidType.equals(type.getType())) {
                 return null;
             }
@@ -72,9 +70,9 @@ public class SwaggerDatetimeResolveConfiguration {
         }
 
         @Override
-        public Schema resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
+        public Schema<?> resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
             if (isTime(type.getType())) {
-                Schema schema = PrimitiveType.LONG.createProperty();
+                Schema<?> schema = PrimitiveType.LONG.createProperty();
                 schema.setDefault(System.currentTimeMillis());
                 Optional.ofNullable(AnnotationsUtils.mergeSchemaAnnotations(type.getCtxAnnotations(), javaType))
                         .map(resolvedSchemaOrArrayAnnotation ->
@@ -95,7 +93,7 @@ public class SwaggerDatetimeResolveConfiguration {
             if (Objects.isNull(primitiveType)) {
                 try {
                     primitiveType = PrimitiveType.fromType(rawType);
-                }catch (Throwable e) {
+                }catch (Throwable ignore) {
 
                 }
             }
