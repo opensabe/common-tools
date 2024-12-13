@@ -51,4 +51,17 @@ public class AwsGeocodeServiceImpl implements GeocodeService {
         }
         return null;
     }
+
+
+    public ReverseGeocodeResponse reverseGeocode(List<Double> position) {
+        ReverseGeocodeResponse reverseGeocodeResponse = this.geoPlacesClient.reverseGeocode(ReverseGeocodeRequest.builder()
+                .queryPosition(position)
+                .maxResults(10)
+                .queryRadius(3000L)
+                .language("en")
+                .build());
+
+        return reverseGeocodeResponse;
+
+    }
 }

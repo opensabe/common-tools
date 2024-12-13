@@ -12,13 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @Log4j2
-@ExtendWith({SpringExtension.class, SingleS3IntegrationTest.class})
-@SpringBootTest(properties = {
-        "eureka.client.enabled=false",
-        "aws.location.enabled=false",
-        "aws.s3.folderName="+ "testFolder/country",
-        "aws.s3.defaultBucket=" + "test-bucket"
-}, classes = GeoPlacesBaseTest.App.class)
+@ExtendWith({SpringExtension.class})
+@SpringBootTest(classes = GeoPlacesBaseTest.App.class)
 @AutoConfigureObservability
 public abstract class GeoPlacesBaseTest {
 
