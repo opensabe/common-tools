@@ -13,7 +13,7 @@ public class MessageConsumeContext extends Observation.Context {
     private Throwable throwable;
 
     public MessageConsumeContext(String originTraceId, String topic) {
-        this.originTraceId = originTraceId;
-        this.topic = topic;
+        this.originTraceId = originTraceId == null ? "" : originTraceId;
+        this.topic = topic == null ? "" : topic;
     }
 }

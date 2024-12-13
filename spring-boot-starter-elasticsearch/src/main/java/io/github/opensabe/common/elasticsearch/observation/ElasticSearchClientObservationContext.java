@@ -14,7 +14,7 @@ public class ElasticSearchClientObservationContext extends Observation.Context {
     private Throwable throwable;
 
     public ElasticSearchClientObservationContext(String uri, String params) {
-        this.uri = uri;
-        this.params = params;
+        this.uri = uri == null ? "" : uri;
+        this.params = params == null ? "" : params;
     }
 }
