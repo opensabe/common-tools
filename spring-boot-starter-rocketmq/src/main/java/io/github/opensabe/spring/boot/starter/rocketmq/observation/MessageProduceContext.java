@@ -13,6 +13,6 @@ public class MessageProduceContext extends Observation.Context {
     private Throwable throwable;
 
     public MessageProduceContext(String topic) {
-        this.topic = topic;
+        this.topic = topic == null ? "" : topic;
     }
 }
