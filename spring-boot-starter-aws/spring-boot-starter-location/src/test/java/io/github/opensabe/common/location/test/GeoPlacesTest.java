@@ -3,15 +3,7 @@ package io.github.opensabe.common.location.test;
 import io.github.opensabe.common.location.service.GeocodeService;
 import io.github.opensabe.common.location.test.common.GeoPlacesBaseTest;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.rekognition.RekognitionClient;
-import software.amazon.awssdk.services.rekognition.model.CreateFaceLivenessSessionRequest;
-import software.amazon.awssdk.services.rekognition.model.CreateFaceLivenessSessionRequestSettings;
-import software.amazon.awssdk.services.rekognition.model.CreateFaceLivenessSessionResponse;
-import software.amazon.awssdk.services.rekognition.model.LivenessOutputConfig;
-
+import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,6 +26,12 @@ public class GeoPlacesTest extends GeoPlacesBaseTest {
         List<Double> coordinates = geocodeService.getCoordinates(address);
         assertNotNull(coordinates, "Coordinates should not be null");
         log.info("Coordinates: {}", coordinates);
+    }
+
+    //    @Test
+    public void reverseGeocode() {
+        ReverseGeocodeResponse reverseGeocodeResponse = geocodeService.reverseGeocode(List.of(11.196417D, 5.605130D));
+        System.out.println(reverseGeocodeResponse);
     }
 
 }

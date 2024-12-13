@@ -1,5 +1,7 @@
 package io.github.opensabe.common.location.service;
 
+import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
+
 import java.util.List;
 
 /**
@@ -15,4 +17,8 @@ public interface GeocodeService {
      * @return 经纬度列表 (longitude, latitude)
      */
     List<Double> getCoordinates(String address);
+
+
+    ReverseGeocodeResponse reverseGeocode(List<Double> position);
+
 }

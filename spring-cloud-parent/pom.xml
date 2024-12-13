@@ -230,6 +230,12 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>io.github.opensabe-tech</groupId>
+                <artifactId>spring-boot-starter-location</artifactId>
+                <version>${opensabe.version}</version>
+            </dependency>
+
         </dependencies>
 
     </dependencyManagement>
