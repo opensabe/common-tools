@@ -7,30 +7,22 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 @Category({"RocketMQ"})
 @Label("Message Consume")
 @StackTrace(false)
 public class MessageConsume extends Event {
-    @Getter
     private final String originTraceId;
-    @Getter
-    private final String traceId;
-    @Getter
-    private final String spanId;
-    @Getter
     private final String topic;
-
-    @Setter
+    private String traceId;
+    private String spanId;
     private Boolean successful;
-
-    @Setter
     private Throwable throwable;
 
 
-    public MessageConsume(String originTraceId, String traceId, String spanId, String topic) {
+    public MessageConsume(String originTraceId, String topic) {
         this.originTraceId = originTraceId;
-        this.traceId = traceId;
-        this.spanId = spanId;
         this.topic = topic;
     }
 }

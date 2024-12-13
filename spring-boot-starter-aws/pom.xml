@@ -20,6 +20,7 @@
     <modules>
         <module>spring-boot-starter-dynamodb</module>
         <module>spring-boot-starter-s3</module>
+        <module>spring-boot-starter-location</module>
     </modules>
 
     <dependencies>
@@ -35,7 +36,7 @@
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>
-                <version>2.20.109</version>
+                <version>2.29.22</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

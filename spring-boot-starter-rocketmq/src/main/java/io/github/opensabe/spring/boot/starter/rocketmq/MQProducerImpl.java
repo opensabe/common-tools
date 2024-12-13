@@ -8,6 +8,10 @@ import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageProduce;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeObservationConvention;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageProduceContext;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageProduceObservationConvention;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.RocketMQObservationDocumentation;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import lombok.extern.log4j.Log4j2;
@@ -15,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
+import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -150,11 +155,11 @@ public class MQProducerImpl implements MQProducer {
 
     private void handleSendResult(
             MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString,
-            BaseMQMessage baseMQMessage, MessageProduce messageProduceJfrEvent,
+            BaseMQMessage baseMQMessage, MessageProduceContext messageProduceContext, Observation observation,
             SendCallback sendCallback, SendResult sendResult
     ) {
         if (sendResult != null) {
-            messageProduceJfrEvent.setSendResult(sendResult.toString());
+            messageProduceContext.setSendResult(sendResult.getSendStatus().toString());
             if (Objects.equals(sendResult.getSendStatus(), SendStatus.SEND_OK)) {
                 log.info("MQProducerImpl-handleSendResult: success, result: {}", sendResult);
                 if (sendCallback != null) {
@@ -167,7 +172,7 @@ public class MQProducerImpl implements MQProducer {
             } else {
                 log.fatal("MQProducerImpl-handleSendResult: failed, result: {}", sendResult);
                 SendMQException sendMQException = new SendMQException(sendResult);
-                messageProduceJfrEvent.setThrowable(sendMQException);
+                messageProduceContext.setThrowable(sendMQException);
                 if (sendCallback != null) {
                     try {
                         sendCallback.onException(sendMQException);
@@ -178,19 +183,21 @@ public class MQProducerImpl implements MQProducer {
                 failThenPersist(mqSendConfig, topic, hashKey, traceIdString, baseMQMessage);
             }
         }
-        messageProduceJfrEvent.commit();
+        observation.stop();
     }
 
     private void handleSendException(
-            MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString, BaseMQMessage baseMQMessage, MessageProduce messageProduceJfrEvent, SendCallback sendCallback,
+            MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString,
+            BaseMQMessage baseMQMessage, MessageProduceContext messageProduceContext,
+            Observation observation, SendCallback sendCallback,
             Throwable throwable) {
         log.fatal("MQProducerImpl-handleSendException: message = {}, topic = {}", baseMQMessage, topic, throwable);
         failThenPersist(mqSendConfig, topic, hashKey, traceIdString, baseMQMessage);
         if (sendCallback != null) {
             sendCallback.onException(throwable);
         }
-        messageProduceJfrEvent.setThrowable(throwable);
-        messageProduceJfrEvent.commit();
+        messageProduceContext.setThrowable(throwable);
+        observation.stop();
     }
 
     @Override
@@ -204,11 +211,17 @@ public class MQProducerImpl implements MQProducer {
             mqSendConfig = new DefaultMQSendConfig();
         }
         final MQSendConfig mqSendConfigFinal = mqSendConfig;
-        Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
+
+        MessageProduceContext messageProduceContext = new MessageProduceContext(topic);
+        Observation observation = RocketMQObservationDocumentation.PRODUCE.observation(
+                null, MessageProduceObservationConvention.DEFAULT,
+                () -> messageProduceContext, unifiedObservationFactory.getObservationRegistry()
+        ).start();
+
         TraceContext traceContext = UnifiedObservationFactory.getTraceContext(observation);
         String traceId = traceContext.traceId();
         String spanId = traceContext.spanId();
-        observation.scoped(() -> {
+        try {
             SendResult sendResult;
             log.info("Try send to MQ, topic: {}, hashKey: {}, isAsync: {}, data: {}", () -> topic, () -> hashKey, () -> isAsync, o::toString);
             BaseMQMessage baseMQMessage;
@@ -224,20 +237,17 @@ public class MQProducerImpl implements MQProducer {
                 throw new RuntimeException("Sensitive string found in MQ message");
             }
 
-            MessageProduce messageProduceJfrEvent = new MessageProduce(traceId, spanId, topic);
-            messageProduceJfrEvent.begin();
-//            baseMQMessage.setOpenTracingTraceIdLongHigh(0L);
-//            baseMQMessage.setOpenTracingTraceIdLong(0L);
-//            baseMQMessage.setOpenTracingSpanIdLong(0L);
             baseMQMessage.setTraceId(traceId);
             baseMQMessage.setSpanId(spanId);
             baseMQMessage.setSrc(srcName);
-            baseMQMessage.setTs(Objects.isNull(time) ? System.currentTimeMillis():time);
+            baseMQMessage.setTs(Objects.isNull(time) ? System.currentTimeMillis() : time);
 
             if (Optional.ofNullable(mqSendConfigFinal.getIsCompressEnabled()).orElse(false)) {
                 // compress the message if its size > 4MB
                 MQMessageUtil.encode(baseMQMessage);
             }
+
+            messageProduceContext.setMsgLength(StringUtils.isNotBlank(baseMQMessage.getData()) ? baseMQMessage.getData().length() : 0);
 
             final BaseMQMessage baseMQMessageFinal = baseMQMessage;
             Message<?> message = MessageBuilder.withPayload(baseMQMessage).setHeader("KEYS", traceId).build();
@@ -248,14 +258,15 @@ public class MQProducerImpl implements MQProducer {
                     public void onSuccess(SendResult sendResult) {
                         handleSendResult(
                                 mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
-                                messageProduceJfrEvent, sendCallback, sendResult
+                                messageProduceContext, observation, sendCallback, sendResult
                         );
                     }
+
                     @Override
                     public void onException(Throwable throwable) {
                         handleSendException(
                                 mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
-                                messageProduceJfrEvent, sendCallback, throwable
+                                messageProduceContext, observation, sendCallback, throwable
                         );
                     }
                 };
@@ -273,47 +284,61 @@ public class MQProducerImpl implements MQProducer {
                     }
                     handleSendResult(
                             mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
-                            messageProduceJfrEvent, sendCallback, sendResult
+                            messageProduceContext,observation, sendCallback, sendResult
                     );
                 } catch (Throwable e) {
                     handleSendException(
                             mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
-                            messageProduceJfrEvent, sendCallback, e
+                            messageProduceContext, observation, sendCallback, e
                     );
                 }
             }
-        });
+        } catch (Throwable e) {
+            messageProduceContext.setSendResult("Throwable");
+            messageProduceContext.setThrowable(e);
+            observation.stop();
+            throw e;
+        }
 
     }
     @Override
     public void sendWithInTransaction(String topic, Object body, Object transactionObj, UniqueRocketMQLocalTransactionListener uniqueRocketMQLocalTransactionListener) {
-        Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
+        MessageProduceContext messageProduceContext = new MessageProduceContext(topic);
+        Observation observation = RocketMQObservationDocumentation.PRODUCE.observation(
+                null, MessageProduceObservationConvention.DEFAULT,
+                () -> messageProduceContext, unifiedObservationFactory.getObservationRegistry()
+        );
         TraceContext traceContext = UnifiedObservationFactory.getTraceContext(observation);
         String traceId = traceContext.traceId();
         String spanId = traceContext.spanId();
-        observation.scoped(() -> {
-            log.info("Try send to MQ, topic: {}, data: {}, transactionObj: {}", () -> topic, body::toString, transactionObj::toString);
-            BaseMQMessage baseMQMessage;
-            if (body instanceof BaseMQMessage) {
-                baseMQMessage = (BaseMQMessage) body;
-            } else {
-                baseMQMessage = new BaseMQMessage();
-                baseMQMessage.setData(JsonUtil.toJSONString(body));
-                baseMQMessage.setAction("default");
+        observation.observe(() -> {
+            try {
+                log.info("Try send to MQ, topic: {}, data: {}, transactionObj: {}", () -> topic, body::toString, transactionObj::toString);
+                BaseMQMessage baseMQMessage;
+                if (body instanceof BaseMQMessage) {
+                    baseMQMessage = (BaseMQMessage) body;
+                } else {
+                    baseMQMessage = new BaseMQMessage();
+                    baseMQMessage.setData(JsonUtil.toJSONString(body));
+                    baseMQMessage.setAction("default");
+                }
+                baseMQMessage.setTraceId(traceId);
+                baseMQMessage.setSpanId(spanId);
+                baseMQMessage.setSrc(srcName);
+                baseMQMessage.setTs(System.currentTimeMillis());
+
+                messageProduceContext.setMsgLength(StringUtils.isNotBlank(baseMQMessage.getData()) ? baseMQMessage.getData().length() : 0);
+
+                Message<?> message = MessageBuilder.withPayload(baseMQMessage)
+                        .setHeader(MQLocalTransactionListener.MSG_HEADER_TRANSACTION_LISTENER, uniqueRocketMQLocalTransactionListener.name())
+                        .setHeader("KEYS", traceId).build();
+                TransactionSendResult transactionSendResult = rocketMQTemplate.sendMessageInTransaction(topic, message, transactionObj);
+                messageProduceContext.setSendResult(transactionSendResult.getSendStatus().name());
+            } catch (Throwable e) {
+                messageProduceContext.setSendResult("Throwable");
+                messageProduceContext.setThrowable(e);
+                throw e;
             }
-            MessageProduce messageProduceJfrEvent = new MessageProduce(traceId, spanId, topic);
-            messageProduceJfrEvent.begin();
-//            baseMQMessage.setOpenTracingTraceIdLongHigh(0L);
-//            baseMQMessage.setOpenTracingTraceIdLong(0L);
-//            baseMQMessage.setOpenTracingSpanIdLong(0L);
-            baseMQMessage.setTraceId(messageProduceJfrEvent.getTraceId());
-            baseMQMessage.setSpanId(messageProduceJfrEvent.getSpanId());
-            baseMQMessage.setSrc(srcName);
-            baseMQMessage.setTs(System.currentTimeMillis());
-            Message<?> message = MessageBuilder.withPayload(baseMQMessage)
-                    .setHeader(MQLocalTransactionListener.MSG_HEADER_TRANSACTION_LISTENER, uniqueRocketMQLocalTransactionListener.name())
-                    .setHeader("KEYS", traceId).build();
-            rocketMQTemplate.sendMessageInTransaction(topic, message, transactionObj);
         });
     }
 

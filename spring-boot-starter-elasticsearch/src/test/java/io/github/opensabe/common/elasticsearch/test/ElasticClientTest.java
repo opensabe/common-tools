@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -50,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         SpringExtension.class
 })
 @Log4j2
+@AutoConfigureObservability
 public class ElasticClientTest {
     @SpringBootApplication
     public static class Main {
