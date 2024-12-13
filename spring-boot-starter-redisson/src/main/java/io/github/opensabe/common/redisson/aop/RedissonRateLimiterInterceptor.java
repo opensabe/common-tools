@@ -19,6 +19,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.time.Duration;
 
 /**
  * redisson 限流器核心实现类
@@ -52,12 +53,20 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
         String rateLimiterName = getRateLimiterName(rateLimiterProperties, invocation.getArguments());
         rateLimiterProperties.setRateLimiterName(rateLimiterName);
         RRateLimiter rateLimiter = redissonClient.getRateLimiter(rateLimiterName);
-        rateLimiter.trySetRate(
-                redissonRateLimiter.rateType(),
-                redissonRateLimiter.rate(),
-                redissonRateLimiter.rateInterval(),
-                redissonRateLimiter.rateIntervalUnit()
-        );
+        long keepAliveTime= redissonRateLimiter.keepAlive();
+        if(keepAliveTime>0){
+            Duration kat=Duration.ofMillis(redissonRateLimiter.keepAliveTimeUnit().toMillis(redissonRateLimiter.rateInterval()));
+            rateLimiter.trySetRate(redissonRateLimiter.rateType(),
+                    redissonRateLimiter.rate(),
+                    Duration.ofMillis(redissonRateLimiter.rateIntervalUnit().toMillis(redissonRateLimiter.rateInterval())),
+                    kat
+            );
+        } else {
+            rateLimiter.trySetRate(redissonRateLimiter.rateType(),
+                    redissonRateLimiter.rate(),
+                    Duration.ofMillis(redissonRateLimiter.rateIntervalUnit().toMillis(redissonRateLimiter.rateInterval()))
+            );
+        }
         RateLimiterConfig config = rateLimiter.getConfig();
         if (
                 !config.getRate().equals(redissonRateLimiter.rate())

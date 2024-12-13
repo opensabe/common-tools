@@ -2,9 +2,11 @@ package io.github.opensabe.common.redisson.observation.rlock;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
+import org.redisson.api.RFencedLock;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 
@@ -13,17 +15,105 @@ import java.util.concurrent.locks.Condition;
  * 注意每次都要新建一个实例，不要重复使用
  * 通过正常的 api 就是每次新建一个，但是注意不要使用单例模式
  */
-public class ObservedRLock implements RLock {
-    private final RLock delegate;
+public class ObservedRFencedLock implements RFencedLock {
+    private final RFencedLock delegate;
     private final UnifiedObservationFactory unifiedObservationFactory;
 
-    public ObservedRLock(RLock delegate, UnifiedObservationFactory unifiedObservationFactory) {
+    public ObservedRFencedLock(RFencedLock delegate, UnifiedObservationFactory unifiedObservationFactory) {
         this.delegate = delegate;
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    @Override
+    public Long getToken() {
+        return delegate.getToken();
+    }
+
+    @Override
+    public Long lockAndGetToken() {
+        return observeAcquiringLockAndGetToken(false, -1L, -1L, null, () -> delegate.lockAndGetToken());
+    }
+
+    @Override
+    public Long lockAndGetToken(long leaseTime, TimeUnit unit) {
+        return observeAcquiringLockAndGetToken(false, -1L, leaseTime, unit, () -> delegate.lockAndGetToken(leaseTime, unit));
+    }
+
+    @Override
+    public Long tryLockAndGetToken() {
+        return observeAcquiringLockAndGetToken(false, -1L, -1,null, () -> delegate.tryLockAndGetToken());
+    }
+
+    @Override
+    public Long tryLockAndGetToken(long waitTime, TimeUnit unit) {
+        return observeAcquiringLockAndGetToken(false, waitTime, -1,unit, () -> delegate.tryLockAndGetToken(waitTime,unit));
+    }
+
+    @Override
+    public Long tryLockAndGetToken(long waitTime, long leaseTime, TimeUnit unit) {
+        return observeAcquiringLockAndGetToken(false, waitTime, leaseTime,unit, () -> delegate.tryLockAndGetToken(waitTime,leaseTime,unit));
+    }
+
+    @Override
+    public RFuture<Long> getTokenAsync() {
+        return delegate.getTokenAsync();
+    }
+
+    @Override
+    public RFuture<Long> lockAndGetTokenAsync() {
+        return delegate.lockAndGetTokenAsync();
+    }
+
+    @Override
+    public RFuture<Long> lockAndGetTokenAsync(long leaseTime, TimeUnit unit) {
+        return delegate.lockAndGetTokenAsync();
+    }
+
+    @Override
+    public RFuture<Long> tryLockAndGetTokenAsync() {
+        return delegate.tryLockAndGetTokenAsync();
+    }
+
+    @Override
+    public RFuture<Long> tryLockAndGetTokenAsync(long waitTime, TimeUnit unit) {
+        return delegate.tryLockAndGetTokenAsync(waitTime,unit);
+    }
+
+    @Override
+    public RFuture<Long> tryLockAndGetTokenAsync(long waitTime, long leaseTime, TimeUnit unit) {
+        return delegate.tryLockAndGetTokenAsync(waitTime,leaseTime,unit);
+    }
+
     interface LockAcquire {
         boolean run();
+    }
+
+    interface LockAndGetTokenAcquire {
+        Long run();
+    }
+
+    private Long observeAcquiringLockAndGetToken(boolean tryAcquire, long waitTime, long leaseTime, TimeUnit unit, LockAndGetTokenAcquire lockAcquire) {
+        RLockAcquiredContext rLockAcquiredContext = new RLockAcquiredContext(
+                getName(), tryAcquire, waitTime, leaseTime, unit, delegate.getClass()
+        );
+        Observation observation = RLockObservationDocumentation.LOCK_ACQUIRE.observation(
+                null, RLockAcquiredObservationConvention.DEFAULT,
+                () -> rLockAcquiredContext, unifiedObservationFactory.getObservationRegistry()
+        ).start();
+        try {
+            Long token = lockAcquire.run();
+            if(Objects.isNull(token)){
+                rLockAcquiredContext.setLockAcquiredSuccessfully(false);
+            } else {
+                rLockAcquiredContext.setLockAcquiredSuccessfully(true);
+            }
+            return token;
+        } catch (Throwable t) {
+            observation.error(t);
+            throw t;
+        } finally {
+            observation.stop();
+        }
     }
 
     private boolean observeAcquiringLock(boolean tryAcquire, long waitTime, long leaseTime, TimeUnit unit, LockAcquire lockAcquire) {
