@@ -294,7 +294,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
         ).start();
         try {
             int result = delegate.tryRelease(permitsIds);
-            rPermitSemaphoreReleasedContext.setPermitReleasedSuccessfully(Objects.equals(permitsIds.size(), result));
+            rPermitSemaphoreReleasedContext.setPermitReleasedSuccessfully(result > 0);
             return result;
         } catch (Throwable t) {
             observation.error(t);
