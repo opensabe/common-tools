@@ -66,7 +66,7 @@ public class ObservedRFencedLock implements RFencedLock {
 
     @Override
     public RFuture<Long> lockAndGetTokenAsync(long leaseTime, TimeUnit unit) {
-        return delegate.lockAndGetTokenAsync();
+        return delegate.lockAndGetTokenAsync(leaseTime, unit);
     }
 
     @Override

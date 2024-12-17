@@ -68,7 +68,7 @@ public class ObservedRedissonClient implements RedissonClient {
 
     @Override
     public RSearch getSearch(Codec codec) {
-        return delegate.getSearch();
+        return delegate.getSearch(codec);
     }
 
     @Override
