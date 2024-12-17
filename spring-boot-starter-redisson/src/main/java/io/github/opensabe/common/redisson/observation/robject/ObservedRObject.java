@@ -199,7 +199,7 @@ public class ObservedRObject implements RObject {
 
     @Override
     public RFuture<Boolean> copyAndReplaceAsync(String destination) {
-        return rObject.copyAsync(destination);
+        return rObject.copyAndReplaceAsync(destination);
     }
 
     @Override

@@ -168,7 +168,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     public List<String> acquire(int permits, long leaseTime, TimeUnit unit) throws InterruptedException {
         try {
             return observeAcquiringPermitsSemaphore(
-                    true, -1, leaseTime, unit, () -> {
+                    false, -1, leaseTime, unit, () -> {
                         try {
                             return delegate.acquire(permits, leaseTime, unit);
                         } catch (InterruptedException e) {
@@ -294,7 +294,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
         ).start();
         try {
             int result = delegate.tryRelease(permitsIds);
-            rPermitSemaphoreReleasedContext.setPermitReleasedSuccessfully(Objects.equals(permitsIds.size(), result));
+            rPermitSemaphoreReleasedContext.setPermitReleasedSuccessfully(result > 0);
             return result;
         } catch (Throwable t) {
             observation.error(t);

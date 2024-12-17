@@ -10,6 +10,7 @@ import org.redisson.api.RateLimiterConfig;
 import org.redisson.api.RateType;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLimiter {
@@ -204,7 +205,11 @@ public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLim
 
     @Override
     public boolean tryAcquire(Duration timeout) {
-        return acquire0(1, timeout.toMillis(), TimeUnit.MILLISECONDS, () -> delegate.tryAcquire(timeout));
+        if(Objects.isNull(timeout)){
+            timeout = Duration.ZERO;
+        }
+        Duration finalTimeout = timeout;
+        return acquire0(1, timeout.toMillis(), TimeUnit.MILLISECONDS, () -> delegate.tryAcquire(finalTimeout));
     }
 
     @Override
