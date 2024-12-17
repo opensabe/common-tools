@@ -9,6 +9,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Documented
@@ -59,6 +60,16 @@ public @interface RedissonRateLimiter {
      * @return
      */
     RateIntervalUnit rateIntervalUnit();
+
+    /**
+     * 令牌存活时间,keepAliveTimeUnit()
+     * @return
+     */
+    long keepAlive() default 0L;
+    /**
+     * 时间单位
+     */
+    TimeUnit keepAliveTimeUnit() default TimeUnit.MILLISECONDS;
 
     /**
      * 仅对 Type.TRY 生效，等待时间

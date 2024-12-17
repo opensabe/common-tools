@@ -1,17 +1,24 @@
 package io.github.opensabe.common.redisson.observation;
 
 import io.github.opensabe.common.redisson.observation.ratelimiter.ObservedRRateLimiter;
+import io.github.opensabe.common.redisson.observation.rlock.ObservedRFencedLock;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRLock;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRReadWriteLock;
 import io.github.opensabe.common.redisson.observation.rsemaphore.ObservedRPermitExpirableSemaphore;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import org.redisson.api.*;
+import org.redisson.api.ExecutorOptions;
+import org.redisson.api.LocalCachedMapOptions;
+import org.redisson.api.MapCacheOptions;
+import org.redisson.api.MapOptions;
+import org.redisson.api.options.*;
 import org.redisson.api.redisnode.BaseRedisNodes;
 import org.redisson.api.redisnode.RedisNodes;
 import org.redisson.client.codec.Codec;
 import org.redisson.codec.JsonCodec;
 import org.redisson.config.Config;
 
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 public class ObservedRedissonClient implements RedissonClient {
@@ -23,6 +30,7 @@ public class ObservedRedissonClient implements RedissonClient {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+
     @Override
     public <V, L> RTimeSeries<V, L> getTimeSeries(String name) {
         return delegate.getTimeSeries(name);
@@ -31,6 +39,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <V, L> RTimeSeries<V, L> getTimeSeries(String name, Codec codec) {
         return delegate.getTimeSeries(name, codec);
+    }
+
+    @Override
+    public <V, L> RTimeSeries<V, L> getTimeSeries(PlainOptions options) {
+        return delegate.getTimeSeries(options);
     }
 
     @Override
@@ -44,6 +57,26 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <K, V> RStream<K, V> getStream(PlainOptions options) {
+        return delegate.getStream(options);
+    }
+
+    @Override
+    public RSearch getSearch() {
+        return delegate.getSearch();
+    }
+
+    @Override
+    public RSearch getSearch(Codec codec) {
+        return delegate.getSearch(codec);
+    }
+
+    @Override
+    public RSearch getSearch(OptionalOptions options) {
+        return delegate.getSearch(options);
+    }
+
+    @Override
     public RRateLimiter getRateLimiter(String name) {
         return new ObservedRRateLimiter(
                 delegate.getRateLimiter(name), unifiedObservationFactory
@@ -51,8 +84,20 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RRateLimiter getRateLimiter(CommonOptions options) {
+        return new ObservedRRateLimiter(
+                delegate.getRateLimiter(options), unifiedObservationFactory
+        );
+    }
+
+    @Override
     public RBinaryStream getBinaryStream(String name) {
         return delegate.getBinaryStream(name);
+    }
+
+    @Override
+    public RBinaryStream getBinaryStream(CommonOptions options) {
+        return delegate.getBinaryStream(options);
     }
 
     @Override
@@ -66,6 +111,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RGeo<V> getGeo(PlainOptions options) {
+        return delegate.getGeo(options);
+    }
+
+    @Override
     public <V> RSetCache<V> getSetCache(String name) {
         return delegate.getSetCache(name);
     }
@@ -76,13 +126,23 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RSetCache<V> getSetCache(PlainOptions options) {
+        return delegate.getSetCache(options);
+    }
+
+    @Override
     public <K, V> RMapCache<K, V> getMapCache(String name, Codec codec) {
         return delegate.getMapCache(name, codec);
     }
 
     @Override
-    public <K, V> RMapCache<K, V> getMapCache(String name, Codec codec, MapOptions<K, V> options) {
+    public <K, V> RMapCache<K, V> getMapCache(String name, Codec codec, MapCacheOptions<K, V> options) {
         return delegate.getMapCache(name, codec, options);
+    }
+
+    @Override
+    public <K, V> RMapCache<K, V> getMapCache(org.redisson.api.options.MapCacheOptions<K, V> options) {
+        return delegate.getMapCache(options);
     }
 
     @Override
@@ -91,7 +151,7 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
-    public <K, V> RMapCache<K, V> getMapCache(String name, MapOptions<K, V> options) {
+    public <K, V> RMapCache<K, V> getMapCache(String name, MapCacheOptions<K, V> options) {
         return delegate.getMapCache(name, options);
     }
 
@@ -106,6 +166,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RBucket<V> getBucket(PlainOptions options) {
+        return delegate.getBucket(options);
+    }
+
+    @Override
     public RBuckets getBuckets() {
         return delegate.getBuckets();
     }
@@ -116,8 +181,23 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
-    public <V> RJsonBucket<V> getJsonBucket(String name, JsonCodec<V> codec) {
-        return delegate.getJsonBucket(name, codec);
+    public RBuckets getBuckets(OptionalOptions options) {
+        return delegate.getBuckets(options);
+    }
+
+    @Override
+    public <V> RJsonBucket<V> getJsonBucket(String name, JsonCodec codec) {
+        return delegate.getJsonBucket(name,codec);
+    }
+
+    @Override
+    public <V> RJsonBucket<V> getJsonBucket(JsonBucketOptions<V> options) {
+        return delegate.getJsonBucket(options);
+    }
+
+    @Override
+    public RJsonBuckets getJsonBuckets(JsonCodec codec) {
+        return delegate.getJsonBuckets(codec);
     }
 
     @Override
@@ -131,6 +211,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RHyperLogLog<V> getHyperLogLog(PlainOptions options) {
+        return delegate.getHyperLogLog(options);
+    }
+
+    @Override
     public <V> RList<V> getList(String name) {
         return delegate.getList(name);
     }
@@ -138,6 +223,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <V> RList<V> getList(String name, Codec codec) {
         return delegate.getList(name, codec);
+    }
+
+    @Override
+    public <V> RList<V> getList(PlainOptions options) {
+        return delegate.getList(options);
     }
 
     @Override
@@ -151,6 +241,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <K, V> RListMultimap<K, V> getListMultimap(PlainOptions options) {
+        return delegate.getListMultimap(options);
+    }
+
+    @Override
     public <K, V> RListMultimapCache<K, V> getListMultimapCache(String name) {
         return delegate.getListMultimapCache(name);
     }
@@ -161,6 +256,36 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <K, V> RListMultimapCache<K, V> getListMultimapCache(PlainOptions options) {
+        return delegate.getListMultimapCache(options);
+    }
+
+    @Override
+    public <K, V> RLocalCachedMapCache<K, V> getLocalCachedMapCache(String name, LocalCachedMapCacheOptions<K, V> options) {
+        return delegate.getLocalCachedMapCache(name, options);
+    }
+
+    @Override
+    public <K, V> RLocalCachedMapCache<K, V> getLocalCachedMapCache(String name, Codec codec, LocalCachedMapCacheOptions<K, V> options) {
+        return delegate.getLocalCachedMapCache(name,codec,options);
+    }
+
+    @Override
+    public <K, V> RListMultimapCacheNative<K, V> getListMultimapCacheNative(String name) {
+        return delegate.getListMultimapCacheNative(name);
+    }
+
+    @Override
+    public <K, V> RListMultimapCacheNative<K, V> getListMultimapCacheNative(String name, Codec codec) {
+        return delegate.getListMultimapCacheNative(name, codec);
+    }
+
+    @Override
+    public <K, V> RListMultimapCacheNative<K, V> getListMultimapCacheNative(PlainOptions options) {
+        return delegate.getListMultimapCacheNative(options);
+    }
+
+    @Override
     public <K, V> RLocalCachedMap<K, V> getLocalCachedMap(String name, LocalCachedMapOptions<K, V> options) {
         return delegate.getLocalCachedMap(name, options);
     }
@@ -168,6 +293,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <K, V> RLocalCachedMap<K, V> getLocalCachedMap(String name, Codec codec, LocalCachedMapOptions<K, V> options) {
         return delegate.getLocalCachedMap(name, codec, options);
+    }
+
+    @Override
+    public <K, V> RLocalCachedMap<K, V> getLocalCachedMap(org.redisson.api.options.LocalCachedMapOptions<K, V> options) {
+        return delegate.getLocalCachedMap(options);
     }
 
     @Override
@@ -191,6 +321,26 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <K, V> RMap<K, V> getMap(org.redisson.api.options.MapOptions<K, V> options) {
+        return delegate.getMap(options);
+    }
+
+    @Override
+    public <K, V> RMapCacheNative<K, V> getMapCacheNative(String name) {
+        return delegate.getMapCacheNative(name);
+    }
+
+    @Override
+    public <K, V> RMapCacheNative<K, V> getMapCacheNative(String name, Codec codec) {
+        return delegate.getMapCacheNative(name, codec);
+    }
+
+    @Override
+    public <K, V> RMapCacheNative<K, V> getMapCacheNative(org.redisson.api.options.MapOptions<K, V> options) {
+        return delegate.getMapCacheNative(options);
+    }
+
+    @Override
     public <K, V> RSetMultimap<K, V> getSetMultimap(String name) {
         return delegate.getSetMultimap(name);
     }
@@ -198,6 +348,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <K, V> RSetMultimap<K, V> getSetMultimap(String name, Codec codec) {
         return delegate.getSetMultimap(name, codec);
+    }
+
+    @Override
+    public <K, V> RSetMultimap<K, V> getSetMultimap(PlainOptions options) {
+        return delegate.getSetMultimap(options);
     }
 
     @Override
@@ -211,8 +366,33 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <K, V> RSetMultimapCache<K, V> getSetMultimapCache(PlainOptions options) {
+        return delegate.getSetMultimapCache(options);
+    }
+
+    @Override
+    public <K, V> RSetMultimapCacheNative<K, V> getSetMultimapCacheNative(String name) {
+        return delegate.getSetMultimapCacheNative(name);
+    }
+
+    @Override
+    public <K, V> RSetMultimapCacheNative<K, V> getSetMultimapCacheNative(String name, Codec codec) {
+        return delegate.getSetMultimapCacheNative(name, codec);
+    }
+
+    @Override
+    public <K, V> RSetMultimapCacheNative<K, V> getSetMultimapCacheNative(PlainOptions options) {
+        return delegate.getSetMultimapCacheNative(options);
+    }
+
+    @Override
     public RSemaphore getSemaphore(String name) {
         return delegate.getSemaphore(name);
+    }
+
+    @Override
+    public RSemaphore getSemaphore(CommonOptions options) {
+        return delegate.getSemaphore(options);
     }
 
     @Override
@@ -222,13 +402,29 @@ public class ObservedRedissonClient implements RedissonClient {
         );
     }
 
+    @Override
+    public RPermitExpirableSemaphore getPermitExpirableSemaphore(CommonOptions options) {
+        return new ObservedRPermitExpirableSemaphore(
+                delegate.getPermitExpirableSemaphore(options), unifiedObservationFactory
+        );
+    }
+
     private RLock getObservedLock(RLock delegate) {
         return new ObservedRLock(delegate, unifiedObservationFactory);
+    }
+
+    private RFencedLock getObservedRFencedLock(RFencedLock delegate) {
+        return new ObservedRFencedLock(delegate, unifiedObservationFactory);
     }
 
     @Override
     public RLock getLock(String name) {
         return getObservedLock(delegate.getLock(name));
+    }
+
+    @Override
+    public RLock getLock(CommonOptions options) {
+        return getObservedLock(delegate.getLock(options));
     }
 
     @Override
@@ -242,8 +438,23 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RFencedLock getFencedLock(String name) {
+        return getObservedRFencedLock(delegate.getFencedLock(name));
+    }
+
+    @Override
+    public RFencedLock getFencedLock(CommonOptions options) {
+        return getObservedRFencedLock(delegate.getFencedLock(options));
+    }
+
+    @Override
     public RLock getMultiLock(RLock... locks) {
         return getObservedLock(delegate.getMultiLock(locks));
+    }
+
+    @Override
+    public RLock getMultiLock(String group, Collection<Object> values) {
+        return getObservedLock(delegate.getMultiLock(group,values));
     }
 
     @Override
@@ -257,8 +468,18 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RLock getFairLock(CommonOptions options) {
+        return getObservedLock(delegate.getFairLock(options));
+    }
+
+    @Override
     public RReadWriteLock getReadWriteLock(String name) {
         return new ObservedRReadWriteLock(delegate.getReadWriteLock(name), unifiedObservationFactory);
+    }
+
+    @Override
+    public RReadWriteLock getReadWriteLock(CommonOptions options) {
+        return new ObservedRReadWriteLock(delegate.getReadWriteLock(options), unifiedObservationFactory);
     }
 
     @Override
@@ -272,6 +493,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RSet<V> getSet(PlainOptions options) {
+        return delegate.getSet(options);
+    }
+
+    @Override
     public <V> RSortedSet<V> getSortedSet(String name) {
         return delegate.getSortedSet(name);
     }
@@ -279,6 +505,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <V> RSortedSet<V> getSortedSet(String name, Codec codec) {
         return delegate.getSortedSet(name, codec);
+    }
+
+    @Override
+    public <V> RSortedSet<V> getSortedSet(PlainOptions options) {
+        return delegate.getSortedSet(options);
     }
 
     @Override
@@ -292,8 +523,18 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RScoredSortedSet<V> getScoredSortedSet(PlainOptions options) {
+        return delegate.getScoredSortedSet(options);
+    }
+
+    @Override
     public RLexSortedSet getLexSortedSet(String name) {
         return delegate.getLexSortedSet(name);
+    }
+
+    @Override
+    public RLexSortedSet getLexSortedSet(CommonOptions options) {
+        return delegate.getLexSortedSet(options);
     }
 
     @Override
@@ -307,6 +548,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RShardedTopic getShardedTopic(PlainOptions options) {
+        return delegate.getShardedTopic(options);
+    }
+
+    @Override
     public RTopic getTopic(String name) {
         return delegate.getTopic(name);
     }
@@ -314,6 +560,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public RTopic getTopic(String name, Codec codec) {
         return delegate.getTopic(name, codec);
+    }
+
+    @Override
+    public RTopic getTopic(PlainOptions options) {
+        return delegate.getTopic(options);
     }
 
     @Override
@@ -327,6 +578,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RReliableTopic getReliableTopic(PlainOptions options) {
+        return delegate.getReliableTopic(options);
+    }
+
+    @Override
     public RPatternTopic getPatternTopic(String pattern) {
         return delegate.getPatternTopic(pattern);
     }
@@ -334,6 +590,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public RPatternTopic getPatternTopic(String pattern, Codec codec) {
         return delegate.getPatternTopic(pattern, codec);
+    }
+
+    @Override
+    public RPatternTopic getPatternTopic(PatternTopicOptions options) {
+        return delegate.getPatternTopic(options);
     }
 
     @Override
@@ -352,6 +613,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RTransferQueue<V> getTransferQueue(PlainOptions options) {
+        return delegate.getTransferQueue(options);
+    }
+
+    @Override
     public <V> RDelayedQueue<V> getDelayedQueue(RQueue<V> destinationQueue) {
         return delegate.getDelayedQueue(destinationQueue);
     }
@@ -359,6 +625,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <V> RQueue<V> getQueue(String name, Codec codec) {
         return delegate.getQueue(name, codec);
+    }
+
+    @Override
+    public <V> RQueue<V> getQueue(PlainOptions options) {
+        return delegate.getQueue(options);
     }
 
     @Override
@@ -372,6 +643,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RRingBuffer<V> getRingBuffer(PlainOptions options) {
+        return delegate.getRingBuffer(options);
+    }
+
+    @Override
     public <V> RPriorityQueue<V> getPriorityQueue(String name) {
         return delegate.getPriorityQueue(name);
     }
@@ -379,6 +655,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <V> RPriorityQueue<V> getPriorityQueue(String name, Codec codec) {
         return delegate.getPriorityQueue(name, codec);
+    }
+
+    @Override
+    public <V> RPriorityQueue<V> getPriorityQueue(PlainOptions options) {
+        return delegate.getPriorityQueue(options);
     }
 
     @Override
@@ -392,6 +673,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RPriorityBlockingQueue<V> getPriorityBlockingQueue(PlainOptions options) {
+        return delegate.getPriorityBlockingQueue(options);
+    }
+
+    @Override
     public <V> RPriorityBlockingDeque<V> getPriorityBlockingDeque(String name) {
         return delegate.getPriorityBlockingDeque(name);
     }
@@ -399,6 +685,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <V> RPriorityBlockingDeque<V> getPriorityBlockingDeque(String name, Codec codec) {
         return delegate.getPriorityBlockingDeque(name, codec);
+    }
+
+    @Override
+    public <V> RPriorityBlockingDeque<V> getPriorityBlockingDeque(PlainOptions options) {
+        return delegate.getPriorityBlockingDeque(options);
     }
 
     @Override
@@ -412,6 +703,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RPriorityDeque<V> getPriorityDeque(PlainOptions options) {
+        return delegate.getPriorityDeque(options);
+    }
+
+    @Override
     public <V> RBlockingQueue<V> getBlockingQueue(String name) {
         return delegate.getBlockingQueue(name);
     }
@@ -419,6 +715,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <V> RBlockingQueue<V> getBlockingQueue(String name, Codec codec) {
         return delegate.getBlockingQueue(name, codec);
+    }
+
+    @Override
+    public <V> RBlockingQueue<V> getBlockingQueue(PlainOptions options) {
+        return delegate.getBlockingQueue(options);
     }
 
     @Override
@@ -432,6 +733,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RBoundedBlockingQueue<V> getBoundedBlockingQueue(PlainOptions options) {
+        return delegate.getBoundedBlockingQueue(options);
+    }
+
+    @Override
     public <V> RDeque<V> getDeque(String name) {
         return delegate.getDeque(name);
     }
@@ -439,6 +745,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public <V> RDeque<V> getDeque(String name, Codec codec) {
         return delegate.getDeque(name, codec);
+    }
+
+    @Override
+    public <V> RDeque<V> getDeque(PlainOptions options) {
+        return delegate.getDeque(options);
     }
 
     @Override
@@ -452,8 +763,18 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RBlockingDeque<V> getBlockingDeque(PlainOptions options) {
+        return delegate.getBlockingDeque(options);
+    }
+
+    @Override
     public RAtomicLong getAtomicLong(String name) {
         return delegate.getAtomicLong(name);
+    }
+
+    @Override
+    public RAtomicLong getAtomicLong(CommonOptions options) {
+        return delegate.getAtomicLong(options);
     }
 
     @Override
@@ -462,8 +783,18 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RAtomicDouble getAtomicDouble(CommonOptions options) {
+        return delegate.getAtomicDouble(options);
+    }
+
+    @Override
     public RLongAdder getLongAdder(String name) {
         return delegate.getLongAdder(name);
+    }
+
+    @Override
+    public RLongAdder getLongAdder(CommonOptions options) {
+        return delegate.getLongAdder(options);
     }
 
     @Override
@@ -472,13 +803,28 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RDoubleAdder getDoubleAdder(CommonOptions options) {
+        return delegate.getDoubleAdder(options);
+    }
+
+    @Override
     public RCountDownLatch getCountDownLatch(String name) {
         return delegate.getCountDownLatch(name);
     }
 
     @Override
+    public RCountDownLatch getCountDownLatch(CommonOptions options) {
+        return delegate.getCountDownLatch(options);
+    }
+
+    @Override
     public RBitSet getBitSet(String name) {
         return delegate.getBitSet(name);
+    }
+
+    @Override
+    public RBitSet getBitSet(CommonOptions options) {
+        return delegate.getBitSet(options);
     }
 
     @Override
@@ -492,8 +838,18 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RBloomFilter<V> getBloomFilter(PlainOptions options) {
+        return delegate.getBloomFilter(options);
+    }
+
+    @Override
     public RIdGenerator getIdGenerator(String name) {
         return delegate.getIdGenerator(name);
+    }
+
+    @Override
+    public RIdGenerator getIdGenerator(CommonOptions options) {
+        return delegate.getIdGenerator(options);
     }
 
     @Override
@@ -507,6 +863,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RFunction getFunction(OptionalOptions options) {
+        return delegate.getFunction(options);
+    }
+
+    @Override
     public RScript getScript() {
         return delegate.getScript();
     }
@@ -514,6 +875,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public RScript getScript(Codec codec) {
         return delegate.getScript(codec);
+    }
+
+    @Override
+    public RScript getScript(OptionalOptions options) {
+        return delegate.getScript(options);
     }
 
     @Override
@@ -537,6 +903,11 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RScheduledExecutorService getExecutorService(org.redisson.api.options.ExecutorOptions options) {
+        return delegate.getExecutorService(options);
+    }
+
+    @Override
     public RRemoteService getRemoteService() {
         return delegate.getRemoteService();
     }
@@ -554,6 +925,11 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public RRemoteService getRemoteService(String name, Codec codec) {
         return delegate.getRemoteService(name, codec);
+    }
+
+    @Override
+    public RRemoteService getRemoteService(PlainOptions options) {
+        return delegate.getRemoteService(options);
     }
 
     @Override
@@ -577,8 +953,23 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public RKeys getKeys(KeysOptions options) {
+        return delegate.getKeys(options);
+    }
+
+    @Override
     public RLiveObjectService getLiveObjectService() {
         return delegate.getLiveObjectService();
+    }
+
+    @Override
+    public RLiveObjectService getLiveObjectService(LiveObjectOptions options) {
+        return delegate.getLiveObjectService(options);
+    }
+
+    @Override
+    public RClientSideCaching getClientSideCaching(ClientSideCachingOptions options) {
+        return delegate.getClientSideCaching(options);
     }
 
     @Override
@@ -635,4 +1026,5 @@ public class ObservedRedissonClient implements RedissonClient {
     public String getId() {
         return delegate.getId();
     }
+
 }
