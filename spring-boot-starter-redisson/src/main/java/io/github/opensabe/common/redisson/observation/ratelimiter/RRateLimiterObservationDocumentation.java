@@ -73,6 +73,12 @@ public enum RRateLimiterObservationDocumentation implements ObservationDocumenta
                 return "redisson.ratelimiter.set.rate.successfully";
             }
         },
+        KEEP_ALIVE {
+            @Override
+            public String asString() {
+                return "redisson.ratelimiter.set.rate.keep.alive";
+            }
+        }
         ;
     }
 

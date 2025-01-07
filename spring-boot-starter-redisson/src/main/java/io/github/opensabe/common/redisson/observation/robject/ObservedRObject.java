@@ -68,6 +68,26 @@ public class ObservedRObject implements RObject {
     }
 
     @Override
+    public boolean copy(String destination) {
+        return rObject.copy(destination);
+    }
+
+    @Override
+    public boolean copy(String destination, int database) {
+        return rObject.copy(destination,database);
+    }
+
+    @Override
+    public boolean copyAndReplace(String destination) {
+        return rObject.copyAndReplace(destination);
+    }
+
+    @Override
+    public boolean copyAndReplace(String destination, int database) {
+        return rObject.copyAndReplace(destination,database);
+    }
+
+    @Override
     public boolean move(int database) {
         return rObject.move(database);
     }
@@ -165,6 +185,26 @@ public class ObservedRObject implements RObject {
     @Override
     public RFuture<Void> copyAsync(String host, int port, int database, long timeout) {
         return rObject.copyAsync(host, port, database, timeout);
+    }
+
+    @Override
+    public RFuture<Boolean> copyAsync(String destination) {
+        return rObject.copyAsync(destination);
+    }
+
+    @Override
+    public RFuture<Boolean> copyAsync(String destination, int database) {
+        return rObject.copyAsync(destination,database);
+    }
+
+    @Override
+    public RFuture<Boolean> copyAndReplaceAsync(String destination) {
+        return rObject.copyAndReplaceAsync(destination);
+    }
+
+    @Override
+    public RFuture<Boolean> copyAndReplaceAsync(String destination, int database) {
+        return rObject.copyAndReplaceAsync(destination,database);
     }
 
     @Override
