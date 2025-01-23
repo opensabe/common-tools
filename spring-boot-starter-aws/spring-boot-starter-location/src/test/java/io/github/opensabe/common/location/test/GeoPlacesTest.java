@@ -3,6 +3,8 @@ package io.github.opensabe.common.location.test;
 import io.github.opensabe.common.location.service.GeocodeService;
 import io.github.opensabe.common.location.test.common.GeoPlacesBaseTest;
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
 import java.util.List;
 
@@ -16,22 +18,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Log4j2
 public class GeoPlacesTest extends GeoPlacesBaseTest {
 
-    private String address = "Samuel Asabia House 35 Marina,Lagos,Nigeria";
+    private final String address = "Samuel Asabia House 35 Marina,Lagos,Nigeria";
 
-    //    @Autowired
+    private final List<Double> position = List.of(11.196417, 5.605130);
+
+    @Autowired
     private GeocodeService geocodeService;
 
-    //    @Test
+//    @Test
     public void testGetCoordinates() {
         List<Double> coordinates = geocodeService.getCoordinates(address);
         assertNotNull(coordinates, "Coordinates should not be null");
         log.info("Coordinates: {}", coordinates);
     }
 
-    //    @Test
+//    @Test
     public void reverseGeocode() {
-        ReverseGeocodeResponse reverseGeocodeResponse = geocodeService.reverseGeocode(List.of(11.196417D, 5.605130D));
-        System.out.println(reverseGeocodeResponse);
+        ReverseGeocodeResponse reverseGeocodeResponse = geocodeService.reverseGeocode(position);
+        log.info("Reverse Geocode Response: {}", reverseGeocodeResponse);
     }
 
 }

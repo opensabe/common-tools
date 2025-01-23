@@ -1,6 +1,6 @@
 aws:
   location:
-    accessKey: ${AWS.LOCATION_ACCESS_KEY}
-    secretKey: ${AWS.LOCATION_SECRET_KEY}
-    region: ${AWS.LOCATION_REGION}
+    accessKey: ${AWS_LOCATION_ACCESS_KEY}
+    secretKey: ${AWS_LOCATION_SECRET_KEY}
+    region: ${AWS_LOCATION_REGION}
     enabled: false
