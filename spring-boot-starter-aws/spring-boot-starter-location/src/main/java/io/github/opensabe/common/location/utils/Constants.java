@@ -5,9 +5,9 @@ package io.github.opensabe.common.location.utils;
  * @date 2025/1/23 14:51
  * @description: 参数
  */
-public final class Constans {
+public final class Constants {
 
-    public Constans() {
+    public Constants() {
     }
 
     public static final Integer REVERSE_MAXRESULTS = 10;

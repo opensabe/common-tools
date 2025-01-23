@@ -3,7 +3,7 @@ package io.github.opensabe.common.location.service;
 import io.github.opensabe.common.location.observation.LocationContext;
 import io.github.opensabe.common.location.observation.LocationConvention;
 import io.github.opensabe.common.location.observation.LocationDocumentation;
-import io.github.opensabe.common.location.utils.Constans;
+import io.github.opensabe.common.location.utils.Constants;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
@@ -41,7 +41,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
         }
         // 初始化 LocationContext
         LocationContext locationContext = new LocationContext(
-                Constans.GETCOORDINATES_METHODNAME,
+                Constants.GETCOORDINATES_METHODNAME,
                 address,
                 null,
                 0,
@@ -103,7 +103,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
         }
         // 初始化 LocationContext
         LocationContext locationContext = new LocationContext(
-                Constans.REVERSEGEOCODE_METHODNAME,
+                Constants.REVERSEGEOCODE_METHODNAME,
                 position,
                 null,
                 0,
@@ -124,9 +124,9 @@ public class AwsLocationGeocodeService implements GeocodeService {
             // 构造 ReverseGeocode 请求
             ReverseGeocodeRequest request = ReverseGeocodeRequest.builder()
                     .queryPosition(position)
-                    .maxResults(Constans.REVERSE_MAXRESULTS)
-                    .queryRadius(Constans.REVERSE_QUERYRADIUS)
-                    .language(Constans.REVERSE_LANGUAGE)
+                    .maxResults(Constants.REVERSE_MAXRESULTS)
+                    .queryRadius(Constants.REVERSE_QUERYRADIUS)
+                    .language(Constants.REVERSE_LANGUAGE)
                     .build();
 
             // 调用 GeoPlacesClient 获取响应
