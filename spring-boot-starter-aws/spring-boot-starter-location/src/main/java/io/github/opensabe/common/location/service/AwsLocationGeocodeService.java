@@ -56,13 +56,12 @@ public class AwsLocationGeocodeService implements GeocodeService {
                         () -> locationContext,
                         unifiedObservationFactory.getObservationRegistry()
                 ).start();
-
+        long startTime = System.currentTimeMillis();
         try {
             // 构造 Geocode 请求
             GeocodeRequest geocodeRequest = GeocodeRequest.builder()
                     .queryText(address)
                     .build();
-            long startTime = System.currentTimeMillis();
             // 调用 GeoPlacesClient 获取响应
             GeocodeResponse geocodeResponse = geoPlacesClient.geocode(geocodeRequest);
             locationContext.setResponse(geocodeResponse);
@@ -81,7 +80,6 @@ public class AwsLocationGeocodeService implements GeocodeService {
 
             // 设置成功状态
             locationContext.setSuccessful(true);
-            locationContext.setExecutionTime(System.currentTimeMillis() - startTime);
             return position;
         } catch (Throwable e) {
             observation.error(e);
@@ -90,6 +88,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
             log.error("Error while fetching geocode for address: {}", address, e);
             throw e;
         } finally {
+            locationContext.setExecutionTime(System.currentTimeMillis() - startTime);
             observation.stop();
         }
     }
@@ -138,8 +137,6 @@ public class AwsLocationGeocodeService implements GeocodeService {
 
             // 设置成功状态
             locationContext.setSuccessful(true);
-            locationContext.setExecutionTime(System.currentTimeMillis() - startTime);
-
             return reverseGeocodeResponse;
 
         } catch (Throwable e) {
