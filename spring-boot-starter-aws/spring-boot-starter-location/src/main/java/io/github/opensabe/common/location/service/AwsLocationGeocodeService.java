@@ -20,7 +20,6 @@ import java.util.List;
  */
 
 @Log4j2
-@Builder
 public class AwsLocationGeocodeService implements GeocodeService {
 
 

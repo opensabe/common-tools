@@ -59,7 +59,7 @@ public class AwsGeoPlacesConfiguration {
     @Bean
     public GeocodeService geocodeService(GeoPlacesClient geoPlacesClient, UnifiedObservationFactory unifiedObservationFactory) {
         log.info("GeocodeService bean is being created");
-        return AwsLocationGeocodeService.builder().geoPlacesClient(geoPlacesClient).unifiedObservationFactory(unifiedObservationFactory).build();
+        return new AwsLocationGeocodeService(geoPlacesClient, unifiedObservationFactory);
     }
 
     @Bean
