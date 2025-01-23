@@ -42,6 +42,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
                 address,
                 null,
                 0,
+                false,
                 null
         );
         // 创建并启动 Observation
@@ -75,11 +76,11 @@ public class AwsLocationGeocodeService implements GeocodeService {
                 return null;
             }
             // 设置成功状态
-            locationContext.setSetSuccessful(true);
+            locationContext.setSuccessful(true);
             locationContext.setExecutionTime(System.currentTimeMillis() - startTime);
             return position;
         } catch (Throwable e) {
-            locationContext.setSetSuccessful(false);
+            locationContext.setSuccessful(false);
             locationContext.setThrowable(e);
             log.error("Error while fetching geocode for address: {}", address, e.getMessage());
         }finally {
@@ -97,6 +98,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
                 position,
                 null,
                 0,
+                false,
                 null
         );
 
@@ -125,14 +127,14 @@ public class AwsLocationGeocodeService implements GeocodeService {
             log.info("ReverseGeocodeResponse: {}", reverseGeocodeResponse);
 
             // 设置成功状态
-            locationContext.setSetSuccessful(true);
+            locationContext.setSuccessful(true);
             locationContext.setExecutionTime(System.currentTimeMillis() - startTime);
 
             return reverseGeocodeResponse;
 
         } catch (Throwable e) {
             // 捕获异常并设置上下文状态
-            locationContext.setSetSuccessful(false);
+            locationContext.setSuccessful(false);
             locationContext.setThrowable(e);
             log.error("Error while fetching reverse geocode for position: {}", position, e);
             return null;

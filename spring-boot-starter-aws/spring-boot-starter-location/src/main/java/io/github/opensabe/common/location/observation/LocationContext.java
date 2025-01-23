@@ -25,14 +25,15 @@ public class LocationContext extends Observation.Context  {
     // 执行时间（毫秒）
     private long executionTime;
 
-    private boolean setSuccessful ;
+    private boolean successful ;
     private Throwable throwable;
 
-    public LocationContext(String methodName, Object requestParams, Object response, long executionTime, Throwable throwable) {
+    public LocationContext(String methodName, Object requestParams, Object response, long executionTime,boolean successful, Throwable throwable) {
         this.methodName = methodName;
         this.requestParams = requestParams;
         this.response = response;
         this.executionTime = executionTime;
         this.throwable = throwable;
+        this.successful=successful;
     }
 }

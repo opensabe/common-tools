@@ -44,22 +44,26 @@ public class LocationObservationToJFRGenerator extends ObservationToJFRGenerator
         // 设置 Trace 信息（如果存在）
         TracingObservationHandler.TracingContext tracingContext = context.get(TracingObservationHandler.TracingContext.class);
         if (tracingContext != null) {
-            TraceContext traceContext = tracingContext.getSpan().context();
-            locationJFREvent.setTraceId(traceContext.traceId());
-            locationJFREvent.setSpanId(traceContext.spanId());
-       } else {
+            if (tracingContext.getSpan() != null) {
+                TraceContext traceContext = tracingContext.getSpan().context();
+                locationJFREvent.setTraceId(traceContext.traceId());
+                locationJFREvent.setSpanId(traceContext.spanId());
+            } else {
+                log.warn("Span is null in tracing context, skipping trace ID and span ID population.");
+            }
+        } else {
             log.warn("Tracing context is null, skipping trace ID and span ID population.");
         }
 
         // 设置事件字段
-        locationJFREvent.setSuccessful(context.isSetSuccessful());
+        locationJFREvent.setSuccessful(context.isSuccessful());
         locationJFREvent.setExecutionTime(context.getExecutionTime());
         locationJFREvent.setResponse(String.valueOf(context.getResponse()));
         locationJFREvent.setMethodName(context.getMethodName());
-        locationJFREvent.setRequestParams(locationJFREvent.getRequestParams());
+        locationJFREvent.setRequestParams(String.valueOf(context.getRequestParams()));
 
         // 提交 JFR 事件
-       locationJFREvent.commit();
+        locationJFREvent.commit();
     }
 
     @Override

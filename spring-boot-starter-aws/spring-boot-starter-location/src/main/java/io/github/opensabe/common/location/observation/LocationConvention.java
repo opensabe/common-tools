@@ -25,7 +25,7 @@ public class LocationConvention implements ObservationConvention<LocationContext
     public KeyValues getLowCardinalityKeyValues(LocationContext context) {
         return KeyValues.of(
                 LocationDocumentation.LOCATION_TAG.METHOD_NAME.withValue(String.valueOf(context.getMethodName())),
-                LocationDocumentation.LOCATION_TAG.LOCATION_SUCCESSFULLY.withValue(String.valueOf(context.isSetSuccessful()))
+                LocationDocumentation.LOCATION_TAG.LOCATION_SUCCESSFULLY.withValue(String.valueOf(context.isSuccessful()))
          );
     }
 
@@ -36,7 +36,7 @@ public class LocationConvention implements ObservationConvention<LocationContext
                 LocationDocumentation.LOCATION_TAG.RESPONSE.withValue(String.valueOf(context.getResponse())),
                 LocationDocumentation.LOCATION_TAG.EXECUTION_TIME.withValue(String.valueOf(context.getExecutionTime())),
                 LocationDocumentation.LOCATION_TAG.METHOD_NAME.withValue(String.valueOf(context.getMethodName())),
-                LocationDocumentation.LOCATION_TAG.LOCATION_SUCCESSFULLY.withValue(String.valueOf(context.isSetSuccessful())),
+                LocationDocumentation.LOCATION_TAG.LOCATION_SUCCESSFULLY.withValue(String.valueOf(context.isSuccessful())),
                 LocationDocumentation.LOCATION_TAG.THROWABLE.withValue(String.valueOf(context.getThrowable() == null ? "" : context.getThrowable().getMessage()))
         );
     }
