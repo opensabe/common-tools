@@ -35,9 +35,7 @@ public class LocationConvention implements ObservationConvention<LocationContext
                 LocationDocumentation.LOCATION_TAG.REQUEST_PARAMS.withValue(String.valueOf(context.getRequestParams())),
                 LocationDocumentation.LOCATION_TAG.RESPONSE.withValue(String.valueOf(context.getResponse())),
                 LocationDocumentation.LOCATION_TAG.EXECUTION_TIME.withValue(String.valueOf(context.getExecutionTime())),
-                LocationDocumentation.LOCATION_TAG.METHOD_NAME.withValue(String.valueOf(context.getMethodName())),
-                LocationDocumentation.LOCATION_TAG.LOCATION_SUCCESSFULLY.withValue(String.valueOf(context.isSuccessful())),
-                LocationDocumentation.LOCATION_TAG.THROWABLE.withValue(String.valueOf(context.getThrowable() == null ? "" : context.getThrowable().getMessage()))
+               LocationDocumentation.LOCATION_TAG.THROWABLE.withValue(String.valueOf(context.getThrowable() == null ? "" : context.getThrowable().getMessage()))
         );
     }
 }

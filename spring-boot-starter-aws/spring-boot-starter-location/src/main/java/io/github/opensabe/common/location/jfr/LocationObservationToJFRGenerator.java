@@ -6,6 +6,8 @@ import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.Objects;
+
 /**
  * @author changhongwei
  * @date 2025/1/22 10:26
@@ -43,8 +45,8 @@ public class LocationObservationToJFRGenerator extends ObservationToJFRGenerator
 
         // 设置 Trace 信息（如果存在）
         TracingObservationHandler.TracingContext tracingContext = context.get(TracingObservationHandler.TracingContext.class);
-        if (tracingContext != null) {
-            if (tracingContext.getSpan() != null) {
+        if (Objects.nonNull(tracingContext)) {
+            if (Objects.nonNull(tracingContext.getSpan())) {
                 TraceContext traceContext = tracingContext.getSpan().context();
                 locationJFREvent.setTraceId(traceContext.traceId());
                 locationJFREvent.setSpanId(traceContext.spanId());
