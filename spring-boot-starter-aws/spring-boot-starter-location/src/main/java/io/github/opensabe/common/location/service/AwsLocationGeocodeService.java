@@ -3,6 +3,7 @@ package io.github.opensabe.common.location.service;
 import io.github.opensabe.common.location.observation.LocationContext;
 import io.github.opensabe.common.location.observation.LocationConvention;
 import io.github.opensabe.common.location.observation.LocationDocumentation;
+import io.github.opensabe.common.location.utils.Constans;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import lombok.Builder;
@@ -42,7 +43,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
         }
         // 初始化 LocationContext
         LocationContext locationContext = new LocationContext(
-                "getCoordinates",
+                Constans.GETCOORDINATES_METHODNAME,
                 address,
                 null,
                 0,
@@ -105,7 +106,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
         }
         // 初始化 LocationContext
         LocationContext locationContext = new LocationContext(
-                "reverseGeocode",
+                Constans.REVERSEGEOCODE_METHODNAME,
                 position,
                 null,
                 0,
@@ -126,9 +127,9 @@ public class AwsLocationGeocodeService implements GeocodeService {
             // 构造 ReverseGeocode 请求
             ReverseGeocodeRequest request = ReverseGeocodeRequest.builder()
                     .queryPosition(position)
-                    .maxResults(10)
-                    .queryRadius(3000L)
-                    .language("en")
+                    .maxResults(Constans.REVERSE_MAXRESULTS)
+                    .queryRadius(Constans.REVERSE_QUERYRADIUS)
+                    .language(Constans.REVERSE_LANGUAGE)
                     .build();
 
             // 调用 GeoPlacesClient 获取响应
