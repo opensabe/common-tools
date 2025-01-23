@@ -6,9 +6,7 @@ import io.github.opensabe.common.location.observation.LocationDocumentation;
 import io.github.opensabe.common.location.utils.Constans;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
-import lombok.Builder;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.services.geoplaces.GeoPlacesClient;
 import software.amazon.awssdk.services.geoplaces.model.*;
 
