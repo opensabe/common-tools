@@ -32,7 +32,6 @@ public class AwsGeoPlacesConfiguration {
         this.geoPlacesProperties = geoPlacesProperties;
     }
 
-
     /**
      * 创建 GeoPlacesClient Bean
      */
