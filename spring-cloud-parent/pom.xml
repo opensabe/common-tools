@@ -27,9 +27,9 @@
     <properties>
         <!-- 指定JDK版本和maven使用的JDK版本 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <java.version>17</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>21</java.version>
 
         <opensabe.version>1.0.6-SNAPSHOT</opensabe.version>
 
@@ -41,6 +41,8 @@
         <springdoc.version>2.6.0</springdoc.version>
         <common.io.version>2.11.0</common.io.version>
         <mockito.version>5.2.0</mockito.version>
+        <!-- jdk21版本需要使用更高版本的lombok -->
+        <lombok.version>1.18.36</lombok.version>
     </properties>
 
     <dependencyManagement>
@@ -234,6 +236,13 @@
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-location</artifactId>
                 <version>${opensabe.version}</version>
+            </dependency>
+
+            <!--lombok简化代码-->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
             </dependency>
 
         </dependencies>
