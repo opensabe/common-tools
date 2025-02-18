@@ -5,16 +5,16 @@
 	<parent>
 		<groupId>io.github.opensabe-tech</groupId>
 		<artifactId>aws-bom</artifactId>
-		<version>1.0.6-SNAPSHOT</version>
+		<version>1.1.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>spring-boot-starter-location</artifactId>
-	<version>1.0.6-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 	<packaging>jar</packaging>
 	<properties>
-		<common-utils.version>1.0.6-SNAPSHOT</common-utils.version>
+		<common-utils.version>1.1.0-SNAPSHOT</common-utils.version>
 	</properties>
 
 	<dependencies>
