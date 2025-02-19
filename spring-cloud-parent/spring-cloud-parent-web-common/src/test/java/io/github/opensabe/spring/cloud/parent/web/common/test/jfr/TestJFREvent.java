@@ -11,6 +11,8 @@ import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @Log4j2
-@JfrEventTest
+//@JfrEventTest
 @SpringJUnitConfig
 @SpringBootTest(
         classes = TestJFREvent.MockConfig.class,
@@ -72,6 +74,7 @@ import static org.mockito.Mockito.when;
 @EnableFeignClients
 //JFR 测试最好在本地做
 @Disabled
+@ExtendWith(MockitoExtension.class)
 public class TestJFREvent extends CommonMicroServiceTest {
     @SpringBootApplication
     static class MockConfig {

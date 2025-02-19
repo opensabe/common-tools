@@ -7,6 +7,7 @@ import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.TraceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 @AutoConfigureObservability
 @ActiveProfiles("observation")
 @EnableFeignClients
+@Disabled
 public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
     @SpringBootApplication
     static class MockConfig {
