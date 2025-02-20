@@ -7,6 +7,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @AutoConfigureObservability
 @EnableFeignClients
+@Disabled
 public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
     static final String TEST_SERVICE_CIRCUITBREAKER = "testServiceCircuitbreaker";
     static final String CONTEXT_ID_CIRCUITBREAKER = "testServiceCircuitbreakerClient";

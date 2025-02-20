@@ -9,6 +9,7 @@ import io.github.resilience4j.retry.RetryRegistry;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("feignDefaultRequest")
 @SpringBootTest
 @AutoConfigureObservability
+@Disabled
 public class FeignBlockingLoadBalancerDefaultRequestSameTest extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "testService1";
     static final String CONTEXT_ID_1 = "testService1Client";

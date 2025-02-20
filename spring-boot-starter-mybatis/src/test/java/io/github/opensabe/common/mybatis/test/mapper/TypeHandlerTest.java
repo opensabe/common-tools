@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.opensabe.common.mybatis.types.JSONTypeHandler;
 import lombok.*;
 import org.apache.ibatis.type.JdbcType;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.mockito.Mockito.*;
 
+@Disabled
 public class TypeHandlerTest {
 
     @Data

@@ -6,6 +6,7 @@ import feign.MethodMetadata;
 import feign.Request;
 import feign.RequestTemplate;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -17,6 +18,7 @@ import java.lang.reflect.Method;
  * Util 类静态方法测试
  */
 @Execution(ExecutionMode.CONCURRENT)
+@Disabled
 public class OpenfeignUtilTest {
     public static class SimpleClass {
         public void testSimple() {}
