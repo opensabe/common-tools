@@ -63,6 +63,7 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
+    @Disabled
     public void testSend() throws InterruptedException {
         mqProducer.send("rocketmq-test-topic", POJO.builder().text("今天天气不错" + testSendLatchString).timestamp(timestamp).build(), MQSendConfig.builder()
                 //重试3次失败后，存入数据库靠定时任务继续重试

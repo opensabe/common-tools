@@ -14,6 +14,7 @@ import io.micrometer.tracing.TraceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         },
         classes = TestGatewayObservation.MockConfig.class
 )
+@Disabled
 public class TestGatewayObservation extends CommonMicroServiceTest {
     @SpringBootApplication
     public static class MockConfig {

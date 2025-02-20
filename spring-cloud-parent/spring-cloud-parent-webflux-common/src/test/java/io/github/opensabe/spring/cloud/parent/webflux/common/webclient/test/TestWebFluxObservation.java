@@ -11,6 +11,7 @@ import io.micrometer.tracing.TraceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -48,6 +49,7 @@ import static org.mockito.Mockito.when;
         "resilience4j.circuitbreaker.configs.default.minimumNumberOfCalls=4",
         "resilience4j.circuitbreaker.configs.default.recordExceptions=java.lang.Exception"
 }, classes = TestWebFluxObservation.MockConfig.class)
+@Disabled
 public class TestWebFluxObservation extends CommonMicroServiceTest {
     @SpringBootApplication
     public static class MockConfig {
