@@ -4,6 +4,7 @@ import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName;
 import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.exceptions.RedissonRateLimiterException;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -90,11 +91,11 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
         } else if (redissonRateLimiter.type() == RedissonRateLimiter.Type.TRY) {
             if (redissonRateLimiter.waitTime() < 0) {
                 if (!rateLimiter.tryAcquire(redissonRateLimiter.permits())) {
-                    throw new RedissonClientException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
+                    throw new RedissonRateLimiterException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
                 }
             } else {
                 if (!rateLimiter.tryAcquire(redissonRateLimiter.permits(), redissonRateLimiter.waitTime(), redissonRateLimiter.timeUnit())) {
-                    throw new RedissonClientException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
+                    throw new RedissonRateLimiterException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
                 }
             }
         }

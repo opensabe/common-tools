@@ -1,9 +1,9 @@
 package io.github.opensabe.common.redisson.aop;
 
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.RedissonLockName;
-import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -75,7 +75,7 @@ public class RedissonLockInterceptor implements MethodInterceptor {
                         .maxDelay(redissonLock.backOffMaxDelay())
                         .multiplier(redissonLock.backOffMultiplier()));
             } else {
-                throw new RedissonClientException("Not implemented BackOffType: " + backOffType);
+                throw new RedissonLockException("Not implemented BackOffType: " + backOffType);
             }
         } else if (lockFeature == RedissonLock.LockFeature.READ_WRITE) {
             if (redissonLock.readOrWrite() == RedissonLock.ReadOrWrite.READ) {
@@ -84,7 +84,7 @@ public class RedissonLockInterceptor implements MethodInterceptor {
                 lock = redissonClient.getReadWriteLock(lockName).writeLock();
             }
         } else {
-            throw new RedissonClientException("Not implemented LockFeature: " + lockFeature);
+            throw new RedissonLockException("Not implemented LockFeature: " + lockFeature);
         }
         if (lock == null) {
             log.error("RedissonLockInterceptor-invoke {} err! error during create redisson lock!", method.getName());
@@ -105,7 +105,7 @@ public class RedissonLockInterceptor implements MethodInterceptor {
                     break;
             }
             if (!getLock) {
-                throw new RedissonClientException("can not get redisson lock,method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
+                throw new RedissonLockException("can not get redisson lock,method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
             } else {
                 log.debug("RedissonLockInterceptor-invoke successfully locked lockName {}, method: {}, threadId: {}",
                         lockName, method.getName(), Thread.currentThread().getId());
