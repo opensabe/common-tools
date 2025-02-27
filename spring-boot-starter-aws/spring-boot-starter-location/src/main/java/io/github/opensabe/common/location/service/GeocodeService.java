@@ -19,6 +19,11 @@ public interface GeocodeService {
     List<Double> getCoordinates(String address);
 
 
+    /**
+     * 根据坐标获取地理位置
+     * @param position
+     * @return
+     */
     ReverseGeocodeResponse reverseGeocode(List<Double> position);
 
 }
