@@ -9,14 +9,13 @@ import org.redisson.api.RedissonClient;
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
-@Repeatable(SLock.Locks.class)
 @Documented
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SLock {
 
-    String name();
+    String[] name();
 
     int order() default 0;
 
@@ -101,7 +100,7 @@ public @interface SLock {
          */
         DEFAULT {
             @Override
-            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+            public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return redissonClient.getLock(name);
             }
         },
@@ -110,7 +109,7 @@ public @interface SLock {
          */
         FAIR {
             @Override
-            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+            public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return redissonClient.getFairLock(name);
             }
         },
@@ -120,7 +119,7 @@ public @interface SLock {
          */
         SPIN {
             @Override
-            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+            public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return redissonClient.getSpinLock(name, content.backOffType().backOff(content));
             }
         },
@@ -129,7 +128,7 @@ public @interface SLock {
          */
         READ_WRITE {
             @Override
-            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+            public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return content.readOrWrite().transform(redissonClient.getReadWriteLock(name));
             }
         },
@@ -139,13 +138,13 @@ public @interface SLock {
          */
         FENCED {
             @Override
-            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+            public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return redissonClient.getFencedLock(name);
             }
         }
         ;
 
-        abstract RLock getLock (String name, SLock content, RedissonClient redissonClient);
+        public abstract RLock getLock (String name, SLock content, RedissonClient redissonClient);
     }
 
 
@@ -196,17 +195,4 @@ public @interface SLock {
         abstract RLock transform (RReadWriteLock lock);
     }
 
-
-
-
-
-
-
-    @Documented
-    @Inherited
-    @Target({ElementType.METHOD, ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface Locks {
-        SLock[] value();
-    }
 }

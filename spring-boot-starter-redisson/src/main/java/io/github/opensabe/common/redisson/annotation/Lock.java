@@ -5,7 +5,6 @@ import org.springframework.core.annotation.AliasFor;
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
-@Repeatable(Lock.Locks.class)
 @Documented
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -14,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public @interface Lock {
 
     @AliasFor(annotation = SLock.class)
-    String name();
+    String[] name();
 
     @AliasFor(annotation = SLock.class)
     int order() default 0;
@@ -40,14 +39,4 @@ public @interface Lock {
 
 
 
-    @Documented
-    @Inherited
-    @Target({ElementType.METHOD, ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @SLock.Locks({})
-    @interface Locks {
-
-        @AliasFor(annotation = SLock.Locks.class)
-        Lock[] value();
-    }
 }

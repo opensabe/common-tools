@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class AnnotationMergeTest {
 
-    @Lock(name = "myname")
     @Lock(name = "myname1")
     public static class App {
 
@@ -58,7 +57,7 @@ public class AnnotationMergeTest {
     void testChildMethod () throws NoSuchMethodException {
         Method method = Child.class.getMethod("doSomething");
         Set<SLock> locks = AnnotatedElementUtils.findMergedRepeatableAnnotations(method, SLock.class);
-        Assertions.assertEquals(2, locks.size());
+        Assertions.assertEquals(1, locks.size());
     }
 
 }
