@@ -1,57 +1,24 @@
 package io.github.opensabe.common.redisson.annotation;
 
+import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import org.redisson.api.LockOptions;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RedissonClient;
 
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
-/**
- * 单个lock
- * 包含所有Lock的所有lock方式
- * @see LockFeature
- * @author hengma
- */
-@Repeatable(MLock.class)
+@Repeatable(SLock.Locks.class)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface SLock {
-    /**
-     * key表达式. 跟 Cacheable保持一致
-     */
+
     String name();
 
-    /**
-     * 多个lock时排序用
-     */
     int order() default 0;
-
-    /**
-     * 锁特性
-     */
-    LockFeature lockFeature() default LockFeature.DEFAULT;
-
-    /**
-     * 阻塞锁
-     */
-    int BLOCK_LOCK = 1;
-    /**
-     * try lock，未获取则不等待，直接抛出 RedissonLockException
-     */
-    int TRY_LOCK_NOWAIT = 2;
-    /**
-     * try lock，包含等待
-     */
-    int TRY_LOCK = 3;
-
-    /**
-     * 锁类型
-     */
-    int lockType() default BLOCK_LOCK;
 
     /**
      * 锁等待时间
@@ -67,6 +34,11 @@ public @interface SLock {
      * 时间单位
      */
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
+
+
+    LockType lockType() default LockType.BLOCK_LOCK;
+
+    LockFeature lockFeature() default LockFeature.DEFAULT;
 
     BackOffType backOffType() default BackOffType.EXPONENTIAL;
 
@@ -85,28 +57,98 @@ public @interface SLock {
     /**
      * 这个参数在 LockFeature = READ_WRITE 使用
      */
-    RedissonLock.ReadOrWrite readOrWrite() default RedissonLock.ReadOrWrite.READ;
+    ReadOrWrite readOrWrite() default ReadOrWrite.READ;
+
+
+    enum LockType {
+
+        BLOCK_LOCK {
+            @Override
+            public boolean lock(SLock content, RLock lock) {
+                lock.lock(content.leaseTime(), content.timeUnit());;
+                return true;
+            }
+        },
+        /**
+         * try lock，未获取则不等待，直接抛出 RedissionClientException
+         */
+        TRY_LOCK_NOWAIT {
+            @Override
+            public boolean lock(SLock content, RLock lock) {
+                return lock.tryLock();
+            }
+        },
+        /**
+         * try lock，包含等待
+         */
+        TRY_LOCK {
+            @Override
+            public boolean lock(SLock content, RLock lock) {
+                try {
+                    return lock.tryLock(content.waitTime(), content.leaseTime(), content.timeUnit());
+                } catch (InterruptedException e) {
+                    throw new RedissonLockException ("can not get redisson lock", e);
+                }
+            }
+        };
+
+        public abstract boolean lock (SLock content,RLock lock);
+    }
 
     enum LockFeature {
         /**
          * @see org.redisson.api.RedissonClient#getLock(String)
          */
-        DEFAULT,
+        DEFAULT {
+            @Override
+            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+                return redissonClient.getLock(name);
+            }
+        },
         /**
          * @see org.redisson.api.RedissonClient#getFairLock(String)
          */
-        FAIR,
+        FAIR {
+            @Override
+            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+                return redissonClient.getFairLock(name);
+            }
+        },
         /**
          * @see org.redisson.api.RedissonClient#getSpinLock(String)
          * @see org.redisson.api.RedissonClient#getSpinLock(String, LockOptions.BackOff)
          */
-        SPIN,
+        SPIN {
+            @Override
+            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+                return redissonClient.getSpinLock(name, content.backOffType().backOff(content));
+            }
+        },
         /**
          * @see org.redisson.api.RedissonClient#getReadWriteLock(String)
          */
-        READ_WRITE,
+        READ_WRITE {
+            @Override
+            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+                return content.readOrWrite().transform(redissonClient.getReadWriteLock(name));
+            }
+        },
+
+        /**
+         * @see RedissonClient#getFencedLock(String)
+         */
+        FENCED {
+            @Override
+            RLock getLock(String name, SLock content, RedissonClient redissonClient) {
+                return redissonClient.getFencedLock(name);
+            }
+        }
         ;
+
+        abstract RLock getLock (String name, SLock content, RedissonClient redissonClient);
     }
+
+
 
     enum BackOffType {
         /**
@@ -114,9 +156,9 @@ public @interface SLock {
          */
         CONSTANT {
             @Override
-            public LockOptions.BackOff lockOptions(SLock sLock) {
+            LockOptions.BackOff backOff(SLock content) {
                 return new LockOptions.ConstantBackOff()
-                        .delay(sLock.backOffDelay());
+                        .delay(content.backOffDelay());
             }
         },
         /**
@@ -124,27 +166,47 @@ public @interface SLock {
          */
         EXPONENTIAL {
             @Override
-            public LockOptions.BackOff lockOptions(SLock sLock) {
+            LockOptions.BackOff backOff(SLock content) {
                 return new LockOptions.ExponentialBackOff()
-                        .initialDelay(sLock.backOffInitialDelay())
-                        .maxDelay(sLock.backOffMaxDelay())
-                        .multiplier(sLock.backOffMultiplier());
+                        .initialDelay(content.backOffInitialDelay())
+                        .maxDelay(content.backOffMaxDelay())
+                        .multiplier(content.backOffMultiplier());
             }
         },
         ;
 
-        public abstract LockOptions.BackOff lockOptions (SLock sLock);
+        abstract LockOptions.BackOff backOff (SLock content);
     }
 
     enum ReadOrWrite {
-        READ(RReadWriteLock::readLock),
-        WRITE(RReadWriteLock::writeLock),
+        READ {
+            @Override
+            RLock transform(RReadWriteLock lock) {
+                return lock.readLock();
+            }
+        },
+        WRITE {
+            @Override
+            RLock transform(RReadWriteLock lock) {
+                return lock.writeLock();
+            }
+        },
         ;
 
-        private final Function<RReadWriteLock, RLock> transform;
+        abstract RLock transform (RReadWriteLock lock);
+    }
 
-        ReadOrWrite(Function<RReadWriteLock, RLock> transform) {
-            this.transform = transform;
-        }
+
+
+
+
+
+
+    @Documented
+    @Inherited
+    @Target({ElementType.METHOD, ElementType.TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Locks {
+        SLock[] value();
     }
 }

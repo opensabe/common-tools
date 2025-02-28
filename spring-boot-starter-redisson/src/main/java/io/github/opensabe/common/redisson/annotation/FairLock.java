@@ -5,27 +5,19 @@ import org.springframework.core.annotation.AliasFor;
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
+@Repeatable(FairLock.Locks.class)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @SLock(name = "", lockFeature = SLock.LockFeature.FAIR)
 public @interface FairLock {
 
     @AliasFor(annotation = SLock.class)
-    String name ();
+    String name();
 
-    /**
-     * 多个lock时排序用
-     */
     @AliasFor(annotation = SLock.class)
     int order() default 0;
-
-    /**
-     * 锁类型
-     */
-    @AliasFor(annotation = SLock.class)
-    int lockType() default SLock.BLOCK_LOCK;
 
     /**
      * 锁等待时间
@@ -45,4 +37,17 @@ public @interface FairLock {
     @AliasFor(annotation = SLock.class)
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
+
+
+
+    @Documented
+    @Inherited
+    @Target({ElementType.METHOD, ElementType.TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    @SLock.Locks({})
+    @interface Locks {
+
+        @AliasFor(annotation = SLock.Locks.class)
+        FairLock[] value();
+    }
 }

@@ -1,38 +1,29 @@
 package io.github.opensabe.common.redisson.annotation;
 
-
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
+@Repeatable(ReadWriteLock.Locks.class)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-@SLock(name = "", lockFeature = SLock.LockFeature.READ_WRITE)
+@Retention(RetentionPolicy.RUNTIME)
+@SLock(name = "", lockFeature = SLock.LockFeature.DEFAULT)
 public @interface ReadWriteLock {
 
     @AliasFor(annotation = SLock.class)
-    String name ();
+    String name();
 
-    /**
-     * 多个lock时排序用
-     */
     @AliasFor(annotation = SLock.class)
     int order() default 0;
-
-    /**
-     * 锁类型
-     */
-    @AliasFor(annotation = SLock.class)
-    int lockType() default SLock.BLOCK_LOCK;
 
     /**
      * 锁等待时间
      */
     @AliasFor(annotation = SLock.class)
-    long waitTime() default 1000;
+    long waitTime() default 1000l;
 
     /**
      * 锁最长持有时间
@@ -46,9 +37,17 @@ public @interface ReadWriteLock {
     @AliasFor(annotation = SLock.class)
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
-    /**
-     * 这个参数在 LockFeature = READ_WRITE 使用
-     */
     @AliasFor(annotation = SLock.class)
     SLock.ReadOrWrite readOrWrite() default SLock.ReadOrWrite.READ;
+
+    @Documented
+    @Inherited
+    @Target({ElementType.METHOD, ElementType.TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    @SLock.Locks({})
+    @interface Locks {
+
+        @AliasFor(annotation = SLock.Locks.class)
+        ReadWriteLock[] value();
+    }
 }

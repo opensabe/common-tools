@@ -5,13 +5,13 @@ import org.springframework.core.annotation.AliasFor;
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
-@Repeatable(SpinLock.Locks.class)
+@Repeatable(FencedLock.Locks.class)
 @Documented
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @SLock(name = "", lockFeature = SLock.LockFeature.DEFAULT)
-public @interface SpinLock {
+public @interface FencedLock {
 
     @AliasFor(annotation = SLock.class)
     String name();
@@ -37,24 +37,7 @@ public @interface SpinLock {
     @AliasFor(annotation = SLock.class)
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
-    @AliasFor(annotation = SLock.class)
-    SLock.BackOffType backOffType() default SLock.BackOffType.EXPONENTIAL;
 
-    /**
-     * 这个参数在 LockFeature = SPIN， BackOffType = CONSTANT 使用
-     */
-    @AliasFor(annotation = SLock.class)
-    long backOffDelay() default 64L;
-
-    /**
-     * 以下三个参数在 LockFeature = SPIN， BackOffType = EXPONENTIAL 使用
-     */
-    @AliasFor(annotation = SLock.class)
-    long backOffMaxDelay()  default 128;
-    @AliasFor(annotation = SLock.class)
-    long backOffInitialDelay() default 1;
-    @AliasFor(annotation = SLock.class)
-    int backOffMultiplier() default 2;
 
 
     @Documented
@@ -65,6 +48,6 @@ public @interface SpinLock {
     @interface Locks {
 
         @AliasFor(annotation = SLock.Locks.class)
-        SpinLock[] value();
+        FencedLock[] value();
     }
 }
