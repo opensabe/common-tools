@@ -8,7 +8,6 @@ import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.LockOptions;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.expression.ParserContext;
@@ -58,52 +57,52 @@ public class RedissonLockInterceptor implements MethodInterceptor {
         RedissonLock redissonLock = redissonLockProperties.getRedissonLock();
         log.debug("RedissonLockInterceptor-invoke begin to try redisson lockName {}, method: {}, thread: {}", lockName, method.getName(), Thread.currentThread().getName());
         //创建锁
-        RLock lock = null;
-        RedissonLock.LockFeature lockFeature = redissonLock.lockFeature();
-        if (lockFeature == RedissonLock.LockFeature.DEFAULT) {
-            lock = redissonClient.getLock(lockName);
-        } else if (lockFeature == RedissonLock.LockFeature.FAIR) {
-            lock = redissonClient.getFairLock(lockName);
-        } else if (lockFeature == RedissonLock.LockFeature.SPIN) {
-            RedissonLock.BackOffType backOffType = redissonLock.backOffType();
-            if (backOffType == RedissonLock.BackOffType.CONSTANT) {
-                lock = redissonClient.getSpinLock(lockName, new LockOptions.ConstantBackOff()
-                        .delay(redissonLock.backOffDelay()));
-            } else if (backOffType == RedissonLock.BackOffType.EXPONENTIAL) {
-                lock = redissonClient.getSpinLock(lockName, new LockOptions.ExponentialBackOff()
-                        .initialDelay(redissonLock.backOffInitialDelay())
-                        .maxDelay(redissonLock.backOffMaxDelay())
-                        .multiplier(redissonLock.backOffMultiplier()));
-            } else {
-                throw new RedissonLockException("Not implemented BackOffType: " + backOffType);
-            }
-        } else if (lockFeature == RedissonLock.LockFeature.READ_WRITE) {
-            if (redissonLock.readOrWrite() == RedissonLock.ReadOrWrite.READ) {
-                lock = redissonClient.getReadWriteLock(lockName).readLock();
-            } else {
-                lock = redissonClient.getReadWriteLock(lockName).writeLock();
-            }
-        } else {
-            throw new RedissonLockException("Not implemented LockFeature: " + lockFeature);
-        }
-        if (lock == null) {
-            log.error("RedissonLockInterceptor-invoke {} err! error during create redisson lock!", method.getName());
-            return invocation.proceed();
-        }
+        RLock lock = redissonLock.lockFeature().getLock(lockName, redissonLock, redissonClient);
+//        RedissonLock.LockFeature lockFeature = redissonLock.lockFeature();
+//        if (lockFeature == RedissonLock.LockFeature.DEFAULT) {
+//            lock = redissonClient.getLock(lockName);
+//        } else if (lockFeature == RedissonLock.LockFeature.FAIR) {
+//            lock = redissonClient.getFairLock(lockName);
+//        } else if (lockFeature == RedissonLock.LockFeature.SPIN) {
+//            RedissonLock.BackOffType backOffType = redissonLock.backOffType();
+//            if (backOffType == RedissonLock.BackOffType.CONSTANT) {
+//                lock = redissonClient.getSpinLock(lockName, new LockOptions.ConstantBackOff()
+//                        .delay(redissonLock.backOffDelay()));
+//            } else if (backOffType == RedissonLock.BackOffType.EXPONENTIAL) {
+//                lock = redissonClient.getSpinLock(lockName, new LockOptions.ExponentialBackOff()
+//                        .initialDelay(redissonLock.backOffInitialDelay())
+//                        .maxDelay(redissonLock.backOffMaxDelay())
+//                        .multiplier(redissonLock.backOffMultiplier()));
+//            } else {
+//                throw new RedissonLockException("Not implemented BackOffType: " + backOffType);
+//            }
+//        } else if (lockFeature == RedissonLock.LockFeature.READ_WRITE) {
+//            if (redissonLock.readOrWrite() == RedissonLock.ReadOrWrite.READ) {
+//                lock = redissonClient.getReadWriteLock(lockName).readLock();
+//            } else {
+//                lock = redissonClient.getReadWriteLock(lockName).writeLock();
+//            }
+//        } else {
+//            throw new RedissonLockException("Not implemented LockFeature: " + lockFeature);
+//        }
+//        if (lock == null) {
+//            log.error("RedissonLockInterceptor-invoke {} err! error during create redisson lock!", method.getName());
+//            return invocation.proceed();
+//        }
         try {
-            boolean getLock = false;
-            switch (redissonLock.lockType()) {
-                case RedissonLock.BLOCK_LOCK:
-                    lock.lock(redissonLock.leaseTime(), redissonLock.timeUnit()); //默认为-1，永久持有直接主动释放
-                    getLock = true;
-                    break;
-                case RedissonLock.TRY_LOCK_NOWAIT:
-                    getLock = lock.tryLock();
-                    break;
-                case RedissonLock.TRY_LOCK:
-                    getLock = lock.tryLock(redissonLock.waitTime(), redissonLock.leaseTime(), redissonLock.timeUnit());
-                    break;
-            }
+            boolean getLock = RedissonLock.LockType.lockType(redissonLock.lockType()).lock(redissonLock, lock);
+//            switch (redissonLock.lockType()) {
+//                case RedissonLock.BLOCK_LOCK:
+//                    lock.lock(redissonLock.leaseTime(), redissonLock.timeUnit()); //默认为-1，永久持有直接主动释放
+//                    getLock = true;
+//                    break;
+//                case RedissonLock.TRY_LOCK_NOWAIT:
+//                    getLock = lock.tryLock();
+//                    break;
+//                case RedissonLock.TRY_LOCK:
+//                    getLock = lock.tryLock(redissonLock.waitTime(), redissonLock.leaseTime(), redissonLock.timeUnit());
+//                    break;
+//            }
             if (!getLock) {
                 throw new RedissonLockException("can not get redisson lock,method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
             } else {

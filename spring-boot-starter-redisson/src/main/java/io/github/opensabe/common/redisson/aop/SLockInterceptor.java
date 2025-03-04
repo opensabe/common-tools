@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.lang3.StringUtils;
 import org.redisson.RedissonMultiLock;
 import org.redisson.api.RExpirable;
 import org.redisson.api.RLock;
@@ -44,12 +43,8 @@ public class SLockInterceptor implements MethodInterceptor {
         RLock[] locks = Arrays.stream(lock.name())
                 .map(name -> {
                     String resolved = evaluator.resolve(method, invocation.getThis(), invocation.getArguments(), name);
-                    if (StringUtils.isBlank(resolved)) {
-                        resolved = name;
-                    }
                     return lock.prefix()+resolved;
                 })
-                .peek(System.out::println)
                 .map(name -> lock.lockFeature().getLock(name, lock, redissonClient))
                 .toArray(RLock[]::new);
 

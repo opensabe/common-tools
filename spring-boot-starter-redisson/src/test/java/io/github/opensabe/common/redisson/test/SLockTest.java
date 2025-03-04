@@ -51,12 +51,12 @@ public class SLockTest extends BaseRedissonTest {
     }
 
     public interface TestRedissonLockInterface1 {
-        @Lock(name = "#name")
+        @Lock(prefix = "p1", name = "#name")
         void testBlockLockWithName(String name) throws InterruptedException;
     }
 
     public interface TestRedissonLockInterface2 {
-        @SpinLock(name = "#name")
+        @SpinLock(prefix = "p1", name = "#name")
         void testBlockSpinLock(String name) throws InterruptedException;
     }
 
@@ -98,37 +98,37 @@ public class SLockTest extends BaseRedissonTest {
             super(redissonClient);
         }
 
-        @Lock(name = "'testNoLock'")
+        @Lock(prefix = "p1", name = "testNoLock")
         public void testNoLock() throws InterruptedException {
             add();
         }
 
-        @Lock(name = "'testBlockLockWithNoName'")
+        @Lock(prefix = "p1", name = "testBlockLockWithNoName")
         public void testBlockLockWithNoName() throws InterruptedException {
             add();
         }
 
-        @Lock(name = "#name")
+        @Lock(prefix = "p1", name = "#name")
         public void testBlockLock(String name) throws InterruptedException {
             add();
         }
 
-        @SpinLock(name = "#name")
+        @SpinLock(prefix = "p1", name = "#name")
         public void testBlockSpinLock(String name) throws InterruptedException {
             add();
         }
 
-        @FairLock(name = "#name")
+        @FairLock(prefix = "p1", name = "#name")
         public void testBlockFairLock(String name) throws InterruptedException {
             add();
         }
 
-        @Lock(name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 100000, timeUnit = TimeUnit.MILLISECONDS)
+        @Lock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 100000, timeUnit = TimeUnit.MILLISECONDS)
         public void testTryLock(String name) throws InterruptedException {
             add();
         }
 
-        @Lock(name = "#name", lockType = SLock.LockType.TRY_LOCK_NOWAIT)
+        @Lock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK_NOWAIT)
         public void testTryLockNoWait( String name) throws InterruptedException {
             add();
             //3s 肯定够100个线程都 try lock 失败
@@ -142,9 +142,9 @@ public class SLockTest extends BaseRedissonTest {
             Assertions.assertTrue(lock.isHeldByCurrentThread());
         }
 
-        @Lock(name = "#name", leaseTime = 1000L)
+        @Lock(prefix = "p1", name = "#name", leaseTime = 1000L)
         public void testLockTime(String name) throws InterruptedException {
-            RLock lock = redissonClient.getLock(RedissonLockName.DEFAULT_PREFIX+name);
+            RLock lock = redissonClient.getLock("p1"+name);
             //验证获取了锁
             Assertions.assertTrue(lock.isHeldByCurrentThread());
             TimeUnit.SECONDS.sleep(2);
@@ -153,9 +153,9 @@ public class SLockTest extends BaseRedissonTest {
         }
 
         //waitTime只对于 trylock 有效
-        @Lock(name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 1000L)
+        @Lock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 1000L)
         public void testWaitTime(String name) throws InterruptedException {
-            RLock lock = redissonClient.getLock(RedissonLockName.DEFAULT_PREFIX+name);
+            RLock lock = redissonClient.getLock("p1"+name);
             //验证获取了锁
             Assertions.assertTrue(lock.isHeldByCurrentThread());
             TimeUnit.SECONDS.sleep(10);

@@ -6,6 +6,7 @@ import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 
 import java.lang.reflect.Method;
@@ -33,7 +34,11 @@ public class MethodArgumentsExpressEvaluator extends CachedExpressionEvaluator {
 
     public String resolve (Method method, Object target, Object[] arguments, String expression) {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
-        return getExpression(method, targetClass, expression).getValue(createContext(method, target, targetClass, arguments), String.class);
+        try {
+            return getExpression(method, targetClass, expression).getValue(createContext(method, target, targetClass, arguments), String.class);
+        }catch (EvaluationException e) {
+            return expression;
+        }
     }
 
     private MethodBasedEvaluationContext createContext (Method method, Object target, Class<?> targetClass, Object[] arguments) {

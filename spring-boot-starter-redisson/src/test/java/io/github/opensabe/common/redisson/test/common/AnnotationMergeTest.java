@@ -40,14 +40,15 @@ public class AnnotationMergeTest {
     void testAnnotationName () throws NoSuchMethodException {
         Method method = App.class.getMethod("doSomething");
         SLock lock = AnnotatedElementUtils.findMergedAnnotation(method, SLock.class);
-        Assertions.assertEquals("parentMethod", lock.name());
+        assertThat(lock.name())
+                .containsExactly("parentMethod");
     }
 
     @Test
     void testChildClass () throws NoSuchMethodException {
-        Set<SLock> set = AnnotatedElementUtils.findMergedRepeatableAnnotations(App.class, SLock.class);
+        SLock set = AnnotatedElementUtils.findMergedAnnotation(App.class, SLock.class);
 
-        Set<SLock> set1 = AnnotatedElementUtils.findMergedRepeatableAnnotations(Child.class, SLock.class);
+        SLock set1 = AnnotatedElementUtils.findMergedAnnotation(Child.class, SLock.class);
 
         assertThat(set).isEqualTo(set1);
 
@@ -56,7 +57,7 @@ public class AnnotationMergeTest {
     @Test
     void testChildMethod () throws NoSuchMethodException {
         Method method = Child.class.getMethod("doSomething");
-        Set<SLock> locks = AnnotatedElementUtils.findMergedRepeatableAnnotations(method, SLock.class);
-        Assertions.assertEquals(1, locks.size());
+        SLock locks = AnnotatedElementUtils.findMergedAnnotation(method, SLock.class);
+        Assertions.assertNotNull(locks);
     }
 }
