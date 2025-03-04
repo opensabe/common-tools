@@ -16,6 +16,9 @@ public @interface ReadWriteLock {
     String[] name();
 
     @AliasFor(annotation = SLock.class)
+    String prefix() default RedissonLockName.DEFAULT_PREFIX;
+
+    @AliasFor(annotation = SLock.class)
     int order() default 0;
 
     /**
@@ -39,4 +42,7 @@ public @interface ReadWriteLock {
     @AliasFor(annotation = SLock.class)
     SLock.ReadOrWrite readOrWrite() default SLock.ReadOrWrite.READ;
 
+
+    @AliasFor(annotation = SLock.class)
+    SLock.LockType lockType() default SLock.LockType.BLOCK_LOCK;
 }

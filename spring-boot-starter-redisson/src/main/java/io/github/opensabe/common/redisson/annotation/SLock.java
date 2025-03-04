@@ -17,6 +17,8 @@ public @interface SLock {
 
     String[] name();
 
+    String prefix() default RedissonLockName.DEFAULT_PREFIX;
+
     int order() default 0;
 
     /**
@@ -57,7 +59,6 @@ public @interface SLock {
      * 这个参数在 LockFeature = READ_WRITE 使用
      */
     ReadOrWrite readOrWrite() default ReadOrWrite.READ;
-
 
     enum LockType {
 

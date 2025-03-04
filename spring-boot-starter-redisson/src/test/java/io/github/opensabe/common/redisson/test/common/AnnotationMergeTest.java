@@ -59,5 +59,4 @@ public class AnnotationMergeTest {
         Set<SLock> locks = AnnotatedElementUtils.findMergedRepeatableAnnotations(method, SLock.class);
         Assertions.assertEquals(1, locks.size());
     }
-
 }

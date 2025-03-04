@@ -1,7 +1,9 @@
 package io.github.opensabe.common.redisson.observation.rlock;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
 import io.micrometer.observation.Observation;
+import org.redisson.api.RExpirable;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
 
@@ -13,11 +15,12 @@ import java.util.concurrent.locks.Condition;
  * 注意每次都要新建一个实例，不要重复使用
  * 通过正常的 api 就是每次新建一个，但是注意不要使用单例模式
  */
-public class ObservedRLock implements RLock {
+public class ObservedRLock extends ObservedRExpirable implements RLock {
     private final RLock delegate;
     private final UnifiedObservationFactory unifiedObservationFactory;
 
     public ObservedRLock(RLock delegate, UnifiedObservationFactory unifiedObservationFactory) {
+        super((RExpirable) delegate, unifiedObservationFactory);
         this.delegate = delegate;
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
@@ -174,9 +177,7 @@ public class ObservedRLock implements RLock {
 
     @Override
     public boolean tryLock() {
-        return observeAcquiringLock(true, -1L, -1L, null, () -> {
-            return delegate.tryLock();
-        });
+        return observeAcquiringLock(true, -1L, -1L, null, delegate::tryLock);
     }
 
     @Override

@@ -1,28 +1,12 @@
 package io.github.opensabe.common.redisson.config;
 
-import io.github.opensabe.common.redisson.aop.RedissonLockAdvisor;
-import io.github.opensabe.common.redisson.aop.RedissonLockCachedPointcut;
-import io.github.opensabe.common.redisson.aop.RedissonLockInterceptor;
-import io.github.opensabe.common.redisson.aop.RedissonRateLimiterAdvisor;
-import io.github.opensabe.common.redisson.aop.RedissonRateLimiterCachedPointcut;
-import io.github.opensabe.common.redisson.aop.RedissonRateLimiterInterceptor;
-import io.github.opensabe.common.redisson.aop.RedissonScheduledBeanPostProcessor;
-import io.github.opensabe.common.redisson.aop.RedissonScheduledListener;
-import io.github.opensabe.common.redisson.aop.RedissonSemaphoreAdvisor;
-import io.github.opensabe.common.redisson.aop.RedissonSemaphoreCachedPointcut;
-import io.github.opensabe.common.redisson.aop.RedissonSemaphoreInterceptor;
-import io.github.opensabe.common.redisson.jfr.RExpirableExpireObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RLockAcquiredObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RLockForceReleaseObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RLockReleasedObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreAcquiredObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreModifiedObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreReleasedObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RRateLimiterAcquireObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RRateLimiterSetRateObservationToJFRGenerator;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.aop.*;
+import io.github.opensabe.common.redisson.jfr.*;
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +33,26 @@ public class RedissonAnnotationConfiguration {
         var advisor = new RedissonLockAdvisor(redissonLockCachedPointcut);
         advisor.setAdvice(redissonLockInterceptor);
         advisor.setOrder(redissonAopConfiguration.getOrder());
+        return advisor;
+    }
+
+    @Bean
+    public SLockPointcut sLockPointcut () {
+        return new SLockPointcut();
+    }
+
+
+    @Bean
+    public SLockInterceptor sLockInterceptor (BeanFactory beanFactory, RedissonClient redissonClient, SLockPointcut pointcut) {
+        MethodArgumentsExpressEvaluator evaluator = new MethodArgumentsExpressEvaluator(beanFactory);
+        return new SLockInterceptor(redissonClient, evaluator, pointcut);
+    }
+
+    @Bean
+    public SLockAdvisor sLockAdvisor (SLockPointcut pointcut, SLockInterceptor interceptor, RedissonAopConfiguration configuration) {
+        SLockAdvisor advisor = new SLockAdvisor(pointcut);
+        advisor.setAdvice(interceptor);
+        advisor.setOrder(configuration.getOrder());
         return advisor;
     }
 

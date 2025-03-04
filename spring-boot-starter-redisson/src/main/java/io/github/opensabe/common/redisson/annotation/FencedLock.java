@@ -16,6 +16,9 @@ public @interface FencedLock {
     String[] name();
 
     @AliasFor(annotation = SLock.class)
+    String prefix() default RedissonLockName.DEFAULT_PREFIX;
+
+    @AliasFor(annotation = SLock.class)
     int order() default 0;
 
     /**
@@ -37,4 +40,6 @@ public @interface FencedLock {
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
 
+    @AliasFor(annotation = SLock.class)
+    SLock.LockType lockType() default SLock.LockType.BLOCK_LOCK;
 }
