@@ -4,6 +4,7 @@ import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphoreName;
 import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.exceptions.RedissonSemaphoreException;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -73,12 +74,12 @@ public class RedissonSemaphoreInterceptor implements MethodInterceptor {
                 if (waitTime < 0) {
                     acquired = semaphore.tryAcquire();
                     if (acquired == null) {
-                        throw new RedissonClientException("Cannot acquire permit of semaphore with name: " + semaphoreName);
+                        throw new RedissonSemaphoreException("Cannot acquire permit of semaphore with name: " + semaphoreName);
                     }
                 } else {
                     acquired = semaphore.tryAcquire(waitTime, timeUnit);
                     if (acquired == null) {
-                        throw new RedissonClientException("Cannot acquire permit of semaphore with name: " + semaphoreName);
+                        throw new RedissonSemaphoreException("Cannot acquire permit of semaphore with name: " + semaphoreName);
                     }
                 }
             }
