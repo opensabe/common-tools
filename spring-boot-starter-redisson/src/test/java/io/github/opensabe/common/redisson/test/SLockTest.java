@@ -1,8 +1,12 @@
 package io.github.opensabe.common.redisson.test;
 
-import io.github.opensabe.common.redisson.annotation.*;
+import io.github.opensabe.common.redisson.annotation.FairLock;
+import io.github.opensabe.common.redisson.annotation.Lock;
+import io.github.opensabe.common.redisson.annotation.SLock;
+import io.github.opensabe.common.redisson.annotation.SpinLock;
 import io.github.opensabe.common.redisson.config.RedissonAopConfiguration;
 import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
+import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -157,6 +161,16 @@ public class SLockTest extends BaseRedissonTest {
         public void testWaitTime(String name) throws InterruptedException {
             RLock lock = redissonClient.getLock("p1"+name);
             //验证获取了锁
+            Assertions.assertTrue(lock.isHeldByCurrentThread());
+            TimeUnit.SECONDS.sleep(10);
+        }
+
+        @Lock(prefix = "p1", name = "#errorExpression")
+        public void testErrorExpression (String name) {
+        }
+        @Lock(prefix = "p1", name = "suppressedExpression")
+        public void testSuppressedExpression (String name) throws InterruptedException {
+            RLock lock = redissonClient.getLock("p1suppressedExpression");
             Assertions.assertTrue(lock.isHeldByCurrentThread());
             TimeUnit.SECONDS.sleep(10);
         }
@@ -467,5 +481,16 @@ public class SLockTest extends BaseRedissonTest {
             threads[i].join();
         }
         Assertions.assertTrue(testRedissonLockClass.getCount() <= THREAD_COUNT * ADD_COUNT);
+    }
+
+    @Test
+    void testErrorExpression () {
+        RedissonLockException exception = assertThrows(RedissonLockException.class, () -> testRedissonLockClass.testErrorExpression("aa"));
+        System.out.println(exception.getMessage());
+    }
+
+    @Test
+    void testSuppressedExpression () throws InterruptedException {
+        testRedissonLockClass.testSuppressedExpression("addd");
     }
 }

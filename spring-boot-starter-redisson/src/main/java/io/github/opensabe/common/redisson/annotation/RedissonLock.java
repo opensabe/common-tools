@@ -191,12 +191,12 @@ public @interface RedissonLock {
         BLOCK_LOCK(RedissonLock.BLOCK_LOCK) {
             @Override
             public boolean lock(RedissonLock content, RLock lock) {
-                lock.lock(content.leaseTime(), content.timeUnit());;
+                lock.lock(content.leaseTime(), content.timeUnit());
                 return true;
             }
         },
         /**
-         * try lock，未获取则不等待，直接抛出 RedissionClientException
+         * try lock 不等待，直接返回
          */
         TRY_LOCK_NOWAIT(RedissonLock.TRY_LOCK_NOWAIT) {
             @Override
@@ -222,7 +222,7 @@ public @interface RedissonLock {
             this.value = value;
         }
 
-        private static Map<Integer, LockType> map = new HashMap<>(3);
+        private final static Map<Integer, LockType> map = new HashMap<>(3);
 
         public abstract boolean lock (RedissonLock content, RLock lock);
 

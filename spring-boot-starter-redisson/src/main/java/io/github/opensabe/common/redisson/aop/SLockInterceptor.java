@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.RedissonMultiLock;
 import org.redisson.api.RExpirable;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisResponseTimeoutException;
+import org.springframework.expression.EvaluationException;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -42,8 +44,25 @@ public class SLockInterceptor implements MethodInterceptor {
         }
         RLock[] locks = Arrays.stream(lock.name())
                 .map(name -> {
-                    String resolved = evaluator.resolve(method, invocation.getThis(), invocation.getArguments(), name);
-                    return lock.prefix()+resolved;
+                    try {
+                        String resolved = evaluator.resolve(method, invocation.getThis(), invocation.getArguments(), name);
+                        if (StringUtils.isBlank(resolved)) {
+                            //如果expression写了表达式，解析失败直接抛出异常
+                            if (StringUtils.contains(name, "#")) {
+                                throw new RedissonLockException("can not resolved redisson lock name , expression: "+name+"method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
+                            }
+                            //如果expression不是一个表达式，只是一个常量，直接用这个常量当锁名称
+                            return lock.prefix() + name;
+                        }
+                        return lock.prefix() + resolved;
+                    }catch (EvaluationException e) {
+                        //如果expression写了表达式，解析失败直接抛出异常
+                        if (StringUtils.contains(name, "#")) {
+                            throw new RedissonLockException("can not resolved redisson lock name , expression: "+name+" method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
+                        }
+                        //如果expression不是一个表达式，只是一个常量，直接用这个常量当锁名称
+                        return lock.prefix() + name;
+                    }
                 })
                 .map(name -> lock.lockFeature().getLock(name, lock, redissonClient))
                 .toArray(RLock[]::new);

@@ -65,12 +65,12 @@ public @interface SLock {
         BLOCK_LOCK {
             @Override
             public boolean lock(SLock content, RLock lock) {
-                lock.lock(content.leaseTime(), content.timeUnit());;
+                lock.lock(content.leaseTime(), content.timeUnit());
                 return true;
             }
         },
         /**
-         * try lock，未获取则不等待，直接抛出 RedissionClientException
+         * try lock，不等待，直接返回
          */
         TRY_LOCK_NOWAIT {
             @Override
