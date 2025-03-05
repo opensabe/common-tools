@@ -45,7 +45,6 @@
         <module>apple-spring-boot</module>
         <module>spring-boot-starter-paypal</module>
         <module>spring-boot-starter-google</module>
-        <module>mapstruct-bom</module>
         <module>spring-boot-starter-milvus</module>
         <module>common-testcontainers</module>
     </modules>
