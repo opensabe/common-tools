@@ -2,8 +2,10 @@ package io.github.opensabe.common.alive.client.message;
 
 import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Publish extends MqMessage{
 
     private Integer requestId;

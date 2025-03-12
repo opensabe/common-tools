@@ -17,6 +17,10 @@
 
     <properties>
         <langchain4j-milvus.version>0.32.0</langchain4j-milvus.version>
+
+        <!--    自带的版本太低，会报警告，这里重新指定版本    -->
+        <azure-java-blob-sdk.version>12.29.1</azure-java-blob-sdk.version>
+        <azure-java-identity-sdk.version>1.15.3</azure-java-identity-sdk.version>
     </properties>
 
     <dependencies>

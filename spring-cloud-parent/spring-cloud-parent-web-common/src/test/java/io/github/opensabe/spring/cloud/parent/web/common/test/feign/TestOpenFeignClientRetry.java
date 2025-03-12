@@ -21,6 +21,7 @@ import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -161,26 +162,26 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     @Autowired
     TestService8Client testService8Client;
 
-    @MockBean(name = "service8_2")
+    @MockitoBean(name = "service8_2")
     ServiceInstance serviceInstance8_2;
-    @MockBean(name = "service8_1")
+    @MockitoBean(name = "service8_1")
     ServiceInstance serviceInstance8_1;
-    @MockBean(name = "service7")
+    @MockitoBean(name = "service7")
     ServiceInstance serviceInstance7;
-    @MockBean(name = "service6")
+    @MockitoBean(name = "service6")
     ServiceInstance serviceInstance6;
-    @MockBean(name = "service5")
+    @MockitoBean(name = "service5")
     ServiceInstance serviceInstance5;
-    @MockBean(name = "service4")
+    @MockitoBean(name = "service4")
     ServiceInstance serviceInstance4;
-    @MockBean(name = "service3")
+    @MockitoBean(name = "service3")
     ServiceInstance serviceInstance3;
-    @MockBean(name = "service2")
+    @MockitoBean(name = "service2")
     ServiceInstance serviceInstance2;
-    @MockBean(name = "service1")
+    @MockitoBean(name = "service1")
     ServiceInstance serviceInstance1;
 
-    @MockBean
+    @MockitoBean
     SimpleDiscoveryClient discoveryClient;
 
     @Autowired
