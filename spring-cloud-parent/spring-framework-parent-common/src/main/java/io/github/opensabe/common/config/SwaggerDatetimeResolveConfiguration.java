@@ -100,4 +100,5 @@ public class SwaggerDatetimeResolveConfiguration {
             return primitiveType != null && times.contains(primitiveType);
         }
     }
+
 }
