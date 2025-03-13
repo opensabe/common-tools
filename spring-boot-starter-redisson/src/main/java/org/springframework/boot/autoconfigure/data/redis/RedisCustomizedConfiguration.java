@@ -5,7 +5,6 @@ import io.github.opensabe.common.redisson.config.MultiRedisProperties;
 import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
 import io.lettuce.core.resource.ClientResources;
 import lombok.extern.log4j.Log4j2;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.ssl.SslBundles;
@@ -40,7 +39,7 @@ public class RedisCustomizedConfiguration {
         ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
         ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
         ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider,
-        RedisConnectionDetails connectionDetails, ObjectProvider<SslBundles> sslBundles,
+        ObjectProvider<SslBundles> sslBundles,
         ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers
         ) {
         log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactory initialization starts... {}", multiRedisProperties.toString());
@@ -51,7 +50,7 @@ public class RedisCustomizedConfiguration {
             LettuceConnectionConfiguration lettuceConnectionConfiguration = new LettuceConnectionConfiguration(v,
                     standaloneConfigurationProvider,
                     sentinelConfigurationProvider,
-                    clusterConfigurationProvider, connectionDetails, sslBundles);
+                    clusterConfigurationProvider, new PropertiesRedisConnectionDetails(v), sslBundles);
             LettuceConnectionFactory lettuceConnectionFactory = lettuceConnectionConfiguration.redisConnectionFactory(builderCustomizers, clientOptionsBuilderCustomizers, clientResources);
             lettuceConnectionFactory.setPipeliningFlushPolicy(LettuceConnection.PipeliningFlushPolicy.flushOnClose());
             lettuceConnectionFactory.setShareNativeConnection(false);
