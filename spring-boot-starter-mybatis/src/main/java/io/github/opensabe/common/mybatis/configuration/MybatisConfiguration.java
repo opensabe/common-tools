@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import tk.mybatis.mapper.autoconfigure.MybatisProperties;
 
 import java.util.List;
+import java.util.Objects;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
@@ -26,26 +27,32 @@ public class MybatisConfiguration {
 				log.info("set configuration of sqlSessionFactory {} -> {}", s.getClass(), configuration.getClass());
 				org.apache.ibatis.session.Configuration o = s.getConfiguration();
 
-//				o.setMapUnderscoreToCamelCase(configuration.isMapUnderscoreToCamelCase());
-				o.setMapUnderscoreToCamelCase(configuration.getMapUnderscoreToCamelCase());
+				if (Objects.nonNull(configuration.getMapUnderscoreToCamelCase())) {
+					o.setMapUnderscoreToCamelCase(configuration.getMapUnderscoreToCamelCase());
+				}
 
-//				o.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
-				o.setAggressiveLazyLoading(configuration.getAggressiveLazyLoading());
+				if (Objects.nonNull(configuration.getAggressiveLazyLoading())) {
+					o.setAggressiveLazyLoading(configuration.getAggressiveLazyLoading());
+				}
 
 				o.setAutoMappingBehavior(configuration.getAutoMappingBehavior());
 				o.setAutoMappingUnknownColumnBehavior(configuration.getAutoMappingUnknownColumnBehavior());
 
-//				o.setCacheEnabled(configuration.isCacheEnabled());
-				o.setCacheEnabled(configuration.getCacheEnabled());
+				if (Objects.nonNull(configuration.getCacheEnabled())) {
+					o.setCacheEnabled(configuration.getCacheEnabled());
+				}
 
-//				o.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
-				o.setAggressiveLazyLoading(configuration.getAggressiveLazyLoading());
+				if (Objects.nonNull(configuration.getAggressiveLazyLoading())) {
+					o.setAggressiveLazyLoading(configuration.getAggressiveLazyLoading());
+				}
 
-//				o.setCallSettersOnNulls(configuration.isCallSettersOnNulls());
-				o.setCallSettersOnNulls(configuration.getCallSettersOnNulls());
+				if (Objects.nonNull(configuration.getCallSettersOnNulls())) {
+					o.setCallSettersOnNulls(configuration.getCallSettersOnNulls());
+				}
 
-//				o.setLazyLoadingEnabled(configuration.isLazyLoadingEnabled());
-				o.setLazyLoadingEnabled(configuration.getLazyLoadingEnabled());
+				if (Objects.nonNull(configuration.getLazyLoadingEnabled())) {
+					o.setLazyLoadingEnabled(configuration.getLazyLoadingEnabled());
+				}
 			});
 		}
 	}
