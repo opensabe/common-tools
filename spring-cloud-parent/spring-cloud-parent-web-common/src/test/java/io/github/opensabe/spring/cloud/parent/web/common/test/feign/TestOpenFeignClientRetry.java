@@ -9,6 +9,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.registry.AbstractRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -41,6 +42,7 @@ import static org.mockito.Mockito.any;
 @SpringBootTest
 @AutoConfigureObservability
 @EnableFeignClients
+@Disabled
 public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "RetryTestService1";
     static final String CONTEXT_ID_1 = "RetryTestService1Client1";

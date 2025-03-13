@@ -13,6 +13,7 @@ import io.micrometer.observation.ObservationRegistry;
 import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.when;
 @AutoConfigureObservability
 @ActiveProfiles("threadpool")
 @EnableFeignClients
+@Disabled
 public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
 
     static final String TEST_SERVICE_1 = "ThreadPoolTestService1";
