@@ -20,19 +20,32 @@ public class MybatisConfiguration {
 
 	@PostConstruct
 	public void afterProperties() {
-		org.apache.ibatis.session.Configuration configuration = mybatisProperties.getConfiguration();
+		MybatisProperties.CoreConfiguration configuration = mybatisProperties.getConfiguration();
 		if (configuration != null) {
 			sqlSessionFactories.forEach(s -> {
 				log.info("set configuration of sqlSessionFactory {} -> {}", s.getClass(), configuration.getClass());
 				org.apache.ibatis.session.Configuration o = s.getConfiguration();
-				o.setMapUnderscoreToCamelCase(configuration.isMapUnderscoreToCamelCase());
-				o.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
+
+//				o.setMapUnderscoreToCamelCase(configuration.isMapUnderscoreToCamelCase());
+				o.setMapUnderscoreToCamelCase(configuration.getMapUnderscoreToCamelCase());
+
+//				o.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
+				o.setAggressiveLazyLoading(configuration.getAggressiveLazyLoading());
+
 				o.setAutoMappingBehavior(configuration.getAutoMappingBehavior());
 				o.setAutoMappingUnknownColumnBehavior(configuration.getAutoMappingUnknownColumnBehavior());
-				o.setCacheEnabled(configuration.isCacheEnabled());
-				o.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
-				o.setCallSettersOnNulls(configuration.isCallSettersOnNulls());
-				o.setLazyLoadingEnabled(configuration.isLazyLoadingEnabled());
+
+//				o.setCacheEnabled(configuration.isCacheEnabled());
+				o.setCacheEnabled(configuration.getCacheEnabled());
+
+//				o.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
+				o.setAggressiveLazyLoading(configuration.getAggressiveLazyLoading());
+
+//				o.setCallSettersOnNulls(configuration.isCallSettersOnNulls());
+				o.setCallSettersOnNulls(configuration.getCallSettersOnNulls());
+
+//				o.setLazyLoadingEnabled(configuration.isLazyLoadingEnabled());
+				o.setLazyLoadingEnabled(configuration.getLazyLoadingEnabled());
 			});
 		}
 	}
