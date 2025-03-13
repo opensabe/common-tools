@@ -22,6 +22,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>spring-cloud-parent-common</artifactId>
         </dependency>
