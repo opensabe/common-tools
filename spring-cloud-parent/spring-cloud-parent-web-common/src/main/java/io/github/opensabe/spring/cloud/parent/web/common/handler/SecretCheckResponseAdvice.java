@@ -9,6 +9,8 @@ import io.github.opensabe.spring.cloud.parent.web.common.undertow.HttpServletRes
 import io.undertow.server.HttpServerExchange;
 import io.undertow.servlet.spec.HttpServletResponseImpl;
 import io.undertow.util.HeaderMap;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.ServletResponseWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -60,7 +62,12 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
                     FilterSecretStringResult headerFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(header);
                     if (headerNameFilterSecretStringResult.isFoundSensitiveString() || headerFilterSecretStringResult.isFoundSensitiveString()) {
                         cache.put(path, true);
-                        if (servletResponse instanceof HttpServletResponseImpl httpServletResponse) {
+                        //2025年03月13日11:09:03，为了防止其他过滤器包装过response，这里要获取真正的response
+                        ServletResponse resp = servletResponse;
+                        while (resp instanceof ServletResponseWrapper wrapper) {
+                            resp = wrapper.getResponse();
+                        }
+                        if (resp instanceof HttpServletResponseImpl httpServletResponse) {
                             HttpServerExchange httpServerExchange = HttpServletResponseImplUtil.getExchange(httpServletResponse);
                             HeaderMap responseHeaders = httpServerExchange.getResponseHeaders();
                             responseHeaders.clear();
