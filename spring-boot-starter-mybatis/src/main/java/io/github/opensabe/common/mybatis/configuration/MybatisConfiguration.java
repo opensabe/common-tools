@@ -42,10 +42,6 @@ public class MybatisConfiguration {
 					o.setCacheEnabled(configuration.getCacheEnabled());
 				}
 
-				if (Objects.nonNull(configuration.getAggressiveLazyLoading())) {
-					o.setAggressiveLazyLoading(configuration.getAggressiveLazyLoading());
-				}
-
 				if (Objects.nonNull(configuration.getCallSettersOnNulls())) {
 					o.setCallSettersOnNulls(configuration.getCallSettersOnNulls());
 				}
