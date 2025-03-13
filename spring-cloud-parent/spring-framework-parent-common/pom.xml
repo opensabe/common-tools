@@ -17,12 +17,12 @@
 
     <properties>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-text.version>1.10.0</commons-text.version>
+        <commons-text.version>1.13.0</commons-text.version>
         <!-- 使用兼容fastjson1的2.x版本：https://mvnrepository.com/artifact/com.alibaba/fastjson/2.0.51 -->
         <fastjson.version>2.0.51</fastjson.version>
-        <fastutil.version>8.5.12</fastutil.version>
-        <transmittable-thread-local.version>2.14.2</transmittable-thread-local.version>
-        <joda-time.version>2.12.5</joda-time.version>
+        <fastutil.version>8.5.15</fastutil.version>
+        <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
+        <joda-time.version>2.13.1</joda-time.version>
         <swagger.version>2.2.28</swagger.version>
     </properties>
 

@@ -16,9 +16,6 @@
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
-    <properties>
-    </properties>
-
     <dependencies>
 
         <dependency>

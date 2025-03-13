@@ -32,12 +32,13 @@
 
         <okhttp.version>4.12.0</okhttp.version>
         <disruptor.version>3.4.4</disruptor.version>
-        <guava.version>32.0.0-jre</guava.version>
-        <hikaricp.version>5.0.1</hikaricp.version>
-        <testcontaniers.version>1.19.3</testcontaniers.version>
-        <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
+        <guava.version>33.4.0-jre</guava.version>
+        <!--   不自己指定hikaricp版本，spring boot已经指定-->
+<!--        <hikaricp.version>5.0.1</hikaricp.version>-->
+        <testcontaniers.version>1.20.6</testcontaniers.version>
+        <spotbugs-annotations.version>4.9.2</spotbugs-annotations.version>
         <springdoc.version>2.8.5</springdoc.version>
-        <common.io.version>2.11.0</common.io.version>
+        <common.io.version>2.18.0</common.io.version>
         <mockito.version>5.2.0</mockito.version>
         <knif4j.version>4.5.0</knif4j.version>
     </properties>
