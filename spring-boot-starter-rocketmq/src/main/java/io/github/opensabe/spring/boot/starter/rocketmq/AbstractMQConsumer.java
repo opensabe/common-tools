@@ -13,16 +13,16 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.CountDownLatch;
 
 @Log4j2
-public abstract class AbstractMQConsumer implements RocketMQListener<String>, ApplicationListener<ApplicationReadyEvent> {
+public abstract class AbstractMQConsumer implements RocketMQListener<String>, ApplicationListener<ApplicationReadyEvent>, InitializingBean {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
     @Autowired
@@ -36,8 +36,8 @@ public abstract class AbstractMQConsumer implements RocketMQListener<String>, Ap
     //用来防止每次消费都要读取 cdl 导致性能下降
     private volatile boolean isStarted = false;
 
-    @PostConstruct
-    public void init() {
+    @Override
+    public void afterPropertiesSet() {
         RocketMQMessageListener rocketMQMessageListener = getClass().getAnnotation(RocketMQMessageListener.class);
         this.topic = environment.resolvePlaceholders(rocketMQMessageListener.topic());
     }
