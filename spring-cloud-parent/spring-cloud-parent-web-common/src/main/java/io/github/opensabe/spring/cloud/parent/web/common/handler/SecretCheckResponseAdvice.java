@@ -2,6 +2,7 @@ package io.github.opensabe.spring.cloud.parent.web.common.handler;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.collect.Lists;
 import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.utils.json.JsonUtil;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.time.Duration;
-import java.util.Collection;
+import java.util.ArrayList;
 
 @Log4j2
 @ControllerAdvice
@@ -46,7 +47,7 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         String path = request.getURI().getPath();
         Boolean ifPresent = cache.getIfPresent(path);
-        if (ifPresent != null && !ifPresent) {
+        if (Boolean.FALSE.equals(ifPresent)) {
             log.debug("Path: {} cached skip current beforeBodyWrite", path);
             return body;
         } else {
@@ -54,28 +55,29 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
         }
         if (response instanceof ServletServerHttpResponse servletServerHttpResponse) {
             HttpServletResponse servletResponse = servletServerHttpResponse.getServletResponse();
-            Collection<String> headerNames = servletResponse.getHeaderNames();
-            for (String headerName : headerNames) {
-                String header = servletResponse.getHeader(headerName);
-                if (header != null) {
-                    FilterSecretStringResult headerNameFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(headerName);
-                    FilterSecretStringResult headerFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(header);
-                    if (headerNameFilterSecretStringResult.isFoundSensitiveString() || headerFilterSecretStringResult.isFoundSensitiveString()) {
-                        cache.put(path, true);
-                        //2025年03月13日11:09:03，为了防止其他过滤器包装过response，这里要获取真正的response
-                        ServletResponse resp = servletResponse;
-                        while (resp instanceof ServletResponseWrapper wrapper) {
-                            resp = wrapper.getResponse();
-                        }
-                        if (resp instanceof HttpServletResponseImpl httpServletResponse) {
-                            HttpServerExchange httpServerExchange = HttpServletResponseImplUtil.getExchange(httpServletResponse);
-                            HeaderMap responseHeaders = httpServerExchange.getResponseHeaders();
-                            responseHeaders.clear();
-                        } else {
-                            log.error("servletResponse is not HttpServletResponseImpl, servletResponse: {}", servletResponse);
+            //2025年03月13日11:09:03，为了防止其他过滤器包装过response，这里要获取真正的response
+            ServletResponse resp = servletResponse;
+            while (resp instanceof ServletResponseWrapper wrapper) {
+                resp = wrapper.getResponse();
+            }
+            HeaderMap responseHeaders;
+            if (resp instanceof HttpServletResponseImpl httpServletResponse) {
+                HttpServerExchange httpServerExchange = HttpServletResponseImplUtil.getExchange(httpServletResponse);
+                responseHeaders = httpServerExchange.getResponseHeaders();
+                ArrayList<String> headers = Lists.newArrayList(servletResponse.getHeaderNames());
+                for (String headerName : headers) {
+                    String header = servletResponse.getHeader(headerName);
+                    if (header != null) {
+                        FilterSecretStringResult headerNameFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(headerName);
+                        FilterSecretStringResult headerFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(header);
+                        if (headerNameFilterSecretStringResult.isFoundSensitiveString() || headerFilterSecretStringResult.isFoundSensitiveString()) {
+                            cache.put(path, true);
+                            responseHeaders.remove(headerName);
                         }
                     }
                 }
+            } else {
+                log.error("servletResponse is not HttpServletResponseImpl, servletResponse: {}", servletResponse);
             }
         } else {
             log.error("response is not ServletServerHttpResponse, response: {}", response);
