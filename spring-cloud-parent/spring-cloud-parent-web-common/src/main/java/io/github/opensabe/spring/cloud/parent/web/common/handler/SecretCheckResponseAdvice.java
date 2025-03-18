@@ -18,6 +18,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -53,7 +54,12 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
         } else {
             log.debug("Path: {} is not cached", path);
         }
-        if (response instanceof ServletServerHttpResponse servletServerHttpResponse) {
+        //2025年03月18日11:02:50,兼容 response Delegate
+        ServerHttpResponse r = response;
+        while (r instanceof DelegatingServerHttpResponse delegate) {
+            r = delegate.getDelegate();
+        }
+        if (r instanceof ServletServerHttpResponse servletServerHttpResponse) {
             HttpServletResponse servletResponse = servletServerHttpResponse.getServletResponse();
             //2025年03月13日11:09:03，为了防止其他过滤器包装过response，这里要获取真正的response
             ServletResponse resp = servletResponse;
