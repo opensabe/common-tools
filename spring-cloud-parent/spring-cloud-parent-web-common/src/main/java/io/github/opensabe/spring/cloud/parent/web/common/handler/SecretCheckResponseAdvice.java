@@ -60,10 +60,9 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
             while (resp instanceof ServletResponseWrapper wrapper) {
                 resp = wrapper.getResponse();
             }
-            HeaderMap responseHeaders;
             if (resp instanceof HttpServletResponseImpl httpServletResponse) {
                 HttpServerExchange httpServerExchange = HttpServletResponseImplUtil.getExchange(httpServletResponse);
-                responseHeaders = httpServerExchange.getResponseHeaders();
+                HeaderMap responseHeaders = httpServerExchange.getResponseHeaders();
                 ArrayList<String> headers = Lists.newArrayList(servletResponse.getHeaderNames());
                 for (String headerName : headers) {
                     String header = servletResponse.getHeader(headerName);
