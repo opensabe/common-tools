@@ -40,7 +40,7 @@ public class SpringdocResponseService extends GenericResponseService {
     public Set<ApiResponse> getApiResponses(Method method) {
         var origin = super.getApiResponses(method);
         Set<ApiResponse> responses = findBizResponse(method).stream()
-                .flatMap(this::createApiResponse)
+                .flatMap(this::responseStream)
                 .collect(Collectors.toSet());
         // 合并逻辑示例，只需一次性过滤添加即可
         responses.addAll(origin.stream()
@@ -71,31 +71,34 @@ public class SpringdocResponseService extends GenericResponseService {
         return responses;
     }
 
-    private Stream<ApiResponse> createApiResponse (BizResponse response) {
+
+
+    private Stream<ApiResponse> responseStream (BizResponse response) {
         return Arrays.stream(response.value().getEnumConstants())
                 .filter(message -> response.exclude().length == 0 || !ArrayUtils.contains(response.exclude(), message.code()))
                 .filter(message -> response.include().length == 0 || ArrayUtils.contains(response.include(), message.code()))
-                .map(message -> {
-                    Content content = createContent(message);
-                    InvocationHandler invocationHandler = (Object proxy, Method method, Object[] args) -> {
-                        String methodName = method.getName();
-                        return switch (methodName) {
-                            case "description" ->  response.condition();
-                            case "responseCode" -> message.code()+"";
-                            case "content" ->  response.useReturnType()? new Content[0]: new Content[]{content};
-                            case "ref" -> "";
-                            case "useReturnTypeSchema" -> response.useReturnType();
-                            case "extensions" -> useless.extensions();
-                            case "header" -> useless.headers();
-                            case "links" -> useless.links();
-                            case "hashCode" -> hashCode(response);
-                            default -> null;
-                        };
-                    };
+                .map(message -> createApiResponse(response, message));
 
-                    return (ApiResponse) Proxy.newProxyInstance(ApiResponse.class.getClassLoader(),new Class[]{ApiResponse.class}, invocationHandler);
-                });
+    }
 
+    private ApiResponse createApiResponse (BizResponse response, ErrorMessage message) {
+        Content content = createContent(message);
+        InvocationHandler invocationHandler = (Object proxy, Method method, Object[] args) -> {
+            String methodName = method.getName();
+            return switch (methodName) {
+                case "description" ->  response.condition();
+                case "responseCode" -> message.code()+"";
+                case "content" ->  response.useReturnType()? new Content[0]: new Content[]{content};
+                case "ref" -> "";
+                case "useReturnTypeSchema" -> response.useReturnType();
+                case "extensions" -> useless.extensions();
+                case "header" -> useless.headers();
+                case "links" -> useless.links();
+                case "hashCode" -> hashCode(response);
+                default -> null;
+            };
+        };
+        return (ApiResponse) Proxy.newProxyInstance(ApiResponse.class.getClassLoader(),new Class[]{ApiResponse.class}, invocationHandler);
     }
     private Content createContent (ErrorMessage errorCode) {
 
