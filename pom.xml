@@ -183,7 +183,7 @@
 
     <scm>
         <!--指向项目的可浏览SCM库（例如ViewVC或者Fisheye）的URL。-->
-        <url>https://github.com/opensabe/spring-data-jdbc</url>
+        <url>https://github.com/opensabe/common-tools</url>
         <!--SCM的URL,该URL描述了版本库和如何连接到版本库。欲知详情，请看SCMs提供的URL格式和列表。该连接只读。-->
         <connection>https://github.com/opensabe/common-tools.git</connection>
         <!--给开发者使用的，类似connection元素。即该连接不仅仅只读-->
