@@ -6,25 +6,24 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.6-SNAPSHOT</version>
+        <version>1.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-framework-parent-common</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-text.version>1.10.0</commons-text.version>
+        <commons-text.version>1.13.0</commons-text.version>
         <!-- 使用兼容fastjson1的2.x版本：https://mvnrepository.com/artifact/com.alibaba/fastjson/2.0.51 -->
         <fastjson.version>2.0.51</fastjson.version>
-        <fastutil.version>8.5.12</fastutil.version>
-        <transmittable-thread-local.version>2.14.2</transmittable-thread-local.version>
-        <joda-time.version>2.12.5</joda-time.version>
-        <swagger.version>2.2.22</swagger.version>
+        <fastutil.version>8.5.15</fastutil.version>
+        <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
+        <joda-time.version>2.13.1</joda-time.version>
+        <swagger.version>2.2.28</swagger.version>
     </properties>
 
     <dependencies>
@@ -70,11 +69,13 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
         <dependency>

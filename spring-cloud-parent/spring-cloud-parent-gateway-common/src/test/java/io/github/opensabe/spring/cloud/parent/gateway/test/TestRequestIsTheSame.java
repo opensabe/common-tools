@@ -1,14 +1,9 @@
 package io.github.opensabe.spring.cloud.parent.gateway.test;
 
+import io.github.opensabe.base.vo.BaseRsp;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.CommonLogFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.InstanceCircuitBreakerFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.QueryNormalizationFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.RecordServiceNameFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.RetryGatewayFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.TraceIdFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.TracedReactiveLoadBalancerClientFilter;
+import io.github.opensabe.spring.cloud.parent.gateway.filter.*;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -26,6 +20,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,9 +29,7 @@ import java.time.Duration;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @AutoConfigureObservability
@@ -65,7 +58,7 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
 
     private final String serviceId = "testService";
 
-    @SpyBean
+    @MockitoSpyBean
     private LoadBalancerClientFactory loadBalancerClientFactory;
     @Autowired
     private CircuitBreakerRegistry circuitBreakerRegistry;
@@ -92,7 +85,7 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
     @Autowired
     private WebTestClient webClient;
 
-    private Integer idx = 0;
+    private int idx = 0;
     private DefaultRequest[] requests;
 
     //不同的测试方法的类对象不是同一个对象，会重新生成，保证互相没有影响
@@ -127,7 +120,13 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
             });
         });
 
-        webClient.get().uri("/httpbin/status/500").exchange().expectStatus().is5xxServerError();
+        //2025年03月13日10:07:13，spring boot 3.4.3开始，网关也受ControllerAdvice影响，因此这里会是200
+
+        webClient.get().uri("/httpbin/status/500").exchange().expectBody(BaseRsp.class)
+                .consumeWith(r -> {
+                    assertTrue(r.getStatus().is2xxSuccessful());
+                    assertTrue(r.getResponseBody().getInnerMsg().contains("Connection refused"));
+                });
         //必须用 == 验证是同一个对象
         assertTrue(requests[0] == requests[1]);
         assertTrue(requests[2] == requests[1]);

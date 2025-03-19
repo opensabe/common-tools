@@ -1,7 +1,7 @@
 package io.github.opensabe.spring.cloud.parent.common.config;
 
 import io.micrometer.core.instrument.Gauge;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;

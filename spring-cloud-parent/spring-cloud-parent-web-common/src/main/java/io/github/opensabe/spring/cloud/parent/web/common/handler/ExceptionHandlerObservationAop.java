@@ -2,7 +2,9 @@ package io.github.opensabe.spring.cloud.parent.web.common.handler;
 
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.handler.IException;
 import io.micrometer.observation.Observation;
+import jakarta.validation.ValidationException;
 import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -28,6 +30,10 @@ public class ExceptionHandlerObservationAop {
     @Order(Ordered.LOWEST_PRECEDENCE)
     @Around("exceptionHandler()")
     public Object aroundSocketIoAnnotationPointCut(ProceedingJoinPoint pjp) throws Throwable {
+        //Skip recording observation for GexceptionHandler (indicating parameter validation failure) so that the request is not marked as failed
+        if (pjp.getThis() instanceof GexceptionHandler) {
+            return pjp.proceed();
+        }
         //由于我们将异常已经 catch 住了，这样从 observation 看就没有异常，这不是我们想要的
         //我们想要的是就算 catch 住并且返回的是 200，也要在 observation 看到有异常
         Observation currentObservation = unifiedObservationFactory.getCurrentObservation();
@@ -35,6 +41,7 @@ public class ExceptionHandlerObservationAop {
             Object[] args = pjp.getArgs();
             if (args != null) {
                 for (Object arg : args) {
+
                     if (arg instanceof Throwable throwable) {
                         currentObservation.error(throwable);
                         break;
