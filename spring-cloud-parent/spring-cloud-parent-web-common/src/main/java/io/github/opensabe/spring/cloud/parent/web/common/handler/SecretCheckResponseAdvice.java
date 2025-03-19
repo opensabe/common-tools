@@ -89,7 +89,8 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
         }
         String s = JsonUtil.toJSONString(body);
         FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(s);
-        cache.put(path, filterSecretStringResult.isFoundSensitiveString());
+        //为了防止body中的值将Header覆盖掉
+        cache.get(path, k -> filterSecretStringResult.isFoundSensitiveString());
         if (filterSecretStringResult.isFoundSensitiveString()) {
             return JsonUtil.parseObject(filterSecretStringResult.getFilteredContent(), body.getClass());
         }

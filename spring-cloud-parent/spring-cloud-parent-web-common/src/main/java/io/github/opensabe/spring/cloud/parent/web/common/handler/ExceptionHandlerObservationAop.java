@@ -2,6 +2,7 @@ package io.github.opensabe.spring.cloud.parent.web.common.handler;
 
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.handler.IException;
 import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -35,7 +36,8 @@ public class ExceptionHandlerObservationAop {
             Object[] args = pjp.getArgs();
             if (args != null) {
                 for (Object arg : args) {
-                    if (arg instanceof Throwable throwable) {
+                    //IException是参数校验失败，这时候不认为请求失败了
+                    if (arg instanceof Throwable throwable && !(arg instanceof IException)) {
                         currentObservation.error(throwable);
                         break;
                     }
