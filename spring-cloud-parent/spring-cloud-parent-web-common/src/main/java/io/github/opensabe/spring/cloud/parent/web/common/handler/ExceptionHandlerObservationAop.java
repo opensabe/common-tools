@@ -30,7 +30,7 @@ public class ExceptionHandlerObservationAop {
     @Order(Ordered.LOWEST_PRECEDENCE)
     @Around("exceptionHandler()")
     public Object aroundSocketIoAnnotationPointCut(ProceedingJoinPoint pjp) throws Throwable {
-        //IException是参数校验失败，这时候不认为请求失败了
+        //Skip recording observation for GexceptionHandler (indicating parameter validation failure) so that the request is not marked as failed
         if (pjp.getThis() instanceof GexceptionHandler) {
             return pjp.proceed();
         }
