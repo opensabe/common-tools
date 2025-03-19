@@ -198,7 +198,7 @@ public class BeanDescriptionDecorator extends BeanDescription {
 
     @Override
     public Converter<Object, Object> findDeserializationConverter() {
-        return delegate.findSerializationConverter();
+        return delegate.findDeserializationConverter();
     }
 
     @Override
