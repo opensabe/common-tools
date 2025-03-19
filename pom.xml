@@ -46,6 +46,7 @@
         <module>spring-boot-starter-google</module>
         <module>spring-boot-starter-milvus</module>
         <module>common-testcontainers</module>
+        <module>springdoc-spring-starter</module>
     </modules>
 
     <dependencyManagement>
