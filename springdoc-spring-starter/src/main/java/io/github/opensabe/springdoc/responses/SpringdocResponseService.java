@@ -36,15 +36,16 @@ public class SpringdocResponseService extends GenericResponseService {
         this.useless = SpringdocResponseService.class.getDeclaredAnnotation(Useless.class);
     }
 
-
     @Override
     public Set<ApiResponse> getApiResponses(Method method) {
         var origin = super.getApiResponses(method);
         Set<ApiResponse> responses = findBizResponse(method).stream()
                 .flatMap(this::createApiResponse)
                 .collect(Collectors.toSet());
-        responses.addAll(origin);
-        responses.addAll(origin.stream().filter(o -> responses.stream().noneMatch(r -> !r.responseCode().equals(o.responseCode()))).toList());
+        // 合并逻辑示例，只需一次性过滤添加即可
+        responses.addAll(origin.stream()
+                .filter(o -> responses.stream().noneMatch(r -> r.responseCode().equals(o.responseCode())))
+                .toList());
 
         return responses;
     }
