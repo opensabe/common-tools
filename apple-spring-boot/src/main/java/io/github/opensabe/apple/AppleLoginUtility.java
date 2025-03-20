@@ -1,6 +1,7 @@
 package io.github.opensabe.apple;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -79,7 +80,8 @@ public class AppleLoginUtility {
         }
 
         String subject = decode.getSubject();
-        String email = decode.getClaims().get("email").asString();
+        Claim emailClaim = decode.getClaims().get("email");
+        String email = Objects.nonNull(emailClaim) ? emailClaim.asString() : "";
         return VerifyUserResult.builder().sub(subject).email(email).build();
     }
 
