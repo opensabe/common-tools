@@ -6,6 +6,7 @@ import io.github.opensabe.common.s3.properties.S3Properties;
 import io.github.opensabe.common.s3.service.AsyncTaskFileService;
 import io.github.opensabe.common.s3.service.FileService;
 import io.github.opensabe.common.s3.service.S3SyncFileService;
+import io.github.opensabe.common.s3.typehandler.S3JsonConverter;
 import io.github.opensabe.common.s3.typehandler.S3OBSService;
 import io.github.opensabe.common.s3.service.S3AsyncTaskFileService;
 import io.github.opensabe.common.s3.service.S3ClientWrapper;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,11 +72,13 @@ public class  AwsS3Configuration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public S3ClientWrapper getS3ClientWrapper(S3Properties s3Properties, S3Client s3Client, UnifiedObservationFactory unifiedObservationFactory) {
 		return new S3ClientWrapper(s3Client, s3Properties.getFolderName(), s3Properties.getDefaultBucket(),unifiedObservationFactory);
 	}
 
 	@Bean("s3ObjectSyncFileService")
+	@ConditionalOnMissingBean
 	public FileService s3ObjectSyncFileService(@Qualifier("s3SyncClient")S3Client client, UnifiedObservationFactory unifiedObservationFactory) {
 		S3SyncFileService service = new S3SyncFileService(unifiedObservationFactory);
 		service.setClient(client);
@@ -88,12 +92,14 @@ public class  AwsS3Configuration {
 	 * @return
 	 */
 	@Bean
+	@ConditionalOnMissingBean
 	public AsyncTaskFileService asyncFileService(@Qualifier("s3ObjectSyncFileService") FileService s3ObjectSyncFileService) {
 		var executorService = threadPoolFactory.createNormalThreadPool("s3-async task-", 8);
 		return new S3AsyncTaskFileService(s3ObjectSyncFileService,executorService,s3Properties);
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public OBSService s3OBSService (@Qualifier("s3ObjectSyncFileService")FileService fileService,
 									S3Properties properties,
 									@Value("${defaultOperId:0}") String defaultOrderId) {
@@ -101,8 +107,15 @@ public class  AwsS3Configuration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public S3OperationObservationToJFRGenerator s3OperationObservationToJFRGenerator( ) {
 		return new S3OperationObservationToJFRGenerator();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public S3JsonConverter s3JsonConverter (FileService fileService, S3Properties properties) {
+		return new S3JsonConverter(fileService, properties);
 	}
 
 
