@@ -2,6 +2,7 @@ package io.github.opensabe.common.dynamodb.config;
 
 import io.github.opensabe.common.dynamodb.Service.KeyValueDynamoDbService;
 import io.github.opensabe.common.dynamodb.typehandler.DynamoDbOBService;
+import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;
 import io.github.opensabe.common.typehandler.OBSService;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.log4j.Log4j2;
@@ -78,5 +79,10 @@ public class DynamoDBConfiguration {
     @ConditionalOnClass(KeyValueDynamoDbService.class)
     public OBSService dynamoDbOBSService(KeyValueDynamoDbService dynamoDbBaseService) {
         return new DynamoDbOBService(dynamoDbBaseService);
+    }
+
+    @Bean
+    public DynamodbConverter dynamodbConverter (DynamoDbClient client, @Value("${aws_env}") String env) {
+        return new DynamodbConverter(client, env);
     }
 }

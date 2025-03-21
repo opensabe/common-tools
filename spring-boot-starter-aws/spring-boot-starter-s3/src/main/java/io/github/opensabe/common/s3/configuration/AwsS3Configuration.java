@@ -1,17 +1,12 @@
 package io.github.opensabe.common.s3.configuration;
 
 import io.github.opensabe.common.executor.ThreadPoolFactory;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.s3.jfr.S3OperationObservationToJFRGenerator;
 import io.github.opensabe.common.s3.properties.S3Properties;
-import io.github.opensabe.common.s3.service.AsyncTaskFileService;
-import io.github.opensabe.common.s3.service.FileService;
-import io.github.opensabe.common.s3.service.S3SyncFileService;
-import io.github.opensabe.common.s3.typehandler.S3JsonConverter;
+import io.github.opensabe.common.s3.service.*;
 import io.github.opensabe.common.s3.typehandler.S3OBSService;
-import io.github.opensabe.common.s3.service.S3AsyncTaskFileService;
-import io.github.opensabe.common.s3.service.S3ClientWrapper;
 import io.github.opensabe.common.typehandler.OBSService;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,12 +106,4 @@ public class  AwsS3Configuration {
 	public S3OperationObservationToJFRGenerator s3OperationObservationToJFRGenerator( ) {
 		return new S3OperationObservationToJFRGenerator();
 	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public S3JsonConverter s3JsonConverter (FileService fileService, S3Properties properties) {
-		return new S3JsonConverter(fileService, properties);
-	}
-
-
 }
