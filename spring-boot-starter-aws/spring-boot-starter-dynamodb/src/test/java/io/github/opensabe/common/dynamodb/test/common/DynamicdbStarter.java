@@ -1,6 +1,7 @@
 package io.github.opensabe.common.dynamodb.test.common;
 
-import com.alibaba.fastjson.JSON;
+import cn.hutool.core.util.ReflectUtil;
+import io.github.opensabe.common.dynamodb.service.DynamoDbBaseService;
 import io.github.opensabe.common.testcontainers.integration.SingleDynamoDbIntegrationTest;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,12 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
-import software.amazon.awssdk.services.dynamodb.model.CreateTableResponse;
-import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
-import software.amazon.awssdk.services.dynamodb.model.KeyType;
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+
+import java.lang.reflect.Field;
+import java.util.List;
 
 @Log4j2
 @JfrEventTest
@@ -30,7 +29,7 @@ import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 }, classes = App.class)
 public abstract class DynamicdbStarter {
     @Autowired
-    private DynamoDbClient dynamoDbClient;
+    private List<DynamoDbBaseService> services;
 
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
@@ -45,46 +44,14 @@ public abstract class DynamicdbStarter {
 
     @BeforeEach
     void createTable() {
-        try {
-            CreateTableResponse table = dynamoDbClient.createTable((builder -> {
+        Field field = ReflectUtil.getField(DynamoDbBaseService.class, "table");
+        services.forEach(s ->  {
+            DynamoDbTable table = (DynamoDbTable) ReflectUtil.getFieldValue(s, field);
+            try {
+                table.createTable();
+            } catch (Exception ignore) {
 
-                builder.tableName("dynamodb_" + aws_env + "_eight_data_types");
-                builder.provisionedThroughput((p) -> {
-                            p.readCapacityUnits(500l);
-                            p.writeCapacityUnits(500l);
-                        }
-                )
-                ;
-                builder.keySchema(KeySchemaElement.builder().attributeName("id").keyType(KeyType.HASH).build(),
-                        KeySchemaElement.builder().attributeName("order").keyType(KeyType.RANGE).build());
-
-                builder.attributeDefinitions(
-                        AttributeDefinition.builder().attributeName("id").attributeType(ScalarAttributeType.S).build(),
-                        AttributeDefinition.builder().attributeName("order").attributeType(ScalarAttributeType.N).build());
-
-            }));
-            log.info("DynamicDBTest-createTable result {}", JSON.toJSONString(table));
-        }  catch (Exception e) {
-            log.warn("create dynamodb table error: {}", e.getMessage());
-        }
-
-        try {
-            dynamoDbClient.createTable(builder ->
-                    builder.tableName("dynamodb_" + aws_env + "_" + defaultOperId + "_typehandler")
-                            .provisionedThroughput((p) -> {
-                                p.readCapacityUnits(500l);
-                                p.writeCapacityUnits(500l);
-                            })
-                            .keySchema(
-                                    KeySchemaElement.builder().attributeName("key").keyType(KeyType.HASH).build()
-                            )
-                            .attributeDefinitions(
-                                    AttributeDefinition.builder().attributeName("key").attributeType(ScalarAttributeType.S).build()
-                            )
-
-            );
-        } catch (Exception e) {
-            log.warn("create dynamodb table error: {}", e.getMessage());
-        }
+            }
+        });
     }
 }

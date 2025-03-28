@@ -43,7 +43,8 @@ import java.util.Optional;
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "aws.s3.folderName="+ BaseMybatisTest.FOLDER_NAME,
-        "aws.s3.defaultBucket=" + BaseMybatisTest.BUCKET_NAME
+        "aws.s3.defaultBucket=" + BaseMybatisTest.BUCKET_NAME,
+        "aws.s3.profile=test"
 }, classes = BaseMybatisTest.App.class)
 public abstract class BaseMybatisTest {
     @SpringBootApplication(scanBasePackages = "io.github.opensabe.common.mybatis.test")

@@ -36,4 +36,10 @@ public class ExceptionConfiguration {
     public ThrowableHandler throwableHandler() {
         return new ThrowableHandler();
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EnumConvertConfiguration enumConvertConfiguration () {
+        return new EnumConvertConfiguration();
+    }
 }

@@ -45,7 +45,6 @@
         <module>spring-boot-starter-apple</module>
         <module>spring-boot-starter-paypal</module>
         <module>spring-boot-starter-google</module>
-        <module>mapstruct-bom</module>
         <module>spring-boot-starter-milvus</module>
         <module>common-testcontainers</module>
     </modules>
@@ -210,9 +209,9 @@
             <timezone>+8</timezone>
         </developer>
         <developer>
-            <id>maheng-hub</id>
+            <id>maheng157</id>
             <name>heng.ma</name>
-            <email>253286440@qq.com</email>
+            <email>xinhui.niu@icloud.com</email>
             <roles>
                 <role>Developer</role>
             </roles>

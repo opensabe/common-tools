@@ -55,7 +55,7 @@ public abstract class ByteBuddyBeanCopier<S, T> implements BeanCopier<S, T>{
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public static <S, T> ByteBuddyBeanCopier<S, T> create (Class<S> source, Class<T> target) {
-        try (var unloaded = new ByteBuddy(ClassFileVersion.ofThisVm(ClassFileVersion.JAVA_V17))
+        try (var unloaded = new ByteBuddy(ClassFileVersion.ofThisVm())
                 .subclass(ByteBuddyBeanCopier.class)
                 .method(ElementMatchers.named("copy").and(ElementMatchers.isAbstract()))
                 .intercept(MethodDelegation.to(new Interceptor<>()))

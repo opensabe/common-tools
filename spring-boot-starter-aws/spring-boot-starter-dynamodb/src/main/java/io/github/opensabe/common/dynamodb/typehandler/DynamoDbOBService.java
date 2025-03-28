@@ -1,6 +1,6 @@
 package io.github.opensabe.common.dynamodb.typehandler;
 
-import io.github.opensabe.common.dynamodb.Service.KeyValueDynamoDbService;
+import io.github.opensabe.common.dynamodb.service.KeyValueDynamoDbService;
 import io.github.opensabe.common.typehandler.OBSService;
 import io.github.opensabe.common.typehandler.OBSTypeEnum;
 import lombok.extern.log4j.Log4j2;
@@ -11,7 +11,7 @@ import java.util.Objects;
 @Log4j2
 public class DynamoDbOBService implements OBSService {
 
-    private KeyValueDynamoDbService dynamoDbUpdateService;
+    private final KeyValueDynamoDbService dynamoDbUpdateService;
 
     public DynamoDbOBService(KeyValueDynamoDbService dynamoDbBaseService){
         this.dynamoDbUpdateService = dynamoDbBaseService;

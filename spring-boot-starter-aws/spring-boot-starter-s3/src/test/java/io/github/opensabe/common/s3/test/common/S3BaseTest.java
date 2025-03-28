@@ -24,7 +24,8 @@ import java.util.Optional;
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "aws.s3.folderName="+ S3BaseTest.FOLDER_NAME,
-        "aws.s3.defaultBucket=" + S3BaseTest.BUCKET_NAME
+        "aws.s3.defaultBucket=" + S3BaseTest.BUCKET_NAME,
+        "aws.s3.profile=test"
 }, classes = App.class)
 @AutoConfigureObservability
 public abstract class S3BaseTest {
