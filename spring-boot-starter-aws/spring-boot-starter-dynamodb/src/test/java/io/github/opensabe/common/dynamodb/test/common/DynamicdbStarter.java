@@ -2,7 +2,6 @@ package io.github.opensabe.common.dynamodb.test.common;
 
 import cn.hutool.core.util.ReflectUtil;
 import io.github.opensabe.common.dynamodb.service.DynamoDbBaseService;
-import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;
 import io.github.opensabe.common.testcontainers.integration.SingleDynamoDbIntegrationTest;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +30,7 @@ import java.util.List;
 public abstract class DynamicdbStarter {
     @Autowired
     private List<DynamoDbBaseService> services;
-    @Autowired
-    private DynamodbConverter converter;
+
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleDynamoDbIntegrationTest.setProperties(registry);
