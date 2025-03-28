@@ -13,7 +13,7 @@
 
     <groupId>io.github.opensabe-tech</groupId>
     <artifactId>common-tools</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.8-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 
@@ -42,7 +42,7 @@
         <module>spring-cloud-node-manager</module>
         <module>spring-cloud-parent</module>
         <module>spring-cloud-starter-3rd-client</module>
-        <module>apple-spring-boot</module>
+        <module>spring-boot-starter-apple</module>
         <module>spring-boot-starter-paypal</module>
         <module>spring-boot-starter-google</module>
         <module>spring-boot-starter-milvus</module>
