@@ -11,16 +11,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.util.TypeInformation;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.BeanAttributeGetter;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.BeanAttributeSetter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 
 import java.util.Date;
 import java.util.Objects;
@@ -31,18 +27,6 @@ import java.util.Optional;
  */
 public class TableSchemeTest {
 
-    @Test
-    void testParseExpression () {
-        Expression.builder().expression("");
-    }
-
-    @Test
-    void testKey () {
-        Key key = Key.builder().partitionValue(1).sortValue(10).build();
-        QueryConditional conditional = QueryConditional.keyEqualTo(Key.builder().partitionValue(11).sortValue(31).build());
-        QueryEnhancedRequest request = QueryEnhancedRequest.builder().queryConditional(conditional).build();
-        System.out.println(conditional);
-    }
 
     @Test
     void testParamerizedType() {
