@@ -28,7 +28,7 @@ public class DynamodbExecuteObservationConvention implements ObservationConventi
     public KeyValues getHighCardinalityKeyValues(DynamodbExecuteContext context) {
         KeyValues keyValues = KeyValues.of(TAG_METHOD, context.getMethod());
         if (StringUtils.isNotBlank(context.getHashKey())) {
-           keyValues =  keyValues.and(TAG_HASH_KEY, context.getMethod());
+           keyValues =  keyValues.and(TAG_HASH_KEY, context.getHashKey());
         }
         if (StringUtils.isNotBlank(context.getRangeKey())) {
             keyValues = keyValues.and(TAG_RANGE_KEY, context.getRangeKey());
