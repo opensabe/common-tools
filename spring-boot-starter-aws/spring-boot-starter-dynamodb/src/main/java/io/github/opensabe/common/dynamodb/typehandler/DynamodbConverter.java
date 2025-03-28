@@ -20,6 +20,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author heng.ma
@@ -41,6 +42,9 @@ public class DynamodbConverter extends DynamoDbBaseService<DynamodbConverter.Con
     @Override
     public Object read(String value, ValueConversionContext context) {
         ConverterBean bean = table.getItem(Key.builder().partitionValue(value).build());
+        if (Objects.isNull(bean)) {
+            return null;
+        }
         return JsonUtil.parseObject(bean.getValue(), JacksonParameterizedTypeTypeReference.fromTypeInformation(context.getProperty().getTypeInformation()));
     }
 
