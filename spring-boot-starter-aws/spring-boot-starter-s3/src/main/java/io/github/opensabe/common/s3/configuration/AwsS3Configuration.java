@@ -95,7 +95,7 @@ public class  AwsS3Configuration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public OBSService s3OBSService (@Qualifier("s3ObjectSyncFileService")FileService fileService,
+	public S3OBSService s3OBSService (@Qualifier("s3ObjectSyncFileService")FileService fileService,
 									S3Properties properties,
 									@Value("${defaultOperId:0}") String defaultOrderId) {
 		return new S3OBSService(fileService, properties,defaultOrderId);

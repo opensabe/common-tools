@@ -5,7 +5,6 @@ import io.github.opensabe.common.dynamodb.service.ObservedTable;
 import io.github.opensabe.common.dynamodb.typehandler.DynamoDbOBService;
 import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.typehandler.OBSService;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -96,7 +95,7 @@ public class DynamoDBConfiguration {
 
     @Bean
     @ConditionalOnClass(KeyValueDynamoDbService.class)
-    public OBSService dynamoDbOBSService(KeyValueDynamoDbService dynamoDbBaseService) {
+    public DynamoDbOBService dynamoDbOBSService(KeyValueDynamoDbService dynamoDbBaseService) {
         return new DynamoDbOBService(dynamoDbBaseService);
     }
 
