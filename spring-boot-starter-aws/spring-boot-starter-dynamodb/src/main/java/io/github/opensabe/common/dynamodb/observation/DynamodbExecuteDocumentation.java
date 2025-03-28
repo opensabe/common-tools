@@ -6,29 +6,38 @@ import io.micrometer.observation.docs.ObservationDocumentation;
 
 public enum DynamodbExecuteDocumentation implements ObservationDocumentation {
 
-    SQL_EXECUTE_INSERT {
+    PUT_ITEM {
         @Override
         public String getName() {
             return "aws.execute.dynamodb.insert";
         }
-
-        @Override
-        public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
-            return DynamodbExecuteObservationConvention.class;
-        }
-
     },
 
-    SQL_EXECUTE_SELECT {
+    SELECT {
         @Override
         public String getName() {
             return "aws.execute.dynamodb.select";
         }
+    },
 
+    DELETE_ITEM {
         @Override
-        public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
-            return DynamodbExecuteObservationConvention.class;
+        public String getName() {
+            return "aws.execute.dynamodb.delete";
         }
+    },
 
+    UPDATE_ITEM {
+        @Override
+        public String getName() {
+            return "aws.execute.dynamodb.update";
+        }
+    }
+
+    ;
+
+    @Override
+    public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
+        return DynamodbExecuteObservationConvention.class;
     }
 }
