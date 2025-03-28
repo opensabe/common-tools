@@ -72,7 +72,7 @@ public abstract class DynamoDbBaseService<T> {
             Key key = table.keyFrom(item);
             return table.query(QueryConditional.keyEqualTo(key)).items().stream().toList();
         } catch (IllegalArgumentException e) {
-            //query查询必须包含partition key，所以只通过 sort key查询时得英scan
+            //query查询必须包含partition key，所以只通过 sort key查询时得用scan
             TableSchema<T> schema = table.tableSchema();
             String key = schema.tableMetadata().indexSortKey(TableMetadata.primaryIndexName()).orElseThrow();
             AttributeValue value = schema.attributeValue(item, key);
