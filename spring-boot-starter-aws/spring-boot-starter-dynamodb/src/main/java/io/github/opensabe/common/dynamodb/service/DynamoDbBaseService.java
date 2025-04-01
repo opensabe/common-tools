@@ -68,19 +68,20 @@ public abstract class DynamoDbBaseService<T> {
      *
      */
     public List<T> selectList(T item) {
+        Key key;
         try {
-            Key key = table.keyFrom(item);
-            return table.query(QueryConditional.keyEqualTo(key)).items().stream().toList();
+            key = table.keyFrom(item);
         } catch (IllegalArgumentException e) {
             //query查询必须包含partition key，所以只通过 sort key查询时得用scan
             TableSchema<T> schema = table.tableSchema();
-            String key = schema.tableMetadata().indexSortKey(TableMetadata.primaryIndexName()).orElseThrow();
-            AttributeValue value = schema.attributeValue(item, key);
+            String _key = schema.tableMetadata().indexSortKey(TableMetadata.primaryIndexName()).orElseThrow();
+            AttributeValue value = schema.attributeValue(item, _key);
             return table.scan(b -> b.filterExpression(Expression.builder()
                             .expression("#sortKey = :sortKey")
-                            .putExpressionName("#sortKey", key)
+                            .putExpressionName("#sortKey", _key)
                             .putExpressionValue(":sortKey", value).build())).items().stream().toList();
         }
+        return table.query(QueryConditional.keyEqualTo(key)).items().stream().toList();
     }
 
     public List<T> selectList(QueryConditional conditional) {
