@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @TableName(name = "dynamodb_${aws_env}_eight_data_types")
@@ -35,6 +36,8 @@ public class EightDataTypesPo {
     private boolean flag2;
     @JSONField(name = "create_time")
     private Date createTime;
+    @JSONField(name = "update_time")
+    private LocalDateTime updateTime;
     private BigDecimal bg;
     private BigInteger bi;
 
