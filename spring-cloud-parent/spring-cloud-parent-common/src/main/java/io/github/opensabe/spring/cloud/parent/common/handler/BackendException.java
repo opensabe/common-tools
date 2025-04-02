@@ -1,6 +1,12 @@
 package io.github.opensabe.spring.cloud.parent.common.handler;
 
+import io.github.opensabe.base.vo.BaseRsp;
+
 public class BackendException extends IException {
+
+    public static <T> T resolveBaseResponse (BaseRsp<T> rsp) {
+        return rsp.resolveData(BackendException::new);
+    }
 
     public BackendException(Integer code, String message, String innerMessage, Object data) {
         super(code, message, innerMessage, data);

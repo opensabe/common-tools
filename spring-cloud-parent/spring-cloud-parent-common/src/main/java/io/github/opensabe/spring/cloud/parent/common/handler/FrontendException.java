@@ -1,10 +1,15 @@
 package io.github.opensabe.spring.cloud.parent.common.handler;
 
+import io.github.opensabe.base.vo.BaseRsp;
 import lombok.Getter;
 
 @Getter
 @SuppressWarnings("unused")
 public class FrontendException extends IException {
+
+    public static <T> T resolveBaseResponse (BaseRsp<T> rsp) {
+        return rsp.resolveData(FrontendException::new);
+    }
 
     /**
      * 国家化占位符
