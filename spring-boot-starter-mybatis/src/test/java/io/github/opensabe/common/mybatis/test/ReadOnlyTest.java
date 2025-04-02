@@ -7,7 +7,6 @@ import io.github.opensabe.common.mybatis.test.service.UserMapperService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

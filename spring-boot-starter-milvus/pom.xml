@@ -6,18 +6,21 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.8-SNAPSHOT</version>
+        <version>1.2.0-SNAPSHOT</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-boot-starter-milvus</artifactId>
-    <version>1.0.8-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
         <langchain4j-milvus.version>0.32.0</langchain4j-milvus.version>
+
+        <!--    自带的版本太低，会报警告，这里重新指定版本    -->
+        <azure-java-blob-sdk.version>12.29.1</azure-java-blob-sdk.version>
+        <azure-java-identity-sdk.version>1.15.3</azure-java-identity-sdk.version>
     </properties>
 
     <dependencies>

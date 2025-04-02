@@ -2,8 +2,8 @@ package io.github.opensabe.common.redisson.aop;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.observation.Observation;
@@ -64,21 +64,22 @@ public class RedissonScheduledListener {
                     if (map.containsKey(name)) {
                         throw new BeanCreationException("RedissonScheduled name duplicated");
                     } else {
-                        map.put(name, new ExecutorWrapper(redissonClient, unifiedObservationFactory, method, bean, name, annotation.initialDelay(),
+                        map.put(name, new ExecutorWrapper(redissonClient, unifiedObservationFactory, () -> method.invoke(bean)
+                           , name, annotation.initialDelay(),
                                 annotation.fixedDelay(), annotation.stopOnceShutdown(), meterRegistry));
                     }
 
                 }
             }
-            if (bean instanceof AbstractRedissonScheduledService scheduledService) {
-                Method method;
-                try {
-                    method = AbstractRedissonScheduledService.class.getDeclaredMethod("run");
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
+            if (bean instanceof RedissonScheduledService scheduledService) {
+//                Method method;
+//                try {
+//                    method = RedissonScheduledService.class.getDeclaredMethod("run");
+//                } catch (NoSuchMethodException e) {
+//                    throw new RuntimeException(e);
+//                }
                 map.put(scheduledService.name(), new ExecutorWrapper(redissonClient, unifiedObservationFactory,
-                        method, bean, scheduledService.name(), scheduledService.initialDelay(),
+                        scheduledService, scheduledService.name(), scheduledService.initialDelay(),
                         scheduledService.fixedDelay(), scheduledService.stopOnceShutdown(), meterRegistry));
             }
         });
@@ -101,8 +102,8 @@ public class RedissonScheduledListener {
         private final DistributionSummary distributionSummary;
 
         public ExecutorWrapper(RedissonClient redissonClient, UnifiedObservationFactory unifiedObservationFactory,
-                               Method method,
-                               Object bean, String name, long initialDelay,
+                               ScheduledService runnable,
+                               String name, long initialDelay,
                                long fixedDelay, boolean stopOnceShutdown, MeterRegistry meterRegistry) {
             RLock lock = redissonClient.getLock(name + ":leader");
             this.stopOnceShutdown = stopOnceShutdown;
@@ -151,7 +152,8 @@ public class RedissonScheduledListener {
                         if (log.isDebugEnabled()) {
                             log.debug("RedissonScheduledBeanPostProcessor task: {} start", name);
                         }
-                        method.invoke(bean);
+//                        method.invoke(bean);
+                        runnable.run();
                         long elapsed = System.currentTimeMillis() - start;
                         if (distributionSummary.count() > 10 && (elapsed > distributionSummary.max() * 2) && elapsed > 60000) {
                             log.fatal("RedissonScheduledBeanPostProcessor task: {} end in {} ms, recent mean elapsed time is {}ms", name, elapsed, distributionSummary.mean());
@@ -189,4 +191,6 @@ public class RedissonScheduledListener {
             log.info("RedissonScheduledBeanPostProcessor executor {} closed...", scheduledThreadPoolExecutor.toString());
         }
     }
+
+
 }
