@@ -21,11 +21,13 @@ public class DynamodbExecuteEvent extends Event {
     private String spanId;
     private String hashKey;
     private String rangeKey;
+    private String expression;
 
-    public DynamodbExecuteEvent(String method,String hashKey,String rangeKey) {
+    public DynamodbExecuteEvent(String method,String hashKey,String rangeKey, String expression) {
         this.method = method;
         this.hashKey = hashKey;
         this.rangeKey = rangeKey;
+        this.expression = expression;
     }
 
 }

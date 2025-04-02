@@ -51,6 +51,9 @@ public class EnumConvertConfiguration {
         @Override
         @SuppressWarnings({"rawtypes", "unchecked"})
         public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+            if (Objects.isNull(source)) {
+                return null;
+            }
             if (isInteger(source.toString())) {
                 IntValueEnum[] enums = (IntValueEnum[]) IntValueEnum.values((Class) targetType.getType());
                 try {

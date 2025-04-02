@@ -17,7 +17,6 @@
     <packaging>jar</packaging>
 
     <properties>
-        <common-utils.version>1.0.6-SNAPSHOT</common-utils.version>
     </properties>
 
     <dependencies>

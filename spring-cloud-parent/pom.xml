@@ -73,7 +73,7 @@
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
-                <artifactId>apple-spring-boot</artifactId>
+                <artifactId>spring-boot-starter-apple</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

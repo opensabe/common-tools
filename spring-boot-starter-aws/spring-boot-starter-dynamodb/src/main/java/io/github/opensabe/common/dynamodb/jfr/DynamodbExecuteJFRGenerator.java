@@ -33,13 +33,14 @@ public class DynamodbExecuteJFRGenerator extends ObservationToJFRGenerator<Dynam
             event.setSpanId(traceContext.spanId());
             event.setHashKey(context.getHashKey());
             event.setRangeKey(context.getRangeKey());
+            event.setExpression(context.getExpression());
         }
         event.commit();
     }
 
     @Override
     protected void generateOnStart(DynamodbExecuteContext context) {
-        DynamodbExecuteEvent event = new DynamodbExecuteEvent(context.getMethod(),context.getHashKey(), context.getRangeKey());
+        DynamodbExecuteEvent event = new DynamodbExecuteEvent(context.getMethod(),context.getHashKey(), context.getRangeKey(), context.getExpression());
         context.put(DynamodbExecuteEvent.class, event);
     }
 }

@@ -1,4 +1,4 @@
-package io.github.opensabe.common.dynamodb.configuration;
+package io.github.opensabe.common.dynamodb.config;
 
 
 import io.github.opensabe.common.dynamodb.jfr.DynamodbExecuteJFRGenerator;

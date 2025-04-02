@@ -41,7 +41,7 @@
         <module>spring-cloud-node-manager</module>
         <module>spring-cloud-parent</module>
         <module>spring-cloud-starter-3rd-client</module>
-        <module>apple-spring-boot</module>
+        <module>spring-boot-starter-apple</module>
         <module>spring-boot-starter-paypal</module>
         <module>spring-boot-starter-google</module>
         <module>spring-boot-starter-milvus</module>

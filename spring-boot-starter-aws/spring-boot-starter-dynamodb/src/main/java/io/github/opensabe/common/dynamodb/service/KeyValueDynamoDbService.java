@@ -1,9 +1,16 @@
-package io.github.opensabe.common.dynamodb.Service;
+package io.github.opensabe.common.dynamodb.service;
 
 import io.github.opensabe.common.dynamodb.annotation.HashKeyName;
 import io.github.opensabe.common.dynamodb.annotation.TableName;
+import org.springframework.core.env.Environment;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 
 public class KeyValueDynamoDbService extends DynamoDbBaseService<KeyValueDynamoDbService.KeyValueMap> {
+
+
+    public KeyValueDynamoDbService( Environment environment, DynamoDbEnhancedClient client) {
+        super(environment, client);
+    }
 
     @TableName(name = "dynamodb_${aws_env}_${defaultOperId}_typehandler")
     public static class KeyValueMap {
