@@ -131,7 +131,8 @@ public class SpringdocResponseService extends GenericResponseService {
                 String methodName = method.getName();
                 return switch (methodName) {
                     case "name" ->  name;
-                    case "schema" -> createSchema(example, type);
+//                    case "schema" -> createSchema(example, type);
+                    case "schema" -> useless.schema();
                     case "array" -> useless.array();
                     default -> null;
                 };
@@ -139,45 +140,45 @@ public class SpringdocResponseService extends GenericResponseService {
 
         return (SchemaProperty) Proxy.newProxyInstance(SchemaProperty.class.getClassLoader(),new Class[]{SchemaProperty.class}, invocationHandler);
     }
-    private Schema createSchema (String example, String type) {
-
-        InvocationHandler invocationHandler = (Object proxy, Method method, Object[] args) -> {
-                String methodName = method.getName();
-                return switch (methodName) {
-                    case "type" -> type;
-                    case "example", "defaultValue" -> example;
-
-                    case "implementation", "not", "contains", "contentSchema", "propertyNames", "additionalItems",
-                         "unevaluatedItems", "_if", "_else", "then", "exampleClasses", "unevaluatedProperties",
-                         "additionalPropertiesSchema" -> Void.class;
-                    case "oneOf", "anyOf", "allOf", "subTypes", "prefixItems" -> new Class[0];
-                    case "name", "title", "maximum", "minimum", "pattern", "description", "format", "ref",
-                         "discriminatorProperty", "$id", "$schema", "$anchor", "$vocabulary", "$dynamicAnchor",
-                         "contentEncoding", "contentMediaType", "_const", "$comment" -> "";
-                    case "multipleOf" -> 0d;
-                    case "exclusiveMaximum", "exclusiveMinimum", "nullable", "deprecated", "hidden", "enumAsRef",
-                         "readOnly", "writeOnly", "required" -> false;
-                    case "maxLength", "maxContains" -> Integer.MAX_VALUE;
-                    case "minLength", "maxProperties", "exclusiveMaximumValue", "exclusiveMinimumValue",
-                         "minContains", "minProperties" -> 0;
-                    case "requiredProperties", "allowableValues", "types", "examples" -> new String[0];
-                    case "requiredMode" -> Schema.RequiredMode.AUTO;
-                    case "accessMode" -> Schema.AccessMode.AUTO;
-                    case "externalDocs" -> useless.externalDocs();
-                    case "discriminatorMapping" -> useless.discriminatorMapping();
-                    case "extensions" -> useless.extensions();
-                    case "additionalProperties" -> Schema.AdditionalPropertiesValue.USE_ADDITIONAL_PROPERTIES_ANNOTATION;
-                    case "dependentRequiredMap" -> useless.dependentRequiredMap();
-                    case "dependentSchemas", "patternProperties", "properties" -> useless.patternProperties();
-
-
-                    default -> null;
-                };
-
-            };
-
-        return  (Schema) Proxy.newProxyInstance(Schema.class.getClassLoader(),new Class[]{Schema.class}, invocationHandler);
-    }
+//    private Schema createSchema (String example, String type) {
+//
+//        InvocationHandler invocationHandler = (Object proxy, Method method, Object[] args) -> {
+//                String methodName = method.getName();
+//                return switch (methodName) {
+//                    case "type" -> type;
+//                    case "example", "defaultValue" -> example;
+//
+//                    case "implementation", "not", "contains", "contentSchema", "propertyNames", "additionalItems",
+//                         "unevaluatedItems", "_if", "_else", "then", "exampleClasses", "unevaluatedProperties",
+//                         "additionalPropertiesSchema" -> Void.class;
+//                    case "oneOf", "anyOf", "allOf", "subTypes", "prefixItems" -> new Class[0];
+//                    case "name", "title", "maximum", "minimum", "pattern", "description", "format", "ref",
+//                         "discriminatorProperty", "$id", "$schema", "$anchor", "$vocabulary", "$dynamicAnchor",
+//                         "contentEncoding", "contentMediaType", "_const", "$comment" -> "";
+//                    case "multipleOf" -> 0d;
+//                    case "exclusiveMaximum", "exclusiveMinimum", "nullable", "deprecated", "hidden", "enumAsRef",
+//                         "readOnly", "writeOnly", "required" -> false;
+//                    case "maxLength", "maxContains" -> Integer.MAX_VALUE;
+//                    case "minLength", "maxProperties", "exclusiveMaximumValue", "exclusiveMinimumValue",
+//                         "minContains", "minProperties" -> 0;
+//                    case "requiredProperties", "allowableValues", "types", "examples" -> new String[0];
+//                    case "requiredMode" -> Schema.RequiredMode.AUTO;
+//                    case "accessMode" -> Schema.AccessMode.AUTO;
+//                    case "externalDocs" -> useless.externalDocs();
+//                    case "discriminatorMapping" -> useless.discriminatorMapping();
+//                    case "extensions" -> useless.extensions();
+//                    case "additionalProperties" -> Schema.AdditionalPropertiesValue.USE_ADDITIONAL_PROPERTIES_ANNOTATION;
+//                    case "dependentRequiredMap" -> useless.dependentRequiredMap();
+//                    case "dependentSchemas", "patternProperties", "properties" -> useless.patternProperties();
+//
+//
+//                    default -> null;
+//                };
+//
+//            };
+//
+//        return  (Schema) Proxy.newProxyInstance(Schema.class.getClassLoader(),new Class[]{Schema.class}, invocationHandler);
+//    }
 
 
     private int hashCode (Object ... os) {
