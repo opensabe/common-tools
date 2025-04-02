@@ -93,10 +93,6 @@ public abstract class DynamoDbBaseService<T> {
     }
 
 
-    public void update (T item) {
-        table.updateItem(item);
-    }
-
     public void deleteByKey (T item) {
         table.deleteItem(table.keyFrom(item));
     }

@@ -112,7 +112,7 @@ public class DynamicDBTest extends DynamicdbStarter {
         save.setOrder(333);
         save.setNum1(999);
 
-        eightDataTypesManager.update(save);
+        eightDataTypesManager.save(save);
 
         EightDataTypesPo po = eightDataTypesManager.selectOne(save);
 
