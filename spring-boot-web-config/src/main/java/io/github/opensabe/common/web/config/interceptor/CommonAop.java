@@ -29,11 +29,11 @@ public class CommonAop {
     }
 
     @Pointcut("@within(org.springframework.web.bind.annotation.RestController) ")
-    public void feignClientMethodPointcut() {
+    public void restControllerMethodPointcut() {
     }
 
     @Pointcut("@within(org.springframework.cloud.openfeign.FeignClient)")
-    public void restControllerMethodPointcut() {
+    public void feignClientMethodPointcut() {
     }
 
     @Order(Integer.MIN_VALUE)
