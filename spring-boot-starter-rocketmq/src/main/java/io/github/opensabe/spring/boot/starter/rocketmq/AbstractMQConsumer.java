@@ -11,6 +11,7 @@ import io.micrometer.tracing.TraceContext;
 import jakarta.annotation.Nonnull;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.InitializingBean;
@@ -22,7 +23,7 @@ import org.springframework.core.env.Environment;
 import java.util.concurrent.CountDownLatch;
 
 @Log4j2
-public abstract class AbstractMQConsumer implements RocketMQListener<String>, ApplicationListener<ApplicationReadyEvent>, InitializingBean {
+public abstract class AbstractMQConsumer implements RocketMQListener<String>, ApplicationListener<ApplicationReadyEvent>, InitializingBean, ConsumerAdjust {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
     @Autowired
@@ -104,6 +105,17 @@ public abstract class AbstractMQConsumer implements RocketMQListener<String>, Ap
     public void onApplicationEvent(@Nonnull ApplicationReadyEvent event) {
         cdl.countDown();
         isStarted = true;
+    }
+
+
+    @Override
+    public ConsumeFromWhere consumeFromWhere() {
+        return ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET;
+    }
+
+    @Override
+    public long consumeFromSecondsAgo() {
+        return 10;
     }
 
     abstract protected void onBaseMQMessage(BaseMQMessage baseMQMessage);

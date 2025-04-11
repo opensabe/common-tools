@@ -45,4 +45,10 @@ public class MQProducerConfiguration {
     public MQLocalTransactionListener getMQLocalTransactionListener(List<UniqueRocketMQLocalTransactionListener> uniqueRocketMQLocalTransactionListeners) {
         return new MQLocalTransactionListener(uniqueRocketMQLocalTransactionListeners);
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RocketMQListenerContainerBeanPostProcessor rocketMQListenerContainerBeanPostProcessor () {
+        return new RocketMQListenerContainerBeanPostProcessor();
+    }
 }
