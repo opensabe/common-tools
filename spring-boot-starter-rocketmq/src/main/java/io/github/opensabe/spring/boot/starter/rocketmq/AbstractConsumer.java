@@ -25,6 +25,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.util.TypeUtils;
 
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 @Log4j2
@@ -63,9 +64,27 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         String payload = new String(ext.getBody());
 
         if ("v2".equals(ext.getProperty("CORE_VERSION"))) {
-            return JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
+            BaseMessage<T> message = null;
+            if (payload.trim().startsWith("{")) {
+                message = JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
+            }
+            if (Objects.isNull(message)) {
+                message = new BaseMessage<>();
+            }
+            if (Objects.isNull(message.getData())) {
+                message.setData(JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference));
+            }
+            return message;
         }
         BaseMQMessage  v1 = JsonUtil.parseObject(payload, new TypeReference<>() {});
+
+        if (Objects.isNull(v1)) {
+            v1 = new BaseMQMessage();
+        }
+
+        if (StringUtils.isEmpty(v1.getData())) {
+            v1.setData(payload);
+        }
 
         if (TypeUtils.isAssignable(String.class, typeReference.getType())) {
             return (BaseMessage<T>) MQMessageUtil.decode(v1);

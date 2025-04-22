@@ -15,13 +15,48 @@ public class BaseMessageTest {
     public record User (String name, Integer age) {}
 
     @Test
-    void testSimpleV2 () {
+    void testSimple () {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
         ext.setBody(SimpleMessageListener.jsonWrapper.getBytes());
         new SimpleMessageListener().onMessage(ext);
+    }
+    @Test
+    void testSimpleWithoutWrapper () {
+        MessageExt ext = new MessageExt();
+        ext.putUserProperty("CORE_VERSION", "v2");
+        ext.setBody(SimpleMessageListener.json.getBytes());
+        new SimpleMessageListener().onMessage(ext);
+    }
 
+    @Test
+    void testList () {
+        MessageExt ext = new MessageExt();
+        ext.putUserProperty("CORE_VERSION", "v2");
+        ext.setBody(ListMessageListener.jsonWrapper.getBytes());
+        new ListMessageListener().onMessage(ext);
+    }
+    @Test
+    void testListWithoutWrapper () {
+        MessageExt ext = new MessageExt();
+        ext.putUserProperty("CORE_VERSION", "v2");
+        ext.setBody(ListMessageListener.json.getBytes());
+        new ListMessageListener().onMessage(ext);
+    }
 
+    @Test
+    void testMap () {
+        MessageExt ext = new MessageExt();
+        ext.putUserProperty("CORE_VERSION", "v2");
+        ext.setBody(MapMessageListener.jsonWrapper.getBytes());
+        new MapMessageListener().onMessage(ext);
+    }
+    @Test
+    void testMapWithoutWrapper () {
+        MessageExt ext = new MessageExt();
+        ext.putUserProperty("CORE_VERSION", "v2");
+        ext.setBody(MapMessageListener.json.getBytes());
+        new MapMessageListener().onMessage(ext);
     }
 
     static class SimpleMessageListener extends AbstractConsumer<User> {
@@ -87,7 +122,11 @@ public class BaseMessageTest {
 
         @Override
         protected void onBaseMessage(BaseMessage<List<User>> baseMQMessage) {
-
+            System.out.println(baseMQMessage.getData().size());
+            baseMQMessage.getData().forEach(user -> {
+                System.out.println(user.name());
+                System.out.println(user.age());
+            });
         }
     }
 
@@ -149,7 +188,9 @@ public class BaseMessageTest {
         }
         @Override
         protected void onBaseMessage(BaseMessage<Map<String, List<User>>> baseMQMessage) {
-
+            System.out.println(baseMQMessage.getData().size());
+            System.out.println(baseMQMessage.getData().get("male"));
+            System.out.println(baseMQMessage.getData().get("female"));
         }
     }
 
