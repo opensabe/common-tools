@@ -16,8 +16,4 @@ public class InviteCodeUtil {
         return result.toString();
     }
 
-    public static void main(String[] args) {
-        System.out.println(generateInviteCode(7));
-    }
-
 }

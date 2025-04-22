@@ -40,7 +40,7 @@ public class MQMessageUtil {
         return message;
     }
 
-    private static String decode(String message) {
+    public static String decode(String message) {
         if (message == null || !message.startsWith(COMPRESSED_PREFIX)) {
             return message;
         }
