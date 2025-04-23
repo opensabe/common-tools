@@ -25,6 +25,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.util.TypeUtils;
 
+import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
@@ -45,8 +46,9 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
     //用来防止每次消费都要读取 cdl 导致性能下降
     private volatile boolean isStarted = false;
 
+    @SuppressWarnings("unchecked")
     protected AbstractConsumer() {
-        TypeInformation<?> information = TypeInformation.of(getClass()).getSuperTypeInformation(AbstractConsumer.class).getTypeArguments().get(0);
+        TypeInformation<?> information = TypeInformation.of(getClass()).getSuperTypeInformation(AbstractConsumer.class).getTypeArguments().getFirst();
         this.typeReference = (MessageTypeReference<T>) MessageTypeReference.fromTypeInformation(information);
         this.cdl = new CountDownLatch(1);
     }
@@ -59,13 +61,15 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
     }
 
 
+    @SuppressWarnings("unchecked")
     protected BaseMessage<T> convert (MessageExt ext) {
 
-        String payload = new String(ext.getBody());
+        String payload = new String(ext.getBody(), Charset.defaultCharset());
 
         if ("v2".equals(ext.getProperty("CORE_VERSION"))) {
             BaseMessage<T> message = null;
             if (payload.trim().startsWith("{")) {
+                System.out.println(payload);
                 message = JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
             }
             if (Objects.isNull(message)) {
@@ -85,6 +89,7 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         if (StringUtils.isEmpty(v1.getData())) {
             v1.setData(payload);
         }
+
 
         if (TypeUtils.isAssignable(String.class, typeReference.getType())) {
             return (BaseMessage<T>) MQMessageUtil.decode(v1);

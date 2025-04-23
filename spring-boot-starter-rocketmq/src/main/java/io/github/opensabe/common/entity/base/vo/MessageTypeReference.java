@@ -1,13 +1,10 @@
 package io.github.opensabe.common.entity.base.vo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.springframework.core.ResolvableType;
 import org.springframework.data.util.TypeInformation;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,15 +13,15 @@ import java.util.List;
  */
 public class MessageTypeReference<T> extends TypeReference<T> {
 
-    private final ParameterizedType type;
+    private final Type type;
 
-    private final ParameterizedType baseMessageType;
+    private final Type baseMessageType;
 
     private MessageTypeReference(final TypeInformation<T> information) {
         final List<TypeInformation<?>> arguments = information.getTypeArguments();
         this.type = new ParameterizedType() {
             public Type [] getActualTypeArguments() {
-                return arguments.stream().map(TypeInformation::getType).toArray(Type[]::new);
+                return arguments.stream().map(i -> i.toTypeDescriptor().getResolvableType().getType()).toArray(Type[]::new);
             }
 
             public  Type getRawType() {

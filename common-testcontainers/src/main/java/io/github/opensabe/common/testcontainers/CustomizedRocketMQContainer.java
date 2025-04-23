@@ -15,7 +15,7 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
     public static final int BROKER_PORT = 10911;
 
     public CustomizedRocketMQContainer() {
-        super("dyrnq/rocketmq:5.0.0");
+        super("dyrnq/rocketmq:5.3.2");
         withExposedPorts(NAMESRV_PORT, BROKER_PORT, BROKER_PORT - 2);
     }
 
@@ -45,6 +45,8 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
                         || result.getExitCode() != 0
                         || result.getStderr().contains("failed")
         ) {
+            System.out.println("---------".repeat(10));
+            System.out.println(command);
             result = execInContainer("/bin/sh", "-c", command);
             System.out.println(result.getStdout());
             System.out.println(result.getStderr());

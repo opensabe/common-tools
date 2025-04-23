@@ -3,6 +3,7 @@ package io.github.opensabe.spring.boot.starter.rocketmq;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
+import io.github.opensabe.common.entity.base.vo.BaseMessage;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
 import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQTest;
@@ -117,12 +118,13 @@ public class RocketMQTest extends BaseRocketMQTest {
             consumerGroup = "${spring.application.name}_rocketmq-test-topic",
             topic = "rocketmq-test-topic"
     )
-    public static class TestConsumer extends AbstractMQConsumer {
+    public static class TestConsumer extends AbstractConsumer<POJO> {
+
 
         @Override
-        protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
+        protected void onBaseMessage(BaseMessage<POJO> baseMessage) {
             try {
-                POJO pojo = JSON.parseObject(baseMQMessage.getData(), POJO.class);
+                POJO pojo = baseMessage.getData();
                 if (pojo.text.contains(testSendLatchString)) {
                     hasInfo = pojo.text.contains("今天天气不错");
                     testSendLatch.countDown();
@@ -132,7 +134,7 @@ public class RocketMQTest extends BaseRocketMQTest {
                     latch.countDown();
                 }
             } catch (JSONException ex) {
-                System.out.println("failed parse object: " + ex.getMessage() + ": " + baseMQMessage.getData());
+                System.out.println("failed parse object: " + ex.getMessage() + ": " + baseMessage.getData());
             }
         }
     }

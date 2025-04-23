@@ -59,7 +59,7 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
 
         return fileName.formatted(property.getOwner().getType().getSimpleName(),
                 property.getName(),
-                hashids.encode(System.nanoTime(), Thread.currentThread().getId()));
+                hashids.encode(System.nanoTime(), Thread.currentThread().threadId()));
     }
 
     private static class JacksonParameterizedTypeTypeReference<T> extends TypeReference<T> {
@@ -73,7 +73,7 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
             final List<TypeInformation<?>> arguments = information.getTypeArguments();
             this.type = new ParameterizedType() {
                 public Type @NotNull [] getActualTypeArguments() {
-                    return arguments.stream().map(TypeInformation::getType).toArray(Type[]::new);
+                    return arguments.stream().map(t -> t.toTypeDescriptor().getResolvableType().getType()).toArray(Type[]::new);
                 }
 
                 public @NotNull Type getRawType() {

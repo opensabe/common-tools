@@ -2,10 +2,14 @@ package io.github.opensabe.spring.boot.starter.rocketmq;
 
 import io.github.opensabe.common.entity.base.vo.BaseMessage;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author heng.ma
@@ -82,8 +86,10 @@ public class BaseMessageTest {
 
         @Override
         protected void onBaseMessage(BaseMessage<User> baseMQMessage) {
-            System.out.println(baseMQMessage.getData().name());
-            System.out.println(baseMQMessage.getData().age());
+            User user = baseMQMessage.getData();
+            Assertions.assertNotNull(user);
+            Assertions.assertEquals(10, user.age());
+            Assertions.assertEquals("zhangsan", user.name());
         }
     }
 
@@ -122,11 +128,10 @@ public class BaseMessageTest {
 
         @Override
         protected void onBaseMessage(BaseMessage<List<User>> baseMQMessage) {
-            System.out.println(baseMQMessage.getData().size());
-            baseMQMessage.getData().forEach(user -> {
-                System.out.println(user.name());
-                System.out.println(user.age());
-            });
+            List<User> list = baseMQMessage.getData();
+            assertThat(list).hasSize(2)
+                    .extracting(User::name, User::age)
+                    .containsExactly(Tuple.tuple("zhangsan", 10), Tuple.tuple("lisi", 20));
         }
     }
 
@@ -159,26 +164,26 @@ public class BaseMessageTest {
                 """;
         static final String json = """
                 {
-                        "male" : [
-                            {
-                                "name" : "zhangsan",
-                                "age": 10
-                            },
-                            {
-                                "name" : "lisi",
-                                "age": 20
-                            }
-                        ],
-                       "female": [
-                            {
-                                "name" : "lily",
-                                "age": 11
-                            },
-                            {
-                                "name" : "lucy",
-                                "age": 21
-                            }
-                       ]
+                    "male" : [
+                        {
+                            "name" : "zhangsan",
+                            "age": 10
+                        },
+                        {
+                            "name" : "lisi",
+                            "age": 20
+                        }
+                    ],
+                   "female": [
+                        {
+                            "name" : "lily",
+                            "age": 11
+                        },
+                        {
+                            "name" : "lucy",
+                            "age": 21
+                        }
+                   ]
                 }
                 """;
 
@@ -188,21 +193,15 @@ public class BaseMessageTest {
         }
         @Override
         protected void onBaseMessage(BaseMessage<Map<String, List<User>>> baseMQMessage) {
-            System.out.println(baseMQMessage.getData().size());
-            System.out.println(baseMQMessage.getData().get("male"));
-            System.out.println(baseMQMessage.getData().get("female"));
-        }
-    }
-
-    static class StringMessageListener extends AbstractConsumer<String> {
-
-        @Override
-        public void onMessage(MessageExt ext) {
-            onBaseMessage(convert(ext));
-        }
-        @Override
-        protected void onBaseMessage(BaseMessage<String> baseMQMessage) {
-
+            Map<String, List<User>> map = baseMQMessage.getData();
+            assertThat(map).hasSize(2)
+                    .containsKeys("male", "female");
+            assertThat(map.get("male")).hasSize(2)
+                    .extracting(User::name, User::age)
+                    .containsExactly(Tuple.tuple("zhangsan", 10), Tuple.tuple("lisi", 20));
+            assertThat(map.get("female")).hasSize(2)
+                    .extracting(User::name, User::age)
+                    .containsExactly(Tuple.tuple("lily", 11), Tuple.tuple("lucy", 21));
         }
     }
 }
