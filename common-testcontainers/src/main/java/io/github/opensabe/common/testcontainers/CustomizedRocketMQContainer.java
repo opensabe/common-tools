@@ -3,7 +3,6 @@ package io.github.opensabe.common.testcontainers;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import lombok.SneakyThrows;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +29,13 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
     @Override
     @SneakyThrows
     protected void containerIsStarted(InspectContainerResponse containerInfo) {
-        List<String> updateBrokerConfigCommands = new ArrayList<>();
+        List<String> updateBrokerConfigCommands = new ArrayList<>(4);
         // Update the brokerAddr and the clients can use the mapped address to connect the broker.
         updateBrokerConfigCommands.add(updateBrokerConfig("brokerIP1", getHost()));
         // Make the changes take effect immediately.
-        updateBrokerConfigCommands.add(updateBrokerConfig("brokerPermission", defaultBrokerPermission));
         updateBrokerConfigCommands.add(updateBrokerConfig("listenPort", getMappedPort(BROKER_PORT)));
+        updateBrokerConfigCommands.add(updateBrokerConfig("brokerPermission", defaultBrokerPermission));
+        updateBrokerConfigCommands.add(updateBrokerConfig("namesrvAddr", "localhost:"+NAMESRV_PORT));
 
         final String command = String.join(" && ", updateBrokerConfigCommands);
         ExecResult result = null;
@@ -50,7 +50,7 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
             result = execInContainer("/bin/sh", "-c", command);
             System.out.println(result.getStdout());
             System.out.println(result.getStderr());
-            Thread.sleep(1000);
+//            Thread.sleep(2000);
         }
         result = execInContainer(
                 "/bin/sh",
@@ -65,6 +65,7 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
         final String brokerAddr = "localhost:" + BROKER_PORT;
         return "./mqadmin updateBrokerConfig -b " + brokerAddr + " -k " + key + " -v " + val;
     }
+
 
     public int getNamesrvPort() {
         return getMappedPort(NAMESRV_PORT);
