@@ -1,13 +1,13 @@
 package io.github.opensabe.paypal.service;
 
-import com.alibaba.fastjson.JSON;
-import io.github.opensabe.common.core.AppException;
-import io.github.opensabe.common.core.ErrorCode;
+import io.github.opensabe.base.code.BizCodeEnum;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.paypal.bo.PayPalTokenResponseBO;
 import io.github.opensabe.paypal.config.PayPalProperties;
 import io.github.opensabe.paypal.dto.PayPalPlanDTO;
 import io.github.opensabe.paypal.dto.PayPalPlanDetailResponseDTO;
 import io.github.opensabe.paypal.dto.PayPalPlanResponseDTO;
+import io.github.opensabe.spring.cloud.parent.common.handler.FrontendException;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,15 +25,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * PayPal 通用service
- * https://developer.paypal.com/api/rest/
+ * <a href="https://developer.paypal.com/api/rest/">...</a>
  */
 @Service
 @Log4j2
 public class PayPalService {
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-
+    private final StringRedisTemplate redisTemplate;
+    private final PayPalProperties properties;
     /**
      * 获取token的uri
      */
@@ -55,28 +54,30 @@ public class PayPalService {
      */
     public static final String PAYPAL_TOKEN_REDIS_KEY = "patron:paypal:token";
 
-    @Autowired
-    private PayPalProperties properties;
 
-    private OkHttpClient okHttpClient;
+
+    private final OkHttpClient okHttpClient;
 
     @Autowired
-    public PayPalService(OkHttpClient okHttpClient) {
-        this.okHttpClient = okHttpClient;
+    public PayPalService(StringRedisTemplate redisTemplate, PayPalProperties properties) {
+        this.redisTemplate = redisTemplate;
+        this.properties = properties;
+        this.okHttpClient = new OkHttpClient().newBuilder()
+                .connectTimeout(180, TimeUnit.SECONDS)
+                .readTimeout(180, TimeUnit.SECONDS)
+                .writeTimeout(180, TimeUnit.SECONDS)
+                .build();
     }
 
     /**
      * 获取token
-     *
-     * @return
-     * @throws AppException
      */
-    public String getToken() throws AppException {
+    public String getToken() {
         if (Objects.isNull(properties)
                 || Objects.isNull(properties.getUrl())
                 || Objects.isNull(properties.getClientId())
                 || Objects.isNull(properties.getClientSecret())) {
-            throw new AppException(ErrorCode.INVALID, "api or clientId or secret not null");
+            throw new FrontendException(BizCodeEnum.INVALID, "api or clientId or secret not null");
         }
 
         // 如果缓存中找到token，则返回
@@ -103,18 +104,11 @@ public class PayPalService {
 
     /**
      * 获取PayPal API token
-     * https://developer.paypal.com/api/rest/
-     *
      * @param url          PayPal请求地址
      * @param clientId     clientId
      * @param clientSecret clientSecret
      */
     public PayPalTokenResponseBO obtainTokenFromApi(String url, String clientId, String clientSecret) {
-        okHttpClient = new OkHttpClient().newBuilder()
-                .connectTimeout(180, TimeUnit.SECONDS)
-                .readTimeout(180, TimeUnit.SECONDS)
-                .writeTimeout(180, TimeUnit.SECONDS)
-                .build();
 
         // 构建一个formBody builder
         FormBody.Builder formBuilder = new FormBody.Builder();
@@ -138,9 +132,9 @@ public class PayPalService {
 
         // 返回请求结果
         try (Response response = call.execute()) {
-            return JSON.parseObject(response.body().string(), PayPalTokenResponseBO.class);
+            return JsonUtil.parseObject(Objects.requireNonNull(response.body()).string(), PayPalTokenResponseBO.class);
         } catch (IOException e) {
-            log.error("PayPalService.obtainTokenFromApi error:{}", e);
+            log.error("PayPalService.obtainTokenFromApi error", e);
         }
 
         return null;
@@ -175,23 +169,12 @@ public class PayPalService {
 
     /**
      * 获取PayPal API plans
-     * https://developer.paypal.com/docs/api/subscriptions/v1/#plans_list
-     *
-     * @return
+     * <a href="https://developer.paypal.com/docs/api/subscriptions/v1/#plans_list">...</a>
      */
     private List<PayPalPlanDTO> obtainPlansFromApi(String url) {
-        okHttpClient = new OkHttpClient().newBuilder()
-                .connectTimeout(180, TimeUnit.SECONDS)
-                .readTimeout(180, TimeUnit.SECONDS)
-                .writeTimeout(180, TimeUnit.SECONDS)
-                .build();
 
-        String basicAuth = null;
-        try {
-            basicAuth = "Bearer " + getToken();
-        } catch (AppException e) {
-            throw new RuntimeException(e);
-        }
+
+        String basicAuth = "Bearer " + getToken();
 
         Request request = new Request.Builder()
                 .url(url)
@@ -205,10 +188,10 @@ public class PayPalService {
 
         // 返回请求结果
         try (Response response = call.execute()) {
-            PayPalPlanResponseDTO payPalPlanResponseDTO = JSON.parseObject(response.body().string(), PayPalPlanResponseDTO.class);
+            PayPalPlanResponseDTO payPalPlanResponseDTO = JsonUtil.parseObject(Objects.requireNonNull(response.body()).string(), PayPalPlanResponseDTO.class);
             return payPalPlanResponseDTO.getPlans();
         } catch (IOException e) {
-            log.error("PayPalService.obtainTokenFromApi error:{}", e);
+            log.error("PayPalService.obtainTokenFromApi error", e);
         }
 
         return null;
@@ -218,7 +201,6 @@ public class PayPalService {
      * 获取plan详情
      *
      * @param planId planId
-     * @return
      */
     public PayPalPlanDetailResponseDTO getPlanDetails(String planId) {
         if (StringUtils.isNotBlank(planId)) {
@@ -229,24 +211,13 @@ public class PayPalService {
 
     /**
      * 获取PayPal API plans detail
-     * https://developer.paypal.com/docs/api/subscriptions/v1/#plans_get
-     *
-     * @param url
-     * @return
+     * <a href="https://developer.paypal.com/docs/api/subscriptions/v1/#plans_get">...</a>
      */
     private PayPalPlanDetailResponseDTO obtainPlansDetailFromApi(String url, String planId) {
-        okHttpClient = new OkHttpClient().newBuilder()
-                .connectTimeout(180, TimeUnit.SECONDS)
-                .readTimeout(180, TimeUnit.SECONDS)
-                .writeTimeout(180, TimeUnit.SECONDS)
-                .build();
 
-        String basicAuth = null;
-        try {
-            basicAuth = "Bearer " + getToken();
-        } catch (AppException e) {
-            throw new RuntimeException(e);
-        }
+
+        String basicAuth = "Bearer " + getToken();
+
 
         Request request = new Request.Builder()
                 .url(url + PAYPAL_PLANS_DETAIL_URI + planId)
@@ -260,9 +231,9 @@ public class PayPalService {
 
         // 返回请求结果
         try (Response response = call.execute()) {
-            return JSON.parseObject(response.body().string(), PayPalPlanDetailResponseDTO.class);
+            return JsonUtil.parseObject(Objects.requireNonNull(response.body()).string(), PayPalPlanDetailResponseDTO.class);
         } catch (IOException e) {
-            log.error("PayPalService.obtainPlansDetailFromApi error:{}", e);
+            log.error("PayPalService.obtainPlansDetailFromApi error", e);
         }
 
         return null;

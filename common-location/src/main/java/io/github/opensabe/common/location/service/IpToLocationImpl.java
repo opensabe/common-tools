@@ -1,9 +1,8 @@
 package io.github.opensabe.common.location.service;
 
-import com.alibaba.fastjson.JSON;
+import com.sun.istack.NotNull;
 import io.github.opensabe.common.location.vo.GeoLocationData;
 import io.github.opensabe.common.location.vo.IpLocation;
-import com.sun.istack.NotNull;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +37,7 @@ public class IpToLocationImpl implements IpToLocation {
     }
 
     private IpLocation getLocation(String ip) {
-        IpLocation location = JSON.parseObject(redisTemplate.opsForValue().get(getKey(ip)), IpLocation.class);
+        IpLocation location = JsonUtil.parseObject(redisTemplate.opsForValue().get(getKey(ip)), IpLocation.class);
         if (location == null) {
             location = getLocationFromUrl(ip);
             if (location != null) {

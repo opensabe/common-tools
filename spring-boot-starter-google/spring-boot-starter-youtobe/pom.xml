@@ -30,8 +30,7 @@
 
         <dependency>
             <groupId>io.github.opensabe-tech</groupId>
-            <artifactId>common-utils</artifactId>
-            <version>${common-utils.version}</version>
+            <artifactId>spring-framework-parent-common</artifactId>
         </dependency>
 
         <!-- 引入OkHttp包，用来发起Http请求 -->

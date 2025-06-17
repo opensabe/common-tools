@@ -1,5 +1,7 @@
 package io.github.opensabe.youtobe.properties;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -17,6 +19,7 @@ public class YouToBeDataApiProperties {
     /**
      * 谷歌提供的youtobe的 list api
      */
+    @NotBlank
     private String list;
 
     /**
@@ -27,5 +30,6 @@ public class YouToBeDataApiProperties {
     /**
      * 谷歌授权的api key
      */
+    @NotEmpty
     private List<String> keys;
 }
