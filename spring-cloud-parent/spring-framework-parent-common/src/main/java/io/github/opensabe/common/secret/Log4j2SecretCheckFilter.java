@@ -28,7 +28,7 @@ public class Log4j2SecretCheckFilter extends AbstractFilter {
     @Override
     public Result filter(LogEvent event) {
         //对于异步日志，这里是单线程执行的，所以不能有太大消耗，不能每次都检查
-        String format = event.getMessage().getFormat();
+        String format = event.getMessage().getFormattedMessage();
         if (format == null) {
             return Result.NEUTRAL;
         }

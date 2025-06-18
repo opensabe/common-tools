@@ -2,8 +2,8 @@ package io.github.opensabe.common.redisson.aop;
 
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphoreName;
-import io.micrometer.core.instrument.util.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

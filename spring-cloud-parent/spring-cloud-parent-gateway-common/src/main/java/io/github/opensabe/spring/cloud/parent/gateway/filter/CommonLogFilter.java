@@ -62,7 +62,6 @@ public class CommonLogFilter extends AbstractTracedFilter {
             MediaType.TEXT_XML,
             MediaType.APPLICATION_XML,
             MediaType.APPLICATION_JSON,
-            MediaType.APPLICATION_JSON_UTF8,
             MediaType.TEXT_PLAIN,
             MediaType.TEXT_XML
     );
@@ -153,7 +152,7 @@ public class CommonLogFilter extends AbstractTracedFilter {
         }).build());
     }
 
-    private Cache<String, Long> thresholdCache = Caffeine.newBuilder()
+    private final Cache<String, Long> thresholdCache = Caffeine.newBuilder()
             .maximumSize(100000)
             .expireAfterWrite(Duration.ofHours(1))
             .build();
@@ -170,11 +169,11 @@ public class CommonLogFilter extends AbstractTracedFilter {
                     return first.get();
                 }
             }
-            return Long.valueOf(Long.MAX_VALUE);
-        }).longValue();
+            return Long.MAX_VALUE;
+        });
     }
 
-    private Cache<String, List<GatewayLogProperties.ParamCheck>> paramCheckCache = Caffeine.newBuilder()
+    private final Cache<String, List<GatewayLogProperties.ParamCheck>> paramCheckCache = Caffeine.newBuilder()
             .maximumSize(100000)
             .expireAfterWrite(Duration.ofHours(1))
             .build();
@@ -201,7 +200,7 @@ public class CommonLogFilter extends AbstractTracedFilter {
         MultiValueMap<String, String> queryParams = request.getQueryParams();
         List<String> platforms = headers.get("platform");
         if (CollectionUtils.isNotEmpty(platforms)) {
-            String platform = platforms.get(0);
+            String platform = platforms.getFirst();
             List<GatewayLogProperties.ParamCheck> paramCheckList = getParamCheckList(path.value());
             for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
                 String param = entry.getKey();
@@ -222,9 +221,7 @@ public class CommonLogFilter extends AbstractTracedFilter {
                                         if (CollectionUtils.isNotEmpty(specificOperation.getVersions())) {
                                             List<String> appversion = headers.get("appversion");
                                             if (CollectionUtils.isNotEmpty(appversion)) {
-                                                if (specificOperation.getVersions().containsAll(appversion)) {
-                                                    return true;
-                                                }
+                                                return specificOperation.getVersions().containsAll(appversion);
                                             }
                                         } else {
                                             return true;
