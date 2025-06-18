@@ -188,6 +188,9 @@ public class PayPalService {
 
         // 返回请求结果
         try (Response response = call.execute()) {
+            if (!response.isSuccessful()) {
+                throw new FrontendException(BizCodeEnum.FAIL, response.message());
+            }
             PayPalPlanResponseDTO payPalPlanResponseDTO = JsonUtil.parseObject(Objects.requireNonNull(response.body()).string(), PayPalPlanResponseDTO.class);
             return payPalPlanResponseDTO.getPlans();
         } catch (IOException e) {
@@ -231,6 +234,9 @@ public class PayPalService {
 
         // 返回请求结果
         try (Response response = call.execute()) {
+            if (!response.isSuccessful()) {
+                throw new FrontendException(BizCodeEnum.FAIL, response.message());
+            }
             return JsonUtil.parseObject(Objects.requireNonNull(response.body()).string(), PayPalPlanDetailResponseDTO.class);
         } catch (IOException e) {
             log.error("PayPalService.obtainPlansDetailFromApi error", e);

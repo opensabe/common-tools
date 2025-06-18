@@ -2,10 +2,9 @@ package io.github.opensabe.paypal.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.opensabe.common.core.AppException;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.SubscriptionsApi;
@@ -30,7 +29,7 @@ public class SubscriptionsApiTest {
     private PayPalService payPalService;
 
     @Test
-    public void subscriptionGetTest() throws AppException, ApiException {
+    public void subscriptionGetTest() throws ApiException {
         ApiClient apiClient = new ApiClient();
         String token = payPalService.getToken();
         apiClient.setAccessToken(token);
@@ -40,7 +39,7 @@ public class SubscriptionsApiTest {
     }
 
     @Test
-    public void verifyTest() throws AppException, ApiException, JsonProcessingException {
+    public void verifyTest() throws  ApiException, JsonProcessingException {
         ApiClient apiClient = new ApiClient();
         ObjectMapper objectMapper = apiClient.getObjectMapper();
         String token = payPalService.getToken();

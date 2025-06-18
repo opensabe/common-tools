@@ -52,6 +52,9 @@ public class YouToBeListService {
 
         // remote request api
         try(Response response = okHttpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new FrontendException(BizCodeEnum.FAIL, response.message());
+            }
             // analysis
             String body = Objects.requireNonNull(response.body()).string();
 
