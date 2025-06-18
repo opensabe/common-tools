@@ -1,6 +1,5 @@
 package io.github.opensabe.common.observation;
 
-import io.github.opensabe.common.utils.AlarmUtil;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Span;
@@ -39,21 +38,6 @@ public class UnifiedObservationFactory {
     public static final char TRACEPARENT_DELIMITER = '-';
 
     static {
-        String value = null;
-        char delimeter = 0;
-//        try {
-//            MethodHandles.Lookup lookup = MethodHandles.lookup();
-//            MethodHandles.Lookup privateLookup = MethodHandles.privateLookupIn(W3CPropagation.class, lookup);
-//            // 使用Lookup对象来找到VarHandle
-//            VarHandle traceParent = privateLookup.findStaticVarHandle(W3CPropagation.class, "TRACE_PARENT", String.class);
-//            VarHandle traceParentDelimiter = privateLookup.findStaticVarHandle(W3CPropagation.class, "TRACEPARENT_DELIMITER", char.class);
-//            value = (String) traceParent.get();
-//            delimeter = (char) traceParentDelimiter.get();
-//        } catch (NoSuchFieldException | IllegalAccessException e) {
-//            AlarmUtil.fatal("Failed to get traceParentValue, {}", e.toString(), e);
-//        }
-//        TRACE_PARENT = value;
-//        TRACEPARENT_DELIMITER = delimeter;
         try {
             OBSERVATION_REGISTRY_HANDLE = MethodHandles.privateLookupIn(UnifiedObservationFactory.class, MethodHandles.lookup())
                     .findVarHandle(UnifiedObservationFactory.class, "observationRegistry", ObservationRegistry.class);
