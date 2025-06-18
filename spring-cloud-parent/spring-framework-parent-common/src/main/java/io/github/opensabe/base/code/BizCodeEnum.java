@@ -1,12 +1,13 @@
 package io.github.opensabe.base.code;
 
+import io.github.opensabe.spring.cloud.parent.common.handler.ErrorMessage;
 import lombok.Getter;
 
 /**
  * Business code in basic response
  */
 @Getter
-public enum BizCodeEnum {
+public enum BizCodeEnum implements ErrorMessage {
     /**
      * Standard response code for backend system
      */
@@ -29,4 +30,14 @@ public enum BizCodeEnum {
 
     private int val;
     private String defaultMsg;
+
+    @Override
+    public int code() {
+        return val;
+    }
+
+    @Override
+    public String message() {
+        return defaultMsg;
+    }
 }

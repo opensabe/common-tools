@@ -7,8 +7,6 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.utils.json.JsonUtil;
-import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageProduce;
-import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeObservationConvention;
 import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageProduceContext;
 import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageProduceObservationConvention;
 import io.github.opensabe.spring.boot.starter.rocketmq.observation.RocketMQObservationDocumentation;
