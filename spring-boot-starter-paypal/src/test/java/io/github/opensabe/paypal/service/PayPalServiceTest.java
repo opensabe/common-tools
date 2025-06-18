@@ -1,11 +1,10 @@
 package io.github.opensabe.paypal.service;
 
-import io.github.opensabe.common.core.AppException;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.paypal.bo.PayPalTokenResponseBO;
 import io.github.opensabe.paypal.config.PayPalProperties;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -23,10 +22,9 @@ public class PayPalServiceTest {
     /**
      * 获取token 单测
      *
-     * @throws AppException
      */
     @Test
-    public void getTokenTest() throws AppException {
+    public void getTokenTest() {
 
         System.out.println(payPalService.getToken());
     }
@@ -34,7 +32,6 @@ public class PayPalServiceTest {
     /**
      * 获取PayPal的plans列表 单测
      *
-     * @throws AppException
      */
     @Test
     public void getPlansTest() {
