@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -119,7 +116,7 @@ public class RocketMQTest extends BaseRocketMQTest {
 
         @Override
         protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
-            POJO pojo = JsonUtil.parseObject(baseMQMessage.getData(), POJO.class);
+            POJO pojo = JsonUtil.parseObject(Objects.requireNonNull(baseMQMessage.getData()), POJO.class);
             if (pojo.text.contains(testSendLatchString)) {
                 hasInfo = pojo.text.contains("今天天气不错");
                 testSendLatch.countDown();
