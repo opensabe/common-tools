@@ -45,13 +45,13 @@ public class YouToBeSearchService {
         // 拼接get方式请求入参
         String url = this.buildUrlAndParam(properties, reqDTO);
         log.info("YouToBeSearchService.getSearch url:{}", url);
-
-        Request request = new Request.Builder().url(url)
-//                .addHeader("Content-Type", "text/json; charset=utf-8")
-                .build();
+        Request request = new Request.Builder().url(url).build();
 
         // remote request api
         try(Response response = okHttpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new FrontendException(BizCodeEnum.FAIL, response.message());
+            }
             String body = Objects.requireNonNull(response.body()).string();
             log.info("YouToBeSearchService.getSearch response.code:{}, result:{}", response.code(), body);
 
