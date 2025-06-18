@@ -37,12 +37,13 @@ public class IpToLocationImpl implements IpToLocation {
     }
 
     private IpLocation getLocation(String ip) {
-        IpLocation location = JsonUtil.parseObject(redisTemplate.opsForValue().get(getKey(ip)), IpLocation.class);
-        if (location == null) {
-            location = getLocationFromUrl(ip);
-            if (location != null) {
-                putLocationToRedis(ip, location);
-            }
+        String str = redisTemplate.opsForValue().get(getKey(ip));
+        if (StringUtils.isNotBlank(str)) {
+            return JsonUtil.parseObject(str, IpLocation.class);
+        }
+        IpLocation location = getLocationFromUrl(ip);
+        if (location != null) {
+            putLocationToRedis(ip, location);
         }
         return location;
     }
