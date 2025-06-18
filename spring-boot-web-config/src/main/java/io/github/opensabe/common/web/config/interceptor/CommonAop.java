@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
+/**
+ * 该切面类主要是用来记录http相关接口的请求以及相应数据
+ * 该切面类会影响到所有@RestController和@FeignClient注解影响的类
+ */
 @Log4j2
 @Aspect
 @Component
@@ -24,13 +28,12 @@ public class CommonAop {
     public CommonAop() {
     }
 
-    @Pointcut("within(io.github.opensabe..controller..*) && @within(org.springframework.web.bind.annotation.RestController) ")
-    public void feignClientMethodPointcut() {
+    @Pointcut("@within(org.springframework.web.bind.annotation.RestController) ")
+    public void restControllerMethodPointcut() {
     }
 
-    @Pointcut("execution(* io.github.opensabe..*(..)) && @within(org.springframework.cloud.openfeign.FeignClient)"
-    )
-    public void restControllerMethodPointcut() {
+    @Pointcut("@within(org.springframework.cloud.openfeign.FeignClient)")
+    public void feignClientMethodPointcut() {
     }
 
     @Order(Integer.MIN_VALUE)

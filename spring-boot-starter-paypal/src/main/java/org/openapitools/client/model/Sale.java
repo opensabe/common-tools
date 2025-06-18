@@ -304,7 +304,9 @@ public class Sale {
    * The recipient fund status. Returned only when the fund status is &#x60;held&#x60;.
    */
   public enum PaymentHoldStatusEnum {
-    HELD("HELD");
+    HELD("HELD"),
+
+    RELEASED("RELEASED");
 
     private String value;
 

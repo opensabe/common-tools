@@ -1,7 +1,6 @@
 package io.github.opensabe.youtobe.service;
 
 
-import io.github.opensabe.common.core.AppException;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.youtobe.App;
 import io.github.opensabe.youtobe.dto.list.YouToBeListReqDTO;
@@ -53,10 +52,9 @@ public class YouToBeTest {
     /**
      * search 方法单测
      *
-     * @throws AppException
      */
     @Test
-    public void getSearchTest() throws AppException {
+    public void getSearchTest() {
         YouToBeSearchReqDTO reqDTO = new YouToBeSearchReqDTO();
         reqDTO.setQ("West Adelaide Bearcats 60 - 66 South Adelaide Panthers | Highlights");
         reqDTO.setMaxResults(25);
@@ -68,10 +66,9 @@ public class YouToBeTest {
     /**
      * list 方法单测
      *
-     * @throws AppException
      */
     @Test
-    public void getListTest() throws AppException {
+    public void getListTest() {
         YouToBeListReqDTO reqDTO = new YouToBeListReqDTO();
         reqDTO.setId("Ks-_Mh1QhMc,c0KYU2j0TM4,eIho2S0ZahI");
         reqDTO.setRegionCode("HK");

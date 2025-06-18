@@ -1,8 +1,8 @@
 package io.github.opensabe.youtobe.service;
 
-import com.alibaba.fastjson.JSON;
-import io.github.opensabe.common.core.AppException;
-import io.github.opensabe.common.core.ErrorCode;
+import io.github.opensabe.base.code.BizCodeEnum;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import io.github.opensabe.spring.cloud.parent.common.handler.FrontendException;
 import io.github.opensabe.youtobe.dto.list.YouToBeListReqDTO;
 import io.github.opensabe.youtobe.dto.list.YouToBeListRespDTO;
 import io.github.opensabe.youtobe.properties.YouToBeDataApiProperties;
@@ -21,25 +21,25 @@ import java.util.Random;
 
 /**
  * youtobe list通用service
- * https://developers.google.com/youtube/v3/docs/videos/list?hl=zh-cn
+ * <a href="https://developers.google.com/youtube/v3/docs/videos/list?hl=zh-cn">...</a>
  */
 @Service
 @Log4j2
 public class YouToBeListService {
 
-    @Autowired
-    private YouToBeDataApiProperties properties;
+    private final YouToBeDataApiProperties properties;
 
     private final OkHttpClient okHttpClient;
 
     @Autowired
-    public YouToBeListService(OkHttpClient okHttpClient) {
+    public YouToBeListService(YouToBeDataApiProperties properties, OkHttpClient okHttpClient) {
+        this.properties = properties;
         this.okHttpClient = okHttpClient;
     }
 
-    public YouToBeListRespDTO getList(YouToBeListReqDTO reqDTO) throws AppException {
+    public YouToBeListRespDTO getList(YouToBeListReqDTO reqDTO) {
         if (Objects.isNull(properties) || Objects.isNull(properties.getList()) || CollectionUtils.isEmpty(properties.getKeys())) {
-            throw new AppException(ErrorCode.INVALID, "api or key not null");
+            throw new FrontendException(BizCodeEnum.INVALID, "api or key not null");
         }
 
         // 拼接get方式请求入参
@@ -51,30 +51,17 @@ public class YouToBeListService {
                 .build();
 
         // remote request api
-        Response response = null;
-        try {
-            response = okHttpClient.newCall(request).execute();
+        try(Response response = okHttpClient.newCall(request).execute()) {
+            // analysis
+            String body = Objects.requireNonNull(response.body()).string();
+
+            log.info("YouToBeListService.getList response.code:{}, result:{}", response.code(), body);
+
+            return JsonUtil.parseObject(body, YouToBeListRespDTO.class);
         } catch (IOException e) {
-            log.error("YouToBeListService.getList error:{}", e);
+            log.error("YouToBeListService.getList error", e);
             return null;
         }
-
-        // analysis
-        YouToBeListRespDTO result = null;
-        try {
-//            if (200 == response.code()) {
-                result = JSON.parseObject(response.body().string(), YouToBeListRespDTO.class);
-//            } else {
-//                log.warn("YouToBeListService.getList google data api http code:{}", response.code());
-//            }
-        } catch (Exception e) {
-            log.error("YouToBeListService.getList json error:{}", e);
-            return null;
-        }
-
-        log.info("YouToBeListService.getList response.code:{}, result:{}", response.code(), JSON.toJSONString(result));
-
-        return result;
     }
 
     /**
@@ -82,7 +69,6 @@ public class YouToBeListService {
      *
      * @param properties api原始地址和key
      * @param reqDTO     请求入参
-     * @return
      */
     private String buildUrlAndParam(YouToBeDataApiProperties properties, YouToBeListReqDTO reqDTO) {
         StringBuilder sb = new StringBuilder(properties.getList());

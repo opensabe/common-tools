@@ -9,7 +9,6 @@ import org.springframework.messaging.Message;
 public abstract class UniqueRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
     /**
      * 名称，通过这个标识用哪个 UniqueRocketMQLocalTransactionListener 处理对应的事务消息发送回调
-     * @return
      */
     public abstract String name();
 
