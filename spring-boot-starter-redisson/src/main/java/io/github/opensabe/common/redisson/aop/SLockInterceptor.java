@@ -16,6 +16,7 @@ import org.redisson.client.RedisResponseTimeoutException;
 import org.springframework.expression.EvaluationException;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +76,7 @@ public class SLockInterceptor implements MethodInterceptor {
         }else {
             if (log.isDebugEnabled()) {
                 log.debug("RedissonLockInterceptor-invoke successfully locked lockName {}, method: {}, threadId: {}",
-                        Arrays.stream(locks).map(RLock::getName).collect(Collectors.joining(",")), method.getName(), Thread.currentThread().getId());
+                        Arrays.stream(locks).map(RLock::getName).collect(Collectors.joining(",")), method.getName(), Thread.currentThread().threadId());
             }
         }
         try {
@@ -98,7 +99,7 @@ public class SLockInterceptor implements MethodInterceptor {
         while (locked) {
             try {
                 lock.unlock();
-                log.debug("RedissonLockInterceptor-release redisson lock {} released, method: {}, threadId: {}", lock.getName(), method.getName(), Thread.currentThread().getId());
+                log.debug("RedissonLockInterceptor-release redisson lock {} released, method: {}, threadId: {}", lock.getName(), method.getName(), Thread.currentThread().threadId());
                 break;
             } catch (Throwable e) {
                 log.fatal("error during release redisson lock {}, {}, count: {}", lock.getName(), e.getMessage(), count, e);
@@ -208,7 +209,7 @@ public class SLockInterceptor implements MethodInterceptor {
             if (leaseTime > 0) {
                 acquiredLocks.stream()
                         .map(l -> (RExpirable) l)
-                        .map(l -> l.expireAsync(unit.toMillis(leaseTime), TimeUnit.MILLISECONDS))
+                        .map(l -> l.expireAsync(Duration.of(leaseTime, unit.toChronoUnit())))
                         .forEach(f -> f.toCompletableFuture().join());
             }
 

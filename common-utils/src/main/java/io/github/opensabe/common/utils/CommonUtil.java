@@ -297,13 +297,6 @@ public class CommonUtil {
         }
     }
 
-    public static void main(String[] args) {
-        //		String url = "http://caipiao.163.com/t/hit/g_2014112914CP11035571.html";
-        //		System.out.println(getOrderIdFormUrl(url));
-        String mss = getMd5Sign("000000", "utf-8");
-        System.out.println(mss);
-    }
-
     /**
      * 将BigDecimal 格式化为 0.00的格式
      *

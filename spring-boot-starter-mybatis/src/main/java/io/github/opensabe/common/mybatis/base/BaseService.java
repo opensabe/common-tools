@@ -4,6 +4,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.Table;
 import org.apache.ibatis.binding.MapperProxy;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import tk.mybatis.mapper.weekend.Fn;
 import tk.mybatis.mapper.weekend.Weekend;
 import tk.mybatis.mapper.weekend.reflection.Reflections;
 
-import javax.persistence.Table;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

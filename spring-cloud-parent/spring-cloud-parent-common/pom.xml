@@ -6,18 +6,17 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.9.1-SNAPSHOT</version>
+        <version>1.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-cloud-parent-common</artifactId>
-    <version>1.0.9.1-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <org.jetbrains.anotations.version>24.1.0</org.jetbrains.anotations.version>
+        <org.jetbrains.anotations.version>26.0.2</org.jetbrains.anotations.version>
     </properties>
 
     <dependencies>
@@ -57,10 +56,6 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.jetbrains</groupId>

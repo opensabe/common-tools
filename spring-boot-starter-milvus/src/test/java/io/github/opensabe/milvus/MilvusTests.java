@@ -4,6 +4,7 @@ import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.milvus.MilvusEmbeddingStore;
 import io.github.opensabe.milvus.config.MilvusEmbeddingStoreProperties;
 import org.assertj.core.api.Assertions;
@@ -17,7 +18,6 @@ import java.util.List;
 
 /**
  * 单测
- * @see dev.langchain4j.store.embedding.spring.EmbeddingStoreAutoConfigurationIT
  */
 @Disabled
 @SpringBootTest(classes = App.class)
@@ -56,7 +56,7 @@ class MilvusTests {
 
         awaitUntilPersisted();
 
-        List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(embedding, 10);
+        List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.search(EmbeddingSearchRequest.builder().queryEmbedding(embedding).maxResults(10).build()).matches();
         Assertions.assertThat(relevant).hasSize(1);
         EmbeddingMatch<TextSegment> match = (EmbeddingMatch)relevant.get(0);
         Assertions.assertThat(match.score()).isCloseTo(1.0, Percentage.withPercentage(1.0));
@@ -83,11 +83,11 @@ class MilvusTests {
 
         List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(embedding, 10);
         Assertions.assertThat(relevant).hasSize(1);
-        EmbeddingMatch<TextSegment> match = (EmbeddingMatch)relevant.get(0);
+        EmbeddingMatch<TextSegment> match = relevant.get(0);
         Assertions.assertThat(match.score()).isCloseTo(1.0, Percentage.withPercentage(1.0));
         Assertions.assertThat(match.embeddingId()).isEqualTo(id);
         Assertions.assertThat(match.embedding()).isEqualTo(embedding);
-        Assertions.assertThat((TextSegment)match.embedded()).isEqualTo(segment);
+        Assertions.assertThat(match.embedded()).isEqualTo(segment);
 
         // 为了不影响下一个测试，这里删除本次embeddingStore创建的collection
         embeddingStore.dropCollection(properties.getCollectionName());

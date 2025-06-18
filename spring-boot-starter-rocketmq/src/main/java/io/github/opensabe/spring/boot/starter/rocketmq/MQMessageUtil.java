@@ -10,11 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MQMessageUtil {
 
-    // fixme configurable or retrieve from rocketMQ?
-    private static final int MAX_MESSAGE_SIZE = 1 * 1024 * 1024; /* aka 1MB */
+    private static final int MAX_MESSAGE_SIZE = 1024 * 1024; /* aka 1MB */
     private static final String COMPRESSED_PREFIX = "compressed.";
 
-    private static String encode(String message) {
+    public static String encode(String message) {
         if (message == null || message.getBytes().length < MAX_MESSAGE_SIZE) {
             return message;
         }
@@ -40,7 +39,7 @@ public class MQMessageUtil {
         return message;
     }
 
-    private static String decode(String message) {
+    public static String decode(String message) {
         if (message == null || !message.startsWith(COMPRESSED_PREFIX)) {
             return message;
         }
