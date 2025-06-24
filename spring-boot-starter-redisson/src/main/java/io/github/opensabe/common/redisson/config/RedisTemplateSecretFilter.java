@@ -18,8 +18,7 @@ public class RedisTemplateSecretFilter implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
-        if (bean instanceof RedisTemplate) {
-            RedisTemplate redisTemplate = (RedisTemplate) bean;
+        if (bean instanceof RedisTemplate redisTemplate) {
             RedisSerializer defaultSerializer = redisTemplate.getDefaultSerializer();
             if (defaultSerializer != null) {
                 redisTemplate.setDefaultSerializer(new SecretCheckRedisSerializer(defaultSerializer, globalSecretManager));
