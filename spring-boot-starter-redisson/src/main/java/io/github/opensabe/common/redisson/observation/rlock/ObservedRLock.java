@@ -6,30 +6,29 @@ import io.micrometer.observation.Observation;
 import org.redisson.api.RExpirable;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
+import org.springframework.lang.NonNull;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
+import java.util.function.Supplier;
 
 /**
  * 观察者模式的分布式锁
  * 注意每次都要新建一个实例，不要重复使用
  * 通过正常的 api 就是每次新建一个，但是注意不要使用单例模式
  */
-public class ObservedRLock extends ObservedRExpirable implements RLock {
-    private final RLock delegate;
-    private final UnifiedObservationFactory unifiedObservationFactory;
+public class ObservedRLock<T extends RLock> extends ObservedRExpirable implements RLock {
+    protected final T delegate;
+    protected final UnifiedObservationFactory unifiedObservationFactory;
 
-    public ObservedRLock(RLock delegate, UnifiedObservationFactory unifiedObservationFactory) {
+    public ObservedRLock(T delegate, UnifiedObservationFactory unifiedObservationFactory) {
         super((RExpirable) delegate, unifiedObservationFactory);
         this.delegate = delegate;
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
-    interface LockAcquire {
-        boolean run();
-    }
 
-    private boolean observeAcquiringLock(boolean tryAcquire, long waitTime, long leaseTime, TimeUnit unit, LockAcquire lockAcquire) {
+    private boolean observeAcquiringLock(boolean tryAcquire, long waitTime, long leaseTime, TimeUnit unit, Supplier<Boolean> lockAcquire) {
         RLockAcquiredContext rLockAcquiredContext = new RLockAcquiredContext(
                 getName(), tryAcquire, waitTime, leaseTime, unit, delegate.getClass()
         );
@@ -38,7 +37,7 @@ public class ObservedRLock extends ObservedRExpirable implements RLock {
                 () -> rLockAcquiredContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
-            boolean result = lockAcquire.run();
+            boolean result = lockAcquire.get();
             rLockAcquiredContext.setLockAcquiredSuccessfully(result);
             return result;
         } catch (Throwable t) {
@@ -181,7 +180,7 @@ public class ObservedRLock extends ObservedRExpirable implements RLock {
     }
 
     @Override
-    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+    public boolean tryLock(long time, @NonNull TimeUnit unit) throws InterruptedException {
         try {
             return observeAcquiringLock(true, time, -1L, unit, () -> {
                 try {
@@ -220,6 +219,7 @@ public class ObservedRLock extends ObservedRExpirable implements RLock {
     }
 
     @Override
+    @NonNull
     public Condition newCondition() {
         return delegate.newCondition();
     }

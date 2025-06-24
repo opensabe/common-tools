@@ -15,14 +15,15 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 在方法或者类上添加该注释后，自动添加基于 Redisson 的分布式锁
+ * @deprecated use {@link io.github.opensabe.common.redisson.annotation.slock.RedissonLock} instead
  */
+@Deprecated(forRemoval = true)
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(
-        {ElementType.METHOD, ElementType.TYPE}
-)
+@Target({ElementType.METHOD, ElementType.TYPE})
 public @interface RedissonLock {
+
     /**
      * 一般通过 RedissonLockName 指定锁名称
      * 但如果锁和方法参数无关，则通过这个 name 指定

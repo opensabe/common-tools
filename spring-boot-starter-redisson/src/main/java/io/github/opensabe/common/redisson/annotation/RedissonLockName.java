@@ -1,21 +1,22 @@
 package io.github.opensabe.common.redisson.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+
+import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
+
+import java.lang.annotation.*;
 
 /**
  * 分布式锁名称注解
+ * @deprecated use {@link io.github.opensabe.common.redisson.annotation.slock.RedissonLock} instead
  */
+@Deprecated(forRemoval = true)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
 public @interface RedissonLockName {
-    String DEFAULT_PREFIX = "redisson:lock:";
 
-    String prefix() default DEFAULT_PREFIX;
+
+    String prefix() default RedissonLock.DEFAULT_PREFIX;
 
     String expression() default "";
 }

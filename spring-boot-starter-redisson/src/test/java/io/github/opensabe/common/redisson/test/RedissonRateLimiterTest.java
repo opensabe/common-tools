@@ -86,7 +86,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
         public void testRateLimiterBlockAcquireWithParams(@RedissonRateLimiterName String permitsName) {
             try {
                 list.add(System.currentTimeMillis());
-                RRateLimiter testRateLimiterBlockAcquire = redissonClient.getRateLimiter(RedissonRateLimiterName.DEFAULT_PREFIX + permitsName);
+                RRateLimiter testRateLimiterBlockAcquire = redissonClient.getRateLimiter(RedissonRateLimiter.DEFAULT_PREFIX + permitsName);
                 RateLimiterConfig config = testRateLimiterBlockAcquire.getConfig();
                 Assertions.assertEquals(1, config.getRate());
                 Assertions.assertEquals(1000, config.getRateInterval());

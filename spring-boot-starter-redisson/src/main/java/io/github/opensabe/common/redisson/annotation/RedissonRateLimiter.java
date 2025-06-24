@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
         {ElementType.METHOD, ElementType.TYPE}
 )
 public @interface RedissonRateLimiter {
+    String DEFAULT_PREFIX = "redisson:rateLimiter:";
     /**
      * 可以通过 RedissonRateLimiterName 指定限流器名称
      * 对于不通过参数指定名称的，可以使用这个方法指定

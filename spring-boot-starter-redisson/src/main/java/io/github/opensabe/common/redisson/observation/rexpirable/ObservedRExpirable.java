@@ -1,7 +1,7 @@
 package io.github.opensabe.common.redisson.observation.rexpirable;
 
-import io.github.opensabe.common.redisson.observation.robject.ObservedRObject;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.RObjectDelegate;
 import io.micrometer.observation.Observation;
 import org.redisson.api.RExpirable;
 import org.redisson.api.RFuture;
@@ -11,11 +11,13 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class ObservedRExpirable extends ObservedRObject implements RExpirable {
+public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     private final RExpirable rExpirable;
+    protected final UnifiedObservationFactory unifiedObservationFactory;
     public ObservedRExpirable(RExpirable rExpirable, UnifiedObservationFactory unifiedObservationFactory) {
-        super(rExpirable, unifiedObservationFactory);
+        super(rExpirable);
         this.rExpirable = rExpirable;
+        this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
     private interface ExpireCallable {
@@ -165,7 +167,7 @@ public class ObservedRExpirable extends ObservedRObject implements RExpirable {
     public long getExpireTime() {
         return rExpirable.getExpireTime();
     }
-    
+
     @Override
     public RFuture<Boolean> expireAsync(long timeToLive, TimeUnit timeUnit) {
         return rExpirable.expireAsync(timeToLive, timeUnit);

@@ -1,13 +1,12 @@
 package io.github.opensabe.common.redisson.observation.rsemaphore;
 
-import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
 import io.micrometer.observation.Observation;
 import org.redisson.api.RFuture;
 import org.redisson.api.RPermitExpirableSemaphore;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implements RPermitExpirableSemaphore {
@@ -427,6 +426,11 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     }
 
     @Override
+    public long getLeaseTime(String permitId) {
+        return delegate.getLeaseTime(permitId);
+    }
+
+    @Override
     public RFuture<String> acquireAsync() {
         return delegate.acquireAsync();
     }
@@ -524,5 +528,10 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     @Override
     public RFuture<Boolean> updateLeaseTimeAsync(String permitId, long leaseTime, TimeUnit unit) {
         return delegate.updateLeaseTimeAsync(permitId, leaseTime, unit);
+    }
+
+    @Override
+    public RFuture<Long> getLeaseTimeAsync(String permitId) {
+        return delegate.getLeaseTimeAsync(permitId);
     }
 }

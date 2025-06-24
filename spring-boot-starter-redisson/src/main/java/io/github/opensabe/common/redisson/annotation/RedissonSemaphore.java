@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
         {ElementType.METHOD, ElementType.TYPE}
 )
 public @interface RedissonSemaphore {
+    String DEFAULT_PREFIX = "redisson:semaphore:";
     /**
      * 注意，使用的不是 Redisson 的 Semaphore，而是更严谨的 PermitExpirableSemaphore
      * 可以通过 RedissonSemaphoreName 指定限流器名称
