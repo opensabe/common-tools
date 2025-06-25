@@ -6,4 +6,7 @@ public class RedissonClientException extends RuntimeException {
 		super(message);
 	}
 
+	public RedissonClientException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }
