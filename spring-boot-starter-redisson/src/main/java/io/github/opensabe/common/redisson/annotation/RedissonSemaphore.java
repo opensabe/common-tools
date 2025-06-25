@@ -24,6 +24,8 @@ public @interface RedissonSemaphore {
      */
     String name() default "";
 
+    String prefix() default RedissonSemaphore.DEFAULT_PREFIX;
+
     /**
      * 限流器总量
      */
@@ -43,8 +45,7 @@ public @interface RedissonSemaphore {
         /**
          * 获取不到就抛异常
          */
-        TRY,
-        ;
+        TRY
     }
 
     /**

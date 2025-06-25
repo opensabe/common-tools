@@ -1,10 +1,16 @@
 package io.github.opensabe.common.redisson.annotation.slock;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 代替之前的注解
+ * @see org.redisson.api.RedissonClient#getLock(String)
+ * @author heng.ma
+ */
 @Documented
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -14,15 +20,15 @@ public @interface RedissonLock {
 
     String DEFAULT_PREFIX = "redisson:lock:";
 
-
+    /**
+     * 锁的名称表达式
+     * @see Cacheable#cacheNames()
+     */
     @AliasFor(annotation = SLock.class)
     String[] name();
 
     @AliasFor(annotation = SLock.class)
     String prefix() default DEFAULT_PREFIX;
-
-    @AliasFor(annotation = SLock.class)
-    int order() default 0;
 
     /**
      * 锁等待时间

@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 /**
  * @deprecated  use {@link RedissonRateLimiter#name()} instead
  */
+@Deprecated(forRemoval = true)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})

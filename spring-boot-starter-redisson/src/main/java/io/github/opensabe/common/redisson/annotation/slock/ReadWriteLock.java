@@ -1,5 +1,6 @@
 package io.github.opensabe.common.redisson.annotation.slock;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
@@ -12,15 +13,15 @@ import java.util.concurrent.TimeUnit;
 @SLock(name = "", lockFeature = SLock.LockFeature.DEFAULT)
 public @interface ReadWriteLock {
 
+    /**
+     * 锁的名称表达式
+     * @see Cacheable#cacheNames()
+     */
     @AliasFor(annotation = SLock.class)
     String[] name();
 
     @AliasFor(annotation = SLock.class)
     String prefix() default RedissonLock.DEFAULT_PREFIX;
-
-    @AliasFor(annotation = SLock.class)
-    int order() default 0;
-
     /**
      * 锁等待时间
      */

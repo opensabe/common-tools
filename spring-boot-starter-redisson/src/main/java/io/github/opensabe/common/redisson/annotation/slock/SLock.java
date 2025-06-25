@@ -5,6 +5,7 @@ import org.redisson.api.LockOptions;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +16,13 @@ import java.util.concurrent.TimeUnit;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SLock {
 
+    /**
+     * 锁的名称表达式
+     * @see Cacheable#cacheNames()
+     */
     String[] name();
 
     String prefix() default RedissonLock.DEFAULT_PREFIX;
-
-    int order() default 0;
 
     /**
      * 锁等待时间
@@ -62,6 +65,9 @@ public @interface SLock {
 
     enum LockType {
 
+        /**
+         * @see org.redisson.api.RLock#lock(long, TimeUnit)
+         */
         BLOCK_LOCK {
             @Override
             public boolean lock(SLock content, RLock lock) {
@@ -71,6 +77,7 @@ public @interface SLock {
         },
         /**
          * try lock，不等待，直接返回
+         * @see org.redisson.api.RLock#tryLock()
          */
         TRY_LOCK_NOWAIT {
             @Override
@@ -80,6 +87,7 @@ public @interface SLock {
         },
         /**
          * try lock，包含等待
+         * @see org.redisson.api.RLock#tryLock(long, long, TimeUnit)
          */
         TRY_LOCK {
             @Override
@@ -179,12 +187,19 @@ public @interface SLock {
     }
 
     enum ReadOrWrite {
+        /**
+         * @see org.redisson.api.RReadWriteLock#readLock()
+         */
         READ {
             @Override
             RLock transform(RReadWriteLock lock) {
                 return lock.readLock();
             }
         },
+
+        /**
+         * @see org.redisson.api.RReadWriteLock#writeLock()
+         */
         WRITE {
             @Override
             RLock transform(RReadWriteLock lock) {

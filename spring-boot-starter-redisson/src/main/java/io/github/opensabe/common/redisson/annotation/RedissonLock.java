@@ -1,5 +1,6 @@
 package io.github.opensabe.common.redisson.annotation;
 
+import io.github.opensabe.common.redisson.annotation.slock.*;
 import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import org.redisson.api.LockOptions;
 import org.redisson.api.RLock;
@@ -15,9 +16,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 在方法或者类上添加该注释后，自动添加基于 Redisson 的分布式锁
- * @deprecated use {@link io.github.opensabe.common.redisson.annotation.slock.RedissonLock} instead
+ * @deprecated since 2.0.0 use {@link io.github.opensabe.common.redisson.annotation.slock} instead
+ * @see io.github.opensabe.common.redisson.annotation.slock.RedissonLock
+ * @see ReadWriteLock
+ * @see FairLock
+ * @see SpinLock
+ * @see FencedLock
  */
-@Deprecated(forRemoval = true)
+@Deprecated
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
