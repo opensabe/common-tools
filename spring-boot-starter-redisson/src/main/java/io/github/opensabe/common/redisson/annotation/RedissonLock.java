@@ -8,9 +8,9 @@ import org.redisson.api.RedissonClient;
 
 import java.lang.annotation.*;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,7 +57,7 @@ public @interface RedissonLock {
     /**
      * 锁等待时间
      */
-    long waitTime() default 1000l;
+    long waitTime() default 1000;
 
     /**
      * 锁最长持有时间
@@ -223,7 +223,7 @@ public @interface RedissonLock {
             this.value = value;
         }
 
-        private final static Map<Integer, LockType> map = new HashMap<>(3);
+        private final static Map<Integer, LockType> map = new ConcurrentHashMap<>(3);
 
         public abstract boolean lock (RedissonLock content, RLock lock);
 

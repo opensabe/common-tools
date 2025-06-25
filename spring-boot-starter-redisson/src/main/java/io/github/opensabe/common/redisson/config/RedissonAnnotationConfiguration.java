@@ -35,10 +35,9 @@ public class RedissonAnnotationConfiguration {
     @Bean
     public RedissonLockInterceptor redissonLockInterceptor(
             RedissonClient redissonClient,
-            RedissonLockCachedPointcut redissonLockCachedPointcut,
-            UnifiedObservationFactory unifiedObservationFactory
+            RedissonLockCachedPointcut redissonLockCachedPointcut
     ) {
-        return new RedissonLockInterceptor(redissonClient, redissonLockCachedPointcut, unifiedObservationFactory);
+        return new RedissonLockInterceptor(redissonClient, redissonLockCachedPointcut);
     }
 
     @Bean
@@ -75,8 +74,8 @@ public class RedissonAnnotationConfiguration {
     }
 
     @Bean
-    public RedissonRateLimiterInterceptor redissonRateLimiterInterceptor(RedissonClient redissonClient, RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut, UnifiedObservationFactory unifiedObservationFactory) {
-        return new RedissonRateLimiterInterceptor(redissonClient, redissonRateLimiterCachedPointcut, unifiedObservationFactory);
+    public RedissonRateLimiterInterceptor redissonRateLimiterInterceptor(RedissonClient redissonClient, RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut) {
+        return new RedissonRateLimiterInterceptor(redissonClient, redissonRateLimiterCachedPointcut);
     }
 
     @Bean
@@ -93,8 +92,8 @@ public class RedissonAnnotationConfiguration {
     }
 
     @Bean
-    public RedissonSemaphoreInterceptor redissonSemaphoreInterceptor(RedissonClient redissonClient, RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut, UnifiedObservationFactory unifiedObservationFactory) {
-        return new RedissonSemaphoreInterceptor(redissonClient, redissonSemaphoreCachedPointcut, unifiedObservationFactory);
+    public RedissonSemaphoreInterceptor redissonSemaphoreInterceptor(RedissonClient redissonClient, RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut) {
+        return new RedissonSemaphoreInterceptor(redissonClient, redissonSemaphoreCachedPointcut);
     }
 
     @Bean

@@ -28,14 +28,12 @@ public class RedissonSemaphoreInterceptor implements MethodInterceptor {
 
     private final RedissonClient redissonClient;
     private final RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut;
-    private final UnifiedObservationFactory unifiedObservationFactory;
     private final SpelExpressionParser parser = new SpelExpressionParser();
     private final ParserContext context = new TemplateParserContext();
 
-    public RedissonSemaphoreInterceptor(RedissonClient redissonClient, RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut, UnifiedObservationFactory unifiedObservationFactory) {
+    public RedissonSemaphoreInterceptor(RedissonClient redissonClient, RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut) {
         this.redissonClient = redissonClient;
         this.redissonSemaphoreCachedPointcut = redissonSemaphoreCachedPointcut;
-        this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
     @Nullable

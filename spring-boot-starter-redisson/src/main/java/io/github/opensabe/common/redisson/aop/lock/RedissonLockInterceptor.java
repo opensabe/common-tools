@@ -1,6 +1,5 @@
 package io.github.opensabe.common.redisson.aop.lock;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.RedissonLockName;
 import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
@@ -29,12 +28,10 @@ public class RedissonLockInterceptor implements MethodInterceptor {
     private final RedissonLockCachedPointcut redissonLockCachedPointcut;
     private final SpelExpressionParser parser = new SpelExpressionParser();
     private final ParserContext context = new TemplateParserContext();
-    private final UnifiedObservationFactory unifiedObservationFactory;
 
-    public RedissonLockInterceptor(RedissonClient redissonClient, RedissonLockCachedPointcut redissonLockCachedPointcut, UnifiedObservationFactory unifiedObservationFactory) {
+    public RedissonLockInterceptor(RedissonClient redissonClient, RedissonLockCachedPointcut redissonLockCachedPointcut) {
         this.redissonClient = redissonClient;
         this.redissonLockCachedPointcut = redissonLockCachedPointcut;
-        this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
     /**
@@ -107,7 +104,7 @@ public class RedissonLockInterceptor implements MethodInterceptor {
             if (!getLock) {
                 throw new RedissonLockException("can not get redisson lock,method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
             } else {
-                log.debug("RedissonLockInterceptor-invoke successfully locked lockName {}, method: {}, threadId: {}",
+                log.info("RedissonLockInterceptor-invoke successfully locked lockName {}, method: {}, threadId: {}",
                         lockName, method.getName(), Thread.currentThread().getId());
             }
             //执行方法

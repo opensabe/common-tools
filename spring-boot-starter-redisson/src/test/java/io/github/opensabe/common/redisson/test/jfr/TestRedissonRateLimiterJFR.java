@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Import(TestRedissonRateLimiterJFR.Config.class)
 //JFR 测试最好在本地做
 @Disabled
+@JfrEventTest
 public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     public JfrEvents jfrEvents = new JfrEvents();

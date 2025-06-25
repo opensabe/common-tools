@@ -30,14 +30,12 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
 
     private final RedissonClient redissonClient;
     private final RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut;
-    private final UnifiedObservationFactory unifiedObservationFactory;
     private final SpelExpressionParser parser = new SpelExpressionParser();
     private final ParserContext context = new TemplateParserContext();
 
-    public RedissonRateLimiterInterceptor(RedissonClient redissonClient, RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut, UnifiedObservationFactory unifiedObservationFactory) {
+    public RedissonRateLimiterInterceptor(RedissonClient redissonClient, RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut) {
         this.redissonClient = redissonClient;
         this.redissonRateLimiterCachedPointcut = redissonRateLimiterCachedPointcut;
-        this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
     @Nullable
