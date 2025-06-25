@@ -24,7 +24,7 @@ public @interface SLock {
     /**
      * 锁等待时间
      */
-    long waitTime() default 1000l;
+    long waitTime() default 1000;
 
     /**
      * 锁最长持有时间

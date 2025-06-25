@@ -28,7 +28,7 @@ public @interface RedissonLock {
      * 锁等待时间
      */
     @AliasFor(annotation = SLock.class)
-    long waitTime() default 1000l;
+    long waitTime() default 1000;
 
     /**
      * 锁最长持有时间

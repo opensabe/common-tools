@@ -9,6 +9,6 @@ import org.springframework.context.annotation.Import;
  * Lettuce
  */
 @AutoConfiguration(before = RedisAutoConfiguration.class)
-@Import({LettuceConfiguration.class})
+@Import(LettuceConfiguration.class)
 public class LettuceAutoConfiguration {
 }

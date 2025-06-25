@@ -23,6 +23,7 @@ import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.lang.NonNull;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 由于RedissonClient创建比较早，因此这里必须调整一order
+ * 由于RedissonClient创建比较早，因此这里必须调整一下order
  * @author heng.ma
  */
 @Log4j2
@@ -80,7 +81,7 @@ public class MultiRedisConnectionFactoryConfiguration implements BeanPostProcess
      * @see org.redisson.spring.starter.RedissonAutoConfiguration
      */
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
         if (bean instanceof RedisProperties) {
             return multiRedisProperties.getMulti().get(MultiRedisProperties.DEFAULT);
         }
