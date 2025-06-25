@@ -11,6 +11,8 @@ import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 
 /**
+ * 将默认的RedissonClient替换为ObservedRedissonClient，
+ * 因为RedissonClient创建比较早，因此这里必须调整一order，否则不经过BeanPostProcessor
  * @author heng.ma
  */
 public class RedissonClientBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware, Ordered {

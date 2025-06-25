@@ -4,7 +4,9 @@ import com.google.common.collect.Maps;
 import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
 import io.lettuce.core.resource.ClientResources;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
@@ -15,7 +17,7 @@ import org.springframework.boot.autoconfigure.thread.Threading;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.core.Ordered;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -28,10 +30,14 @@ import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 由于RedissonClient创建比较早，因此这里必须调整一order
+ * @author heng.ma
+ */
 @Log4j2
 @ConditionalOnProperty(prefix = "spring.data.redis", value = "enable-multi")
 @Configuration(proxyBeanMethods = false)
-public class MultiRedisConnectionFactoryConfiguration {
+public class MultiRedisConnectionFactoryConfiguration implements BeanPostProcessor, Ordered {
 
     private static final String CONFIGURATION_CLASS_NAME = "org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration";
 
@@ -69,12 +75,17 @@ public class MultiRedisConnectionFactoryConfiguration {
         this.propertyConstructor = MethodHandles.privateLookupIn(propertyType, lookup).findConstructor(propertyType, MethodType.methodType(void.class, RedisProperties.class));
     }
 
-    @Bean
-    @Primary
-    public RedisProperties redisProperties () {
-        return multiRedisProperties.getMulti().get(MultiRedisProperties.DEFAULT);
+    /**
+     * 创建redissonClient需要RedissonProperties，因此需要替换掉默认的RedissonProperties
+     * @see org.redisson.spring.starter.RedissonAutoConfiguration
+     */
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (bean instanceof RedisProperties) {
+            return multiRedisProperties.getMulti().get(MultiRedisProperties.DEFAULT);
+        }
+        return bean;
     }
-
 
     @Bean
     @ConditionalOnThreading(Threading.PLATFORM)
@@ -136,4 +147,8 @@ public class MultiRedisConnectionFactoryConfiguration {
     }
 
 
+    @Override
+    public int getOrder() {
+        return 0;
+    }
 }
