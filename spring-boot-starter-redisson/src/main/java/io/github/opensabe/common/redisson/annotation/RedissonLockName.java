@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * 分布式锁名称注解
  * @deprecated use {@link io.github.opensabe.common.redisson.annotation.slock.RedissonLock} instead
  */
-@Deprecated(forRemoval = true)
+@Deprecated(forRemoval = true, since = "2.0.0")
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})

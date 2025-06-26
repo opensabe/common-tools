@@ -51,7 +51,7 @@ public class RedissonLockInterceptor implements MethodInterceptor {
                 throw new RedissonLockException("can not get redisson lock,method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
             } else {
                 log.info("RedissonLockInterceptor-invoke successfully locked lockName {}, method: {}, threadId: {}",
-                        lockName, method.getName(), Thread.currentThread().getId());
+                        lockName, method.getName(), Thread.currentThread().threadId());
             }
             //执行方法
             return invocation.proceed();
@@ -64,8 +64,6 @@ public class RedissonLockInterceptor implements MethodInterceptor {
 
     /**
      * 释放锁，如果释放失败，重试
-     * @param lock
-     * @param method
      */
     private void release(RLock lock, Method method) {
         boolean locked = lock.isLocked() && lock.isHeldByCurrentThread();
@@ -73,7 +71,7 @@ public class RedissonLockInterceptor implements MethodInterceptor {
         while (locked) {
             try {
                 lock.unlock();
-                log.debug("RedissonLockInterceptor-release redisson lock {} released, method: {}, threadId: {}", lock.getName(), method.getName(), Thread.currentThread().getId());
+                log.debug("RedissonLockInterceptor-release redisson lock {} released, method: {}, threadId: {}", lock.getName(), method.getName(), Thread.currentThread().threadId());
                 break;
             } catch (Throwable e) {
                 log.fatal("error during release redisson lock {}, {}, count: {}", lock.getName(), e.getMessage(), count, e);
@@ -84,7 +82,7 @@ public class RedissonLockInterceptor implements MethodInterceptor {
                     log.debug("release redisson failed because of rejected, retry unlock {}", lock.getName());
                     try {
                         TimeUnit.MILLISECONDS.sleep(500);
-                    } catch (InterruptedException ex) {
+                    } catch (InterruptedException ignore) {
                     }
                 } else {
                     break;

@@ -1,7 +1,6 @@
 package io.github.opensabe.common.redisson.aop.lock;
 
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
-import io.github.opensabe.common.redisson.annotation.RedissonLockName;
 import io.github.opensabe.common.redisson.aop.old.ExtraNamePointcut;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,7 +21,7 @@ public class RedissonLockCachedPointcut extends ExtraNamePointcut<RedissonLockPr
             l = clazz.getAnnotation(RedissonLock.class);
         }
         if (l != null) {
-            Pair<RedissonLockName, Integer> pair = findParameterAnnotation(method, RedissonLockName.class);
+            Pair<io.github.opensabe.common.redisson.annotation.RedissonLockName, Integer> pair = findParameterAnnotation(method, io.github.opensabe.common.redisson.annotation.RedissonLockName.class);
             if (pair != null) {
                 return new RedissonLockProperties(l, pair.getKey(), pair.getValue());
             }else {

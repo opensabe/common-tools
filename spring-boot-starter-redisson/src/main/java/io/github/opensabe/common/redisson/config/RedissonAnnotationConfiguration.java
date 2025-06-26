@@ -53,15 +53,15 @@ public class RedissonAnnotationConfiguration {
     }
 
     @Bean
-    public SLockPointcut sLockPointcut () {
-        return new SLockPointcut();
+    public SLockPointcut sLockPointcut (MethodArgumentsExpressEvaluator evaluator) {
+        return new SLockPointcut(evaluator);
     }
 
 
     @Bean
-    public SLockInterceptor sLockInterceptor (MethodArgumentsExpressEvaluator evaluator, RedissonClient redissonClient, SLockPointcut pointcut) {
+    public SLockInterceptor sLockInterceptor (RedissonClient redissonClient, SLockPointcut pointcut) {
 
-        return new SLockInterceptor(redissonClient, evaluator, pointcut);
+        return new SLockInterceptor(redissonClient, pointcut);
     }
 
     @Bean

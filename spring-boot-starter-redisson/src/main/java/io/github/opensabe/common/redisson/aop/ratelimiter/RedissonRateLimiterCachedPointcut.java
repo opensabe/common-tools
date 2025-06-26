@@ -1,7 +1,6 @@
 package io.github.opensabe.common.redisson.aop.ratelimiter;
 
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
-import io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName;
 import io.github.opensabe.common.redisson.aop.old.ExtraNamePointcut;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import org.apache.commons.lang3.tuple.Pair;
@@ -23,7 +22,8 @@ public class RedissonRateLimiterCachedPointcut extends ExtraNamePointcut<Redisso
             l = clazz.getAnnotation(RedissonRateLimiter.class);
         }
         if (l != null) {
-            Pair<RedissonRateLimiterName, Integer> pair = findParameterAnnotation(method, RedissonRateLimiterName.class);
+            Pair<io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName, Integer> pair =
+                    findParameterAnnotation(method, io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName.class);
             if (pair != null) {
                 return new RedissonRateLimiterProperties(l, pair.getKey(), pair.getValue());
             }else {

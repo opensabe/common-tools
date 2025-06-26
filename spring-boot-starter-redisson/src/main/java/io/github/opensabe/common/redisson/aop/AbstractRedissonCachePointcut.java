@@ -3,6 +3,7 @@ package io.github.opensabe.common.redisson.aop;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.lang.NonNull;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -25,7 +26,7 @@ public abstract class AbstractRedissonCachePointcut<T extends AbstractRedissonPr
 
 
     @Override
-    public boolean matches(Method method, Class<?> targetClass) {
+    public boolean matches(@NonNull Method method, @NonNull Class<?> targetClass) {
         return cache.computeIfAbsent(method, k -> {
             T properties = findProperties(method, targetClass);
             if (Objects.nonNull(properties)) {
@@ -35,9 +36,9 @@ public abstract class AbstractRedissonCachePointcut<T extends AbstractRedissonPr
         }) != AbstractRedissonProperties.NONE;
     }
 
-    public T getRedissonProperties(Method method, Class<?> targetClass) {
-        Object o = cache.get(method);
-        return (T) o;
+    @SuppressWarnings("unchecked")
+    public T getRedissonProperties(Method method, @SuppressWarnings("unused") Class<?> targetClass) {
+        return (T)cache.get(method);
     }
 
     @Nullable

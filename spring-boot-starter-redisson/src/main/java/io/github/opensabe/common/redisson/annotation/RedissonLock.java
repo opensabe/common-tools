@@ -1,6 +1,9 @@
 package io.github.opensabe.common.redisson.annotation;
 
-import io.github.opensabe.common.redisson.annotation.slock.*;
+import io.github.opensabe.common.redisson.annotation.slock.FairLock;
+import io.github.opensabe.common.redisson.annotation.slock.FencedLock;
+import io.github.opensabe.common.redisson.annotation.slock.ReadWriteLock;
+import io.github.opensabe.common.redisson.annotation.slock.SpinLock;
 import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import org.redisson.api.LockOptions;
 import org.redisson.api.RLock;
@@ -23,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * @see SpinLock
  * @see FencedLock
  */
-@Deprecated
+@Deprecated(since = "2.0.0")
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

@@ -2,7 +2,6 @@ package io.github.opensabe.common.redisson.aop.slock;
 
 import io.github.opensabe.common.redisson.annotation.slock.SLock;
 import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
-import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -29,7 +28,6 @@ import java.util.stream.Collectors;
 public class SLockInterceptor implements MethodInterceptor {
 
     private final RedissonClient redissonClient;
-    private final MethodArgumentsExpressEvaluator evaluator;
 
     private final SLockPointcut pointcut;
 
@@ -37,14 +35,15 @@ public class SLockInterceptor implements MethodInterceptor {
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Method method = invocation.getMethod();
         Class<?> clazz = invocation.getThis().getClass();
-        SLock lock = pointcut.findSLock(method, clazz);
-        if (Objects.isNull(lock)) {
+        SLockProperties properties = pointcut.findProperties(method, clazz);
+        if (Objects.isNull(properties)) {
             log.error("RedissonLockInterceptor-invoke error! Cannot find corresponding LockProperties, method {} run without lock", method.getName());
             return invocation.proceed();
         }
+        SLock lock = properties.getLock();
         RLock[] locks = Arrays.stream(lock.name())
                 .map(name -> {
-                    String resolved = evaluator.resolve(method, invocation.getThis(), invocation.getArguments(), name);
+                    String resolved = properties.evaluator().resolve(method, invocation.getThis(), invocation.getArguments(), name);
                     if (StringUtils.isBlank(resolved)) {
                         throw new RedissonLockException("can not resolved redisson lock name , expression: "+name+" method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
                     }

@@ -11,7 +11,6 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.SpelParseException;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
@@ -35,7 +34,6 @@ public class MethodArgumentsExpressEvaluator extends CachedExpressionEvaluator {
     }
 
 
-    @Nullable
     public String resolve (Method method, Object target, Object[] arguments, String expression) {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
         try {
@@ -43,9 +41,10 @@ public class MethodArgumentsExpressEvaluator extends CachedExpressionEvaluator {
         }catch (SpelParseException | EvaluationException e) {
             if (!StringUtils.contains(expression, "#")) {
                 return expression;
+            }else {
+                throw e;
             }
         }
-        return null;
     }
 
     private MethodBasedEvaluationContext createContext (Method method, Object target, Class<?> targetClass, Object[] arguments) {
