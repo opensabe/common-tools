@@ -1,15 +1,12 @@
 package io.github.opensabe.common.redisson.aop.ratelimiter;
 
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
-import io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName;
 import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.exceptions.RedissonRateLimiterException;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateLimiterConfig;
 import org.redisson.api.RedissonClient;
@@ -49,8 +46,7 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
         RedissonRateLimiter redissonRateLimiter = rateLimiterProperties.getRedissonRateLimiter();
-        String rateLimiterName = getRateLimiterName(rateLimiterProperties, invocation.getArguments());
-        rateLimiterProperties.setRateLimiterName(rateLimiterName);
+        String rateLimiterName = rateLimiterProperties.resolve(method, invocation.getThis(), invocation.getArguments());
         RRateLimiter rateLimiter = redissonClient.getRateLimiter(rateLimiterName);
         long keepAliveTime= redissonRateLimiter.keepAlive();
         if(keepAliveTime>0){
@@ -99,23 +95,5 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
         }
         return invocation.proceed();
 
-    }
-
-    private String getRateLimiterName(RedissonRateLimiterProperties rateLimiterProperties, Object... params) {
-        StringBuilder lockName = new StringBuilder();
-        RedissonRateLimiterName redissonRateLimiterName = rateLimiterProperties.getRedissonRateLimiterName();
-        if (redissonRateLimiterName != null) {
-            int parameterIndex = rateLimiterProperties.getParameterIndex();
-            String prefix = redissonRateLimiterName.prefix();
-            String expression = redissonRateLimiterName.expression();
-            if (StringUtils.isNotBlank(expression)) {
-                lockName.append(prefix).append(parser.parseExpression(expression, context).getValue(params[parameterIndex]));
-            } else {
-                lockName.append(prefix).append(params[parameterIndex]);
-            }
-        } else {
-            lockName.append(rateLimiterProperties.getRedissonRateLimiter().name());
-        }
-        return lockName.toString();
     }
 }

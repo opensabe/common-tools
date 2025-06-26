@@ -28,8 +28,12 @@ import org.springframework.context.annotation.Configuration;
 public class RedissonAnnotationConfiguration {
 
     @Bean
-    public RedissonLockCachedPointcut redissonLockCachedPointcut() {
-        return new RedissonLockCachedPointcut();
+    public MethodArgumentsExpressEvaluator methodArgumentsExpressEvaluator (BeanFactory beanFactory) {
+        return new MethodArgumentsExpressEvaluator(beanFactory);
+    }
+    @Bean
+    public RedissonLockCachedPointcut redissonLockCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
+        return new RedissonLockCachedPointcut(evaluator);
     }
 
     @Bean
@@ -55,8 +59,8 @@ public class RedissonAnnotationConfiguration {
 
 
     @Bean
-    public SLockInterceptor sLockInterceptor (BeanFactory beanFactory, RedissonClient redissonClient, SLockPointcut pointcut) {
-        MethodArgumentsExpressEvaluator evaluator = new MethodArgumentsExpressEvaluator(beanFactory);
+    public SLockInterceptor sLockInterceptor (MethodArgumentsExpressEvaluator evaluator, RedissonClient redissonClient, SLockPointcut pointcut) {
+
         return new SLockInterceptor(redissonClient, evaluator, pointcut);
     }
 
@@ -69,8 +73,8 @@ public class RedissonAnnotationConfiguration {
     }
 
     @Bean
-    public RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut() {
-        return new RedissonRateLimiterCachedPointcut();
+    public RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
+        return new RedissonRateLimiterCachedPointcut(evaluator);
     }
 
     @Bean
@@ -87,8 +91,8 @@ public class RedissonAnnotationConfiguration {
     }
 
     @Bean
-    public RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut() {
-        return new RedissonSemaphoreCachedPointcut();
+    public RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
+        return new RedissonSemaphoreCachedPointcut(evaluator);
     }
 
     @Bean

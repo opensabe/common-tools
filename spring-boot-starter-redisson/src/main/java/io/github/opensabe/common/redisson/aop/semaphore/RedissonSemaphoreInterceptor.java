@@ -1,14 +1,11 @@
 package io.github.opensabe.common.redisson.aop.semaphore;
 
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
-import io.github.opensabe.common.redisson.annotation.RedissonSemaphoreName;
 import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.exceptions.RedissonSemaphoreException;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RPermitExpirableSemaphore;
 import org.redisson.api.RedissonClient;
 import org.springframework.expression.ParserContext;
@@ -47,8 +44,7 @@ public class RedissonSemaphoreInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
         RedissonSemaphore redissonSemaphore = redissonSemaphoreProperties.getRedissonSemaphore();
-        String semaphoreName = getSemaphoreName(redissonSemaphoreProperties, invocation.getArguments());
-        redissonSemaphoreProperties.setSemaphoreName(semaphoreName);
+        String semaphoreName = redissonSemaphoreProperties.resolve(method, invocation.getThis(), invocation.getArguments());
         RPermitExpirableSemaphore semaphore = redissonClient.getPermitExpirableSemaphore(semaphoreName);
         //首先尝试设置总的 permits
         int totalPermits = redissonSemaphore.totalPermits();
@@ -90,21 +86,4 @@ public class RedissonSemaphoreInterceptor implements MethodInterceptor {
         }
     }
 
-    private String getSemaphoreName(RedissonSemaphoreProperties redissonSemaphoreProperties, Object... params) {
-        StringBuilder lockName = new StringBuilder();
-        RedissonSemaphoreName redissonSemaphoreName = redissonSemaphoreProperties.getRedissonSemaphoreName();
-        if (redissonSemaphoreName != null) {
-            int parameterIndex = redissonSemaphoreProperties.getParameterIndex();
-            String prefix = redissonSemaphoreName.prefix();
-            String expression = redissonSemaphoreName.expression();
-            if (StringUtils.isNotBlank(expression)) {
-                lockName.append(prefix).append(parser.parseExpression(expression, context).getValue(params[parameterIndex]));
-            } else {
-                lockName.append(prefix).append(params[parameterIndex]);
-            }
-        } else {
-            lockName.append(redissonSemaphoreProperties.getRedissonSemaphore().name());
-        }
-        return lockName.toString();
-    }
 }

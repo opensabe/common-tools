@@ -1,18 +1,13 @@
 package io.github.opensabe.common.redisson.aop.lock;
 
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
-import io.github.opensabe.common.redisson.annotation.RedissonLockName;
 import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
 import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import lombok.extern.log4j.Log4j2;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.expression.ParserContext;
-import org.springframework.expression.common.TemplateParserContext;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -26,8 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class RedissonLockInterceptor implements MethodInterceptor {
     private final RedissonClient redissonClient;
     private final RedissonLockCachedPointcut redissonLockCachedPointcut;
-    private final SpelExpressionParser parser = new SpelExpressionParser();
-    private final ParserContext context = new TemplateParserContext();
+
 
     public RedissonLockInterceptor(RedissonClient redissonClient, RedissonLockCachedPointcut redissonLockCachedPointcut) {
         this.redissonClient = redissonClient;
@@ -36,71 +30,23 @@ public class RedissonLockInterceptor implements MethodInterceptor {
 
     /**
      * 新的 local name支持前缀及el表达式
-     *
-     * @param invocation
-     * @return
-     * @throws Throwable
      */
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Method method = invocation.getMethod();
-        Class<?> clazz = invocation.getThis().getClass();
-        RedissonLockProperties redissonLockProperties = redissonLockCachedPointcut.getRedissonProperties(method, clazz);
+        Object target = invocation.getThis();
+        RedissonLockProperties redissonLockProperties = redissonLockCachedPointcut.getRedissonProperties(method, target.getClass());
         if (redissonLockProperties == null || redissonLockProperties == AbstractRedissonProperties.NONE) {
             log.error("RedissonLockInterceptor-invoke error! Cannot find corresponding LockProperties, method {} run without lock", method.getName());
             return invocation.proceed();
         }
-        String lockName = getLockName(redissonLockProperties, invocation.getArguments());
-        redissonLockProperties.setLockName(lockName);
+        String lockName = redissonLockProperties.resolve(method, invocation.getThis(), invocation.getArguments());
         RedissonLock redissonLock = redissonLockProperties.getRedissonLock();
         log.debug("RedissonLockInterceptor-invoke begin to try redisson lockName {}, method: {}, thread: {}", lockName, method.getName(), Thread.currentThread().getName());
         //创建锁
         RLock lock = redissonLock.lockFeature().getLock(lockName, redissonLock, redissonClient);
-//        RedissonLock.LockFeature lockFeature = redissonLock.lockFeature();
-//        if (lockFeature == RedissonLock.LockFeature.DEFAULT) {
-//            lock = redissonClient.getLock(lockName);
-//        } else if (lockFeature == RedissonLock.LockFeature.FAIR) {
-//            lock = redissonClient.getFairLock(lockName);
-//        } else if (lockFeature == RedissonLock.LockFeature.SPIN) {
-//            RedissonLock.BackOffType backOffType = redissonLock.backOffType();
-//            if (backOffType == RedissonLock.BackOffType.CONSTANT) {
-//                lock = redissonClient.getSpinLock(lockName, new LockOptions.ConstantBackOff()
-//                        .delay(redissonLock.backOffDelay()));
-//            } else if (backOffType == RedissonLock.BackOffType.EXPONENTIAL) {
-//                lock = redissonClient.getSpinLock(lockName, new LockOptions.ExponentialBackOff()
-//                        .initialDelay(redissonLock.backOffInitialDelay())
-//                        .maxDelay(redissonLock.backOffMaxDelay())
-//                        .multiplier(redissonLock.backOffMultiplier()));
-//            } else {
-//                throw new RedissonLockException("Not implemented BackOffType: " + backOffType);
-//            }
-//        } else if (lockFeature == RedissonLock.LockFeature.READ_WRITE) {
-//            if (redissonLock.readOrWrite() == RedissonLock.ReadOrWrite.READ) {
-//                lock = redissonClient.getReadWriteLock(lockName).readLock();
-//            } else {
-//                lock = redissonClient.getReadWriteLock(lockName).writeLock();
-//            }
-//        } else {
-//            throw new RedissonLockException("Not implemented LockFeature: " + lockFeature);
-//        }
-//        if (lock == null) {
-//            log.error("RedissonLockInterceptor-invoke {} err! error during create redisson lock!", method.getName());
-//            return invocation.proceed();
-//        }
         try {
             boolean getLock = RedissonLock.LockType.lockType(redissonLock.lockType()).lock(redissonLock, lock);
-//            switch (redissonLock.lockType()) {
-//                case RedissonLock.BLOCK_LOCK:
-//                    lock.lock(redissonLock.leaseTime(), redissonLock.timeUnit()); //默认为-1，永久持有直接主动释放
-//                    getLock = true;
-//                    break;
-//                case RedissonLock.TRY_LOCK_NOWAIT:
-//                    getLock = lock.tryLock();
-//                    break;
-//                case RedissonLock.TRY_LOCK:
-//                    getLock = lock.tryLock(redissonLock.waitTime(), redissonLock.leaseTime(), redissonLock.timeUnit());
-//                    break;
-//            }
             if (!getLock) {
                 throw new RedissonLockException("can not get redisson lock,method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
             } else {
@@ -145,23 +91,5 @@ public class RedissonLockInterceptor implements MethodInterceptor {
                 }
             }
         }
-    }
-
-    private String getLockName(RedissonLockProperties redissonLockProperties, Object... params) {
-        RedissonLockName redissonLockName = redissonLockProperties.getRedissonLockName();
-        StringBuilder lockName = new StringBuilder();
-        if (redissonLockName != null) {
-            int parameterIndex = redissonLockProperties.getParameterIndex();
-            String prefix = redissonLockName.prefix();
-            String expression = redissonLockName.expression();
-            if (StringUtils.isNotBlank(expression)) {
-                lockName.append(prefix).append(parser.parseExpression(expression, context).getValue(params[parameterIndex]));
-            } else {
-                lockName.append(prefix).append(params[parameterIndex]);
-            }
-        } else {
-            lockName.append(redissonLockProperties.getRedissonLock().name());
-        }
-        return lockName.toString();
     }
 }

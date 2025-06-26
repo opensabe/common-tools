@@ -2,16 +2,23 @@ package io.github.opensabe.common.redisson.aop.semaphore;
 
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphoreName;
-import io.github.opensabe.common.redisson.aop.AbstractRedissonCachePointcut;
+import io.github.opensabe.common.redisson.aop.old.ExtraNamePointcut;
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class RedissonSemaphoreCachedPointcut extends AbstractRedissonCachePointcut<RedissonSemaphoreProperties> {
+public class RedissonSemaphoreCachedPointcut extends ExtraNamePointcut<RedissonSemaphoreProperties> {
+
+    public RedissonSemaphoreCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
+        super(evaluator);
+    }
+
     @Override
     protected RedissonSemaphoreProperties computeRedissonProperties(Method method, Class<?> clazz) {
         try {
@@ -21,23 +28,11 @@ public class RedissonSemaphoreCachedPointcut extends AbstractRedissonCachePointc
                 l = clazz.getAnnotation(RedissonSemaphore.class);
             }
             if (l != null) {
-                Annotation[][] as = method.getParameterAnnotations();
-                for (int i = 0; i < as.length; i++) {
-                    Annotation[] ar = as[i];
-                    if (ArrayUtils.isEmpty(ar)) {
-                        continue;
-                    }
-                    //获取第一个 RedissonLockName 注解的参数
-                    Optional<RedissonSemaphoreName> op = Arrays.stream(ar)
-                            .filter(a -> a instanceof RedissonSemaphoreName)
-                            .map(a -> (RedissonSemaphoreName) a)
-                            .findFirst();
-                    if (op.isPresent()) {
-                        return new RedissonSemaphoreProperties(l, op.get(), i);
-                    }
-                }
-                if (StringUtils.isNotBlank(l.name())) {
-                    return new RedissonSemaphoreProperties(l, null, -1);
+                Pair<RedissonSemaphoreName, Integer> pair = findParameterAnnotation(method, RedissonSemaphoreName.class);
+                if (pair == null) {
+                    return new RedissonSemaphoreProperties(evaluator, l);
+                }else {
+                    return new RedissonSemaphoreProperties(l, pair.getKey(), pair.getValue());
                 }
             }
         } catch (NoSuchMethodException e) {

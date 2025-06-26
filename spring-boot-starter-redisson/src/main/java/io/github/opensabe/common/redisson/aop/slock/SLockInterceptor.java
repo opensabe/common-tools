@@ -13,7 +13,6 @@ import org.redisson.api.RExpirable;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisResponseTimeoutException;
-import org.springframework.expression.EvaluationException;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -45,30 +44,20 @@ public class SLockInterceptor implements MethodInterceptor {
         }
         RLock[] locks = Arrays.stream(lock.name())
                 .map(name -> {
-                    try {
-                        String resolved = evaluator.resolve(method, invocation.getThis(), invocation.getArguments(), name);
-                        if (StringUtils.isBlank(resolved)) {
-                            //如果expression写了表达式，解析失败直接抛出异常
-                            if (StringUtils.contains(name, "#")) {
-                                throw new RedissonLockException("can not resolved redisson lock name , expression: "+name+"method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
-                            }
-                            //如果expression不是一个表达式，只是一个常量，直接用这个常量当锁名称
-                            return lock.prefix() + name;
-                        }
-                        return lock.prefix() + resolved;
-                    }catch (EvaluationException e) {
-                        //如果expression写了表达式，解析失败直接抛出异常
-                        if (StringUtils.contains(name, "#")) {
-                            throw new RedissonLockException("can not resolved redisson lock name , expression: "+name+" method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
-                        }
-                        //如果expression不是一个表达式，只是一个常量，直接用这个常量当锁名称
-                        return lock.prefix() + name;
+                    String resolved = evaluator.resolve(method, invocation.getThis(), invocation.getArguments(), name);
+                    if (StringUtils.isBlank(resolved)) {
+                        throw new RedissonLockException("can not resolved redisson lock name , expression: "+name+" method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
                     }
+                    return lock.prefix() + resolved;
                 })
                 .map(name -> lock.lockFeature().getLock(name, lock, redissonClient))
                 .toArray(RLock[]::new);
-
-        RLock rLock = new MLock(locks);
+        RLock rLock;
+        if (locks.length == 1) {
+            rLock = locks[0];
+        }else {
+            rLock = new MLock(locks);
+        }
 
         boolean locked = lock.lockType().lock(lock, rLock);
         if (!locked) {

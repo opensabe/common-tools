@@ -1,19 +1,27 @@
 package io.github.opensabe.common.redisson.aop;
 
-public abstract class AbstractRedissonProperties {
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
+
+import java.lang.reflect.Method;
+
+public abstract class AbstractRedissonProperties implements RedissonNameResolver {
     public static final Object NONE = new Object();
 
-    private final int parameterIndex;
+    protected final String prefix;
 
-    protected AbstractRedissonProperties(int parameterIndex) {
-        this.parameterIndex = parameterIndex;
+    protected final String name;
+
+    protected final MethodArgumentsExpressEvaluator evaluator;
+
+    protected AbstractRedissonProperties(MethodArgumentsExpressEvaluator evaluator, String prefix, String name) {
+        this.evaluator = evaluator;
+        this.prefix = prefix;
+        this.name = name;
     }
 
-    /**
-     * 参数坐标
-     * @return
-     */
-    public int getParameterIndex() {
-       return this.parameterIndex;
+    @Override
+    public String resolve(Method method, Object target, Object[] args) {
+        return prefix + evaluator.resolve(method, target, args, name);
     }
+
 }

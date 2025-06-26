@@ -2,20 +2,20 @@ package io.github.opensabe.common.redisson.aop.semaphore;
 
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphoreName;
-import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
+import io.github.opensabe.common.redisson.aop.old.ExtraNameProperties;
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-public class RedissonSemaphoreProperties extends AbstractRedissonProperties {
+public class RedissonSemaphoreProperties extends ExtraNameProperties {
+    @Getter
     private final RedissonSemaphore redissonSemaphore;
-    private final RedissonSemaphoreName redissonSemaphoreName;
-    private String semaphoreName;
 
     public RedissonSemaphoreProperties(RedissonSemaphore redissonSemaphore, RedissonSemaphoreName redissonSemaphoreName, int parameterIndex) {
-        super(parameterIndex);
+        super(redissonSemaphoreName.prefix(), redissonSemaphore.name(), parameterIndex, redissonSemaphoreName.expression());
         this.redissonSemaphore = redissonSemaphore;
-        this.redissonSemaphoreName = redissonSemaphoreName;
+    }
+    public RedissonSemaphoreProperties(MethodArgumentsExpressEvaluator evaluator, RedissonSemaphore redissonSemaphore) {
+        super(evaluator, redissonSemaphore.prefix(), redissonSemaphore.name());
+        this.redissonSemaphore = redissonSemaphore;
     }
 }

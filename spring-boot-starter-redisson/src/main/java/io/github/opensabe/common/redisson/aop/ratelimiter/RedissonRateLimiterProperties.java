@@ -2,20 +2,21 @@ package io.github.opensabe.common.redisson.aop.ratelimiter;
 
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiterName;
-import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
+import io.github.opensabe.common.redisson.aop.old.ExtraNameProperties;
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-public class RedissonRateLimiterProperties extends AbstractRedissonProperties {
+public class RedissonRateLimiterProperties extends ExtraNameProperties {
+    @Getter
     private final RedissonRateLimiter redissonRateLimiter;
-    private final RedissonRateLimiterName redissonRateLimiterName;
-    private String rateLimiterName;
 
     public RedissonRateLimiterProperties(RedissonRateLimiter redissonRateLimiter, RedissonRateLimiterName redissonRateLimiterName, int parameterIndex) {
-        super(parameterIndex);
+        super(redissonRateLimiterName.prefix(), redissonRateLimiter.name(), parameterIndex, redissonRateLimiterName.expression());
         this.redissonRateLimiter = redissonRateLimiter;
-        this.redissonRateLimiterName = redissonRateLimiterName;
     }
+    public RedissonRateLimiterProperties(MethodArgumentsExpressEvaluator evaluator, RedissonRateLimiter redissonRateLimiter) {
+        super(evaluator, redissonRateLimiter.prefix(), redissonRateLimiter.name());
+        this.redissonRateLimiter = redissonRateLimiter;
+    }
+
 }

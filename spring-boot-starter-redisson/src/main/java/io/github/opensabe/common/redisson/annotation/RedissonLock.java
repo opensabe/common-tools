@@ -37,6 +37,8 @@ public @interface RedissonLock {
      */
     String name() default "";
 
+
+    String prefix() default io.github.opensabe.common.redisson.annotation.slock.RedissonLock.DEFAULT_PREFIX;
     /**
      * 锁特性
      */
