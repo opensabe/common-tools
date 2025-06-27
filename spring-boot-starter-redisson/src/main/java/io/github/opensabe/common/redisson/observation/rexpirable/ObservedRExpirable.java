@@ -11,12 +11,10 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
-    private final RExpirable rExpirable;
+public class ObservedRExpirable<T extends RExpirable> extends RObjectDelegate<T> implements RExpirable {
     protected final UnifiedObservationFactory unifiedObservationFactory;
-    public ObservedRExpirable(RExpirable rExpirable, UnifiedObservationFactory unifiedObservationFactory) {
+    public ObservedRExpirable(T rExpirable, UnifiedObservationFactory unifiedObservationFactory) {
         super(rExpirable);
-        this.rExpirable = rExpirable;
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
@@ -26,7 +24,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
 
     private boolean expire0(String expire, ExpireCallable callable) {
         RExpirableExpireContext context = new RExpirableExpireContext(
-                rExpirable.getName(), Thread.currentThread().getName(), expire
+                delegate.getName(), Thread.currentThread().getName(), expire
         );
         Observation observation = RExpirableObservationDocumentation.EXPIRE.start(
                 null,
@@ -50,7 +48,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expire(long timeToLive, TimeUnit timeUnit) {
         return expire0(
                 "expire timeToLive: " + timeToLive + " " + timeUnit.name().toLowerCase(),
-                () -> rExpirable.expire(timeToLive, timeUnit)
+                () -> delegate.expire(timeToLive, timeUnit)
         );
     }
 
@@ -58,7 +56,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireAt(long timestamp) {
         return expire0(
                 "expireAt timestamp: " + timestamp,
-                () -> rExpirable.expireAt(timestamp)
+                () -> delegate.expireAt(timestamp)
         );
     }
 
@@ -66,7 +64,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireAt(Date timestamp) {
         return expire0(
                 "expireAt timestamp: " + timestamp,
-                () -> rExpirable.expireAt(timestamp)
+                () -> delegate.expireAt(timestamp)
         );
     }
 
@@ -74,7 +72,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expire(Instant time) {
         return expire0(
                 "expire time: " + time,
-                () -> rExpirable.expire(time)
+                () -> delegate.expire(time)
         );
     }
 
@@ -82,7 +80,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireIfSet(Instant time) {
         return expire0(
                 "expireIfSet time: " + time,
-                () -> rExpirable.expireIfSet(time)
+                () -> delegate.expireIfSet(time)
         );
     }
 
@@ -90,7 +88,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireIfNotSet(Instant time) {
         return expire0(
                 "expireIfNotSet time: " + time,
-                () -> rExpirable.expireIfNotSet(time)
+                () -> delegate.expireIfNotSet(time)
         );
     }
 
@@ -98,7 +96,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireIfGreater(Instant time) {
         return expire0(
                 "expireIfGreater time: " + time,
-                () -> rExpirable.expireIfGreater(time)
+                () -> delegate.expireIfGreater(time)
         );
     }
 
@@ -106,7 +104,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireIfLess(Instant time) {
         return expire0(
                 "expireIfLess time: " + time,
-                () -> rExpirable.expireIfLess(time)
+                () -> delegate.expireIfLess(time)
         );
     }
 
@@ -114,7 +112,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expire(Duration duration) {
         return expire0(
                 "expire duration: " + duration,
-                () -> rExpirable.expire(duration)
+                () -> delegate.expire(duration)
         );
     }
 
@@ -122,7 +120,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireIfSet(Duration duration) {
         return expire0(
                 "expireIfSet duration: " + duration,
-                () -> rExpirable.expireIfSet(duration)
+                () -> delegate.expireIfSet(duration)
         );
     }
 
@@ -130,7 +128,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireIfNotSet(Duration duration) {
         return expire0(
                 "expireIfNotSet duration: " + duration,
-                () -> rExpirable.expireIfNotSet(duration)
+                () -> delegate.expireIfNotSet(duration)
         );
     }
 
@@ -138,7 +136,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireIfGreater(Duration duration) {
         return expire0(
                 "expireIfGreater duration: " + duration,
-                () -> rExpirable.expireIfGreater(duration)
+                () -> delegate.expireIfGreater(duration)
         );
     }
 
@@ -146,7 +144,7 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean expireIfLess(Duration duration) {
         return expire0(
                 "expireIfLess duration: " + duration,
-                () -> rExpirable.expireIfLess(duration)
+                () -> delegate.expireIfLess(duration)
         );
     }
 
@@ -154,97 +152,97 @@ public class ObservedRExpirable extends RObjectDelegate implements RExpirable {
     public boolean clearExpire() {
         return expire0(
                 "clearExpire",
-                rExpirable::clearExpire
+                delegate::clearExpire
         );
     }
 
     @Override
     public long remainTimeToLive() {
-        return rExpirable.remainTimeToLive();
+        return delegate.remainTimeToLive();
     }
 
     @Override
     public long getExpireTime() {
-        return rExpirable.getExpireTime();
+        return delegate.getExpireTime();
     }
 
     @Override
     public RFuture<Boolean> expireAsync(long timeToLive, TimeUnit timeUnit) {
-        return rExpirable.expireAsync(timeToLive, timeUnit);
+        return delegate.expireAsync(timeToLive, timeUnit);
     }
 
     @Override
     public RFuture<Boolean> expireAtAsync(Date timestamp) {
-        return rExpirable.expireAtAsync(timestamp);
+        return delegate.expireAtAsync(timestamp);
     }
 
     @Override
     public RFuture<Boolean> expireAtAsync(long timestamp) {
-        return rExpirable.expireAtAsync(timestamp);
+        return delegate.expireAtAsync(timestamp);
     }
 
     @Override
     public RFuture<Boolean> expireAsync(Instant time) {
-        return rExpirable.expireAsync(time);
+        return delegate.expireAsync(time);
     }
 
     @Override
     public RFuture<Boolean> expireIfSetAsync(Instant time) {
-        return rExpirable.expireIfSetAsync(time);
+        return delegate.expireIfSetAsync(time);
     }
 
     @Override
     public RFuture<Boolean> expireIfNotSetAsync(Instant time) {
-        return rExpirable.expireIfNotSetAsync(time);
+        return delegate.expireIfNotSetAsync(time);
     }
 
     @Override
     public RFuture<Boolean> expireIfGreaterAsync(Instant time) {
-        return rExpirable.expireIfGreaterAsync(time);
+        return delegate.expireIfGreaterAsync(time);
     }
 
     @Override
     public RFuture<Boolean> expireIfLessAsync(Instant time) {
-        return rExpirable.expireIfLessAsync(time);
+        return delegate.expireIfLessAsync(time);
     }
 
     @Override
     public RFuture<Boolean> expireAsync(Duration duration) {
-        return rExpirable.expireAsync(duration);
+        return delegate.expireAsync(duration);
     }
 
     @Override
     public RFuture<Boolean> expireIfSetAsync(Duration duration) {
-        return rExpirable.expireIfSetAsync(duration);
+        return delegate.expireIfSetAsync(duration);
     }
 
     @Override
     public RFuture<Boolean> expireIfNotSetAsync(Duration duration) {
-        return rExpirable.expireIfNotSetAsync(duration);
+        return delegate.expireIfNotSetAsync(duration);
     }
 
     @Override
     public RFuture<Boolean> expireIfGreaterAsync(Duration duration) {
-        return rExpirable.expireIfGreaterAsync(duration);
+        return delegate.expireIfGreaterAsync(duration);
     }
 
     @Override
     public RFuture<Boolean> expireIfLessAsync(Duration duration) {
-        return rExpirable.expireIfLessAsync(duration);
+        return delegate.expireIfLessAsync(duration);
     }
 
     @Override
     public RFuture<Boolean> clearExpireAsync() {
-        return rExpirable.clearExpireAsync();
+        return delegate.clearExpireAsync();
     }
 
     @Override
     public RFuture<Long> remainTimeToLiveAsync() {
-        return rExpirable.remainTimeToLiveAsync();
+        return delegate.remainTimeToLiveAsync();
     }
 
     @Override
     public RFuture<Long> getExpireTimeAsync() {
-        return rExpirable.getExpireTimeAsync();
+        return delegate.getExpireTimeAsync();
     }
 }

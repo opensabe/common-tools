@@ -2,6 +2,7 @@ package io.github.opensabe.common.redisson.observation;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.observation.ratelimiter.ObservedRRateLimiter;
+import io.github.opensabe.common.redisson.observation.rbucket.ObservedRBucket;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRFencedLock;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRLock;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRReadWriteLock;
@@ -122,5 +123,10 @@ public class ObservedRedissonClient extends RedissonClientDelegate {
     @Override
     public RReadWriteLock getReadWriteLock(CommonOptions options) {
         return new ObservedRReadWriteLock(delegate.getReadWriteLock(options), unifiedObservationFactory);
+    }
+
+    @Override
+    public <V> RBucket<V> getBucket(String name) {
+        return new ObservedRBucket<>(super.getBucket(name), unifiedObservationFactory);
     }
 }

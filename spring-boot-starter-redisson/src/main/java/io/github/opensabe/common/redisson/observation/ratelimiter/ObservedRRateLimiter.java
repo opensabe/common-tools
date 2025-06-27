@@ -1,26 +1,18 @@
 package io.github.opensabe.common.redisson.observation.ratelimiter;
 
-import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
 import io.micrometer.observation.Observation;
-import org.redisson.api.RFuture;
-import org.redisson.api.RRateLimiter;
-import org.redisson.api.RateIntervalUnit;
-import org.redisson.api.RateLimiterConfig;
-import org.redisson.api.RateType;
+import org.redisson.api.*;
 
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLimiter {
-    private final RRateLimiter delegate;
-    private final UnifiedObservationFactory unifiedObservationFactory;
+public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> implements RRateLimiter {
 
     public ObservedRRateLimiter(RRateLimiter delegate, UnifiedObservationFactory unifiedObservationFactory) {
         super(delegate, unifiedObservationFactory);
-        this.delegate = delegate;
-        this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
     @Override

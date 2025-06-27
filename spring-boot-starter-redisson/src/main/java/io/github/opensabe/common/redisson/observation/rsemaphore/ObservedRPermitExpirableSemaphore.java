@@ -9,12 +9,10 @@ import org.redisson.api.RPermitExpirableSemaphore;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implements RPermitExpirableSemaphore {
-    private final RPermitExpirableSemaphore delegate;
+public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermitExpirableSemaphore> implements RPermitExpirableSemaphore {
 
     public ObservedRPermitExpirableSemaphore(RPermitExpirableSemaphore delegate, UnifiedObservationFactory unifiedObservationFactory) {
         super(delegate, unifiedObservationFactory);
-        this.delegate = delegate;
     }
 
     @Override

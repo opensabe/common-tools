@@ -12,19 +12,17 @@ import java.util.concurrent.TimeUnit;
  *
  * @author heng.ma
  */
-public class RObjectDelegate extends RObjectAsyncDelegate implements RObject {
+public class RObjectDelegate<T extends RObject> extends RObjectAsyncDelegate<T> implements RObject {
 
     // 被委托的 RObject 实例
-    protected final RObject delegate;
 
     /**
      * 构造函数，初始化委托对象。
      *
      * @param delegate 要委托的 RObject 实例，不能为 null
      */
-    public RObjectDelegate(RObject delegate) {
+    public RObjectDelegate(T delegate) {
         super(delegate);
-        this.delegate = delegate;
     }
 
     @Override

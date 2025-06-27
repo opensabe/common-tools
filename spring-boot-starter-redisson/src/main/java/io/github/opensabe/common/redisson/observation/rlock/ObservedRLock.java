@@ -19,12 +19,11 @@ import java.util.function.Supplier;
  */
 public class ObservedRLock<T extends RLock> extends ObservedRExpirable implements RLock {
     protected final T delegate;
-    protected final UnifiedObservationFactory unifiedObservationFactory;
 
+    @SuppressWarnings("unchecked")
     public ObservedRLock(T delegate, UnifiedObservationFactory unifiedObservationFactory) {
-        super((RExpirable) delegate, unifiedObservationFactory);
+        super((RExpirable)delegate, unifiedObservationFactory);
         this.delegate = delegate;
-        this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
 
