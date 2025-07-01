@@ -17,10 +17,9 @@ import java.util.function.Supplier;
  * 注意每次都要新建一个实例，不要重复使用
  * 通过正常的 api 就是每次新建一个，但是注意不要使用单例模式
  */
-public class ObservedRLock<T extends RLock> extends ObservedRExpirable implements RLock {
+public class ObservedRLock<T extends RLock> extends ObservedRExpirable<RExpirable> implements RLock {
     protected final T delegate;
 
-    @SuppressWarnings("unchecked")
     public ObservedRLock(T delegate, UnifiedObservationFactory unifiedObservationFactory) {
         super((RExpirable)delegate, unifiedObservationFactory);
         this.delegate = delegate;

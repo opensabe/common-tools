@@ -36,10 +36,7 @@ public abstract class ExtraNamePointcut<T extends AbstractRedissonProperties> ex
             allSuperclasses = ClassUtils.getAllInterfaces(targetClass);
             optional = fromClasses(allSuperclasses, method);
         }
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+        return optional.orElse(null);
     }
 
     private Optional<T> fromClasses(List<Class<?>> list, Method method) {
@@ -64,9 +61,10 @@ public abstract class ExtraNamePointcut<T extends AbstractRedissonProperties> ex
             if (ArrayUtils.isEmpty(ar)) {
                 continue;
             }
+            @SuppressWarnings("unchecked")
             //获取第一个 RedissonLockName 注解的参数
             Optional<A> op = Arrays.stream(ar)
-                    .filter(a -> annotationClass.isInstance(a))
+                    .filter(annotationClass::isInstance)
                     .map(a -> (A) a)
                     .findFirst();
             if (op.isPresent()) {

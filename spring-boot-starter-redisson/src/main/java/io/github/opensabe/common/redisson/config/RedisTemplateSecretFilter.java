@@ -17,6 +17,7 @@ public class RedisTemplateSecretFilter implements BeanPostProcessor {
     }
 
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public Object postProcessAfterInitialization(Object bean, String beanName) {
         if (bean instanceof RedisTemplate redisTemplate) {
             RedisSerializer defaultSerializer = redisTemplate.getDefaultSerializer();
@@ -47,32 +48,26 @@ public class RedisTemplateSecretFilter implements BeanPostProcessor {
         return bean;
     }
 
-    private static class SecretCheckRedisSerializer<T> implements RedisSerializer<T> {
-        private final RedisSerializer<T> delegate;
-        private final GlobalSecretManager globalSecretManager;
-
-        public SecretCheckRedisSerializer(RedisSerializer<T> delegate, GlobalSecretManager globalSecretManager) {
-            this.delegate = delegate;
-            this.globalSecretManager = globalSecretManager;
-        }
+    private record SecretCheckRedisSerializer<T>(RedisSerializer<T> delegate,
+                                                 GlobalSecretManager globalSecretManager) implements RedisSerializer<T> {
 
         @Override
-        public byte[] serialize(T o) throws SerializationException {
-            byte[] serialize = delegate.serialize(o);
-            if (serialize != null) {
-                String s = new String(serialize, StandardCharsets.UTF_8);
-                FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(s);
-                if (filterSecretStringResult.isFoundSensitiveString()) {
-                    throw new SerializationException("Sensitive string found in Redis request");
+            public byte[] serialize(T o) throws SerializationException {
+                byte[] serialize = delegate.serialize(o);
+                if (serialize != null) {
+                    String s = new String(serialize, StandardCharsets.UTF_8);
+                    FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(s);
+                    if (filterSecretStringResult.isFoundSensitiveString()) {
+                        throw new SerializationException("Sensitive string found in Redis request");
+                    }
                 }
+                return serialize;
             }
-            return serialize;
-        }
 
-        @Override
-        public T deserialize(byte[] bytes) throws SerializationException {
-            return delegate.deserialize(bytes);
+            @Override
+            public T deserialize(byte[] bytes) throws SerializationException {
+                return delegate.deserialize(bytes);
+            }
         }
-    }
 }
 
