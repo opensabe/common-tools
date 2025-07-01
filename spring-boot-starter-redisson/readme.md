@@ -51,6 +51,8 @@ spring:
     - 可能出现业务中并不需要该参数，但为了获取redisson锁名称，必须添加一个无用的形参，代码不优雅
     - 不注意会出现@RedissonLock跟@RedissonLockName分别在子类跟父类方法上
 
+- 旧版写法依然生效，但是为了督促尽快升级，编译会报警告，甚至红色报错
+
 ```java
 /**
  * 新版本可以用student和permitsName拼接作为限流器名称,旧版本做不到
