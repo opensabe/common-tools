@@ -97,6 +97,28 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
                 result.set(false);
             }
         }
+        @RedissonRateLimiter(
+                name = "#permitsName",
+                type = RedissonRateLimiter.Type.BLOCK,
+                rate = 1,
+                rateInterval = 1,
+                rateType = RateType.OVERALL,
+                rateIntervalUnit = RateIntervalUnit.SECONDS
+        )
+        public void testRateLimiterBlockAcquireWithParams1(String permitsName) {
+            try {
+                list.add(System.currentTimeMillis());
+                RRateLimiter testRateLimiterBlockAcquire = redissonClient.getRateLimiter(RedissonRateLimiter.DEFAULT_PREFIX + permitsName);
+                RateLimiterConfig config = testRateLimiterBlockAcquire.getConfig();
+                Assertions.assertEquals(1, config.getRate());
+                Assertions.assertEquals(1000, config.getRateInterval());
+                Assertions.assertEquals(RateType.OVERALL, config.getRateType());
+                System.out.println(JsonUtil.toJSONString(config));
+            } catch (Exception e) {
+                e.printStackTrace();
+                result.set(false);
+            }
+        }
 
         @RedissonRateLimiter(
                 name = "testRateLimiterTryAcquireNoWait",
@@ -184,6 +206,30 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
         for (int i = 0; i < THREAD_COUNT; i++) {
             threads[i] = new Thread(() -> {
                testRedissonRateLimiterClass.testRateLimiterBlockAcquireWithParams("test");
+            });
+        }
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            threads[i].start();
+        }
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            threads[i].join();
+        }
+        for (int i = 1; i < list.size(); i++) {
+            //验证限流差不多是 1 秒
+            Assertions.assertTrue(list.get(i) - list.get(i - 1) >= 900);
+        }
+        Assertions.assertEquals(10, list.size());
+        Assertions.assertTrue(testRedissonRateLimiterClass.getResult().get());
+    }
+    @Test
+    public void testRateLimiterBlockAcquireWithParams1() throws InterruptedException {
+        List<Long> list = testRedissonRateLimiterClass.getList();
+        testRedissonRateLimiterClass.getResult().set(true);
+        list.clear();
+        Thread []threads = new Thread[THREAD_COUNT];
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            threads[i] = new Thread(() -> {
+               testRedissonRateLimiterClass.testRateLimiterBlockAcquireWithParams1("test1");
             });
         }
         for (int i = 0; i < THREAD_COUNT; i++) {

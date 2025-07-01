@@ -142,6 +142,12 @@ public class RedissonLockTest extends BaseRedissonTest {
             RLock lock = redissonClient.getLock("test:" + lockName);
             Assertions.assertTrue(lock.isHeldByCurrentThread());
         }
+        @RedissonLock(prefix = "test:", name = "#student.id==null?#student.name:#student.id")
+        public void testRedissonLockNameProperty1(Student student, String params) throws InterruptedException {
+            String lockName = student.getId() == null ? student.getName() : student.getId();
+            RLock lock = redissonClient.getLock("test:" + lockName);
+            Assertions.assertTrue(lock.isHeldByCurrentThread());
+        }
 
         @RedissonLock(leaseTime = 1000L)
         public void testLockTime(@RedissonLockName String name) throws InterruptedException {
@@ -423,6 +429,12 @@ public class RedissonLockTest extends BaseRedissonTest {
         testRedissonLockClass.reset();
         testRedissonLockClass.testRedissonLockNameProperty(Student.builder().name("zhx").build(), "zhx");
         testRedissonLockClass.testRedissonLockNameProperty(Student.builder().id("111111").build(), "zhx");
+    }
+    @Test
+    public void testBlockProperty1() throws InterruptedException {
+        testRedissonLockClass.reset();
+        testRedissonLockClass.testRedissonLockNameProperty1(Student.builder().name("zhx").build(), "zhx");
+        testRedissonLockClass.testRedissonLockNameProperty1(Student.builder().id("111111").build(), "zhx");
     }
 
     @Test

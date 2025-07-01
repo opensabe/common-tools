@@ -10,7 +10,7 @@ public class RedissonLockProperties extends ExtraNameProperties {
     private final RedissonLock redissonLock;
 
     public RedissonLockProperties(MethodArgumentsExpressEvaluator evaluator, RedissonLock redissonLock) {
-        super(evaluator, redissonLock.name(), redissonLock.prefix());
+        super(evaluator, redissonLock.prefix(), redissonLock.name());
         this.redissonLock = redissonLock;
     }
     @SuppressWarnings("removal")
