@@ -57,7 +57,7 @@ spring:
 import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
 
 /**
- * 新版本可以用student和permitsName拼接作为限流器名称,旧版本做不到
+ * 新版本可以用student和permitsName拼接作为锁名称,旧版本做不到
  */
 @RedissonLock(name = "#permitsName+#student.name")
 public void testBlockAcquire(String permitsName, tudent student);
@@ -75,10 +75,12 @@ public void testBlockAcquire(String permitsName, tudent student);
 **对于某个 bean 的某个方法使用 redisson 阻塞锁**：
 
 ```java
+import io.github.opensabe.common.redisson.annotation.RedissonLock;
+
 //旧版本
 @Deprecated
-@RedissonLock(name="#name")
-public void defaultLock(String name) {
+@RedissonLock
+public void defaultLock(@RedissonLock String name) {
 }
 
 /**
