@@ -47,10 +47,10 @@ spring:
     - io.github.opensabe.common.redisson.annotation.slock.@ReadWriteLock `（LockFeature.READ_WRITE）`
     - io.github.opensabe.common.redisson.annotation.slock.@SpinLock `（LockFeature.FENCED）`
 - 原来的@RedissonLockName, @RedissonRateLimiterName , @RedissonSemaphoreName已经废弃，标为过时 @Deprecated(removal=true)，原因：
-    - 不支持多个参数参与表达式
     - 可能出现业务中并不需要该参数，但为了获取redisson锁名称，必须添加一个无用的形参，代码不优雅
     - 不注意会出现@RedissonLock跟@RedissonLockName分别在子类跟父类方法上
-
+    - 不支持多个参数参与表达式
+    - 基于多个参数参与表达式，SLock支持了MultipleLock
 - 旧版写法依然生效，但是为了督促尽快升级，编译会报警告，甚至红色报错
 
 ```java
@@ -58,6 +58,13 @@ spring:
  * 新版本可以用student和permitsName拼接作为限流器名称,旧版本做不到
  */
 @RedissonRateLimiter(name = "#permitsName+#student.name")
+public void testBlockAcquire(String permitsName, tudent student);
+
+/**
+ * 同时获取两个锁，根据name先后顺序，依次锁permitsName+student.name和permitsName+student.id
+ * multipleLock
+ */
+@RedissonRateLimiter(name = {"#permitsName+#student.name", "#permitsName+#student.id"})
 public void testBlockAcquire(String permitsName, tudent student);
 ```
 
