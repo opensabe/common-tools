@@ -54,17 +54,19 @@ spring:
 - 旧版写法依然生效，但是为了督促尽快升级，编译会报警告，甚至红色报错
 
 ```java
+import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
+
 /**
  * 新版本可以用student和permitsName拼接作为限流器名称,旧版本做不到
  */
-@RedissonRateLimiter(name = "#permitsName+#student.name")
+@RedissonLock(name = "#permitsName+#student.name")
 public void testBlockAcquire(String permitsName, tudent student);
 
 /**
  * 同时获取两个锁，根据name先后顺序，依次锁permitsName+student.name和permitsName+student.id
  * multipleLock
  */
-@RedissonRateLimiter(name = {"#permitsName+#student.name", "#permitsName+#student.id"})
+@RedissonLock(name = {"#permitsName+#student.name", "#permitsName+#student.id"})
 public void testBlockAcquire(String permitsName, tudent student);
 ```
 
