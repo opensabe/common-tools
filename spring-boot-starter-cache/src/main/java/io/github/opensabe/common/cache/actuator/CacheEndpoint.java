@@ -1,7 +1,6 @@
 package io.github.opensabe.common.cache.actuator;
 
 import io.github.opensabe.common.cache.config.CachesProperties;
-import io.github.opensabe.common.cache.utils.CacheHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,7 +48,7 @@ public class CacheEndpoint {
                                 Map<String, Object> infoMap = new HashMap<>(4);
                                 infoMap.put("type", cacheInfo.getType());
                                 infoMap.put("cacheDesc", cacheInfo.getCacheDesc());
-                                infoMap.put("cacheNames", cacheInfo.getCacheNames().stream().map(name -> name.replace(CacheHelper.CACHE_NAME_PREFIX, "")).collect(Collectors.toList()));
+                                infoMap.put("cacheNames", cacheInfo.getCacheNames());
                                 infoMap.put("settings", cacheInfo.getCacheSetting());
                                 return infoMap;
                             }
@@ -61,7 +60,6 @@ public class CacheEndpoint {
 
     @ReadOperation
     public CacheReport cacheKeys(@Selector String cacheName, @Selector Long pageSize, @Selector Long pageNumber) {
-        String hideCacheName = CacheHelper.CACHE_NAME_PREFIX + cacheName;
         Cache cache = cacheManager.getCache(cacheName);
         if (cache == null) {
             return errorCacheReport(cacheName, "Cache not found");
@@ -73,9 +71,9 @@ public class CacheEndpoint {
         Set<@NonNull Object> keys = new HashSet<>(0);
         if (cache instanceof RedisCache){
             StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
-            Long hashSize = template.opsForHash().size(hideCacheName);
+            Long hashSize = template.opsForHash().size(cacheName);
             long selectSize = Math.min(pageSize * pageNumber, hashSize);
-            try(Cursor<Map.Entry<Object,Object>> cursor = template.opsForHash().scan(hideCacheName, ScanOptions.scanOptions().match("*").count(10000).build())) {
+            try(Cursor<Map.Entry<Object,Object>> cursor = template.opsForHash().scan(cacheName, ScanOptions.scanOptions().match("*").count(10000).build())) {
                 while (cursor.hasNext()) {
                     Map.Entry<Object, Object> entry = cursor.next();
                     keys.add(entry.getKey());
@@ -121,7 +119,7 @@ public class CacheEndpoint {
         
         if (cache instanceof RedisCache) {
             StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
-            template.opsForHash().delete(CacheHelper.CACHE_NAME_PREFIX + cacheName, key);
+            template.opsForHash().delete(cacheName, key);
         }
         cache.evict(redisOrCaffeineKey(key));
         return cacheReport(cacheName, cache.getClass().getSimpleName(), null, Collections.singleton(key));
