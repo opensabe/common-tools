@@ -43,9 +43,9 @@ spring:
 - 为了简化配置，将lockFeature封装为不同的注解：
     - io.github.opensabe.common.redisson.annotation.slock.@RedissonLock `（LockFeature.default）`
     - io.github.opensabe.common.redisson.annotation.slock.@FairLock `（LockFeature.FAIR）`
-    - io.github.opensabe.common.redisson.annotation.slock.@FencedLock `（LockFeature.SPIN）`
+    - io.github.opensabe.common.redisson.annotation.slock.@FencedLock `（LockFeature.FENCED）`
     - io.github.opensabe.common.redisson.annotation.slock.@ReadWriteLock `（LockFeature.READ_WRITE）`
-    - io.github.opensabe.common.redisson.annotation.slock.@SpinLock `（LockFeature.FENCED）`
+    - io.github.opensabe.common.redisson.annotation.slock.@SpinLock `（LockFeature.SPIN）`
 - 原来的@RedissonLockName, @RedissonRateLimiterName , @RedissonSemaphoreName已经废弃，标为过时 @Deprecated(removal=true)，原因：
     - 可能出现业务中并不需要该参数，但为了获取redisson锁名称，必须添加一个无用的形参，代码不优雅
     - 不注意会出现@RedissonLock跟@RedissonLockName分别在子类跟父类方法上
