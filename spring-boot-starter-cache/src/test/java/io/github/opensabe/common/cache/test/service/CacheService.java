@@ -17,7 +17,7 @@ public class CacheService {
 
     private MockStorage storage;
 
-    @Expire
+    @Expire(60)
     @Cacheable(value = "test_caffeine")
     public Map<Long, ItemObject> getData() {
         return storage.getData();

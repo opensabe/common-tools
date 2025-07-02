@@ -1,5 +1,7 @@
 package io.github.opensabe.common.cache.config;
 
+import com.github.benmanes.caffeine.cache.CaffeineSpec;
+import io.github.opensabe.common.cache.api.CaffeineExpireCacheManager;
 import io.github.opensabe.common.cache.api.CompositeCacheManager;
 import io.github.opensabe.common.cache.api.ExpireCacheInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -32,7 +34,9 @@ public class SpringCacheConfiguration {
 
     @Bean
     public CompositeCacheManager compositeCacheManager () {
-        return new CompositeCacheManager(List.of(new NoOpCacheManager()));
+        CaffeineExpireCacheManager cacheManager = new CaffeineExpireCacheManager();
+        cacheManager.setCaffeineSpec(CaffeineSpec.parse("maximumSize=10000"));
+        return new CompositeCacheManager(List.of(cacheManager));
     }
 
 }

@@ -1,5 +1,6 @@
 package io.github.opensabe.common.cache.api;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -20,13 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExpireCacheResolver implements CacheResolver {
 
-    private final CacheManager cacheManager;
+    private final CompositeCacheManager cacheManager;
     private final BeanFactory beanFactory;
     private final Map<Method, Collection<? extends Cache>> map;
     public ExpireCacheResolver(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
         this.map = new ConcurrentHashMap<>();
-        this.cacheManager = beanFactory.getBeanProvider(CacheManager.class).getIfAvailable();
+        this.cacheManager = beanFactory.getBeanProvider(CompositeCacheManager.class).getIfAvailable();
     }
 
 
@@ -36,18 +37,21 @@ public class ExpireCacheResolver implements CacheResolver {
         return map.computeIfAbsent(context.getMethod(), m -> {
             CacheManager cacheManager = this.cacheManager;
             if (context.getOperation() instanceof CacheOperation cacheOperation) {
-                cacheManager = beanFactory.getBean(cacheOperation.getCacheManager(), ExpireCacheManager.class);
-            }
-            Expire expire = AnnotationUtils.getAnnotation(m, Expire.class);
-            if (expire != null) {
-                if (cacheManager instanceof ExpireCacheManager expireCacheManager) {
-                    Duration ttl = Duration.of(expire.value(), expire.timeUnit().toChronoUnit());
-                    return getCaches(expireCacheManager, context.getOperation().getCacheNames(), ttl);
-                }else {
-                    throw new IllegalStateException("CacheManager must be an instance of ExpireCacheManager while using @Expire");
+                if (StringUtils.isNotBlank(cacheOperation.getCacheManager())) {
+                    cacheManager = beanFactory.getBean(cacheOperation.getCacheManager(), ExpireCacheManager.class);
                 }
             }
-            return getCaches(cacheManager, context.getOperation().getCacheNames());
+            Expire expire = AnnotationUtils.getAnnotation(m, Expire.class);
+            if (expire == null) {
+                return getCaches(cacheManager, context.getOperation().getCacheNames());
+            }else {
+                if (cacheManager instanceof ExpireCacheManager expireCacheManager) {
+                    return getCaches(expireCacheManager, context.getOperation().getCacheNames(), Duration.of(expire.value(), expire.timeUnit().toChronoUnit()));
+                }else {
+                    throw new RuntimeException("cacheManager must be instanceof ExpireCacheManager while @Expire is present");
+                }
+            }
+
         });
     }
 

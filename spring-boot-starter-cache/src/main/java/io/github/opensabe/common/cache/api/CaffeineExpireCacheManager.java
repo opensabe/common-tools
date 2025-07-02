@@ -14,31 +14,36 @@ import java.util.Collection;
  */
 public class CaffeineExpireCacheManager extends CaffeineCacheManager implements ExpireCacheManager {
 
+    private CaffeineSpec caffeineSpec;
+    @Nullable
+    @Override
+    public Cache getCache(String name, Duration ttl) {
+
+        return adaptCaffeineCache(name, Caffeine.from(caffeineSpec).expireAfterWrite(ttl).build());
+    }
+
 
     @Override
     public void setCacheNames(Collection<String> cacheNames) {
         super.setCacheNames(cacheNames);
-    }
 
-
-    @Nullable
-    @Override
-    public Cache getCache(String name, Duration ttl) {
-        return null;
-    }
-
-    @Override
-    public void setCaffeineSpec(CaffeineSpec caffeineSpec) {
-        super.setCaffeineSpec(caffeineSpec);
-    }
-
-    @Override
-    public void setCacheSpecification(String cacheSpecification) {
-        super.setCacheSpecification(cacheSpecification);
     }
 
     @Override
     public void setCaffeine(Caffeine<Object, Object> caffeine) {
         super.setCaffeine(caffeine);
     }
+
+    @Override
+    public void setCaffeineSpec(CaffeineSpec caffeineSpec) {
+        super.setCaffeineSpec(caffeineSpec);
+        this.caffeineSpec = caffeineSpec;
+    }
+
+    @Override
+    public void setCacheSpecification(String cacheSpecification) {
+        super.setCacheSpecification(cacheSpecification);
+        this.caffeineSpec = CaffeineSpec.parse(cacheSpecification);
+    }
+
 }

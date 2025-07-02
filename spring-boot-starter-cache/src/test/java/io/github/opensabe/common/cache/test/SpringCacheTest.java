@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@EnableCaching
 @ExtendWith({
         SpringExtension.class, SingleRedisIntegrationTest.class
 })
@@ -77,6 +79,7 @@ public class SpringCacheTest {
         Cache cache = cacheManager.getCache(CAFFEINE_CACHE_NAME);
         assertNotNull(cache);
         Set<@NonNull Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
+        System.out.println(keys);
         assertTrue(keys.contains("getData"));
     }
 
