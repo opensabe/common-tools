@@ -1,5 +1,6 @@
 package io.github.opensabe.common.cache.test.service;
 
+import io.github.opensabe.common.cache.api.Expire;
 import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ public class CacheService {
 
     private MockStorage storage;
 
+    @Expire
     @Cacheable(value = "test_caffeine")
     public Map<Long, ItemObject> getData() {
         return storage.getData();

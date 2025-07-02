@@ -5,9 +5,6 @@ import io.github.opensabe.common.cache.test.service.CacheService;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,14 +17,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.containers.FixedHostPortGenericContainer;
-import org.testcontainers.containers.GenericContainer;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static io.github.opensabe.common.cache.utils.CacheHelper.CACHE_NAME_PREFIX;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({
@@ -67,9 +61,9 @@ public class SpringCacheTest {
 
     public static final String REDIS_CACHE_NAME = "test_redis";
 
-    public static final String REDIS_CACHE_KEY_PREFIX = CACHE_NAME_PREFIX + "test_redis::";
+    public static final String REDIS_CACHE_KEY_PREFIX = "test_redis::";
 
-    public static final String REDIS_CACHE_KEY_PREFIX2 = CACHE_NAME_PREFIX + "test_redis2::";
+    public static final String REDIS_CACHE_KEY_PREFIX2 = "test_redis2::";
 
     public static final String CAFFEINE_CACHE_NAME = "test_caffeine";
 
@@ -131,7 +125,7 @@ public class SpringCacheTest {
         String redisRst = redisTemplate.opsForValue().get(REDIS_CACHE_KEY_PREFIX + redisKey);
         assertEquals(item.getName(), redisRst.replace("\"", ""));
 
-        Object mapRst = redisTemplate.opsForHash().get(CACHE_NAME_PREFIX + REDIS_CACHE_NAME, REDIS_CACHE_KEY_PREFIX + redisKey);
+        Object mapRst = redisTemplate.opsForHash().get( REDIS_CACHE_NAME, REDIS_CACHE_KEY_PREFIX + redisKey);
         assertNotNull(mapRst);
     }
 
@@ -200,7 +194,7 @@ public class SpringCacheTest {
         String redisRst = redisTemplate.opsForValue().get(REDIS_CACHE_KEY_PREFIX + redisKey);
         assertNull(redisRst);
 
-        Object mapRst = redisTemplate.opsForHash().get(CACHE_NAME_PREFIX + REDIS_CACHE_NAME, REDIS_CACHE_KEY_PREFIX + redisKey);
+        Object mapRst = redisTemplate.opsForHash().get( REDIS_CACHE_NAME, REDIS_CACHE_KEY_PREFIX + redisKey);
         assertNull(mapRst);
     }
 
