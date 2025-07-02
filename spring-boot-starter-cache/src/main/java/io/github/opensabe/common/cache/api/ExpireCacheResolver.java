@@ -23,7 +23,7 @@ public class ExpireCacheResolver implements CacheResolver {
 
     private final CompositeCacheManager cacheManager;
     private final BeanFactory beanFactory;
-    private final Map<Method, Collection<? extends Cache>> map;
+    private final Map<Method, CacheFunction> map;
     public ExpireCacheResolver(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
         this.map = new ConcurrentHashMap<>();
@@ -38,27 +38,37 @@ public class ExpireCacheResolver implements CacheResolver {
             CacheManager cacheManager = this.cacheManager;
             if (context.getOperation() instanceof CacheOperation cacheOperation) {
                 if (StringUtils.isNotBlank(cacheOperation.getCacheManager())) {
-                    cacheManager = beanFactory.getBean(cacheOperation.getCacheManager(), ExpireCacheManager.class);
+                    cacheManager = beanFactory.getBean(cacheOperation.getCacheManager(), CacheManager.class);
                 }
             }
-            Expire expire = AnnotationUtils.getAnnotation(m, Expire.class);
-            if (expire == null) {
-                return getCaches(cacheManager, context.getOperation().getCacheNames());
+            Expire expire = AnnotationUtils.getAnnotation(context.getMethod(), Expire.class);
+            return new CacheFunction(cacheManager, expire == null ? null : Duration.of(expire.value(), expire.timeUnit().toChronoUnit()));
+        }).execute(context.getOperation().getCacheNames());
+
+    }
+
+
+
+    private record CacheFunction (CacheManager cacheManager, Duration ttl) {
+
+        private Collection<? extends Cache> execute(Collection<String> cacheNames) {
+            if (ttl == null) {
+                return getCaches(cacheManager, cacheNames);
             }else {
                 if (cacheManager instanceof ExpireCacheManager expireCacheManager) {
-                    return getCaches(expireCacheManager, context.getOperation().getCacheNames(), Duration.of(expire.value(), expire.timeUnit().toChronoUnit()));
+                    return getCaches(expireCacheManager, cacheNames, ttl);
                 }else {
                     throw new RuntimeException("cacheManager must be instanceof ExpireCacheManager while @Expire is present");
                 }
             }
+        }
 
-        });
-    }
+        private Collection<? extends Cache> getCaches(ExpireCacheManager cacheManager, Collection<String> cacheNames, Duration ttl) {
+            return cacheNames.stream().map(cacheName -> cacheManager.getCache(cacheName, ttl)).toList();
+        }
+        private Collection<? extends Cache> getCaches(CacheManager cacheManager, Collection<String> cacheNames) {
+            return cacheNames.stream().map(cacheManager::getCache).toList();
+        }
 
-    private Collection<? extends Cache> getCaches(ExpireCacheManager cacheManager, Collection<String> cacheNames, Duration ttl) {
-        return cacheNames.stream().map(cacheName -> cacheManager.getCache(cacheName, ttl)).toList();
-    }
-    private Collection<? extends Cache> getCaches(CacheManager cacheManager, Collection<String> cacheNames) {
-        return cacheNames.stream().map(cacheManager::getCache).toList();
     }
 }

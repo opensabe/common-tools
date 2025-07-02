@@ -1,6 +1,8 @@
 package io.github.opensabe.common.cache.api;
 
 import jakarta.annotation.Nullable;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.springframework.cache.Cache;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
@@ -13,6 +15,7 @@ import java.time.Duration;
  */
 public class RedisExpireCacheManager extends RedisCacheManager implements ExpireCacheManager {
 
+    private MultiKeyMap<Object, Cache> map = new MultiKeyMap<>();
 
     public RedisExpireCacheManager(RedisCacheWriter cacheWriter,
                                    RedisCacheConfiguration defaultCacheConfiguration,
@@ -23,8 +26,10 @@ public class RedisExpireCacheManager extends RedisCacheManager implements Expire
     @Nullable
     @Override
     public Cache getCache(String name, Duration ttl) {
-        RedisCacheConfiguration configuration = getDefaultCacheConfiguration();
-        configuration.entryTtl(ttl);
-        return super.createRedisCache(name, configuration);
+        return map.computeIfAbsent(new MultiKey<>(name, ttl), k -> {
+            RedisCacheConfiguration configuration = getDefaultCacheConfiguration();
+            configuration.entryTtl(ttl);
+            return super.createRedisCache(name, configuration);
+        });
     }
 }

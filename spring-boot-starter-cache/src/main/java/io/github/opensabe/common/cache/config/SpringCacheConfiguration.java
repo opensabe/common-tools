@@ -53,7 +53,7 @@ public class SpringCacheConfiguration {
     }
 
     @Bean
-    public CompositeCacheManager compositeCacheManager () {
+    public CompositeCacheManager compositeCacheManager (CachesProperties cachesProperties) {
         CaffeineExpireCacheManager cacheManager = new CaffeineExpireCacheManager();
         cacheManager.setCaffeineSpec(CaffeineSpec.parse("maximumSize=10000"));
         return new CompositeCacheManager(List.of(cacheManager));
