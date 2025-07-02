@@ -1,5 +1,6 @@
 package io.github.opensabe.common.cache.test;
 
+import io.github.opensabe.common.cache.api.CompositeCacheManager;
 import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.service.CacheService;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
@@ -11,21 +12,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@EnableCaching
 @ExtendWith({
         SpringExtension.class, SingleRedisIntegrationTest.class
 })
@@ -50,7 +49,7 @@ public class SpringCacheTest {
     }
 
     @Autowired
-    private CacheManager cacheManager;
+    private CompositeCacheManager cacheManager;
 
     @Autowired
     private MockStorage storage;
@@ -69,6 +68,19 @@ public class SpringCacheTest {
 
     public static final String CAFFEINE_CACHE_NAME = "test_caffeine";
 
+    @Test
+    public void test_cacheable_caffeine_without_key_and_field_with_ttl(){
+
+        ItemObject item = ItemObject.builder().id(999L).name("caffeineCache").value("Test_Caffeine").build();
+        storage.addItem(item);
+        ItemObject object = service.getItemFromCaffeineWithoutKeyWithTTL(999L, "xxxd");
+
+        Cache cache = cacheManager.getCache(CAFFEINE_CACHE_NAME, Duration.ofSeconds(60));
+        assertNotNull(cache);
+        Set<@NonNull Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
+        System.out.println(keys);
+        assertTrue(keys.toString().contains("xxxd"));
+    }
     @Test
     public void test_cacheable_caffeine_without_key_and_field(){
 

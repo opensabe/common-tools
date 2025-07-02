@@ -17,10 +17,15 @@ public class CacheService {
 
     private MockStorage storage;
 
-    @Expire(60)
     @Cacheable(value = "test_caffeine")
     public Map<Long, ItemObject> getData() {
         return storage.getData();
+    }
+
+    @Expire(60)
+    @Cacheable(value = "test_caffeine")
+    public ItemObject getItemFromCaffeineWithoutKeyWithTTL(Long id, String field) {
+        return storage.getItem(id);
     }
 
     @Cacheable(value = "test_caffeine")

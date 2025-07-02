@@ -3,6 +3,8 @@ package io.github.opensabe.common.cache.api;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
 import jakarta.annotation.Nullable;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.springframework.cache.Cache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 
@@ -15,11 +17,13 @@ import java.util.Collection;
 public class CaffeineExpireCacheManager extends CaffeineCacheManager implements ExpireCacheManager {
 
     private CaffeineSpec caffeineSpec;
+
+    private MultiKeyMap<Object, Cache> cacheMap = new MultiKeyMap<>();
+
     @Nullable
     @Override
     public Cache getCache(String name, Duration ttl) {
-
-        return adaptCaffeineCache(name, Caffeine.from(caffeineSpec).expireAfterWrite(ttl).build());
+        return cacheMap.computeIfAbsent( new MultiKey<>(name, ttl), k -> adaptCaffeineCache(name, Caffeine.from(caffeineSpec).expireAfterWrite(ttl).build()));
     }
 
 
