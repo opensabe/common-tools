@@ -105,7 +105,7 @@ public class SpringCacheTest {
         Cache cache = cacheManager.getCache(CAFFEINE_CACHE_NAME);
         assertNotNull(cache);
         Set<@NonNull Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
-        assertTrue(keys.contains(String.format("%s:%s", item.getId(), "TEST")));
+        assertTrue(keys.toString().contains(String.format("%s:%s", item.getId(), "TEST")));
     }
 
     @Test

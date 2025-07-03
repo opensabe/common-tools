@@ -8,12 +8,10 @@ import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
-import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author heng.ma
@@ -30,7 +28,6 @@ public class CaffeineConfiguration implements InitializingBean {
         this.compositeCacheManager = compositeCacheManager;
     }
 
-    @Bean
     public DynamicCaffeineCacheManager dynamicCaffeineCacheManager () {
         DynamicCaffeineCacheManager cacheManager = new DynamicCaffeineCacheManager(cachesProperties);
         return customizers.customize(cacheManager);
@@ -55,6 +52,7 @@ public class CaffeineConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
+        compositeCacheManager.setCacheManagers(List.of(dynamicCaffeineCacheManager()));
         if (cachesProperties.isEnabled() && cachesProperties.getCustom()!= null) {
             List<CacheManager> list = cachesProperties.getCustom().stream().filter(p -> CacheType.CAFFEINE.equals(p.getType()))
                     .map(this::caffeineCacheManager)

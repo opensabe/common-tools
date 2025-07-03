@@ -7,9 +7,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.cache.CacheType;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -43,9 +41,7 @@ public class RedisConfiguration implements InitializingBean {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public DynamicRedisCacheManager dynamicRedisCacheManager (RedisConnectionFactory redisConnectionFactory) {
+    private DynamicRedisCacheManager dynamicRedisCacheManager () {
         Map<String, RedisCacheConfiguration> map = new HashMap<>();
         List<CachesProperties.CustomCacheProperties> list = properties.getCustom();
         if (list != null) {
@@ -56,11 +52,12 @@ public class RedisConfiguration implements InitializingBean {
                         });
                     });
         }
-        return customizers.customize(new DynamicRedisCacheManager(redisConnectionFactory, defaultCacheConfig(), map));
+        return customizers.customize(new DynamicRedisCacheManager(connectionFactory, defaultCacheConfig(), map));
     }
 
     @Override
     public void afterPropertiesSet() {
+        compositeCacheManager.setCacheManagers(List.of(dynamicRedisCacheManager()));
         if (properties.isEnabled() && properties.getCustom() != null) {
             List<CacheManager> list = properties.getCustom().stream().filter(p -> CacheType.REDIS.equals(p.getType()))
                     .map(p -> redisCacheManager(connectionFactory, customizers, p))
