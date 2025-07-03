@@ -1,8 +1,5 @@
 package io.github.opensabe.common.cache.config;
 
-import com.github.benmanes.caffeine.cache.CaffeineSpec;
-import io.github.opensabe.common.cache.api.CaffeineExpireCacheManager;
-import io.github.opensabe.common.cache.api.CompositeCacheManager;
 import io.github.opensabe.common.cache.api.ExpireCacheInterceptor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,12 +10,10 @@ import org.springframework.cache.interceptor.CacheOperationSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 
-import java.util.List;
-
 /**
  * @author heng.ma
  */
-public class SpringCacheConfiguration {
+public class CacheAopConfiguration {
 
 
 
@@ -52,10 +47,4 @@ public class SpringCacheConfiguration {
         return new AnnotationCacheOperationSource(false);
     }
 
-    @Bean
-    public CompositeCacheManager compositeCacheManager (CachesProperties cachesProperties) {
-        CaffeineExpireCacheManager cacheManager = new CaffeineExpireCacheManager();
-        cacheManager.setCaffeineSpec(CaffeineSpec.parse("maximumSize=10000"));
-        return new CompositeCacheManager(List.of(cacheManager));
-    }
 }

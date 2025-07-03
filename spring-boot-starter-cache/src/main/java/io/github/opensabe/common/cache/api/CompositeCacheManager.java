@@ -1,7 +1,10 @@
 package io.github.opensabe.common.cache.api;
 
+import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
+import io.github.opensabe.common.cache.redis.DynamicRedisCacheManager;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.util.Assert;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -18,6 +21,9 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
 
     private final List<CacheManager> cacheManagers = new ArrayList<>();
 
+    private Integer caffeineIndex;
+
+    private Integer redisIndex;
 
     public CompositeCacheManager(List<CacheManager> cacheManagers) {
         super();
@@ -28,6 +34,14 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
     public void setCacheManagers(Collection<CacheManager> cacheManagers) {
         super.setCacheManagers(cacheManagers);
         this.cacheManagers.addAll(cacheManagers);
+        for (int i = 0; i < this.cacheManagers.size(); i++) {
+            CacheManager cacheManager = this.cacheManagers.get(i);
+            if (cacheManager instanceof DynamicCaffeineCacheManager) {
+                caffeineIndex = i;
+            } else if (cacheManager instanceof DynamicRedisCacheManager) {
+                redisIndex = i;
+            }
+        }
     }
 
     @Override
@@ -42,5 +56,15 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
         }
 
         return null;
+    }
+
+    public ExpireCacheManager redisCacheManager() {
+        Assert.notNull(redisIndex, "DynamicRedisCacheManager not found");
+        return (ExpireCacheManager) this.cacheManagers.get(redisIndex);
+    }
+
+    public ExpireCacheManager caffeineCacheManager() {
+        Assert.notNull(caffeineIndex, "DynamicCaffeineCacheManager not found");
+        return (ExpireCacheManager) this.cacheManagers.get(caffeineIndex);
     }
 }
