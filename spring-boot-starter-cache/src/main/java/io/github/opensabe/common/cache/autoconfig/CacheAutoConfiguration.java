@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
+
 /**
  * @author heng.ma
  */
@@ -12,11 +13,11 @@ import org.springframework.context.annotation.Import;
 @Import({
         ExpireCachingConfigurer.class,
         CacheAopConfiguration.class,
-        CacheManagerConfiguration.class,
+        CaffeineConfiguration.class,
         RedisConfiguration.class,
-        CaffeineConfiguration.class
+        CacheManagerConfiguration.class
 })
 @EnableConfigurationProperties(CachesProperties.class)
 public class CacheAutoConfiguration {
-    
+
 }

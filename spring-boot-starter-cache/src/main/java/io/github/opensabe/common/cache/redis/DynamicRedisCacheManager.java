@@ -26,8 +26,10 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
 
     private Function<RedisCacheConfiguration, RedisCacheConfiguration> onRedisCacheConfiguration;
 
-    public DynamicRedisCacheManager(RedisConnectionFactory connectionFactory, RedisCacheConfiguration defaultCacheConfiguration) {
-        super(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory), defaultCacheConfiguration);
+    public DynamicRedisCacheManager(RedisConnectionFactory connectionFactory,
+                                    RedisCacheConfiguration defaultCacheConfiguration,
+                                    Map<String, RedisCacheConfiguration> configurations) {
+        super(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory), defaultCacheConfiguration, configurations);
         this.map = new ConcurrentHashMap<>();
         this.onRedisCacheConfiguration = Function.identity();
     }
@@ -36,7 +38,10 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
     @Override
     public Cache getCache(String name, Duration ttl) {
         return map.computeIfAbsent(name, k -> new ConcurrentHashMap<>()).computeIfAbsent(ttl, k -> {
-            RedisCacheConfiguration configuration = getDefaultCacheConfiguration().entryTtl(ttl);
+            RedisCacheConfiguration configuration = getCacheConfigurations().get(name);
+            if (configuration == null) {
+                configuration = getDefaultCacheConfiguration();
+            }
             configuration = onRedisCacheConfiguration.apply(configuration);
             return super.decorateCache(new RCache(name, getCacheWriter(), configuration));
         });
@@ -88,4 +93,5 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
         this.onRedisCacheConfiguration = this.onRedisCacheConfiguration.andThen(onRedisCacheConfiguration);
         return this;
     }
+
 }

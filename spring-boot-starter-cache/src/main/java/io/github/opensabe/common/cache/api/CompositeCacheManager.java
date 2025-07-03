@@ -25,9 +25,8 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
 
     private Integer redisIndex;
 
-    public CompositeCacheManager(List<CacheManager> cacheManagers) {
+    public CompositeCacheManager() {
         super();
-        setCacheManagers(cacheManagers);
     }
 
     @Override

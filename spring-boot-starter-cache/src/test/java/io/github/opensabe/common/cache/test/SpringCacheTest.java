@@ -31,14 +31,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(properties = {
         "caches.enabled=true",
         "caches.custom[0].type=caffeine",
-        "caches.custom[0].cacheNames=test_caffeine",
+        "caches.custom[0].cacheNames[0]=test_caffeine",
         "caches.custom[0].caffeine.spec=expireAfterWrite=5s",
         "caches.custom[1].type=redis",
-        "caches.custom[1].cacheNames=test_redis",
+        "caches.custom[1].cacheNames[0]=test_redis",
         "caches.custom[1].redis.timeToLive=5s",
         "caches.custom[1].redis.cacheNullValues=false",
         "caches.custom[2].type=redis",
-        "caches.custom[2].cacheNames=test_redis2",
+        "caches.custom[2].cacheNames[0]=test_redis2",
         "caches.custom[2].redis.timeToLive=3s",
         "caches.custom[2].redis.cacheNullValues=false",
 }, classes = App.class)
@@ -114,7 +114,6 @@ public class SpringCacheTest {
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
         service.getItemFromCaffeine(item.getId());
-
         ItemObject cachedItem = cacheManager.getCache(CAFFEINE_CACHE_NAME).get(item.getId(), ItemObject.class);
         assertNotNull(cachedItem);
         assertEquals(cachedItem.getName(), item.getName());

@@ -22,7 +22,7 @@ public class CacheManagerConfiguration {
 
 
     @Bean
-    public CompositeCacheManager compositeCacheManager (ObjectProvider<CacheManager> cacheManagers) {
-        return new CompositeCacheManager(cacheManagers.orderedStream().toList());
+    public CompositeCacheManager compositeCacheManager () {
+        return new CompositeCacheManager();
     }
 }

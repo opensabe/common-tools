@@ -3,7 +3,8 @@ package io.github.opensabe.common.cache.caffeine;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
 import io.github.opensabe.common.cache.api.ExpireCacheManager;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
+import io.github.opensabe.common.cache.config.CachesProperties;
+import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.cache.Cache;
 import org.springframework.cache.caffeine.CaffeineCache;
 
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class DynamicCaffeineCacheManager implements ExpireCacheManager {
 
-    private final CaffeineSpec caffeineSpec;
+    private final Map<String,CaffeineSpec> caffeineSpec;
 
     private final Map<String, Map<Duration, Cache>> map;
 
@@ -28,26 +29,34 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
 
     private BiFunction<String, Caffeine<Object, Object>, CaffeineCache> adapter = (name, caffeine) -> new CaffeineCache(name, caffeine.build(), isAllowNullValues());
 
-    public DynamicCaffeineCacheManager(String caffeineSpec) {
+    public DynamicCaffeineCacheManager(CachesProperties properties) {
         this.map = new ConcurrentHashMap<>();
-        caffeineSpec = Arrays.stream(caffeineSpec.split(","))
+        this.caffeineSpec = new ConcurrentHashMap<>();
+        properties.getCustom().stream()
+                .filter(p -> !p.getCacheNames().isEmpty())
+                .filter(p -> CacheType.CAFFEINE.equals(p.getType()))
+                .forEach(p -> p.getCacheNames().forEach(n -> caffeineSpec.putIfAbsent(n, CaffeineSpec.parse(resolveCaffeineSpec(p.getCaffeine().getSpec())))));
+
+    }
+
+
+    private String resolveCaffeineSpec(String caffeineSpec) {
+        return Arrays.stream(caffeineSpec.split(","))
                 .filter(op -> !op.contains("expireAfterWrite"))
                 .peek(op -> {
                     if (op.contains("allowNullValues")) {
                         setAllowNullValues(Boolean.parseBoolean(op.split("=")[1].trim()));
                     }
                 }).collect(Collectors.joining(","));
-        this.caffeineSpec = CaffeineSpec.parse(caffeineSpec);
     }
 
-    public DynamicCaffeineCacheManager(CacheProperties.Caffeine caffeine) {
-        this(caffeine.getSpec());
-    }
 
     @Override
     public Cache getCache(String name, Duration ttl) {
+        CaffeineSpec spec = caffeineSpec.get(name);
+
         return map.computeIfAbsent(name, k -> new ConcurrentHashMap<>()).computeIfAbsent(ttl,
-                k -> adapter.apply(name, Caffeine.from(caffeineSpec).expireAfterWrite(ttl)));
+                k -> adapter.apply(name, (spec == null ? Caffeine.newBuilder() :Caffeine.from(spec)).expireAfterWrite(ttl)));
     }
 
     @Override
