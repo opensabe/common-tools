@@ -44,7 +44,7 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
             if (configuration == null) {
                 configuration = getDefaultCacheConfiguration();
             }
-            configuration = onRedisCacheConfiguration.apply(configuration);
+            configuration = onRedisCacheConfiguration.apply(configuration.entryTtl(ttl));
             return super.decorateCache(new RCache(name, getCacheWriter(), configuration));
         });
     }
@@ -55,13 +55,17 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
             super(name, cacheWriter, cacheConfiguration);
         }
 
+        /**
+         * Override to log the key.
+         * @param key will never be {@literal null}.
+         * @return
+         */
         @Override
         protected String createCacheKey(Object key) {
             String cacheKey = super.createCacheKey(key);
             if (log.isDebugEnabled()) {
                 log.debug("Spring cache redis key: {}", cacheKey);
             }
-            log.info("Spring cache redis key: {}", cacheKey);
             return cacheKey;
         }
     }

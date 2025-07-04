@@ -4,6 +4,7 @@ import io.github.opensabe.common.cache.api.Expire;
 import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,6 +31,11 @@ public class CacheService {
     @Expire(5)
     @Cacheable(value = "test_redis")
     public ItemObject getRedisExpire(Long id, String field) {
+        return storage.getItem(id);
+    }
+    @Expire(value = 5, cacheType = CacheType.CAFFEINE)
+    @Cacheable(value = "test_redis")
+    public ItemObject geAssignmentExpire(Long id, String field) {
         return storage.getItem(id);
     }
 

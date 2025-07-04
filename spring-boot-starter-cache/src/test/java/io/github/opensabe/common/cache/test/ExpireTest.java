@@ -67,13 +67,30 @@ public class ExpireTest {
         Assertions.assertNull(cache.get("1:id1"));
     }
     @Test
-    void testRedis () throws InterruptedException, NoSuchMethodException {
+    void testRedis () throws NoSuchMethodException {
         Expire expire = CacheService.class.getMethod("getRedisExpire", Long.class, String.class).getAnnotation(Expire.class);
+        long start = System.currentTimeMillis();
         ItemObject current = cacheService.getRedisExpire(2L, "id2");
         Cache cache = cacheManager.getCache("test_redis", Duration.of(expire.value(), expire.timeUnit().toChronoUnit()));
 
         Assertions.assertInstanceOf(RedisCache.class, cache);
 
+        long ttl = redisTemplate.getExpire("sfccmr:test_redis::2:id2");
+        long end = System.currentTimeMillis();
+
+        System.out.println(ttl);
+
+        Assertions.assertTrue(ttl + Duration.ofMillis(end-start).get(expire.timeUnit().toChronoUnit()) == expire.value());
     }
 
+    @Test
+    void testAssignment () throws NoSuchMethodException, InterruptedException {
+        Expire expire = CacheService.class.getMethod("geAssignmentExpire", Long.class, String.class).getAnnotation(Expire.class);
+        cacheService.geAssignmentExpire(2L, "id2");
+        Cache cache = cacheManager.getCache("test_redis", Duration.of(expire.value(), expire.timeUnit().toChronoUnit()));
+
+        Assertions.assertInstanceOf(CaffeineCache.class, cache);
+        expire.timeUnit().sleep(expire.value());
+        Assertions.assertNull(cache.get("2:id2"));
+    }
 }

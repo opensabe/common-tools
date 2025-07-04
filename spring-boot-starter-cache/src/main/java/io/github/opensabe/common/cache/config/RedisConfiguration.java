@@ -26,6 +26,8 @@ import java.util.Map;
  */
 public class RedisConfiguration implements InitializingBean {
 
+    public static final String DEFAULT_REDIS_KEY_PREFIX = "sfccmr:";
+
     private final CacheManagerCustomizers customizers;
     private final RedisConnectionFactory connectionFactory;
     private final CachesProperties properties;
@@ -55,7 +57,7 @@ public class RedisConfiguration implements InitializingBean {
     private RedisCacheConfiguration defaultCacheConfig() {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
-                .prefixCacheNameWith("");
+                .prefixCacheNameWith(DEFAULT_REDIS_KEY_PREFIX);
     }
 
     private DynamicRedisCacheManager dynamicRedisCacheManager () {
