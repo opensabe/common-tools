@@ -66,7 +66,9 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
 
 
     /**
-     * 删除缓存使用，因为清除缓存时可能不设置ttl,因此这里需要返回当前所有的缓存，删除时将所有缓存的key都清楚掉
+     * 因为caffeine是本地缓存，并且<code>ExpireCacheManager</code>是动态创建缓存的，
+     * 不同的key可能会分散到不同的cache上，因此删除时需要遍历所有的cache
+     * @see CompositedCache
      */
     @Override
     public Cache getCache(String name) {
