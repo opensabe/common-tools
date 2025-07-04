@@ -58,6 +58,12 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
     }
 
     @Override
+    public Collection<String> settings(String name) {
+        //TODO 后续完善
+        return List.of();
+    }
+
+    @Override
     public Collection<String> getCacheNames() {
         Set<String> set = new HashSet<>();
         set.addAll(caffeineSpec.keySet());

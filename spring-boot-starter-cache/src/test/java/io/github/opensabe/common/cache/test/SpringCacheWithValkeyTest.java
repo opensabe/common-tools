@@ -1,5 +1,6 @@
 package io.github.opensabe.common.cache.test;
 
+import io.github.opensabe.common.cache.config.RedisConfiguration;
 import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.service.CacheService;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
@@ -161,7 +162,7 @@ public class SpringCacheWithValkeyTest {
         assertNotNull(cachedItem);
         assertEquals(cachedItem, item.getName());
 
-        String redisRst = redisTemplate.opsForValue().get(REDIS_CACHE_KEY_PREFIX + redisKey).toString();
+        String redisRst = redisTemplate.opsForValue().get(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX+REDIS_CACHE_KEY_PREFIX + redisKey).toString();
         assertEquals(item.getName(), redisRst.replace("\"", ""));
     }
 

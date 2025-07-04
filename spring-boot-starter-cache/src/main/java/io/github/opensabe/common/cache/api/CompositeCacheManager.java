@@ -4,12 +4,16 @@ import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
 import io.github.opensabe.common.cache.redis.DynamicRedisCacheManager;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.util.Assert;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -27,6 +31,18 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
 
     public CompositeCacheManager() {
         super();
+    }
+
+    private static VarHandle caffeineCacheBuilder;
+
+    static {
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        try {
+            caffeineCacheBuilder = lookup.findVarHandle(CaffeineCacheManager.class, "cacheBuilder", CaffeineCache.class);
+            caffeineCacheBuilder.accessModeType(VarHandle.AccessMode.GET);
+        } catch (NoSuchFieldException | IllegalAccessException ignore) {
+
+        }
     }
 
     @Override
@@ -60,6 +76,35 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
         }
         return null;
     }
+
+    @Override
+    public Collection<String> settings (String cacheName) {
+        Set<String> set = new HashSet<>();
+        for (CacheManager cacheManager : cacheManagers) {
+            Collection<String> settings = null;
+            {
+                switch (cacheManager) {
+                    case ExpireCacheManager expireCacheManager -> {
+                        settings = expireCacheManager.settings(cacheName);
+                    }
+                    case CaffeineCacheManager caffeineCacheManager -> {
+                        Object o = caffeineCacheBuilder.get(caffeineCacheManager);
+                        settings = List.of(o.toString());
+                    }
+                    case RedisCacheManager redisCacheManager -> {
+                        RedisCacheConfiguration configuration = redisCacheManager.getCacheConfigurations().get(cacheName);
+                        Duration duration = configuration.getTtlFunction().getTimeToLive(Object.class, null);
+                        String keyPrefix = configuration.getKeyPrefix().compute(cacheName);
+                        settings = List.of(keyPrefix, duration.toString());
+                    }
+                    default -> Collections.emptyList();
+                };
+            }
+            set.addAll(settings);
+        }
+        return set;
+    }
+
 
     public ExpireCacheManager redisCacheManager() {
         Assert.notNull(redisIndex, "DynamicRedisCacheManager not found");

@@ -11,10 +11,7 @@ import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import java.time.Duration;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -76,6 +73,12 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
     @Override
     public Cache getCache(String name) {
         return null;
+    }
+
+    @Override
+    public Collection<String> settings(String name) {
+        //后续完善
+        return List.of();
     }
 
     @Override
