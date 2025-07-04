@@ -47,13 +47,17 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
     public Cache getCache(String name, Duration ttl) {
         for (CacheManager cacheManager : cacheManagers) {
             if (cacheManager instanceof ExpireCacheManager expireCacheManager) {
-                Cache cache = expireCacheManager.getCache(name, ttl);
-                if (cache != null) {
-                    return cache;
+                //优先选择预定义的cacheManager
+                if (expireCacheManager.getCacheNames().contains(name)) {
+                    return expireCacheManager.getCache(name, ttl);
                 }
             }
         }
-
+        //如果预定义的没有，优先使用caffeine,如果没有caffeine，使用redis
+        Integer index = caffeineIndex == null? redisIndex : caffeineIndex;
+        if (index != null) {
+            return ((ExpireCacheManager)cacheManagers.get(index)).getCache(name, ttl);
+        }
         return null;
     }
 

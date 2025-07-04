@@ -22,9 +22,14 @@ public class CacheService {
         return storage.getData();
     }
 
-    @Expire(60)
+    @Expire(5)
     @Cacheable(value = "test_caffeine")
-    public ItemObject getItemFromCaffeineWithoutKeyWithTTL(Long id, String field) {
+    public ItemObject getCaffeineExpire(Long id, String field) {
+        return storage.getItem(id);
+    }
+    @Expire(5)
+    @Cacheable(value = "test_redis")
+    public ItemObject getRedisExpire(Long id, String field) {
         return storage.getItem(id);
     }
 

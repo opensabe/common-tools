@@ -18,6 +18,12 @@ public class CacheAopConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ExpireCachingConfigurer expireCachingConfigurer () {
+        return new ExpireCachingConfigurer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public ExpireCacheInterceptor expireCacheInterceptor (ExpireCachingConfigurer configurer,
                                                           CacheOperationSource cacheOperationSource) {
         ExpireCacheInterceptor interceptor = new ExpireCacheInterceptor(configurer.cacheResolver());

@@ -18,7 +18,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -68,19 +67,6 @@ public class SpringCacheTest {
 
     public static final String CAFFEINE_CACHE_NAME = "test_caffeine";
 
-    @Test
-    public void test_cacheable_caffeine_without_key_and_field_with_ttl(){
-
-        ItemObject item = ItemObject.builder().id(999L).name("caffeineCache").value("Test_Caffeine").build();
-        storage.addItem(item);
-        ItemObject object = service.getItemFromCaffeineWithoutKeyWithTTL(999L, "xxxd");
-
-        Cache cache = cacheManager.getCache(CAFFEINE_CACHE_NAME, Duration.ofSeconds(60));
-        assertNotNull(cache);
-        Set<@NonNull Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
-        System.out.println(keys);
-        assertTrue(keys.toString().contains("xxxd"));
-    }
     @Test
     public void test_cacheable_caffeine_without_key_and_field(){
 

@@ -12,7 +12,9 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -59,6 +61,7 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
             if (log.isDebugEnabled()) {
                 log.debug("Spring cache redis key: {}", cacheKey);
             }
+            log.info("Spring cache redis key: {}", cacheKey);
             return cacheKey;
         }
     }
@@ -73,7 +76,10 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
 
     @Override
     public Collection<String> getCacheNames() {
-        return map.keySet();
+        Set<String> set = new HashSet<>();
+        set.addAll(getInitialCacheConfiguration().keySet());
+        set.addAll(map.keySet());
+        return set;
     }
 
     @Override

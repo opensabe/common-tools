@@ -9,9 +9,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.caffeine.CaffeineCache;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -32,7 +30,7 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
     public DynamicCaffeineCacheManager(CachesProperties properties) {
         this.map = new ConcurrentHashMap<>();
         this.caffeineSpec = new ConcurrentHashMap<>();
-        properties.getCustom().stream()
+        Optional.ofNullable(properties.getCustom()).stream().flatMap(List::stream)
                 .filter(p -> !p.getCacheNames().isEmpty())
                 .filter(p -> CacheType.CAFFEINE.equals(p.getType()))
                 .forEach(p -> p.getCacheNames().forEach(n -> caffeineSpec.putIfAbsent(n, CaffeineSpec.parse(resolveCaffeineSpec(p.getCaffeine().getSpec())))));
@@ -61,7 +59,10 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
 
     @Override
     public Collection<String> getCacheNames() {
-        return map.keySet();
+        Set<String> set = new HashSet<>();
+        set.addAll(caffeineSpec.keySet());
+        set.addAll(map.keySet());
+        return set;
     }
 
     public boolean isAllowNullValues() {
@@ -72,8 +73,7 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
         this.allowNullValues = allowNullValues;
     }
 
-    public DynamicCaffeineCacheManager onCaffeine(BiFunction<String, Caffeine<Object, Object>, CaffeineCache> adapter) {
+    public void onCaffeine(BiFunction<String, Caffeine<Object, Object>, CaffeineCache> adapter) {
         this.adapter = adapter;
-        return this;
     }
 }

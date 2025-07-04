@@ -1,1 +1,2 @@
 io.github.opensabe.common.cache.autoconfig.CacheAutoConfiguration
+io.github.opensabe.common.cache.autoconfig.RedisCacheManagerAutoConfiguration

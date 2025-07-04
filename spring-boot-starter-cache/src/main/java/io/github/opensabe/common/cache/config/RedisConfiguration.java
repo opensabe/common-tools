@@ -54,7 +54,8 @@ public class RedisConfiguration implements InitializingBean {
 
     private RedisCacheConfiguration defaultCacheConfig() {
         return RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                .prefixCacheNameWith("");
     }
 
     private DynamicRedisCacheManager dynamicRedisCacheManager () {
@@ -62,11 +63,7 @@ public class RedisConfiguration implements InitializingBean {
         List<CachesProperties.CustomCacheProperties> list = properties.getCustom();
         if (list != null) {
             list.stream().filter(p -> CacheType.REDIS.equals(p.getType()))
-                    .forEach(p -> {
-                        p.getCacheNames().forEach(n -> {
-                            map.put(n, configuration(p.getRedis()));
-                        });
-                    });
+                    .forEach(p -> p.getCacheNames().forEach(n -> map.put(n, configuration(p.getRedis()))));
         }
         return customizers.customize(new DynamicRedisCacheManager(connectionFactory, defaultCacheConfig(), map));
     }

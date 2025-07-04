@@ -1,11 +1,13 @@
 package io.github.opensabe.common.cache.config;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.opensabe.common.cache.api.CompositeCacheManager;
 import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.cache.CacheType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.util.StringUtils;
@@ -17,6 +19,7 @@ import java.util.List;
 /**
  * @author heng.ma
  */
+@ConditionalOnClass(Caffeine.class)
 public class CaffeineConfiguration implements InitializingBean {
 
     private final CachesProperties cachesProperties;
