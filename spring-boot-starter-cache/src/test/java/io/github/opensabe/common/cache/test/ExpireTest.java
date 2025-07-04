@@ -2,6 +2,7 @@ package io.github.opensabe.common.cache.test;
 
 import io.github.opensabe.common.cache.api.Expire;
 import io.github.opensabe.common.cache.api.ExpireCacheManager;
+import io.github.opensabe.common.cache.config.RedisConfiguration;
 import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.service.CacheService;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
@@ -75,7 +76,7 @@ public class ExpireTest {
 
         Assertions.assertInstanceOf(RedisCache.class, cache);
 
-        long ttl = redisTemplate.getExpire("sfccmr:test_redis::2:id2");
+        long ttl = redisTemplate.getExpire(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX+"test_redis::2:id2");
         long end = System.currentTimeMillis();
 
         System.out.println(ttl);
