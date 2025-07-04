@@ -28,6 +28,14 @@ public class CacheService {
     public ItemObject getCaffeineExpire(Long id, String field) {
         return storage.getItem(id);
     }
+    @CacheEvict(value = "test_caffeine")
+    public void deleteCaffeine(Long id, String field) {
+        storage.deleteItem(id);
+    }
+    @CacheEvict(value = "test_redis")
+    public void deleteRedis(Long id, String field) {
+        storage.deleteItem(id);
+    }
     @Expire(5)
     @Cacheable(value = "test_redis")
     public ItemObject getRedisExpire(Long id, String field) {
