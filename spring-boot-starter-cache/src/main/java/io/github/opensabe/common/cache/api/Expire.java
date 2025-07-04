@@ -27,15 +27,14 @@ public @interface Expire {
 
     /**
      * 目前只能选择redis或者caffeine
-     * <p>
-     *     如果<code>@Cacheable</code>只指定了cacheName,没有指定cacheManager,
-     *     会先看该cacheName有没有预先被<code>CachesProperties</code>定义，如果有就使用预定义的settings(ttl除外).
-     *     如果这个cacheName没有任何预先定义，那么优先使用<code>没有任何设置的caffeine</code>。
-     * </p>
-     * <p>
-     *     如果想改变这个默认的<code>caffeine</code>行为，比如添加Listener,设置最大容量等，设置loader等，
-     *     可以通过{@link io.github.opensabe.common.cache.caffeine.CaffeineCacheManagerCustomizer}
-     * </p>
+     * <ol>
+     *     <li>如果<code>@Cacheable</code>指定了cacheName但没有指定cacheManager会先看该cacheName有没有预先在yml定义，
+     *     如果有就使用预定义的settings(ttl除外).</li>
+     *     <li>如果这个cacheName没有任何预先定义，那么优先使用没有任何设置的<code>caffeine</code>。</li>
+     *     <li>如果cacheManager指定的不是<code>ExpireCacheManager</code>实例会抛{@link ClassCastException}</li>
+     *     <li>如果想改变这个默认的<code>caffeine</code>行为，比如添加Listener,设置最大容量等，设置loader等，</li>
+     *     <li>可以通过{@link io.github.opensabe.common.cache.caffeine.CaffeineCacheManagerCustomizer}</li>
+     * </ol>
      */
     CacheType cacheType() default CacheType.NONE;
 }
