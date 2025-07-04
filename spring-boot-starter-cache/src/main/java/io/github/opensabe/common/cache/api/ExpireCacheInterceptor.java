@@ -23,6 +23,10 @@ public class ExpireCacheInterceptor extends CacheInterceptor {
         this.cacheResolver = cacheResolver;
     }
 
+    /**
+     * 如果方法上包含 {@link Expire}注解，就使用 <code>ExpireCacheResolver</code>解析缓存实例，
+     * 如果不包含，就走默认程序
+     */
     @Override
     protected Collection<? extends Cache> getCaches(CacheOperationInvocationContext<CacheOperation> context, CacheResolver cacheResolver) {
         if (map.computeIfAbsent(context.getMethod(), m -> AnnotationUtils.getAnnotation(m, Expire.class) == null)) {

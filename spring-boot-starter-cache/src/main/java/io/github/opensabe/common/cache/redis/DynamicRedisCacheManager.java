@@ -56,7 +56,7 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
         /**
          * Override to log the key.
          * @param key will never be {@literal null}.
-         * @return
+         * @return  最终发到redis的key
          */
         @Override
         protected String createCacheKey(Object key) {

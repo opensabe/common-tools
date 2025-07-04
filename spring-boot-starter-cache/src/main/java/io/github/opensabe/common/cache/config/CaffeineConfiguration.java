@@ -17,6 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * 根据<code>CachesProperties</code>,创建cacheManager添加到
+ * <code>CompositedCacheManager</code>中
+ * @see CachesProperties
  * @author heng.ma
  */
 @ConditionalOnClass(Caffeine.class)

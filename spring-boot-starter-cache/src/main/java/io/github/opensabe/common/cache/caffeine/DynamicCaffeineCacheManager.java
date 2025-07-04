@@ -28,6 +28,11 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
 
     private BiFunction<String, Caffeine<Object, Object>, CaffeineCache> adapter = (name, caffeine) -> new CaffeineCache(name, caffeine.build(), isAllowNullValues());
 
+    /**
+     * 如果<code>properties</code>预先定义了cacheName,那么在创建该cache时，
+     * 使用预定义的这些settings
+     * @param properties 预先定义的cacheName
+     */
     public DynamicCaffeineCacheManager(CachesProperties properties) {
         this.map = new ConcurrentHashMap<>();
         this.caffeineSpec = new ConcurrentHashMap<>();

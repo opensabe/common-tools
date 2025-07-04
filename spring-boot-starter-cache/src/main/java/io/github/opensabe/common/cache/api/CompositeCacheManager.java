@@ -1,10 +1,10 @@
 package io.github.opensabe.common.cache.api;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
 import io.github.opensabe.common.cache.redis.DynamicRedisCacheManager;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
@@ -16,9 +16,8 @@ import java.time.Duration;
 import java.util.*;
 
 /**
- * <p>
- *
- * </p>
+ * 实现 <code>Expire#cacheType()</code>逻辑
+ * @see Expire#cacheType()
  * @author heng.ma
  */
 public class CompositeCacheManager extends org.springframework.cache.support.CompositeCacheManager implements ExpireCacheManager {
@@ -38,7 +37,7 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
     static {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         try {
-            caffeineCacheBuilder = lookup.findVarHandle(CaffeineCacheManager.class, "cacheBuilder", CaffeineCache.class);
+            caffeineCacheBuilder = lookup.findVarHandle(CaffeineCacheManager.class, "cacheBuilder", Caffeine.class);
             caffeineCacheBuilder.accessModeType(VarHandle.AccessMode.GET);
         } catch (NoSuchFieldException | IllegalAccessException ignore) {
 
@@ -81,12 +80,10 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
     public Collection<String> settings (String cacheName) {
         Set<String> set = new HashSet<>();
         for (CacheManager cacheManager : cacheManagers) {
-            Collection<String> settings = null;
+            Collection<String> settings;
             {
                 switch (cacheManager) {
-                    case ExpireCacheManager expireCacheManager -> {
-                        settings = expireCacheManager.settings(cacheName);
-                    }
+                    case ExpireCacheManager expireCacheManager -> settings = expireCacheManager.settings(cacheName);
                     case CaffeineCacheManager caffeineCacheManager -> {
                         Object o = caffeineCacheBuilder.get(caffeineCacheManager);
                         settings = List.of(o.toString());
@@ -97,8 +94,8 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
                         String keyPrefix = configuration.getKeyPrefix().compute(cacheName);
                         settings = List.of(keyPrefix, duration.toString());
                     }
-                    default -> Collections.emptyList();
-                };
+                    default -> settings = Collections.emptyList();
+                }
             }
             set.addAll(settings);
         }

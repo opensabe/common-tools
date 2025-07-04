@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 
 /**
+ * 为了避免默认的切面覆盖自定义的配置，
+ * 项目中千万不要加 {@link org.springframework.cache.annotation.EnableCaching} 注解
  * @author heng.ma
  */
 public class CacheAopConfiguration {

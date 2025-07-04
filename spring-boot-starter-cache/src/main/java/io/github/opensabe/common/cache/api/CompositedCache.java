@@ -16,6 +16,7 @@ import java.util.concurrent.Callable;
  *     因此ExpireCacheManager在返回该缓存时，只需要添加当前已经创建的cache即可。
  *     </b>
  * </p>
+ * @see org.springframework.cache.CacheManager#getCache(String)
  * @author heng.ma
  */
 public class CompositedCache implements Cache {

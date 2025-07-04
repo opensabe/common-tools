@@ -4,6 +4,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -18,7 +19,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 有两种情况会使用该类解析缓存实例：
+ * <ul>
+ *     <li>方法上包含{@link Expire} 注解</li>
+ *     <li><code>Cacheable</code>没有指定cacheManager（<code>ExpireCachingConfigurer</code>会指定默认解析器）</li>
+ * </ul>
  * @author heng.ma
+ * @see io.github.opensabe.common.cache.config.ExpireCachingConfigurer
  */
 public class ExpireCacheResolver implements CacheResolver {
 
@@ -32,6 +39,23 @@ public class ExpireCacheResolver implements CacheResolver {
     }
 
 
+    /**
+     * 只做两个操作：
+     * <ul>
+     *     <li>选择<code>CacheManager</code>还是<code>ExpireCacheManager</code></li>
+     *     <li>选择获取code的方法<code>CacheManager.getCache(name)</code>还是<code>ExpireCacheManager.getCache(name, ttl)</code></li>
+     * </ul>
+     * <p>
+     * 1. 如果<code>Cacheable</code>指定cacheManager，就要指定的这个，如果没有就根据 {@link Expire#cacheType()}来选
+     * <br>
+     * 2. 如果包含{@link Expire}注解就调用 <code>ExpireCacheManager.getCache(name, ttl)</code>
+     * <br>
+     * </p>
+     * @param context the context of the particular invocation
+     * @throws ClassCastException 当包含{@link Expire}注解，但<code>CacheManager</code>指定的cacheManager不是{@link ExpireCacheManager}实例时
+     * @see Expire#cacheType()
+     * @see ExpireCacheManager#getCache(String, Duration)
+     */
     @Override
     @NonNull
     public Collection<? extends Cache> resolveCaches( CacheOperationInvocationContext<?> context) {
@@ -66,7 +90,7 @@ public class ExpireCacheResolver implements CacheResolver {
                 if (cacheManager instanceof ExpireCacheManager expireCacheManager) {
                     return getCaches(expireCacheManager, cacheNames, ttl);
                 }else {
-                    throw new RuntimeException("cacheManager must be instanceof ExpireCacheManager while @Expire is present");
+                    throw new ClassCastException("cacheManager must be instanceof ExpireCacheManager while @Expire is present");
                 }
             }
         }

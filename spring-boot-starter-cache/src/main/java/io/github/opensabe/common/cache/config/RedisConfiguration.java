@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 根据<code>CachesProperties</code>,创建cacheManager添加到
+ * <code>CompositedCacheManager</code>中
+ * @see CachesProperties
  * @author heng.ma
  */
 public class RedisConfiguration implements InitializingBean {
