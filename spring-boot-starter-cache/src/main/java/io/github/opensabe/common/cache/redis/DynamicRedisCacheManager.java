@@ -1,5 +1,6 @@
 package io.github.opensabe.common.cache.redis;
 
+import io.github.opensabe.common.cache.api.CompositedCache;
 import io.github.opensabe.common.cache.api.ExpireCacheManager;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cache.Cache;
@@ -68,10 +69,17 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
     }
 
     /**
-     * 屏蔽普通的cache
+     *
+     * 删除时可能不设置ttl,因此获取一个只支持删除的cache，
+     * 因为redis是分布式缓存，只要Key一样，哪个cache都能删除，因此只返回一个cache即可，
+     * 为了兼容其他自定义的cacheManager,因此只获取当前已经存在的cache
      */
     @Override
     public Cache getCache(String name) {
+        Map<Duration, Cache> caches = map.get(name);
+        if (caches != null) {
+            return new CompositedCache(name, caches.values().stream().limit(1).toList());
+        }
         return null;
     }
 

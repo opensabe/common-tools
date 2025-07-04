@@ -12,14 +12,6 @@ public interface ExpireCacheManager extends CacheManager {
     Cache getCache(String name, Duration ttl);
 
     /**
-     * 屏蔽正常获取缓存的方法
-     */
-    @Override
-    default Cache getCache(String name) {
-        return null;
-    }
-
-    /**
      * 获取cache的配置信息
      * @param name  cacheName
      * @return  setting of cacheName

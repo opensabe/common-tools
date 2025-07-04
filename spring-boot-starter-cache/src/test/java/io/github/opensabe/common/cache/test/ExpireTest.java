@@ -94,4 +94,9 @@ public class ExpireTest {
         expire.timeUnit().sleep(expire.value());
         Assertions.assertNull(cache.get("2:id2"));
     }
+
+    @Test
+    void testRemove () {
+        //TODO 待补充
+    }
 }
