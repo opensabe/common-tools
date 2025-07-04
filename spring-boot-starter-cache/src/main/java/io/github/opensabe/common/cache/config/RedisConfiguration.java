@@ -16,6 +16,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,21 @@ public class RedisConfiguration implements InitializingBean {
         this.connectionFactory = connectionFactory;
         this.properties = properties;
         this.compositeCacheManager = compositeCacheManager;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        List<CacheManager> cacheManagers = new ArrayList<>();
+        cacheManagers.add(dynamicRedisCacheManager());
+        if (properties.isEnabled() && properties.getCustom() != null) {
+            List<CacheManager> list = properties.getCustom().stream().filter(p -> CacheType.REDIS.equals(p.getType()))
+                    .map(p -> redisCacheManager(connectionFactory, customizers, p))
+                    .toList();
+            if (!list.isEmpty()) {
+                cacheManagers.addAll(list);
+            }
+        }
+        compositeCacheManager.setCacheManagers(cacheManagers);
     }
 
     private RedisCacheConfiguration defaultCacheConfig() {
@@ -55,18 +71,7 @@ public class RedisConfiguration implements InitializingBean {
         return customizers.customize(new DynamicRedisCacheManager(connectionFactory, defaultCacheConfig(), map));
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        compositeCacheManager.setCacheManagers(List.of(dynamicRedisCacheManager()));
-        if (properties.isEnabled() && properties.getCustom() != null) {
-            List<CacheManager> list = properties.getCustom().stream().filter(p -> CacheType.REDIS.equals(p.getType()))
-                    .map(p -> redisCacheManager(connectionFactory, customizers, p))
-                    .toList();
-            if (!list.isEmpty()) {
-                compositeCacheManager.setCacheManagers(list);
-            }
-        }
-    }
+
 
     private RedisCacheConfiguration configuration (CacheProperties.Redis redis) {
         Duration timeToLive = redis.getTimeToLive();

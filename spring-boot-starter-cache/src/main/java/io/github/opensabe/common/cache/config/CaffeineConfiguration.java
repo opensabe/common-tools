@@ -10,6 +10,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,6 +27,22 @@ public class CaffeineConfiguration implements InitializingBean {
         this.cachesProperties = cachesProperties;
         this.customizers = customizers;
         this.compositeCacheManager = compositeCacheManager;
+    }
+
+
+    @Override
+    public void afterPropertiesSet() {
+        List<CacheManager> cacheManagers = new ArrayList<>();
+        cacheManagers.add(dynamicCaffeineCacheManager());
+        if (cachesProperties.isEnabled() && cachesProperties.getCustom()!= null) {
+            List<CacheManager> list = cachesProperties.getCustom().stream().filter(p -> CacheType.CAFFEINE.equals(p.getType()))
+                    .map(this::caffeineCacheManager)
+                    .toList();
+            if (!list.isEmpty()) {
+                cacheManagers.addAll(list);
+            }
+        }
+        compositeCacheManager.setCacheManagers(cacheManagers);
     }
 
     public DynamicCaffeineCacheManager dynamicCaffeineCacheManager () {
@@ -50,16 +67,4 @@ public class CaffeineConfiguration implements InitializingBean {
         return customizers.customize(cacheManager);
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        compositeCacheManager.setCacheManagers(List.of(dynamicCaffeineCacheManager()));
-        if (cachesProperties.isEnabled() && cachesProperties.getCustom()!= null) {
-            List<CacheManager> list = cachesProperties.getCustom().stream().filter(p -> CacheType.CAFFEINE.equals(p.getType()))
-                    .map(this::caffeineCacheManager)
-                    .toList();
-            if (!list.isEmpty()) {
-                compositeCacheManager.setCacheManagers(list);
-            }
-        }
-    }
 }

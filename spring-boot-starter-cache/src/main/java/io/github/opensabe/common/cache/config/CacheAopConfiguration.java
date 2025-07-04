@@ -16,7 +16,6 @@ import org.springframework.transaction.interceptor.BeanFactoryTransactionAttribu
 public class CacheAopConfiguration {
 
 
-
     @Bean
     @ConditionalOnMissingBean
     public ExpireCacheInterceptor expireCacheInterceptor (ExpireCachingConfigurer configurer,
@@ -37,11 +36,13 @@ public class CacheAopConfiguration {
         BeanFactoryCacheOperationSourceAdvisor advisor = new BeanFactoryCacheOperationSourceAdvisor();
         advisor.setCacheOperationSource(cacheOperationSource);
         advisor.setAdvice(cacheInterceptor);
+        //要保证缓存的优先级高于事务
         transactionAttributeSourceAdvisors.ifUnique(ts -> advisor.setOrder(ts.getOrder()-1));
         return advisor;
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public CacheOperationSource cacheOperationSource() {
         // Accept protected @Cacheable etc methods on CGLIB proxies, as of 6.0.
         return new AnnotationCacheOperationSource(false);
