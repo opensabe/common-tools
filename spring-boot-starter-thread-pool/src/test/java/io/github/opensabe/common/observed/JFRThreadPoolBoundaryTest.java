@@ -206,6 +206,8 @@ public class JFRThreadPoolBoundaryTest {
             });
         });
 
+        executorService.awaitTermination(UNIT * 10, TimeUnit.MILLISECONDS);
+
         //等待事件全部采集到
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
@@ -543,6 +545,7 @@ public class JFRThreadPoolBoundaryTest {
             logger.info("task2 down...");
         });
 
+        executorService.awaitTermination(UNIT * 10, TimeUnit.MILLISECONDS);
         //等待事件全部采集到
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()

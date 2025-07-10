@@ -3,8 +3,6 @@ package io.github.opensabe.paypal.utils;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -25,17 +23,17 @@ public class CacheUtils {
     public static final Cache<String, CacheObject<?>> CAFFEINE = Caffeine.newBuilder()
             .expireAfter(new Expiry<String, CacheObject<?>>() {
                 @Override
-                public long expireAfterCreate(@NonNull String key, @NonNull CacheObject<?> value, long currentTime) {
+                public long expireAfterCreate(String key, CacheObject<?> value, long currentTime) {
                     return value.expire;
                 }
 
                 @Override
-                public long expireAfterUpdate(@NonNull String key, @NonNull CacheObject<?> value, long currentTime, @NonNegative long currentDuration) {
+                public long expireAfterUpdate(String key, CacheObject<?> value, long currentTime, long currentDuration) {
                     return value.expire;
                 }
 
                 @Override
-                public long expireAfterRead(@NonNull String key, @NonNull CacheObject<?> value, long currentTime, @NonNegative long currentDuration) {
+                public long expireAfterRead(String key, CacheObject<?> value, long currentTime, long currentDuration) {
                     return value.expire;
                 }
             })

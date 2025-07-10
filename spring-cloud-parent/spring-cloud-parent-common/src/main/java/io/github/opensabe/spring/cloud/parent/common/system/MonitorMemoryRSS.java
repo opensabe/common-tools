@@ -4,7 +4,6 @@ import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
 import io.github.opensabe.spring.cloud.parent.common.system.jfr.MemoryStatJfrEvent;
 import io.github.opensabe.spring.cloud.parent.common.system.jfr.MemorySwStatJfrEvent;
-import io.github.opensabe.spring.cloud.parent.common.system.jfr.NativeMemoryTrackingJfrEvent;
 import io.github.opensabe.spring.cloud.parent.common.system.jfr.OOMScoreJfrEvent;
 import io.github.opensabe.spring.cloud.parent.common.system.jfr.SmapsJfrEvent;
 import lombok.extern.log4j.Log4j2;
@@ -12,10 +11,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -40,12 +37,6 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
                 smapsProcess(pid);
                 memoryStatProcess();
                 memorySwStatProcess();
-                //native memory tracking 是看 JVM 自己认为自己申请了多少，以及每一部分
-//                Process process = Runtime.getRuntime().exec(new String[]{"jcmd", pid + "", "VM.native_memory"});
-//                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-//                    log.info("MonitorMemoryRSS, native_memory: {}", reader.lines().collect(Collectors.joining("\n")));
-//                }
-                nativeMemoryTrackingProcess(pid);
                 //oom score
                 OOMScoreRecording(pid);
             } catch (IOException ignore) {
@@ -126,37 +117,6 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
             oomScoreJfrEvent.commit();
         } catch (Throwable e) {
             log.error("Process OOM Score Jfr Event log exception ", e);
-        }
-    }
-
-    private void nativeMemoryTrackingProcess(long pid) {
-        try {
-            Process process = Runtime.getRuntime().exec(new String[]{"jcmd", pid + "", "VM.native_memory"});
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                List<String> nmt = reader.lines().collect(Collectors.toList());
-                log.info("MonitorMemoryRSS, native_memory: {}", String.join("\n", nmt));
-                nmt.forEach(line -> {
-                    if (line.contains("Total:")) {
-                        String[] arr = line.trim().substring(line.indexOf(": ") + 1).split(",");
-                        NativeMemoryTrackingJfrEvent nativeMemoryTrackingJfrEvent = new NativeMemoryTrackingJfrEvent("Total",
-                                Long.parseLong(arr[0].substring(arr[0].indexOf('=') + 1, arr[0].lastIndexOf("KB"))),
-                                Long.parseLong(arr[1].substring(arr[1].indexOf('=') + 1, arr[1].lastIndexOf("KB"))));
-                        nativeMemoryTrackingJfrEvent.commit();
-                    }
-                    if (!line.isEmpty() && line.charAt(0) == '-') {
-                        String newLine = line.substring(1).trim();
-                        String name = newLine.substring(0, newLine.indexOf('(')).trim();
-                        String data = newLine.substring(newLine.indexOf('(') + 1, newLine.indexOf(')')).trim();
-                        String[] arr = data.trim().substring(data.indexOf(": ") + 1).split(",");
-                        NativeMemoryTrackingJfrEvent nativeMemoryTrackingJfrEvent = new NativeMemoryTrackingJfrEvent(name,
-                                Long.parseLong(arr[0].substring(arr[0].indexOf('=') + 1, arr[0].lastIndexOf("KB"))),
-                                Long.parseLong(arr[1].substring(arr[1].indexOf('=') + 1, arr[1].lastIndexOf("KB"))));
-                        nativeMemoryTrackingJfrEvent.commit();
-                    }
-                });
-            }
-        } catch (Throwable e) {
-            log.error("Process Native Memory Tracking log exception ", e);
         }
     }
 

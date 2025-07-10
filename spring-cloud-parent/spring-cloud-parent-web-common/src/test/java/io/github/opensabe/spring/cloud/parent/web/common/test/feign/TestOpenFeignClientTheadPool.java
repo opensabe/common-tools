@@ -1,9 +1,9 @@
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
 import feign.Request;
 import feign.RetryableException;
 import feign.httpclient.ApacheHttpClient;
+import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -18,19 +18,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -104,17 +108,17 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
     @Autowired
     private ObservationRegistry observationRegistry;
 
-    @MockBean(name = "service1")
+    @MockitoBean(name = "service1")
     private ServiceInstance serviceInstance1;
-    @MockBean(name = "service2")
+    @MockitoBean(name = "service2")
     private ServiceInstance serviceInstance2;
-    @MockBean(name = "service3")
+    @MockitoBean(name = "service3")
     private ServiceInstance serviceInstance3;
-    @MockBean(name = "service4")
+    @MockitoBean(name = "service4")
     private ServiceInstance serviceInstance4;
-    @MockBean
+    @MockitoBean
     private SimpleDiscoveryClient discoveryClient;
-    @SpyBean
+    @MockitoSpyBean
     private ApacheHttpClient apacheHttpClient;
 
 

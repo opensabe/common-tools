@@ -2,6 +2,7 @@ package io.github.opensabe.common.redisson.observation.rlock;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
+import org.redisson.api.ObjectListener;
 import org.redisson.api.RFencedLock;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
@@ -82,6 +83,26 @@ public class ObservedRFencedLock implements RFencedLock {
     @Override
     public RFuture<Long> tryLockAndGetTokenAsync(long waitTime, long leaseTime, TimeUnit unit) {
         return delegate.tryLockAndGetTokenAsync(waitTime,leaseTime,unit);
+    }
+
+    @Override
+    public int addListener(ObjectListener objectListener) {
+        return delegate.addListener(objectListener);
+    }
+
+    @Override
+    public void removeListener(int i) {
+        delegate.removeListener(i);
+    }
+
+    @Override
+    public RFuture<Integer> addListenerAsync(ObjectListener objectListener) {
+        return delegate.addListenerAsync(objectListener);
+    }
+
+    @Override
+    public RFuture<Void> removeListenerAsync(int i) {
+        return delegate.removeListenerAsync(i);
     }
 
     interface LockAcquire {

@@ -2,23 +2,16 @@ package io.github.opensabe.spring.cloud.parent.gateway.test;
 
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.CommonLogFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.InstanceCircuitBreakerFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.QueryNormalizationFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.RecordServiceNameFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.RetryGatewayFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.TraceIdFilter;
-import io.github.opensabe.spring.cloud.parent.gateway.filter.TracedReactiveLoadBalancerClientFilter;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -26,6 +19,7 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 
@@ -49,12 +43,12 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         webEnvironment = RANDOM_PORT,
         properties = {
                 "eureka.client.enabled=false",
-                "spring.cloud.gateway.httpclient.connect-timeout=500",
-                "spring.cloud.gateway.httpclient.response-timeout=10000",
-                "spring.cloud.gateway.routes[0].id=testService",
-                "spring.cloud.gateway.routes[0].uri=lb://testService",
-                "spring.cloud.gateway.routes[0].predicates[0]=Path=/httpbin/**",
-                "spring.cloud.gateway.routes[0].filters[0]=StripPrefix=1",
+                "spring.cloud.gateway.server.webflux.httpclient.connect-timeout=500",
+                "spring.cloud.gateway.server.webflux.httpclient.response-timeout=10000",
+                "spring.cloud.gateway.server.webflux.routes[0].id=testService",
+                "spring.cloud.gateway.server.webflux.routes[0].uri=lb://testService",
+                "spring.cloud.gateway.server.webflux.routes[0].predicates[0]=Path=/httpbin/**",
+                "spring.cloud.gateway.server.webflux.routes[0].filters[0]=StripPrefix=1",
                 "resilience4j.circuitbreaker.configs.default.failureRateThreshold=50",
                 "resilience4j.circuitbreaker.configs.default.slidingWindowType=COUNT_BASED",
                 "resilience4j.circuitbreaker.configs.default.slidingWindowSize=5",
@@ -70,7 +64,7 @@ public class TestGateway extends CommonMicroServiceTest {
 
     private static final String serviceId = "testService";
 
-    @SpyBean
+    @MockitoSpyBean
     private LoadBalancerClientFactory loadBalancerClientFactory;
     @Autowired
     private CircuitBreakerRegistry circuitBreakerRegistry;
@@ -80,22 +74,12 @@ public class TestGateway extends CommonMicroServiceTest {
     protected int port = 0;
 
     @Autowired
-    private CommonLogFilter commonLogFilter;
-    @Autowired
-    private InstanceCircuitBreakerFilter instanceCircuitBreakerFilter;
-    @Autowired
-    private QueryNormalizationFilter queryNormalizationFilter;
-    @Autowired
-    private RecordServiceNameFilter recordServiceNameFilter;
-    @Autowired
-    private RetryGatewayFilter retryGatewayFilter;
-    @Autowired
-    private TracedReactiveLoadBalancerClientFilter reactiveLoadBalancerClientFilter;
-    @Autowired
-    private TraceIdFilter traceIdFilter;
-    @Autowired
     protected WebTestClient webClient;
 
+    //Junit 默认方法执行生命周期是：
+    //@BeforeAll -> 创建类构造器产生新实例 -> @BeforeEach -> 测试方法 1 -> @AfterEach
+    //-> 创建类构造器产生新实例 -> @BeforeEach -> 测试方法 2 -> @AfterEach
+    //-> @AfterAll
     //不同的测试方法的类对象不是同一个对象，会重新生成，保证互相没有影响
     ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
     //not exists host, will cause connect time out
@@ -116,6 +100,7 @@ public class TestGateway extends CommonMicroServiceTest {
     }
 
     @Test
+    @DisplayName("测试网关中的断路器的正确性")
     public void testLevelOfCircuit() {
         when(loadBalancerClientFactory.getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class)).thenReturn(loadBalancerClientFactoryInstance);
         when(serviceInstanceListSupplier.get()).thenReturn(Flux.just(Lists.newArrayList(zone1Instance1, zone1Instance2)));
@@ -151,6 +136,7 @@ public class TestGateway extends CommonMicroServiceTest {
     }
 
     @Test
+    @DisplayName("测试针对不同 http status code 的重试")
     public void testRetryOnResponceCode() {
         //返回正常实例
         when(loadBalancerClientFactory.getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class)).thenReturn(loadBalancerClientFactoryInstance);
@@ -216,6 +202,7 @@ public class TestGateway extends CommonMicroServiceTest {
     }
 
     @Test
+    @DisplayName("测试在网关在尝试连接后面的服务在 connect timeout 的情况下重试")
     public void testRetryOnConnectionTimeout() {
         //返回一个正常实例，一个 connect time out 实例
         when(loadBalancerClientFactory.getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class)).thenReturn(loadBalancerClientFactoryInstance);
@@ -254,6 +241,7 @@ public class TestGateway extends CommonMicroServiceTest {
     }
 
     @Test
+    @DisplayName("测试在网关在将请求已经发出到后面的服务之后，长时间没收到响应之后的处理")
     public void testRetryOnReadTimeout() {
         //返回正常实例
         when(loadBalancerClientFactory.getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class)).thenReturn(loadBalancerClientFactoryInstance);

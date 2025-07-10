@@ -623,6 +623,21 @@ public class ObservedRedissonClient implements RedissonClient {
     }
 
     @Override
+    public <V> RReliableQueue<V> getReliableQueue(String s) {
+        return delegate.getReliableQueue(s);
+    }
+
+    @Override
+    public <V> RReliableQueue<V> getReliableQueue(String s, Codec codec) {
+        return delegate.getReliableQueue(s, codec);
+    }
+
+    @Override
+    public <V> RReliableQueue<V> getReliableQueue(PlainOptions plainOptions) {
+        return delegate.getReliableQueue(plainOptions);
+    }
+
+    @Override
     public <V> RQueue<V> getQueue(String name, Codec codec) {
         return delegate.getQueue(name, codec);
     }
@@ -880,6 +895,16 @@ public class ObservedRedissonClient implements RedissonClient {
     @Override
     public RScript getScript(OptionalOptions options) {
         return delegate.getScript(options);
+    }
+
+    @Override
+    public RVectorSet getVectorSet(String s) {
+        return delegate.getVectorSet(s);
+    }
+
+    @Override
+    public RVectorSet getVectorSet(CommonOptions commonOptions) {
+        return delegate.getVectorSet(commonOptions);
     }
 
     @Override

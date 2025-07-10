@@ -137,13 +137,13 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
             }
         });
         //断路器打开后，我们的请求会直接失败
-        Assertions.assertThrows(
+        Assertions.assertThrowsExactly(
                 RetryableException.class,
                 () -> testServiceCircuitbreakerClient.anything()
         );
         //等待断路器超时，断路器不会恢复
         TimeUnit.MILLISECONDS.sleep(2000);
-        Assertions.assertThrows(
+        Assertions.assertThrowsExactly(
                 RetryableException.class,
                 () -> testServiceCircuitbreakerClient.anything()
         );
@@ -169,7 +169,7 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
             }
         });
         //断路器打开后，我们的请求会直接失败
-        Assertions.assertThrows(
+        Assertions.assertThrowsExactly(
                 RetryableException.class,
                 () -> testServiceCircuitbreakerClient.testCircuitBreakerStatus200()
         );
@@ -196,7 +196,7 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
             }
         });
         //断路器打开后，我们的请求会直接失败
-        Assertions.assertThrows(
+        Assertions.assertThrowsExactly(
                 RetryableException.class,
                 () -> testServiceCircuitbreakerClient.testCircuitBreakerStatus200()
         );

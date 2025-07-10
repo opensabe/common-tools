@@ -1,11 +1,11 @@
 package io.github.opensabe.common.mybatis.types;
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.util.Base64Utils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 
 /**
  * @author musaxi on 2017/11/2.
@@ -30,7 +30,7 @@ public class AESUtil {
             IvParameterSpec iv = new IvParameterSpec("8070605040302010".getBytes());
             cipher.init(1, skeySpec, iv);
             byte[] encrypted = cipher.doFinal(plain.getBytes());
-            return Base64Utils.encodeToString(encrypted);
+            return Base64.getEncoder().encodeToString(encrypted);
         }
     }
 
@@ -51,7 +51,7 @@ public class AESUtil {
                 Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
                 IvParameterSpec iv = new IvParameterSpec("8070605040302010".getBytes());
                 cipher.init(2, skeySpec, iv);
-                byte[] encrypted1 = Base64Utils.decodeFromString(plain);
+                byte[] encrypted1 = Base64.getDecoder().decode(plain);
 
                 try {
                     byte[] original = cipher.doFinal(encrypted1);

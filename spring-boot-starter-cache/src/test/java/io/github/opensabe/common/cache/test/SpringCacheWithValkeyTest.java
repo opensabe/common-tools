@@ -4,7 +4,6 @@ import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.service.CacheService;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
 import io.github.opensabe.common.testcontainers.integration.SingleValkeyIntegrationTest;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,7 +76,7 @@ public class SpringCacheWithValkeyTest {
 
         Cache cache = cacheManager.getCache(CAFFEINE_CACHE_NAME);
         assertNotNull(cache);
-        Set<@NonNull Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
+        Set<Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
         assertTrue(keys.contains("getData"));
     }
 
@@ -90,7 +89,7 @@ public class SpringCacheWithValkeyTest {
 
         Cache cache = cacheManager.getCache(CAFFEINE_CACHE_NAME);
         assertNotNull(cache);
-        Set<@NonNull Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
+        Set<Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
         assertTrue(keys.contains(String.format("%s:%s", item.getId(), "TEST")));
     }
 

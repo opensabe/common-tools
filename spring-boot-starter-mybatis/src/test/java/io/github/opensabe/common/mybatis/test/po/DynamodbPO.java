@@ -23,8 +23,8 @@ public class DynamodbPO {
     @Getter
     @Setter
     public static class OrderInfo {
-        private String matchId;
+        private String stockId;
 
-        private Integer market;
+        private Integer stake;
     }
 }

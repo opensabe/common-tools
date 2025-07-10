@@ -21,11 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -33,7 +33,11 @@ import reactor.core.publisher.Flux;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +72,7 @@ public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
     private CircuitBreakerRegistry circuitBreakerRegistry;
     @Autowired
     private CircuitBreakerExtractor circuitBreakerExtractor;
-    @SpyBean
+    @MockitoSpyBean
     private LoadBalancerClientFactory loadBalancerClientFactory;
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
@@ -126,7 +130,7 @@ public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
         currentObservation2.scoped(() -> {
             Observation currentObservation = unifiedObservationFactory.getCurrentObservation();
             TraceContext traceContext = UnifiedObservationFactory.getTraceContext(currentObservation);
-            assertThrows(WebClientResponseException.InternalServerError.class, () -> webClient.get()
+            assertThrowsExactly(WebClientResponseException.InternalServerError.class, () -> webClient.get()
                     .uri("/status/500")
                     .retrieve().bodyToMono(String.class).block()
             );

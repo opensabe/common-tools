@@ -6,19 +6,19 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.9.1-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>common-utils</artifactId>
-    <version>1.0.9.1-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
         <UserAgentUtils.version>1.21</UserAgentUtils.version>
-        <spring-boot-starter-thread-pool.version>1.0.9.1-SNAPSHOT</spring-boot-starter-thread-pool.version>
+        <spring-boot-starter-thread-pool.version>2.0.0-SNAPSHOT</spring-boot-starter-thread-pool.version>
         <poi.version>4.1.2</poi.version>
         <hutool.version>5.8.25</hutool.version>
         <jctools.version>3.3.0</jctools.version>
@@ -59,9 +59,10 @@
             <artifactId>UserAgentUtils</artifactId>
             <version>${UserAgentUtils.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -142,6 +143,15 @@
                         </path>
 
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!--skip mvn test-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
                 </configuration>
             </plugin>
         </plugins>

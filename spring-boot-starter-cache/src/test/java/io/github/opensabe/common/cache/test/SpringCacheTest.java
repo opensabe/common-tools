@@ -4,10 +4,6 @@ import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.service.CacheService;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,15 +16,16 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.containers.FixedHostPortGenericContainer;
-import org.testcontainers.containers.GenericContainer;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.opensabe.common.cache.utils.CacheHelper.CACHE_NAME_PREFIX;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith({
         SpringExtension.class, SingleRedisIntegrationTest.class
@@ -82,7 +79,7 @@ public class SpringCacheTest {
 
         Cache cache = cacheManager.getCache(CAFFEINE_CACHE_NAME);
         assertNotNull(cache);
-        Set<@NonNull Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
+        Set<Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
         assertTrue(keys.contains("getData"));
     }
 
@@ -95,7 +92,7 @@ public class SpringCacheTest {
 
         Cache cache = cacheManager.getCache(CAFFEINE_CACHE_NAME);
         assertNotNull(cache);
-        Set<@NonNull Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
+        Set<Object> keys = ((CaffeineCache)cache).getNativeCache().asMap().keySet();
         assertTrue(keys.contains(String.format("%s:%s", item.getId(), "TEST")));
     }
 

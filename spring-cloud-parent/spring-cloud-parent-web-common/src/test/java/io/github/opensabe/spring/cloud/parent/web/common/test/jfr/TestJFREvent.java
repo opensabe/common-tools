@@ -289,7 +289,7 @@ public class TestJFREvent extends CommonMicroServiceTest {
         });
         Observation currentOrCreateEmptyObservation2= unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         currentOrCreateEmptyObservation2.scoped(() -> {
-            Assertions.assertThrows(RetryableException.class, () -> {
+            Assertions.assertThrowsExactly(RetryableException.class, () -> {
                 testService1Client.getStatus500();
             });
         });
@@ -358,7 +358,7 @@ public class TestJFREvent extends CommonMicroServiceTest {
         when(discoveryClient.getInstances(TEST_SERVICE_1)).thenReturn(abnormal);
         Observation currentOrCreateEmptyObservation1 = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         currentOrCreateEmptyObservation1.scoped(() -> {
-            Assertions.assertThrows(RetryableException.class, () -> {
+            Assertions.assertThrowsExactly(RetryableException.class, () -> {
                 testService1Client.postAnything(
                         "param1",
                         "header1",

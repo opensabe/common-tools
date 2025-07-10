@@ -1,10 +1,8 @@
-package io.github.opensabe.spring.framework.parent.common.test;
+package io.github.opensabe.spring.framework.parent.common.test.log4j2;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
-import io.micrometer.observation.Observation;
-import io.micrometer.observation.ObservationRegistry;
+import io.github.opensabe.common.utils.SpringUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter;
@@ -15,38 +13,44 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.micrometer.observation.tck.ObservationRegistryAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-
 @Log4j2
-@SpringBootTest(classes = TracingAndLog4j2Test.Main.class)
+@SpringBootTest(
+        classes = Log4j2SecretTest.Main.class
+)
 @AutoConfigureObservability
-public class TracingAndLog4j2Test {
-    private static final String SECRET = "secretString";
-    private static final String IDENTIFIER = "IDENTIFIER";
+public class Log4j2SecretTest {
+    private static final String SECRET = "secretString-Log4j2SecretTest";
+    private static final String IDENTIFIER = "IDENTIFIER-Log4j2SecretTest";
 
     private static final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     private static final AtomicBoolean hasSecret = new AtomicBoolean(false);
-    @SpringBootApplication(scanBasePackages = "io.github.opensabe.spring.framework.parent.common.test.secret")
+
+    @SpringBootApplication
     public static class Main {
         @Bean
         public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
@@ -55,6 +59,14 @@ public class TracingAndLog4j2Test {
     }
 
     @Test
+    /**
+     * 测试 Log4j2 日志中是否包含敏感信息
+     * 在并发单元测试的时候需要禁止执行，因为用到了 SpringUtil 获取 GlobalSecretManager
+     * 多线程测试时，单元测试之间的 SpringUtil 的 ApplicationContext 可能会被覆盖污染
+     * 因此需要在单元测试中禁用
+     * 在开发的时候单独执行
+     */
+    @Disabled
     public void testLog4j2() throws InterruptedException {
         log.info("{} test {} test {} test {}", IDENTIFIER, SECRET, SECRET + SECRET, SECRET + "xx");
         countDownLatch.await();
@@ -111,57 +123,13 @@ public class TracingAndLog4j2Test {
             String formattedMessage = event.getMessage().getFormattedMessage();
             System.out.println(formattedMessage);
             if (formattedMessage.contains(SECRET)) {
+                System.out.println("Found secret in log: " + formattedMessage);
                 hasSecret.set(true);
             }
             if (formattedMessage.contains(IDENTIFIER)) {
+                System.out.println("Found identifier in log: " + formattedMessage);
                 countDownLatch.countDown();
             }
         }
-    }
-
-    @Autowired
-    private UnifiedObservationFactory unifiedObservationFactory;
-
-    @Test
-    public void testTracing() {
-        var logger = LoggerFactory.getLogger("test");
-        ObservationRegistry observationRegistry = unifiedObservationFactory.getObservationRegistry();
-        var parent = Observation.start("parent", observationRegistry);
-        parent.scoped(() -> {
-            logger.info("parent");
-            //获取当前 Observation
-            Observation current = unifiedObservationFactory.getCurrentObservation();
-            assertTrue(current == parent);
-            //验证日志 Context 中有放入对应的 key
-            String parentLoggerTraceId = MDC.get("traceId");
-            String parentLoggerSpanId = MDC.get("spanId");
-            //验证从当前 Observation 获取的 TracingContext 中的 Span 与日志 Context 中的一致
-            Assertions.assertEquals(parentLoggerTraceId, UnifiedObservationFactory.getTraceContext(current).traceId());
-            Assertions.assertEquals(parentLoggerSpanId, UnifiedObservationFactory.getTraceContext(current).spanId());
-            //判断 Observation
-            assertThat(observationRegistry)
-                    .hasRemainingCurrentObservationSameAs(parent);
-            var child = Observation.start("child", observationRegistry);
-            child.scoped(() -> {
-                logger.info("child");
-                //验证日志 Context 中有放入对应的 key
-                String childLoggerTraceId = MDC.get("traceId");
-                String childLoggerSpanId = MDC.get("spanId");
-                //判断 Observation
-                assertThat(observationRegistry)
-                        .hasRemainingCurrentObservationSameAs(child)
-                        .doesNotHaveRemainingCurrentObservationSameAs(parent);
-                //获取当前 Observation
-                Observation currentChild = unifiedObservationFactory.getCurrentObservation();
-                //验证从当前 Observation 获取的 TracingContext 中的 Span 与日志 Context 中的一致
-                Assertions.assertEquals(childLoggerTraceId, UnifiedObservationFactory.getTraceContext(currentChild).traceId());
-                Assertions.assertEquals(childLoggerSpanId, UnifiedObservationFactory.getTraceContext(currentChild).spanId());
-                Assertions.assertEquals(parentLoggerTraceId, childLoggerTraceId);
-                Assertions.assertNotNull(parentLoggerTraceId);
-                Assertions.assertNotNull(parentLoggerSpanId);
-                Assertions.assertNotNull(childLoggerTraceId);
-                Assertions.assertNotNull(childLoggerSpanId);
-            });
-        });
     }
 }

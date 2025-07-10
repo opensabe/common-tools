@@ -6,12 +6,12 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>common-tools</artifactId>
-        <version>1.0.9.1-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-cloud-parent</artifactId>
-    <version>1.0.9.1-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>pom</packaging>
@@ -27,20 +27,20 @@
     <properties>
         <!-- 指定JDK版本和maven使用的JDK版本 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <java.version>17</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>21</java.version>
 
-        <opensabe.version>1.0.9.1-SNAPSHOT</opensabe.version>
+        <opensabe.version>2.0.0-SNAPSHOT</opensabe.version>
 
-        <disruptor.version>3.4.4</disruptor.version>
-        <guava.version>32.0.0-jre</guava.version>
-        <hikaricp.version>5.0.1</hikaricp.version>
-        <testcontaniers.version>1.19.3</testcontaniers.version>
-        <spotbugs-annotations.version>4.7.3</spotbugs-annotations.version>
-        <springdoc.version>2.6.0</springdoc.version>
-        <common.io.version>2.11.0</common.io.version>
-        <mockito.version>5.2.0</mockito.version>
+        <disruptor.version>4.0.0</disruptor.version>
+        <guava.version>33.4.8-jre</guava.version>
+        <hikaricp.version>6.3.0</hikaricp.version>
+        <testcontaniers.version>1.21.1</testcontaniers.version>
+        <spotbugs-annotations.version>4.9.3</spotbugs-annotations.version>
+        <springdoc.version>2.8.8</springdoc.version>
+        <common.io.version>2.19.0</common.io.version>
+        <mockito.version>5.18.0</mockito.version>
     </properties>
 
     <dependencyManagement>
@@ -323,11 +323,9 @@
             <scope>test</scope>
         </dependency>
 
-        <!--mockito扩展，主要是需要mock final类-->
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-inline -->
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
+            <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
@@ -399,4 +397,27 @@
             <version>${common.io.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

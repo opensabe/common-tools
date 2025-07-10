@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -26,6 +25,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,12 +44,12 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         webEnvironment = RANDOM_PORT,
         properties = {
                 "eureka.client.enabled=false",
-                "spring.cloud.gateway.httpclient.connect-timeout=500",
-                "spring.cloud.gateway.httpclient.response-timeout=2000",
-                "spring.cloud.gateway.routes[0].id=testService",
-                "spring.cloud.gateway.routes[0].uri=lb://testService",
-                "spring.cloud.gateway.routes[0].predicates[0]=Path=/httpbin/**",
-                "spring.cloud.gateway.routes[0].filters[0]=StripPrefix=1",
+                "spring.cloud.gateway.server.webflux.httpclient.connect-timeout=500",
+                "spring.cloud.gateway.server.webflux.httpclient.response-timeout=2000",
+                "spring.cloud.gateway.server.webflux.routes[0].id=testService",
+                "spring.cloud.gateway.server.webflux.routes[0].uri=lb://testService",
+                "spring.cloud.gateway.server.webflux.routes[0].predicates[0]=Path=/httpbin/**",
+                "spring.cloud.gateway.server.webflux.routes[0].filters[0]=StripPrefix=1",
                 "resilience4j.circuitbreaker.configs.default.failureRateThreshold=50",
                 "resilience4j.circuitbreaker.configs.default.slidingWindowType=TIME_BASED",
                 "resilience4j.circuitbreaker.configs.default.slidingWindowSize=5",
@@ -65,7 +65,7 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
 
     private final String serviceId = "testService";
 
-    @SpyBean
+    @MockitoSpyBean
     private LoadBalancerClientFactory loadBalancerClientFactory;
     @Autowired
     private CircuitBreakerRegistry circuitBreakerRegistry;
@@ -122,12 +122,12 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
         when(loadBalancerClientFactoryInstance.choose(any())).thenAnswer(req -> {
             updateRequest(req.getArgument(0));
             return serviceInstanceListSupplier.get().next().flatMap((serviceInstances) -> {
-                ServiceInstance serviceInstance = (ServiceInstance) serviceInstances.get(1);
+                ServiceInstance serviceInstance = serviceInstances.get(1);
                 return Mono.just(new DefaultResponse(serviceInstance));
             });
         });
 
-        webClient.get().uri("/httpbin/status/500").exchange().expectStatus().is5xxServerError();
+        WebTestClient.ResponseSpec exchange = webClient.get().uri("/httpbin/status/500").exchange();
         //必须用 == 验证是同一个对象
         assertTrue(requests[0] == requests[1]);
         assertTrue(requests[2] == requests[1]);

@@ -5,7 +5,6 @@ import io.github.opensabe.common.cache.utils.CacheHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
@@ -70,7 +69,7 @@ public class CacheEndpoint {
         }
 
         String msg;
-        Set<@NonNull Object> keys = new HashSet<>(0);
+        Set<Object> keys = new HashSet<>(0);
         if (cache instanceof RedisCache){
             StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
             Long hashSize = template.opsForHash().size(hideCacheName);

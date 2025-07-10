@@ -49,6 +49,10 @@ public class SpringUtil implements ApplicationContextAware {
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		if (SpringUtil.applicationContext == null) {
 			SpringUtil.applicationContext = applicationContext;
+			log.info("SpringUtil: setApplicationContext successful: {}", applicationContext);
+		} else {
+			AlarmUtil.fatal("SpringUtil: reset ApplicationContext {} -> {}", SpringUtil.applicationContext, applicationContext);
+			SpringUtil.applicationContext = applicationContext;
 		}
 	}
 

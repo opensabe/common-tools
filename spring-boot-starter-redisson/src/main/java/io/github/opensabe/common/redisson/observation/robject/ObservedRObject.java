@@ -1,6 +1,7 @@
 package io.github.opensabe.common.redisson.observation.robject;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import org.redisson.api.ObjectEncoding;
 import org.redisson.api.ObjectListener;
 import org.redisson.api.RFuture;
 import org.redisson.api.RObject;
@@ -20,6 +21,21 @@ public class ObservedRObject implements RObject {
     @Override
     public Long getIdleTime() {
         return rObject.getIdleTime();
+    }
+
+    @Override
+    public int getReferenceCount() {
+        return rObject.getReferenceCount();
+    }
+
+    @Override
+    public int getAccessFrequency() {
+        return rObject.getAccessFrequency();
+    }
+
+    @Override
+    public ObjectEncoding getInternalEncoding() {
+        return rObject.getInternalEncoding();
     }
 
     @Override
@@ -140,6 +156,21 @@ public class ObservedRObject implements RObject {
     @Override
     public RFuture<Long> getIdleTimeAsync() {
         return rObject.getIdleTimeAsync();
+    }
+
+    @Override
+    public RFuture<Integer> getReferenceCountAsync() {
+        return rObject.getReferenceCountAsync();
+    }
+
+    @Override
+    public RFuture<Integer> getAccessFrequencyAsync() {
+        return rObject.getAccessFrequencyAsync();
+    }
+
+    @Override
+    public RFuture<ObjectEncoding> getInternalEncodingAsync() {
+        return rObject.getInternalEncodingAsync();
     }
 
     @Override

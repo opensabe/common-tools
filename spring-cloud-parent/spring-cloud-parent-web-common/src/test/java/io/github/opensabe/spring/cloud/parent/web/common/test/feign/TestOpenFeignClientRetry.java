@@ -1,9 +1,9 @@
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import io.github.opensabe.spring.cloud.parent.web.common.feign.RetryableMethod;
-import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
 import feign.Request;
 import feign.httpclient.ApacheHttpClient;
+import io.github.opensabe.spring.cloud.parent.web.common.feign.RetryableMethod;
+import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.registry.AbstractRegistry;
@@ -14,13 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -29,13 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ActiveProfiles("retrytest")
 @SpringBootTest
@@ -66,7 +65,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     static final String TEST_SERVICE_8 = "RetryTestService8";
     static final String CONTEXT_ID_8 = "RetryTestService8Client8";
 
-    @SpyBean
+    @MockitoSpyBean
     private ApacheHttpClient apacheHttpClient;
 
     @SpringBootApplication
@@ -161,26 +160,26 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     @Autowired
     TestService8Client testService8Client;
 
-    @MockBean(name = "service8_2")
+    @MockitoBean(name = "service8_2")
     ServiceInstance serviceInstance8_2;
-    @MockBean(name = "service8_1")
+    @MockitoBean(name = "service8_1")
     ServiceInstance serviceInstance8_1;
-    @MockBean(name = "service7")
+    @MockitoBean(name = "service7")
     ServiceInstance serviceInstance7;
-    @MockBean(name = "service6")
+    @MockitoBean(name = "service6")
     ServiceInstance serviceInstance6;
-    @MockBean(name = "service5")
+    @MockitoBean(name = "service5")
     ServiceInstance serviceInstance5;
-    @MockBean(name = "service4")
+    @MockitoBean(name = "service4")
     ServiceInstance serviceInstance4;
-    @MockBean(name = "service3")
+    @MockitoBean(name = "service3")
     ServiceInstance serviceInstance3;
-    @MockBean(name = "service2")
+    @MockitoBean(name = "service2")
     ServiceInstance serviceInstance2;
-    @MockBean(name = "service1")
+    @MockitoBean(name = "service1")
     ServiceInstance serviceInstance1;
 
-    @MockBean
+    @MockitoBean
     SimpleDiscoveryClient discoveryClient;
 
     @Autowired

@@ -38,25 +38,28 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
         updateBrokerConfigCommands.add(updateBrokerConfig("listenPort", getMappedPort(BROKER_PORT)));
 
         final String command = String.join(" && ", updateBrokerConfigCommands);
-        ExecResult result = null;
         //直到执行成功
-        while (
-                result == null
-                        || result.getExitCode() != 0
-                        || result.getStderr().contains("failed")
-        ) {
-            result = execInContainer("/bin/sh", "-c", command);
-            System.out.println(result.getStdout());
-            System.out.println(result.getStderr());
-            Thread.sleep(1000);
+        while (true) {
+            ExecResult result = execInContainer("/bin/sh", "-c", command);
+            System.out.println("command executed out: \n" + result.getStdout() + "; \nerr: \n" + result.getStderr());
+            if (result.getExitCode() != 0 || result.getStderr().contains("failed")) {
+                System.out.println("Retrying to update broker config...");
+                Thread.sleep(1000);
+                continue;
+            }
+
+            result = execInContainer(
+                    "/bin/sh",
+                    "-c",
+                    "./mqadmin clusterList -n localhost:" + NAMESRV_PORT
+            );
+            System.out.println("clusterList out: \n" + result.getStdout() + "; \nerr: \n"+ result.getStderr());
+            if (result.getExitCode() == 0 && result.getStdout().contains(getMappedPort(BROKER_PORT).toString())) {
+                break;
+            } else {
+                Thread.sleep(1000);
+            }
         }
-        result = execInContainer(
-                "/bin/sh",
-                "-c",
-                "./mqadmin clusterList -n localhost:" + NAMESRV_PORT
-        );
-        System.out.println(result.getStdout());
-        System.out.println(result.getStderr());
     }
 
     private String updateBrokerConfig(final String key, final Object val) {

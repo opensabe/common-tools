@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
@@ -38,15 +39,27 @@ public class RedisCustomizedConfiguration {
         MultiRedisProperties multiRedisProperties,
         ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
         ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
-        ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider
+        ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider,
+        ObjectProvider<SslBundles> sslBundles,
+        ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers
         ) {
         log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactory initialization starts... {}", multiRedisProperties.toString());
         Map<String, List<LettuceConnectionFactory>> connectionFactoryMap = Maps.newHashMap();
         Map<String, RedisProperties> multi = multiRedisProperties.getMulti();
         multi.forEach((k, v) -> {
             log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactory is initializing... {},{}", k,v.getHost());
-            LettuceConnectionConfiguration lettuceConnectionConfiguration = new LettuceConnectionConfiguration(v, standaloneConfigurationProvider, sentinelConfigurationProvider, clusterConfigurationProvider);
-            LettuceConnectionFactory lettuceConnectionFactory = lettuceConnectionConfiguration.redisConnectionFactory(builderCustomizers, clientResources);
+            LettuceConnectionConfiguration lettuceConnectionConfiguration = new LettuceConnectionConfiguration(
+                    v, standaloneConfigurationProvider,
+                    sentinelConfigurationProvider, clusterConfigurationProvider,
+                    /**
+                     * @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration#redisConnectionDetails(RedisProperties, ObjectProvider)
+                     */
+                    new PropertiesRedisConnectionDetails(v, sslBundles.getIfAvailable()),
+                    sslBundles
+            );
+            LettuceConnectionFactory lettuceConnectionFactory = lettuceConnectionConfiguration.redisConnectionFactory(
+                    builderCustomizers, clientOptionsBuilderCustomizers, clientResources
+            );
             lettuceConnectionFactory.setPipeliningFlushPolicy(LettuceConnection.PipeliningFlushPolicy.flushOnClose());
             lettuceConnectionFactory.setShareNativeConnection(false);
             connectionFactoryMap.put(k, List.of(lettuceConnectionFactory));

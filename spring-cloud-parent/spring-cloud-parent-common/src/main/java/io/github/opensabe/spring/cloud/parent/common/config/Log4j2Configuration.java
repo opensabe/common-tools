@@ -1,7 +1,7 @@
 package io.github.opensabe.spring.cloud.parent.common.config;
 
 import io.micrometer.core.instrument.Gauge;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +23,8 @@ import java.lang.management.ManagementFactory;
 //需要在引入了 prometheus 并且 actuator 暴露了 prometheus 端口的情况下才加载
 @ConditionalOnEnabledMetricsExport("prometheus")
 public class Log4j2Configuration {
+    public final static String GAUGE_NAME_SUFFIX = "_logger_ring_buffer_remaining_capacity";
+
     @Autowired
     private ObjectProvider<PrometheusMeterRegistry> meterRegistry;
     //只初始化一次
@@ -46,7 +48,7 @@ public class Log4j2Configuration {
                     //针对 RootLogger，它的 cfgName 是空字符串，为了显示好看，我们在 prometheus 中将它命名为 root
                     String cfgName = StringUtils.isBlank(k) ? "" : k;
                     String gaugeName = StringUtils.isBlank(k) ? "root" : k;
-                    Gauge.builder(gaugeName + "_logger_ring_buffer_remaining_capacity", () ->
+                    Gauge.builder(gaugeName + GAUGE_NAME_SUFFIX, () ->
                     {
                         try {
                             return (Number) ManagementFactory.getPlatformMBeanServer()

@@ -427,6 +427,11 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     }
 
     @Override
+    public long getLeaseTime(String s) {
+        return delegate.getLeaseTime(s);
+    }
+
+    @Override
     public RFuture<String> acquireAsync() {
         return delegate.acquireAsync();
     }
@@ -524,5 +529,10 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     @Override
     public RFuture<Boolean> updateLeaseTimeAsync(String permitId, long leaseTime, TimeUnit unit) {
         return delegate.updateLeaseTimeAsync(permitId, leaseTime, unit);
+    }
+
+    @Override
+    public RFuture<Long> getLeaseTimeAsync(String s) {
+        return delegate.getLeaseTimeAsync(s);
     }
 }

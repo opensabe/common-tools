@@ -23,7 +23,12 @@ public class DefaultErrorDecoder implements ErrorDecoder {
         log.info("{} response: {}-{}, should retry: {}", methodKey, response.status(), response.reason(), shouldThrowRetryable);
         //对于查询请求以及可以重试的响应码的异常，进行重试，即抛出可重试异常 RetryableException
         if (shouldThrowRetryable) {
-                throw new RetryableException(response.status(), response.reason(), response.request().httpMethod(), null, response.request());
+                throw new RetryableException(
+                        response.status(), response.reason(), response.request().httpMethod(),
+                        //这里我们不使用内置的 retry 而是外部的 resilience4j 的 retry，所以这里留 null
+                        (Long) null,
+                        response.request()
+                );
         } else {
             throw errorStatus(methodKey, response);
         }
