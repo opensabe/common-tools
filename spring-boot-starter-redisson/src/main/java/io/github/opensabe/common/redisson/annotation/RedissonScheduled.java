@@ -5,9 +5,7 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(
-        {ElementType.METHOD}
-)
+@Target(ElementType.METHOD)
 public @interface RedissonScheduled {
     /**
      * 定时任务名称，如果为空则取方法名加类名称
@@ -16,13 +14,11 @@ public @interface RedissonScheduled {
 
     /**
      * 执行间隔
-     * @return
      */
     long fixedDelay() default 1000;
 
     /**
      * 初始延迟
-     * @return
      */
     long initialDelay() default 0;
     

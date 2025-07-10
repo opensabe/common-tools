@@ -1,29 +1,22 @@
 package io.github.opensabe.common.redisson.observation.ratelimiter;
 
-import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
 import io.micrometer.observation.Observation;
-import org.redisson.api.RFuture;
-import org.redisson.api.RRateLimiter;
-import org.redisson.api.RateIntervalUnit;
-import org.redisson.api.RateLimiterConfig;
-import org.redisson.api.RateType;
+import org.redisson.api.*;
 
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLimiter {
-    private final RRateLimiter delegate;
-    private final UnifiedObservationFactory unifiedObservationFactory;
+public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> implements RRateLimiter {
 
     public ObservedRRateLimiter(RRateLimiter delegate, UnifiedObservationFactory unifiedObservationFactory) {
         super(delegate, unifiedObservationFactory);
-        this.delegate = delegate;
-        this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean trySetRate(RateType mode, long rate, long rateInterval, RateIntervalUnit rateIntervalUnit) {
         RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, rateIntervalUnit);
         Observation observation = RRateLimiterObservationDocumentation.SET_RATE.start(
@@ -87,6 +80,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLim
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void setRate(RateType mode, long rate, long rateInterval, RateIntervalUnit rateIntervalUnit) {
         RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, rateIntervalUnit);
         Observation observation = RRateLimiterObservationDocumentation.SET_RATE.start(
@@ -199,6 +193,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLim
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean tryAcquire(long timeout, TimeUnit unit) {
         return acquire0(1, timeout, unit, () -> delegate.tryAcquire(timeout, unit));
     }
@@ -213,6 +208,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLim
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean tryAcquire(long permits, long timeout, TimeUnit unit) {
         return acquire0(permits, timeout, unit, () -> delegate.tryAcquire(permits, timeout, unit));
     }
@@ -233,6 +229,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLim
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public RFuture<Boolean> trySetRateAsync(RateType mode, long rate, long rateInterval, RateIntervalUnit rateIntervalUnit) {
         return delegate.trySetRateAsync(mode, rate, rateInterval, rateIntervalUnit);
     }
@@ -268,6 +265,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLim
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public RFuture<Boolean> tryAcquireAsync(long timeout, TimeUnit unit) {
         return delegate.tryAcquireAsync(timeout, unit);
     }
@@ -278,6 +276,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLim
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public RFuture<Boolean> tryAcquireAsync(long permits, long timeout, TimeUnit unit) {
         return delegate.tryAcquireAsync(permits, timeout, unit);
     }
@@ -288,6 +287,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable implements RRateLim
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public RFuture<Void> setRateAsync(RateType mode, long rate, long rateInterval, RateIntervalUnit rateIntervalUnit) {
         return delegate.setRateAsync(mode, rate, rateInterval, rateIntervalUnit);
     }

@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
 
 import static io.github.opensabe.common.alive.client.config.AliveProperties.ROCKET_CLIENT_NAME;
 
@@ -27,8 +28,8 @@ public class AliveConfiguration {
     @Primary
     @Bean(ROCKET_CLIENT_NAME)
     @ConditionalOnProperty(prefix = "alive.push",name = "rocketmq.name-server")
-    public Client rocketAliveClient () {
-         var producer = new RocketMQAutoConfiguration().
+    public Client rocketAliveClient (Environment environment) {
+         var producer = new RocketMQAutoConfiguration(environment).
                 defaultMQProducer(aliveProperties.getRocketmq());
         producer.setInstanceName("aliveProducer");
         try {

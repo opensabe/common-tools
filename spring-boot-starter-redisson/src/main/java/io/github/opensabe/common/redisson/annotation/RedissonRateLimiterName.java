@@ -6,13 +6,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * @deprecated  use {@link RedissonRateLimiter#name()} instead
+ */
+@Deprecated(forRemoval = true, since = "2.0.0")
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
 public @interface RedissonRateLimiterName {
-    String DEFAULT_PREFIX = "redisson:rateLimiter:";
 
-    String prefix() default DEFAULT_PREFIX;
+
+    String prefix() default RedissonRateLimiter.DEFAULT_PREFIX;
 
     String expression() default "";
 }

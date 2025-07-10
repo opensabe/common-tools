@@ -11,21 +11,15 @@
     </parent>
 
     <artifactId>common-utils</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
         <UserAgentUtils.version>1.21</UserAgentUtils.version>
-        <spring-boot-starter-thread-pool.version>2.0.0-SNAPSHOT</spring-boot-starter-thread-pool.version>
-        <poi.version>4.1.2</poi.version>
-        <hutool.version>5.8.25</hutool.version>
-        <jctools.version>3.3.0</jctools.version>
-        <bytebuddy.version>1.14.17</bytebuddy.version>
-        <org.mapstruct.version>1.6.0.Beta2</org.mapstruct.version>
-        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
-        <opensabe.mapstruct.version>0.0.9.5</opensabe.mapstruct.version>
+        <poi.version>5.4.0</poi.version>
+        <hutool.version>5.8.36</hutool.version>
+        <jctools.version>4.0.5</jctools.version>
     </properties>
 
     <dependencies>
@@ -50,10 +44,9 @@
         <dependency>
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>spring-boot-starter-thread-pool</artifactId>
-            <version>${spring-boot-starter-thread-pool.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/eu.bitwalker/UserAgentUtils -->
+        <!-- 解析userAgent来区分ios -->
         <dependency>
             <groupId>eu.bitwalker</groupId>
             <artifactId>UserAgentUtils</artifactId>
@@ -87,6 +80,8 @@
             <artifactId>hutool-all</artifactId>
             <version>${hutool.version}</version>
         </dependency>
+
+        <!--  buffered queue内存队列用      -->
         <dependency>
             <groupId>org.jctools</groupId>
             <artifactId>jctools-core</artifactId>
@@ -96,64 +91,7 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>${bytebuddy.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>io.github.opensabe-tech</groupId>
-            <artifactId>mapstruct-core</artifactId>
-            <version>${opensabe.mapstruct.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
-            <version>2.2</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>${lombok-mapstruct-binding.version}</version>
-                        </path>
-                        <path>
-                            <groupId>io.github.opensabe-tech</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${opensabe.mapstruct.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${org.mapstruct.version}</version>
-                        </path>
-
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <!--skip mvn test-->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skipTests>true</skipTests>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

@@ -1,10 +1,10 @@
 package io.github.opensabe.common.redisson.test;
 
-import io.github.opensabe.common.redisson.annotation.FairLock;
-import io.github.opensabe.common.redisson.annotation.Lock;
-import io.github.opensabe.common.redisson.annotation.SLock;
-import io.github.opensabe.common.redisson.annotation.SpinLock;
-import io.github.opensabe.common.redisson.config.RedissonAopConfiguration;
+import io.github.opensabe.common.redisson.annotation.slock.FairLock;
+import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
+import io.github.opensabe.common.redisson.annotation.slock.SLock;
+import io.github.opensabe.common.redisson.annotation.slock.SpinLock;
+import io.github.opensabe.common.redisson.config.RedissonAopOrderProperties;
 import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
 import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
@@ -31,7 +31,7 @@ public class SLockTest extends BaseRedissonTest {
     private static final int ADD_COUNT = 10000;
 
     @Autowired
-    private RedissonAopConfiguration redissonAopConfiguration;
+    private RedissonAopOrderProperties redissonAopConfiguration;
 
     public static class Config {
         @Autowired
@@ -55,7 +55,7 @@ public class SLockTest extends BaseRedissonTest {
     }
 
     public interface TestRedissonLockInterface1 {
-        @Lock(prefix = "p1", name = "#name")
+        @RedissonLock(prefix = "p1", name = "#name")
         void testBlockLockWithName(String name) throws InterruptedException;
     }
 
@@ -102,17 +102,17 @@ public class SLockTest extends BaseRedissonTest {
             super(redissonClient);
         }
 
-        @Lock(prefix = "p1", name = "testNoLock")
+        @RedissonLock(prefix = "p1", name = "testNoLock")
         public void testNoLock() throws InterruptedException {
             add();
         }
 
-        @Lock(prefix = "p1", name = "testBlockLockWithNoName")
+        @RedissonLock(prefix = "p1", name = "testBlockLockWithNoName")
         public void testBlockLockWithNoName() throws InterruptedException {
             add();
         }
 
-        @Lock(prefix = "p1", name = "#name")
+        @RedissonLock(prefix = "p1", name = "#name")
         public void testBlockLock(String name) throws InterruptedException {
             add();
         }
@@ -127,26 +127,26 @@ public class SLockTest extends BaseRedissonTest {
             add();
         }
 
-        @Lock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 100000, timeUnit = TimeUnit.MILLISECONDS)
+        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 100000, timeUnit = TimeUnit.MILLISECONDS)
         public void testTryLock(String name) throws InterruptedException {
             add();
         }
 
-        @Lock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK_NOWAIT)
+        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK_NOWAIT)
         public void testTryLockNoWait( String name) throws InterruptedException {
             add();
             //3s 肯定够100个线程都 try lock 失败
             TimeUnit.SECONDS.sleep(3);
         }
 
-        @Lock(prefix = "test:", name = "#student.id == null? #student.name:#student.id")
+        @RedissonLock(prefix = "test:", name = "#student.id == null? #student.name:#student.id")
         public void testRedissonLockNameProperty(Student student, String params) throws InterruptedException {
             String lockName = student.getId() == null ? student.getName() : student.getId();
             RLock lock = redissonClient.getLock("test:" + lockName);
             Assertions.assertTrue(lock.isHeldByCurrentThread());
         }
 
-        @Lock(prefix = "p1", name = "#name", leaseTime = 1000L)
+        @RedissonLock(prefix = "p1", name = "#name", leaseTime = 1000L)
         public void testLockTime(String name) throws InterruptedException {
             RLock lock = redissonClient.getLock("p1"+name);
             //验证获取了锁
@@ -157,7 +157,7 @@ public class SLockTest extends BaseRedissonTest {
         }
 
         //waitTime只对于 trylock 有效
-        @Lock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 1000L)
+        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 1000L)
         public void testWaitTime(String name) throws InterruptedException {
             RLock lock = redissonClient.getLock("p1"+name);
             //验证获取了锁
@@ -165,10 +165,10 @@ public class SLockTest extends BaseRedissonTest {
             TimeUnit.SECONDS.sleep(10);
         }
 
-        @Lock(prefix = "p1", name = "#errorExpression")
+        @RedissonLock(prefix = "p1", name = "#errorExpression")
         public void testErrorExpression (String name) {
         }
-        @Lock(prefix = "p1", name = "suppressedExpression")
+        @RedissonLock(prefix = "p1", name = "suppressedExpression")
         public void testSuppressedExpression (String name) throws InterruptedException {
             RLock lock = redissonClient.getLock("p1suppressedExpression");
             Assertions.assertTrue(lock.isHeldByCurrentThread());

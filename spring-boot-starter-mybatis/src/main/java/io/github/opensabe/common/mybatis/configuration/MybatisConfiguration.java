@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import tk.mybatis.mapper.autoconfigure.MybatisProperties;
 
 import java.util.List;
+import java.util.Objects;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
@@ -20,19 +21,34 @@ public class MybatisConfiguration {
 
 	@PostConstruct
 	public void afterProperties() {
-		org.apache.ibatis.session.Configuration configuration = mybatisProperties.getConfiguration();
+		MybatisProperties.CoreConfiguration configuration = mybatisProperties.getConfiguration();
 		if (configuration != null) {
 			sqlSessionFactories.forEach(s -> {
 				log.info("set configuration of sqlSessionFactory {} -> {}", s.getClass(), configuration.getClass());
 				org.apache.ibatis.session.Configuration o = s.getConfiguration();
-				o.setMapUnderscoreToCamelCase(configuration.isMapUnderscoreToCamelCase());
-				o.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
+
+				if (Objects.nonNull(configuration.getMapUnderscoreToCamelCase())) {
+					o.setMapUnderscoreToCamelCase(configuration.getMapUnderscoreToCamelCase());
+				}
+
+				if (Objects.nonNull(configuration.getAggressiveLazyLoading())) {
+					o.setAggressiveLazyLoading(configuration.getAggressiveLazyLoading());
+				}
+
 				o.setAutoMappingBehavior(configuration.getAutoMappingBehavior());
 				o.setAutoMappingUnknownColumnBehavior(configuration.getAutoMappingUnknownColumnBehavior());
-				o.setCacheEnabled(configuration.isCacheEnabled());
-				o.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
-				o.setCallSettersOnNulls(configuration.isCallSettersOnNulls());
-				o.setLazyLoadingEnabled(configuration.isLazyLoadingEnabled());
+
+				if (Objects.nonNull(configuration.getCacheEnabled())) {
+					o.setCacheEnabled(configuration.getCacheEnabled());
+				}
+
+				if (Objects.nonNull(configuration.getCallSettersOnNulls())) {
+					o.setCallSettersOnNulls(configuration.getCallSettersOnNulls());
+				}
+
+				if (Objects.nonNull(configuration.getLazyLoadingEnabled())) {
+					o.setLazyLoadingEnabled(configuration.getLazyLoadingEnabled());
+				}
 			});
 		}
 	}

@@ -1,6 +1,5 @@
 package io.github.opensabe.spring.cloud.parent.gateway.common;
 
-import com.google.common.base.Charsets;
 import io.github.opensabe.base.vo.BaseRsp;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -12,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.AntPathMatcher;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 
 public class CommonFilterUtil {
     /**
@@ -47,7 +48,7 @@ public class CommonFilterUtil {
         //例如这里使用请求的 body 作为输入的 dataBuffer，读取完了必须释放
         // 因为参与后续 Filter 的已经不是原始的 dataBuffer，无法释放了
         DataBufferUtils.release(dataBuffer);
-        return new String(content, Charsets.UTF_8);
+        return new String(content, StandardCharsets.UTF_8);
     }
 
     public static Mono<Void> errorResponse(ServerHttpResponse response, HttpStatus httpStatus, BaseRsp baseRsp, DataBufferFactory dataBufferFactory) {

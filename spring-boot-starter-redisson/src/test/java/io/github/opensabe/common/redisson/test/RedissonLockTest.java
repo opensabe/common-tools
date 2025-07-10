@@ -2,7 +2,7 @@ package io.github.opensabe.common.redisson.test;
 
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.RedissonLockName;
-import io.github.opensabe.common.redisson.config.RedissonAopConfiguration;
+import io.github.opensabe.common.redisson.config.RedissonAopOrderProperties;
 import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
 import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import lombok.AllArgsConstructor;
@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +28,7 @@ public class RedissonLockTest extends BaseRedissonTest {
     private static final int ADD_COUNT = 10000;
 
     @Autowired
-    private RedissonAopConfiguration redissonAopConfiguration;
+    private RedissonAopOrderProperties redissonAopConfiguration;
 
     public static class Config {
         @Autowired
@@ -144,10 +142,16 @@ public class RedissonLockTest extends BaseRedissonTest {
             RLock lock = redissonClient.getLock("test:" + lockName);
             Assertions.assertTrue(lock.isHeldByCurrentThread());
         }
+        @RedissonLock(prefix = "test:", name = "#student.id==null?#student.name:#student.id")
+        public void testRedissonLockNameProperty1(Student student, String params) throws InterruptedException {
+            String lockName = student.getId() == null ? student.getName() : student.getId();
+            RLock lock = redissonClient.getLock("test:" + lockName);
+            Assertions.assertTrue(lock.isHeldByCurrentThread());
+        }
 
         @RedissonLock(leaseTime = 1000L)
         public void testLockTime(@RedissonLockName String name) throws InterruptedException {
-            RLock lock = redissonClient.getLock(RedissonLockName.DEFAULT_PREFIX + name);
+            RLock lock = redissonClient.getLock(io.github.opensabe.common.redisson.annotation.slock.RedissonLock.DEFAULT_PREFIX + name);
             //验证获取了锁
             Assertions.assertTrue(lock.isHeldByCurrentThread());
             TimeUnit.SECONDS.sleep(2);
@@ -158,7 +162,7 @@ public class RedissonLockTest extends BaseRedissonTest {
         //waitTime只对于 trylock 有效
         @RedissonLock(lockType = RedissonLock.TRY_LOCK, waitTime = 1000L)
         public void testWaitTime(@RedissonLockName String name) throws InterruptedException {
-            RLock lock = redissonClient.getLock(RedissonLockName.DEFAULT_PREFIX + name);
+            RLock lock = redissonClient.getLock(io.github.opensabe.common.redisson.annotation.slock.RedissonLock.DEFAULT_PREFIX + name);
             //验证获取了锁
             Assertions.assertTrue(lock.isHeldByCurrentThread());
             TimeUnit.SECONDS.sleep(10);
@@ -425,6 +429,12 @@ public class RedissonLockTest extends BaseRedissonTest {
         testRedissonLockClass.reset();
         testRedissonLockClass.testRedissonLockNameProperty(Student.builder().name("zhx").build(), "zhx");
         testRedissonLockClass.testRedissonLockNameProperty(Student.builder().id("111111").build(), "zhx");
+    }
+    @Test
+    public void testBlockProperty1() throws InterruptedException {
+        testRedissonLockClass.reset();
+        testRedissonLockClass.testRedissonLockNameProperty1(Student.builder().name("zhx").build(), "zhx");
+        testRedissonLockClass.testRedissonLockNameProperty1(Student.builder().id("111111").build(), "zhx");
     }
 
     @Test

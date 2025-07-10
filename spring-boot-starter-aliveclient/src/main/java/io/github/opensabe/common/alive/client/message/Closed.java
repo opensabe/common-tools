@@ -1,17 +1,13 @@
 package io.github.opensabe.common.alive.client.message;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Closed extends MqMessage{
     private String deviceId;
 
-    public Closed() {
-    }
-
-    public Closed(String deviceId) {
-        this.deviceId = deviceId;
-    }
 }

@@ -8,6 +8,7 @@ import io.github.opensabe.common.utils.json.JsonUtil;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.servlet.spec.HttpServletResponseImpl;
 import io.undertow.util.HeaderMap;
+import jakarta.servlet.ServletResponse;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.HttpString;
 import jakarta.servlet.ServletResponse;
@@ -18,6 +19,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -47,16 +49,24 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         String path = request.getURI().getPath();
         Boolean ifPresent = cache.getIfPresent(path);
-        if (ifPresent != null && !ifPresent) {
+        if (Boolean.FALSE.equals(ifPresent)) {
             log.debug("Path: {} cached skip current beforeBodyWrite", path);
             return body;
         } else {
             log.debug("Path: {} is not cached", path);
         }
-        if (response instanceof ServletServerHttpResponse servletServerHttpResponse) {
+        //2025年03月18日11:02:50,兼容 response Delegate
+        ServerHttpResponse r = response;
+        while (r instanceof DelegatingServerHttpResponse delegate) {
+            r = delegate.getDelegate();
+        }
+        if (r instanceof ServletServerHttpResponse servletServerHttpResponse) {
             HttpServletResponse servletResponse = servletServerHttpResponse.getServletResponse();
-            if (servletResponse instanceof HttpServletResponseWrapper httpServletResponseWrapper) {
-                ServletResponse wrapperResponse = httpServletResponseWrapper.getResponse();
+            ServletResponse resp = servletResponse;
+            while (resp instanceof ServletResponseWrapper wrapper) {
+                resp = wrapper.getResponse();
+            }
+            if (rsp instanceof HttpServletResponseImpl wrapperResponse) {
                 if (wrapperResponse instanceof HttpServletResponseImpl httpServletResponseImpl) {
                     HttpServerExchange httpServerExchange = httpServletResponseImpl.getExchange();
                     HeaderMap responseHeaders = httpServerExchange.getResponseHeaders();
@@ -94,7 +104,8 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
         }
         String s = JsonUtil.toJSONString(body);
         FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(s);
-        cache.put(path, filterSecretStringResult.isFoundSensitiveString());
+        //为了防止body中的值将Header覆盖掉
+        cache.get(path, k -> filterSecretStringResult.isFoundSensitiveString());
         if (filterSecretStringResult.isFoundSensitiveString()) {
             return JsonUtil.parseObject(filterSecretStringResult.getFilteredContent(), body.getClass());
         }

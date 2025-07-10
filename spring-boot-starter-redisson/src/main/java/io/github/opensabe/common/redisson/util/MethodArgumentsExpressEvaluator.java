@@ -1,5 +1,6 @@
 package io.github.opensabe.common.redisson.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.expression.AnnotatedElementKey;
@@ -8,6 +9,7 @@ import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.spel.SpelParseException;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -36,8 +38,12 @@ public class MethodArgumentsExpressEvaluator extends CachedExpressionEvaluator {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
         try {
             return getExpression(method, targetClass, expression).getValue(createContext(method, target, targetClass, arguments), String.class);
-        }catch (EvaluationException e) {
-            return expression;
+        }catch (SpelParseException | EvaluationException e) {
+            if (!StringUtils.contains(expression, "#")) {
+                return expression;
+            }else {
+                throw e;
+            }
         }
     }
 

@@ -1,13 +1,12 @@
 package io.github.opensabe.common.redisson.test.common;
 
-import io.github.opensabe.common.redisson.annotation.Lock;
-import io.github.opensabe.common.redisson.annotation.SLock;
+import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
+import io.github.opensabe.common.redisson.annotation.slock.SLock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,11 +15,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class AnnotationMergeTest {
 
-    @Lock(name = "myname1")
+    @RedissonLock(name = "myname1")
     public static class App {
 
 
-        @Lock(name = "parentMethod")
+        @RedissonLock(name = "parentMethod")
         public void doSomething () {
 
         }
@@ -28,7 +27,7 @@ public class AnnotationMergeTest {
 
     public static class Child extends App {
 
-        @Lock(name = "childMethod")
+        @RedissonLock(name = "childMethod")
         @Override
         public void doSomething () {
 

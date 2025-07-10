@@ -7,6 +7,7 @@ import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.spring.boot.starter.rocketmq.*;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -32,8 +33,8 @@ public class MQProducerConfiguration {
                     String srcName,
             UnifiedObservationFactory unifiedObservationFactory,
             RocketMQTemplate rocketMQTemplate,
-            MessagePersistent persistent,
-            UniqueID uniqueID,
+            @Autowired(required = false) MessagePersistent persistent,
+            @Autowired(required = false) UniqueID uniqueID,
             GlobalSecretManager globalSecretManager) {
         MQProducerImpl mqProducer = new MQProducerImpl(srcName, unifiedObservationFactory, rocketMQTemplate, persistent, uniqueID, globalSecretManager);
         return mqProducer;
@@ -43,5 +44,11 @@ public class MQProducerConfiguration {
     @ConditionalOnMissingBean
     public MQLocalTransactionListener getMQLocalTransactionListener(List<UniqueRocketMQLocalTransactionListener> uniqueRocketMQLocalTransactionListeners) {
         return new MQLocalTransactionListener(uniqueRocketMQLocalTransactionListeners);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RocketMQListenerContainerBeanPostProcessor rocketMQListenerContainerBeanPostProcessor () {
+        return new RocketMQListenerContainerBeanPostProcessor();
     }
 }

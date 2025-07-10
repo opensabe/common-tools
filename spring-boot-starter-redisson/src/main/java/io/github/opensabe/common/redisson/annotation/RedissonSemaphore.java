@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
         {ElementType.METHOD, ElementType.TYPE}
 )
 public @interface RedissonSemaphore {
+    String DEFAULT_PREFIX = "redisson:semaphore:";
     /**
      * 注意，使用的不是 Redisson 的 Semaphore，而是更严谨的 PermitExpirableSemaphore
      * 可以通过 RedissonSemaphoreName 指定限流器名称
@@ -22,6 +23,8 @@ public @interface RedissonSemaphore {
      * 如果 RedissonSemaphoreName 为空，这个 name 也是默认的 空字符串，则限流器不生效
      */
     String name() default "";
+
+    String prefix() default RedissonSemaphore.DEFAULT_PREFIX;
 
     /**
      * 限流器总量
@@ -42,8 +45,7 @@ public @interface RedissonSemaphore {
         /**
          * 获取不到就抛异常
          */
-        TRY,
-        ;
+        TRY
     }
 
     /**

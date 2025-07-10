@@ -1,13 +1,13 @@
 package io.github.opensabe.common.mybatis.test.po;
 
 import io.github.opensabe.common.mybatis.types.JSONTypeHandler;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tk.mybatis.mapper.annotation.ColumnType;
 
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.*;
 
 @Getter

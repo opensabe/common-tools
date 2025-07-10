@@ -1,10 +1,7 @@
 package io.github.opensabe.common.redisson.test;
 
 import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
@@ -18,15 +15,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.containers.GenericContainer;
-import reactor.core.Disposable;
-import reactor.core.publisher.Mono;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Testcontainers
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = {
         //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
@@ -50,12 +44,12 @@ public class MultiRedisTest {
     public static class App {
     }
 
-    @ClassRule
+    @Container
     static GenericContainer redis1 = new FixedHostPortGenericContainer("redis")
             .withFixedExposedPort(6378,6379)
             .withExposedPorts(6379)
             .withCommand("redis-server");
-    @ClassRule
+    @Container
     static GenericContainer redis2 = new FixedHostPortGenericContainer("redis")
             .withFixedExposedPort(6380,6379)
             .withExposedPorts(6379)
@@ -69,17 +63,6 @@ public class MultiRedisTest {
     @Autowired
     private MultiRedisLettuceConnectionFactory multiRedisLettuceConnectionFactory;
 
-    @BeforeAll
-    static void setup () {
-        redis1.start();
-        redis2.start();
-    }
-
-    @AfterAll
-    static void destroy () {
-        redis1.stop();
-        redis2.stop();
-    }
 
     private void testMulti(String suffix) {
         redisTemplate.opsForValue().set("testDefault" + suffix, "testDefault");

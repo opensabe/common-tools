@@ -7,13 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.ReactiveRedisClusterConnection;
-import org.springframework.data.redis.connection.ReactiveRedisConnection;
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisClusterConnection;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisSentinelConnection;
+import org.springframework.data.redis.connection.*;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
 import java.util.Collection;
@@ -43,12 +37,12 @@ public class MultiRedisLettuceConnectionFactory
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         connectionFactoryMap.values().stream().flatMap(Collection::stream).forEach(LettuceConnectionFactory::destroy);
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         connectionFactoryMap.values().stream().flatMap(Collection::stream).forEach(LettuceConnectionFactory::afterPropertiesSet);
     }
 

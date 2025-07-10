@@ -1,14 +1,17 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
+import io.github.opensabe.common.entity.base.vo.BaseMessage;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
-import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQTest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
@@ -17,7 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -112,18 +118,23 @@ public class RocketMQTest extends BaseRocketMQTest {
             consumerGroup = "${spring.application.name}_rocketmq-test-topic",
             topic = "rocketmq-test-topic"
     )
-    public static class TestConsumer extends AbstractMQConsumer {
+    public static class TestConsumer extends AbstractConsumer<POJO> {
+
 
         @Override
-        protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
-            POJO pojo = JsonUtil.parseObject(Objects.requireNonNull(baseMQMessage.getData()), POJO.class);
-            if (pojo.text.contains(testSendLatchString)) {
-                hasInfo = pojo.text.contains("今天天气不错");
-                testSendLatch.countDown();
-            }
+        protected void onBaseMessage(BaseMessage<POJO> baseMessage) {
+            try {
+                POJO pojo = baseMessage.getData();
+                if (pojo.text.contains(testSendLatchString)) {
+                    hasInfo = pojo.text.contains("今天天气不错");
+                    testSendLatch.countDown();
+                }
 
-            if (SENT_MESSAGES.contains(pojo.getText()) && latch != null) {
-                latch.countDown();
+                if (SENT_MESSAGES.contains(pojo.getText()) && latch != null) {
+                    latch.countDown();
+                }
+            } catch (JSONException ex) {
+                System.out.println("failed parse object: " + ex.getMessage() + ": " + baseMessage.getData());
             }
         }
     }

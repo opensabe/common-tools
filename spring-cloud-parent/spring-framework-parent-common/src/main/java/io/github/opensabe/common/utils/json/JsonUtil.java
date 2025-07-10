@@ -44,6 +44,11 @@ public final class JsonUtil {
         JsonUtil.objectMapper = objectMapper;
     }
 
+
+    public static ObjectMapper mapper () {
+        return objectMapper;
+    }
+
     @SneakyThrows
     public static String toJSONString (Object value) {
         return objectMapper.writeValueAsString(value);

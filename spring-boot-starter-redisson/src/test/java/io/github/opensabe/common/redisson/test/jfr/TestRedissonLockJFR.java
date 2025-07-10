@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,11 +22,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
+@JfrEventTest
 @Import(TestRedissonLockJFR.Config.class)
 @Execution(ExecutionMode.SAME_THREAD)
 //JFR 测试最好在本地做
@@ -94,7 +93,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
                     try {
                         testBean.testBlockLock(String.valueOf(finalI));
                     } catch (Exception e) {
-                        //ignore
+                        e.printStackTrace();
                     }
                 });
             });
@@ -103,8 +102,8 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
         for (int i = 0; i < threads.length; i++) {
             try {
                 threads[i].join();
-            } catch (Exception e) {
-                //ignore
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         jfrEvents.awaitEvents();

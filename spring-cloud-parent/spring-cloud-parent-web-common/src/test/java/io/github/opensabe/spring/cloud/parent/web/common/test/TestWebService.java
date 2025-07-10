@@ -221,6 +221,7 @@ public class TestWebService {
         @GetMapping("/test-secret-header-key")
         public Map testSecretHeaderKey(HttpServletResponse httpServletResponse) {
             httpServletResponse.addHeader(SECRET, "test");
+            httpServletResponse.addHeader("holder", "holded");
             return Map.of();
         }
 
@@ -466,6 +467,7 @@ public class TestWebService {
         assertEquals(forEntity.getStatusCode(), HttpStatus.OK);
         assertFalse(StringUtils.containsIgnoreCase(forEntity.getBody(), SECRET));
         assertFalse(StringUtils.containsIgnoreCase(forEntity.getHeaders().toString(), SECRET));
+        assertTrue(StringUtils.containsIgnoreCase(forEntity.getHeaders().toString(), "holder"));
 
         forEntity = testRestTemplate.getForEntity("/test-secret-header-value", String.class);
         assertEquals(forEntity.getStatusCode(), HttpStatus.OK);

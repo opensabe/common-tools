@@ -1,5 +1,9 @@
 package io.github.opensabe.common.redisson.annotation;
 
+import io.github.opensabe.common.redisson.annotation.slock.FairLock;
+import io.github.opensabe.common.redisson.annotation.slock.FencedLock;
+import io.github.opensabe.common.redisson.annotation.slock.ReadWriteLock;
+import io.github.opensabe.common.redisson.annotation.slock.SpinLock;
 import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import org.redisson.api.LockOptions;
 import org.redisson.api.RLock;
@@ -8,21 +12,27 @@ import org.redisson.api.RedissonClient;
 
 import java.lang.annotation.*;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
  * 在方法或者类上添加该注释后，自动添加基于 Redisson 的分布式锁
+ * @deprecated since 2.0.0 use {@link io.github.opensabe.common.redisson.annotation.slock} instead
+ * @see io.github.opensabe.common.redisson.annotation.slock.RedissonLock
+ * @see ReadWriteLock
+ * @see FairLock
+ * @see SpinLock
+ * @see FencedLock
  */
+@Deprecated(since = "2.0.0")
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(
-        {ElementType.METHOD, ElementType.TYPE}
-)
+@Target({ElementType.METHOD, ElementType.TYPE})
 public @interface RedissonLock {
+
     /**
      * 一般通过 RedissonLockName 指定锁名称
      * 但如果锁和方法参数无关，则通过这个 name 指定
@@ -30,6 +40,8 @@ public @interface RedissonLock {
      */
     String name() default "";
 
+
+    String prefix() default io.github.opensabe.common.redisson.annotation.slock.RedissonLock.DEFAULT_PREFIX;
     /**
      * 锁特性
      */
@@ -56,7 +68,7 @@ public @interface RedissonLock {
     /**
      * 锁等待时间
      */
-    long waitTime() default 1000l;
+    long waitTime() default 1000;
 
     /**
      * 锁最长持有时间
@@ -222,7 +234,7 @@ public @interface RedissonLock {
             this.value = value;
         }
 
-        private final static Map<Integer, LockType> map = new HashMap<>(3);
+        private final static Map<Integer, LockType> map = new ConcurrentHashMap<>(3);
 
         public abstract boolean lock (RedissonLock content, RLock lock);
 

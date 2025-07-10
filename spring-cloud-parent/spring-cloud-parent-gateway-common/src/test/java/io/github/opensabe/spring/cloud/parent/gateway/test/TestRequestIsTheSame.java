@@ -1,5 +1,6 @@
 package io.github.opensabe.spring.cloud.parent.gateway.test;
 
+import io.github.opensabe.base.vo.BaseRsp;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
 import io.github.opensabe.spring.cloud.parent.gateway.filter.CommonLogFilter;
@@ -92,7 +93,7 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
     @Autowired
     private WebTestClient webClient;
 
-    private Integer idx = 0;
+    private int idx = 0;
     private DefaultRequest[] requests;
 
     //不同的测试方法的类对象不是同一个对象，会重新生成，保证互相没有影响
@@ -127,7 +128,13 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
             });
         });
 
-        WebTestClient.ResponseSpec exchange = webClient.get().uri("/httpbin/status/500").exchange();
+        //2025年03月13日10:07:13，spring boot 3.4.3开始，网关也受ControllerAdvice影响，因此这里会是200
+
+        webClient.get().uri("/httpbin/status/500").exchange().expectBody(BaseRsp.class)
+                .consumeWith(r -> {
+                    assertTrue(r.getStatus().is2xxSuccessful());
+                    assertTrue(r.getResponseBody().getInnerMsg().contains("Connection refused"));
+                });
         //必须用 == 验证是同一个对象
         assertTrue(requests[0] == requests[1]);
         assertTrue(requests[2] == requests[1]);

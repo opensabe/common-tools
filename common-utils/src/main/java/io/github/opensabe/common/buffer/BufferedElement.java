@@ -11,15 +11,12 @@ public abstract class BufferedElement {
 
     /**
      * 用于负载均衡的 key
-     * @return
      */
     public abstract String hashKey();
 
     @Transient
-    @javax.persistence.Transient
     private String traceId;
     @Transient
-    @javax.persistence.Transient
     private String spanId;
 
     private final BufferedElementJFREvent bufferedElementJFREvent;
