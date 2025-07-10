@@ -1,8 +1,10 @@
 package io.github.opensabe.common.cache.test.service;
 
+import io.github.opensabe.common.cache.api.Expire;
 import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,6 +21,30 @@ public class CacheService {
     @Cacheable(value = "test_caffeine")
     public Map<Long, ItemObject> getData() {
         return storage.getData();
+    }
+
+    @Expire(5)
+    @Cacheable(value = "test_caffeine")
+    public ItemObject getCaffeineExpire(Long id, String field) {
+        return storage.getItem(id);
+    }
+    @CacheEvict(value = "test_caffeine")
+    public void deleteCaffeine(Long id, String field) {
+        storage.deleteItem(id);
+    }
+    @CacheEvict(value = "test_redis")
+    public void deleteRedis(Long id, String field) {
+        storage.deleteItem(id);
+    }
+    @Expire(5)
+    @Cacheable(value = "test_redis")
+    public ItemObject getRedisExpire(Long id, String field) {
+        return storage.getItem(id);
+    }
+    @Expire(value = 5, cacheType = CacheType.CAFFEINE)
+    @Cacheable(value = "test_redis")
+    public ItemObject geAssignmentExpire(Long id, String field) {
+        return storage.getItem(id);
     }
 
     @Cacheable(value = "test_caffeine")
