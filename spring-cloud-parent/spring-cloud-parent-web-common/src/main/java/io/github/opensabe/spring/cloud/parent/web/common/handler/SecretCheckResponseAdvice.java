@@ -8,12 +8,10 @@ import io.github.opensabe.common.utils.json.JsonUtil;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.servlet.spec.HttpServletResponseImpl;
 import io.undertow.util.HeaderMap;
-import jakarta.servlet.ServletResponse;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.HttpString;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.ServletResponseWrapper;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.MethodParameter;
@@ -61,14 +59,12 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
             r = delegate.getDelegate();
         }
         if (r instanceof ServletServerHttpResponse servletServerHttpResponse) {
-            HttpServletResponse servletResponse = servletServerHttpResponse.getServletResponse();
-            ServletResponse resp = servletResponse;
-            while (resp instanceof ServletResponseWrapper wrapper) {
-                resp = wrapper.getResponse();
+            ServletResponse servletResponse = servletServerHttpResponse.getServletResponse();
+            while (servletResponse instanceof ServletResponseWrapper wrapper) {
+                servletResponse = wrapper.getResponse();
             }
-            if (rsp instanceof HttpServletResponseImpl wrapperResponse) {
-                if (wrapperResponse instanceof HttpServletResponseImpl httpServletResponseImpl) {
-                    HttpServerExchange httpServerExchange = httpServletResponseImpl.getExchange();
+            if (servletResponse instanceof HttpServletResponseImpl httpServletResponse) {
+                    HttpServerExchange httpServerExchange = httpServletResponse.getExchange();
                     HeaderMap responseHeaders = httpServerExchange.getResponseHeaders();
                     //先复制，防止遍历移除的时候抛出 ConcurrentModificationException
                     Set<HttpString> headerNames = Set.copyOf(responseHeaders.getHeaderNames());
@@ -93,11 +89,8 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
                             }
                         }
                     }
-                } else {
-                    log.error("wrapperResponse is not HttpServletResponseImpl, wrapperResponse: {}", wrapperResponse);
-                }
-            } else {
-                log.error("servletResponse is not HttpServletResponseWrapper, servletResponse: {}", servletResponse);
+            }else {
+                log.error("wrapperResponse is not HttpServletResponseImpl, response: {}", servletResponse);
             }
         } else {
             log.error("response is not ServletServerHttpResponse, response: {}", response);

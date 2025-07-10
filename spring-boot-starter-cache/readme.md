@@ -59,6 +59,8 @@ caches:
 | cacheNullValues  | Boolean | 是否允许缓存Null Value [默认：true] |
 | keyPrefix  | String  | 前綴  |
 
+
+
 ### 2. 使用 Spring Cache注解：
 对于某个方法使用 @Cacheable:
 ```
@@ -91,6 +93,12 @@ public ItemObject getItemFromCaffeine() {
 对于某个方法使用 @CachePut:
 ```
 # 方法总会执行，根据注解的配置将结果缓存
+@CachePut(value = "redisCache", key = "'redis:'+#id")
+public String updateItemFromRedis(Long id) {
+	return storage.getItem(id).getName();
+}
+# 带ttl
+@Expire(value=1,timeUnit=TimeUnit.DAYS)
 @CachePut(value = "redisCache", key = "'redis:'+#id")
 public String updateItemFromRedis(Long id) {
 	return storage.getItem(id).getName();

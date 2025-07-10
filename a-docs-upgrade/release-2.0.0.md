@@ -71,4 +71,3 @@ spring:
 # 该版本不能启用虚拟线程，原因
 
 1. spring-cloud-gateway 需要改成 servlet 实现版本。
-2. spring-boot-starter-redisson 中的对于 spring-data-redis 中的 LettuceConnectionFactory 的使用是普通线程池的，参考：`org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration#redisConnectionFactoryVirtualThreads`
