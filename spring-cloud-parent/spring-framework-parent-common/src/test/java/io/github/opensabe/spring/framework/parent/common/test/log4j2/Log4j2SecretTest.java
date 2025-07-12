@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -43,6 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         classes = Log4j2SecretTest.Main.class
 )
 @AutoConfigureObservability
+@DisplayName("Log4j2敏感信息过滤测试")
 public class Log4j2SecretTest {
     private static final String SECRET = "secretString-Log4j2SecretTest";
     private static final String IDENTIFIER = "IDENTIFIER-Log4j2SecretTest";
@@ -68,6 +70,7 @@ public class Log4j2SecretTest {
      * 在开发的时候单独执行
      */
     @Disabled
+    @DisplayName("测试Log4j2敏感信息过滤 - 验证敏感信息不被记录到日志")
     public void testLog4j2() throws InterruptedException {
         log.info("{} test {} test {} test {}", IDENTIFIER, SECRET, SECRET + SECRET, SECRET + "xx");
         countDownLatch.await();

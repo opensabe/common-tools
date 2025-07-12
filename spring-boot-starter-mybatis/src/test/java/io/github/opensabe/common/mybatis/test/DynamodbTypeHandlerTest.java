@@ -9,6 +9,7 @@ import io.github.opensabe.common.mybatis.test.po.DynamodbPO;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,6 +19,7 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("DynamoDB类型处理器测试")
 public class DynamodbTypeHandlerTest extends BaseMybatisTest {
     @Autowired
     private DynamodbTypeHandlerMapper dynamodbTypeHandlerMapper;
@@ -28,6 +30,7 @@ public class DynamodbTypeHandlerTest extends BaseMybatisTest {
 
     @Test
     @SneakyThrows
+    @DisplayName("测试DynamoDB类型处理器 - 验证数据存储和查询")
     public void testDynamodyTypeHandler () {
         var dynamodbPO = new DynamodbPO();
         dynamodbPO.setId("DynamodbTypeHandlerTestPO1");

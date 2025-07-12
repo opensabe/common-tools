@@ -7,6 +7,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.mockito.Mockito;
 
 import java.sql.PreparedStatement;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.mockito.Mockito.*;
 
+@DisplayName("MyBatis类型处理器测试")
 public class TypeHandlerTest {
 
     @Data
@@ -42,6 +44,7 @@ public class TypeHandlerTest {
     }
 
     @Test
+    @DisplayName("测试JSON类型处理器 - 插入JSON对象")
     public void testJSONTypeHandler_InsertJSON_ExpectInserted() throws Exception {
         AtomicReference<String> actual = new AtomicReference<>();
         PreparedStatement ps = Mockito.mock(PreparedStatement .class);
@@ -58,6 +61,7 @@ public class TypeHandlerTest {
     }
 
     @Test
+    @DisplayName("测试JSON类型处理器 - 插入null值")
     public void testJSONTypeHandler_InsertNull_ExpectNull() throws Exception {
         AtomicReference<String> res = new AtomicReference<>();
         PreparedStatement ps = Mockito.mock(PreparedStatement .class);
@@ -75,6 +79,7 @@ public class TypeHandlerTest {
     }
 
     @Test
+    @DisplayName("测试JSON类型处理器 - 正常JSON反序列化")
     public void testJSONTypeHandler_NormalJSON_ExpectMatch() throws Exception {
         Mockito.when(rs.getString(COL_NAME)).thenReturn(JSONObject.toJSONString(TEST_POJO));
         TestPOJO actual = (TestPOJO) new JSONTypeHandler(TestPOJO.class).getNullableResult(rs, COL_NAME);
@@ -82,6 +87,7 @@ public class TypeHandlerTest {
     }
 
     @Test
+    @DisplayName("测试JSON类型处理器 - null值反序列化")
     public void testJSONTypeHandler_NullValue_ExpectNull() throws Exception {
         Mockito.when(rs.getString(COL_NAME)).thenReturn(null);
         TestPOJO res = (TestPOJO) new JSONTypeHandler(TestPOJO.class).getNullableResult(rs, COL_NAME);

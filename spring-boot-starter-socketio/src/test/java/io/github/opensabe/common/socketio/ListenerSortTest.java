@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 @JfrEventTest
 @AutoConfigureObservability
 @ExtendWith(SingleRedisIntegrationTest.class)
+@DisplayName("SocketIO监听器排序测试")
 public class ListenerSortTest {
 
     @DynamicPropertySource
@@ -105,6 +107,7 @@ public class ListenerSortTest {
     private static final String USER_ID = "u1";
 
     @Test
+    @DisplayName("测试SocketIO事件监听器执行顺序 - 验证@Order注解生效")
     void test1() throws URISyntaxException, InterruptedException {
 
         TimeUnit.SECONDS.sleep(1);

@@ -5,6 +5,7 @@ import io.github.opensabe.common.mybatis.test.mapper.user.UserMapper;
 import io.github.opensabe.common.mybatis.test.po.User;
 import io.github.opensabe.common.mybatis.test.service.UserMapperService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,13 +16,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+@DisplayName("只读数据源测试")
 public class ReadOnlyTest extends BaseMybatisTest {
 
     @Autowired
     private UserMapper userMapper;
     @Autowired
     private UserMapperService userMapperService;
+    
     @Test
+    @DisplayName("测试Mapper只读数据源 - 验证主从分离")
     public void testMapperReadOnly () {
         userMapper.insertSelective(new User("ReadOnlyTest-testMapperReadOnly-id","first name","last name", new Timestamp(System.currentTimeMillis()),null));
         var list = userMapper.selectReadOnly();
@@ -30,7 +34,9 @@ public class ReadOnlyTest extends BaseMybatisTest {
         var user = userMapper.selectByPrimaryKey("ReadOnlyTest-testMapperReadOnly-id");
         Assertions.assertNotNull(user);
     }
+    
     @Test
+    @DisplayName("测试基础服务只读数据源 - 验证主从分离")
     public void testBaseServiceReadOnly () {
         var record = new User("ReadOnlyTest-testBaseServiceReadOnly-id","first name","last name", new Timestamp(System.currentTimeMillis()),null);
         userMapperService.insertSelective(record);
@@ -42,6 +48,7 @@ public class ReadOnlyTest extends BaseMybatisTest {
     }
 
     @Test
+    @DisplayName("测试循环只读数据源 - 验证主从分离的稳定性")
     public void testLoopReadOnly () {
         for (int i = 0; i < 10; i++) {
             userMapper.insertSelective(new User("ReadOnlyTest-testLoopReadOnly-id"+i,"first name","last name", new Timestamp(System.currentTimeMillis()),null));
@@ -53,7 +60,9 @@ public class ReadOnlyTest extends BaseMybatisTest {
             userMapper.deleteByPrimaryKey("ReadOnlyTest-testLoopReadOnly-id"+i);
         }
     }
+    
     @Test
+    @DisplayName("测试多线程只读数据源 - 验证并发场景下的主从分离")
     public void testThreadReadOnly () throws InterruptedException, ExecutionException {
         var executor = Executors.newFixedThreadPool(5);
         List<Future> list = new ArrayList<>(50);

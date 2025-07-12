@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("时间戳模块测试")
 class TimestampModuleTest {
 
     private static ObjectMapper objectMapper;
@@ -24,6 +26,7 @@ class TimestampModuleTest {
     }
 
     @Test
+    @DisplayName("测试LocalDateTime序列化 - 验证时间戳格式")
     void testSerializeLocalDateTime() throws Exception {
         ZonedDateTime zonedDateTime = ZonedDateTime.of(2024, 3, 15, 17, 30, 45, 123_000_000, ZoneId.of("UTC"));
         LocalDateTime dateTime = zonedDateTime.toLocalDateTime();
@@ -32,6 +35,7 @@ class TimestampModuleTest {
     }
 
     @Test
+    @DisplayName("测试从长整型反序列化 - 验证毫秒时间戳转换")
     void testDeserializeFromLong() throws Exception {
         System.setProperty("user.timezone", "UTC");
         // 测试从毫秒时间戳反序列化
@@ -41,6 +45,7 @@ class TimestampModuleTest {
     }
 
     @Test
+    @DisplayName("测试多种字符串格式反序列化 - 验证各种日期时间格式")
     void testDeserializeFromStringFormats() throws Exception {
         // 测试各种字符串格式的反序列化
         String[] formats = {
@@ -64,6 +69,7 @@ class TimestampModuleTest {
     }
 
     @Test
+    @DisplayName("测试空值处理 - 验证null值处理")
     void testNullHandling() throws Exception {
         // 测试空值处理
         String json = "null";
@@ -72,6 +78,7 @@ class TimestampModuleTest {
     }
 
     @Test
+    @DisplayName("测试往返序列化 - 验证序列化后反序列化的准确性")
     void testRoundTrip() throws Exception {
         // 测试序列化后反序列化的往返测试
         LocalDateTime original = LocalDateTime.now().withNano(0);
@@ -81,6 +88,7 @@ class TimestampModuleTest {
     }
 
     @Test
+    @DisplayName("测试精度损失 - 验证纳秒到毫秒的截断")
     void testPrecisionLoss() throws Exception {
         // 测试精度损失（纳秒被截断到毫秒）
         LocalDateTime dateTime = LocalDateTime.of(2024, 3, 15, 14, 30, 45, 123_456_789);

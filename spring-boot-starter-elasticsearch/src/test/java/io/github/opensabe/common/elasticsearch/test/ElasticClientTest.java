@@ -21,6 +21,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.xcontent.XContentType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 })
 @Log4j2
 @AutoConfigureObservability
+@DisplayName("Elasticsearch客户端测试")
 public class ElasticClientTest {
     @SpringBootApplication
     public static class Main {
@@ -72,6 +74,7 @@ public class ElasticClientTest {
     private static final String INDEX = "test_index";
 
     @Test
+    @DisplayName("测试Elasticsearch基本操作 - 索引创建、文档更新、搜索和敏感信息过滤")
     public void test() throws IOException, InterruptedException {
         GetIndexRequest getIndexRequest = new GetIndexRequest(INDEX);
         boolean exists = restHighLevelClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT);

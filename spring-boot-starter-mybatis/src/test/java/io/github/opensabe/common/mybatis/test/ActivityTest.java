@@ -5,17 +5,20 @@ import io.github.opensabe.common.mybatis.test.common.BaseMybatisTest;
 import io.github.opensabe.common.mybatis.test.mapper.user.ActivityMapper;
 import io.github.opensabe.common.mybatis.test.po.Activity;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@DisplayName("活动实体测试")
 public class ActivityTest extends BaseMybatisTest {
     @Autowired
     private ActivityMapper activityMapper;
 
     @Test
+    @DisplayName("测试活动实体的插入和查询功能 - 验证复杂数据类型的序列化和反序列化")
     @Transactional
     public void testInsertSelect () {
         var id = "activity1";

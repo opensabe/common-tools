@@ -2,12 +2,15 @@ package io.github.opensabe.base;
 
 import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.base.vo.BaseRsp;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("响应工具类测试")
 class RespUtilTest {
 
     @Test
+    @DisplayName("测试成功响应 - 无数据")
     void testSucc() {
         BaseRsp<Void> response = RespUtil.succ();
         assertEquals(BizCodeEnum.SUCCESS.getVal(), response.getBizCode());
@@ -17,6 +20,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试成功响应 - 带数据")
     void testSuccWithData() {
         String testData = "测试数据";
         BaseRsp<String> response = RespUtil.succ(testData);
@@ -27,6 +31,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试成功响应 - 带数据到data字段")
     void testSuccess() {
         String testData = "测试数据";
         BaseRsp<String> response = RespUtil.success(testData);
@@ -37,6 +42,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试成功响应 - 带消息")
     void testSuccWithMessage() {
         String succMsg = "成功消息";
         BaseRsp<Void> response = RespUtil.succ(succMsg);
@@ -47,6 +53,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试成功响应 - 带内部消息和用户消息")
     void testSuccWithInnerAndUserMessage() {
         String innerMsg = "内部成功消息";
         String userMsg = "用户成功消息";
@@ -58,6 +65,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试失败响应 - 带消息")
     void testFail() {
         String failMsg = "失败消息";
         BaseRsp<Void> response = RespUtil.fail(failMsg);
@@ -68,6 +76,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试失败响应 - 带内部消息和用户消息")
     void testFailWithInnerAndUserMessage() {
         String innerMsg = "内部失败消息";
         String userMsg = "用户失败消息";
@@ -79,6 +88,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试失败响应 - 带业务码")
     void testFailWithBizCode() {
         int bizCode = 10001;
         String innerMsg = "内部失败消息";
@@ -91,6 +101,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试无效响应 - 带消息")
     void testInvalid() {
         String invalidMsg = "无效消息";
         BaseRsp<Void> response = RespUtil.invalid(invalidMsg);
@@ -101,6 +112,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试无效响应 - 带内部消息和用户消息")
     void testInvalidWithInnerAndUserMessage() {
         String innerMsg = "内部无效消息";
         String userMsg = "用户无效消息";
@@ -112,6 +124,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试资源未找到响应 - 带消息")
     void testResNotFound() {
         String notFoundMsg = "资源未找到消息";
         BaseRsp<Void> response = RespUtil.resNotFound(notFoundMsg);
@@ -122,6 +135,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试资源未找到响应 - 带内部消息和用户消息")
     void testResNotFoundWithInnerAndUserMessage() {
         String innerMsg = "内部资源未找到消息";
         String userMsg = "用户资源未找到消息";
@@ -133,6 +147,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试状态错误响应 - 带消息")
     void testBadState() {
         String badStateMsg = "状态错误消息";
         BaseRsp<Void> response = RespUtil.badState(badStateMsg);
@@ -143,6 +158,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试状态错误响应 - 带内部消息和用户消息")
     void testBadStateWithInnerAndUserMessage() {
         String innerMsg = "内部状态错误消息";
         String userMsg = "用户状态错误消息";
@@ -154,6 +170,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试系统错误响应 - 带消息")
     void testError() {
         String errorMsg = "系统错误消息";
         BaseRsp<Void> response = RespUtil.error(errorMsg);
@@ -164,6 +181,7 @@ class RespUtilTest {
     }
 
     @Test
+    @DisplayName("测试系统错误响应 - 带内部消息和用户消息")
     void testErrorWithInnerAndUserMessage() {
         String innerMsg = "内部系统错误消息";
         String userMsg = "用户系统错误消息";

@@ -1,12 +1,15 @@
 package io.github.opensabe.base.vo;
 
 import io.github.opensabe.base.code.BizCodeEnum;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("基础响应对象测试")
 class BaseRspTest {
 
     @Test
+    @DisplayName("测试默认构造函数")
     void testDefaultConstructor() {
         BaseRsp<String> response = new BaseRsp<>();
         assertNotNull(response);
@@ -17,6 +20,7 @@ class BaseRspTest {
     }
 
     @Test
+    @DisplayName("测试Builder模式构建对象")
     void testBuilder() {
         BaseRsp<String> response = BaseRsp.<String>builder()
                 .bizCode(10000)
@@ -32,6 +36,7 @@ class BaseRspTest {
     }
 
     @Test
+    @DisplayName("测试成功状态判断")
     void testIsSuccess() {
         // 成功情况
         BaseRsp<String> successResponse = new BaseRsp<>();
@@ -45,6 +50,7 @@ class BaseRspTest {
     }
 
     @Test
+    @DisplayName("测试数据解析功能 - 成功和失败场景")
     void testResolveData() {
         // 成功情况
         BaseRsp<String> successResponse = new BaseRsp<>();
@@ -66,6 +72,7 @@ class BaseRspTest {
     }
 
     @Test
+    @DisplayName("测试equals和hashCode方法")
     void testEqualsAndHashCode() {
         BaseRsp<String> response1 = BaseRsp.<String>builder()
                 .bizCode(10000)
@@ -95,6 +102,7 @@ class BaseRspTest {
     }
 
     @Test
+    @DisplayName("测试toString方法")
     void testToString() {
         BaseRsp<String> response = BaseRsp.<String>builder()
                 .bizCode(10000)

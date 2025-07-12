@@ -4,6 +4,7 @@ import io.github.opensabe.common.entity.base.vo.BaseMessage;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,11 +15,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author heng.ma
  */
+@DisplayName("RocketMQ基础消息测试")
 public class BaseMessageTest {
 
     public record User (String name, Integer age) {}
 
     @Test
+    @DisplayName("测试简单对象消息 - 带包装器")
     void testSimple () {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -26,6 +29,7 @@ public class BaseMessageTest {
         new SimpleMessageListener().onMessage(ext);
     }
     @Test
+    @DisplayName("测试简单对象消息 - 不带包装器")
     void testSimpleWithoutWrapper () {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -34,6 +38,7 @@ public class BaseMessageTest {
     }
 
     @Test
+    @DisplayName("测试列表对象消息 - 带包装器")
     void testList () {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -41,6 +46,7 @@ public class BaseMessageTest {
         new ListMessageListener().onMessage(ext);
     }
     @Test
+    @DisplayName("测试列表对象消息 - 不带包装器")
     void testListWithoutWrapper () {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -49,6 +55,7 @@ public class BaseMessageTest {
     }
 
     @Test
+    @DisplayName("测试Map对象消息 - 带包装器")
     void testMap () {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -56,6 +63,7 @@ public class BaseMessageTest {
         new MapMessageListener().onMessage(ext);
     }
     @Test
+    @DisplayName("测试Map对象消息 - 不带包装器")
     void testMapWithoutWrapper () {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");

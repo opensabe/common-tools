@@ -7,6 +7,7 @@ import io.micrometer.observation.Observation;
 import jdk.jfr.consumer.RecordedEvent;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
@@ -33,6 +34,7 @@ import static org.junit.Assert.assertTrue;
 })
 //JFR 测试最好在本地做
 @Disabled
+@DisplayName("线程池统计测试")
 public class TheadPoolStatTest {
 
     @SpringBootApplication
@@ -49,6 +51,7 @@ public class TheadPoolStatTest {
     public JfrEvents jfrEvents = new JfrEvents();
 
     @Test
+    @DisplayName("测试线程池统计功能 - 验证JFR事件记录")
     public void testNormal() {
         ExecutorService executorService = threadPoolFactory.createNormalThreadPool("threadPoolStat", 2);
 

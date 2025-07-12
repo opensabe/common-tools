@@ -12,6 +12,7 @@ import org.apache.logging.log4j.message.SimpleMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -22,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+@DisplayName("Log4j2密钥检查过滤器测试")
 class Log4j2SecretCheckFilterTest {
     private AutoCloseable autoCloseable;
     private MockedStatic<SpringUtil> mockedStatic;
@@ -49,6 +51,7 @@ class Log4j2SecretCheckFilterTest {
     }
 
     @Test
+    @DisplayName("测试过滤器 - 包含敏感内容时应拒绝")
     void testFilter_WithSensitiveContent() {
         // 准备测试数据
         String sensitiveMessage = "This contains password123";
@@ -73,6 +76,7 @@ class Log4j2SecretCheckFilterTest {
     }
 
     @Test
+    @DisplayName("测试过滤器 - 非敏感内容时应通过")
     void testFilter_WithNonSensitiveContent() {
         // 准备测试数据
         String normalMessage = "This is a normal message";
@@ -97,6 +101,7 @@ class Log4j2SecretCheckFilterTest {
     }
 
     @Test
+    @DisplayName("测试过滤器 - 空消息时应通过")
     void testFilter_WithNullMessage() {
         // 准备测试数据
         Message message = new SimpleMessage(null);
@@ -112,6 +117,7 @@ class Log4j2SecretCheckFilterTest {
     }
 
     @Test
+    @DisplayName("测试过滤器 - 特殊消息时应通过")
     void testFilter_WithEmptyMessage() {
         // 准备测试数据
         Message message = new SimpleMessage("xxxyyyzzz");

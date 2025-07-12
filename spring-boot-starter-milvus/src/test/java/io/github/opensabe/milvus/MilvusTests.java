@@ -10,6 +10,7 @@ import io.github.opensabe.milvus.config.MilvusEmbeddingStoreProperties;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import java.util.List;
  */
 @Disabled
 @SpringBootTest(classes = App.class)
+@DisplayName("Milvus向量数据库测试")
 class MilvusTests {
 
     @Autowired
@@ -46,6 +48,7 @@ class MilvusTests {
      * 不启动量化测试。需要将配置中 langchain4j.milvus.quantized 设置为 false
      */
     @Test
+    @DisplayName("测试非量化嵌入存储 - 验证向量存储和搜索功能")
     void should_provide_embedding_store_without_embedding_model() {
 
         // 每个TextSegment，就是一个句子，对应了一个向量，而向量就是一个数字数组
@@ -72,6 +75,7 @@ class MilvusTests {
      * 启动量化测试。需要将配置中 langchain4j.milvus.quantized 设置为 true
      */
     @Test
+    @DisplayName("测试量化嵌入存储 - 验证量化向量存储和搜索功能")
     void should_provide_embedding_store_with_embedding_model() {
 
         TextSegment segment = TextSegment.from("hello");

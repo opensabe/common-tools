@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.EnableEvent;
 import org.moditect.jfrunit.JfrEventTest;
@@ -45,6 +46,7 @@ import static org.junit.Assert.assertTrue;
                 "eureka.client.enabled=false"
         }
 )
+@DisplayName("批量缓冲队列测试")
 public class BatchBufferQueueTest {
     public JfrEvents jfrEvents = new JfrEvents();
     @SpringBootApplication
@@ -156,6 +158,7 @@ public class BatchBufferQueueTest {
 
     private static final CountDownLatch countDownLatch = new CountDownLatch(EVENT_COUNT);
     @Test
+    @DisplayName("测试批量缓冲队列和JFR事件记录 - 验证异步处理和链路追踪")
     @EnableEvent("io.github.opensabe.common.buffer.BufferedElementJFREvent")
     //JFR 测试最好在本地做
     @Disabled
@@ -246,6 +249,7 @@ public class BatchBufferQueueTest {
     }
 
     @Test
+    @DisplayName("测试批量缓冲计数队列 - 验证同步处理")
     public void testBatchBufferedCountDownQueue() throws InterruptedException {
         Thread[] threads = new Thread[EVENT_COUNT];
         CountDownEvent[] countDownEvents = new CountDownEvent[EVENT_COUNT];

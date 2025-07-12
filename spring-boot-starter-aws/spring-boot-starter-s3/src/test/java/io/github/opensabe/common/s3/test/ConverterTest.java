@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.Association;
@@ -21,12 +22,14 @@ import java.lang.annotation.Annotation;
  * @author heng.ma
  */
 @Slf4j
+@DisplayName("S3转换器测试")
 public class ConverterTest extends S3BaseTest {
 
     @Autowired
     private S3JsonConverter converter;
 
     @Test
+    @DisplayName("测试S3 JSON转换器读写功能 - 验证对象序列化和反序列化")
     void testRead () throws NoSuchFieldException {
         BasicPersistentEntity entity = new BasicPersistentEntity<>(TypeInformation.of(MyEntity.class));
         entity.addPersistentProperty(new AbstractPersistentProperty(Property.of(TypeInformation.of(MyEntity.class), MyEntity.class.getDeclaredField("child")), entity, SimpleTypeHolder.DEFAULT) {

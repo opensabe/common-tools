@@ -2,6 +2,7 @@ package io.github.opensabe.common.jfr;
 
 import io.micrometer.observation.Observation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
+@DisplayName("JFR观察者处理器测试")
 class JFRObservationHandlerTest {
 
     @Mock
@@ -42,6 +44,7 @@ class JFRObservationHandlerTest {
     }
 
     @Test
+    @DisplayName("测试开始事件 - 应调用所有匹配的生成器")
     void onStart_ShouldCallAllMatchingGenerators() {
         // when
         handler.onStart(testContext);
@@ -53,6 +56,7 @@ class JFRObservationHandlerTest {
     }
 
     @Test
+    @DisplayName("测试开始事件异常处理 - 应处理生成器异常")
     void onStart_ShouldHandleGeneratorException() {
         // given
         doThrow(new RuntimeException("Test exception")).when(generator1).onStart(testContext);
@@ -66,6 +70,7 @@ class JFRObservationHandlerTest {
     }
 
     @Test
+    @DisplayName("测试停止事件 - 应调用所有匹配的生成器")
     void onStop_ShouldCallAllMatchingGenerators() {
         // when
         handler.onStop(testContext);
@@ -77,6 +82,7 @@ class JFRObservationHandlerTest {
     }
 
     @Test
+    @DisplayName("测试停止事件异常处理 - 应处理生成器异常")
     void onStop_ShouldHandleGeneratorException() {
         // given
         doThrow(new RuntimeException("Test exception")).when(generator1).onStop(testContext);
@@ -90,12 +96,14 @@ class JFRObservationHandlerTest {
     }
 
     @Test
+    @DisplayName("测试上下文支持 - 应始终返回true")
     void supportsContext_ShouldAlwaysReturnTrue() {
         assert handler.supportsContext(testContext);
         assert handler.supportsContext(anotherContext);
     }
 
     @Test
+    @DisplayName("测试构造函数 - 无生成器时应初始化空映射")
     void constructor_ShouldInitializeEmptyMap_WhenNoGenerators() {
         // when
         JFRObservationHandler<TestContext> emptyHandler = new JFRObservationHandler<>(Collections.emptyList());

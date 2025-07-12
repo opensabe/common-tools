@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -39,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Execution(ExecutionMode.SAME_THREAD)
 @Disabled
 @AutoConfigureObservability
+@DisplayName("地理位置JFR事件测试")
 public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
@@ -52,6 +54,7 @@ public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
 
     private final List<Double> position = List.of(11.196417, 5.605130);
 //    @Test
+    @DisplayName("测试获取坐标功能 - 验证JFR事件记录")
     public void testGetCoordinates() {
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         observation.scoped(() -> {
@@ -79,6 +82,7 @@ public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
     }
 
 //    @Test
+    @DisplayName("测试反向地理编码功能 - 验证JFR事件记录")
     public void testReverseGeocode() {
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         observation.scoped(() -> {

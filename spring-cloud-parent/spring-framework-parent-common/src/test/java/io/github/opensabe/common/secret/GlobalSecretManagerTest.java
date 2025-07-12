@@ -2,6 +2,7 @@ package io.github.opensabe.common.secret;
 
 import io.github.opensabe.common.utils.AlarmUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@DisplayName("全局密钥管理器测试")
 class GlobalSecretManagerTest {
 
     private GlobalSecretManager secretManager;
@@ -25,6 +27,7 @@ class GlobalSecretManagerTest {
     }
 
     @Test
+    @DisplayName("测试添加密钥 - 验证敏感信息过滤")
     void testPutSecret() {
         // 准备测试数据
         Map<String, Set<String>> secret = new HashMap<>();
@@ -43,6 +46,7 @@ class GlobalSecretManagerTest {
     }
 
     @Test
+    @DisplayName("测试敏感信息过滤 - 无敏感内容")
     void testFilterSecretStringAndAlarm_NoSensitiveContent() {
         // 准备测试数据
         Map<String, Set<String>> secret = new HashMap<>();
@@ -60,6 +64,7 @@ class GlobalSecretManagerTest {
     }
 
     @Test
+    @DisplayName("测试敏感信息过滤 - 多个敏感内容")
     void testFilterSecretStringAndAlarm_MultipleSensitiveContent() {
         // 准备测试数据
         Map<String, Set<String>> secret = new HashMap<>();
@@ -78,6 +83,7 @@ class GlobalSecretManagerTest {
     }
 
     @Test
+    @DisplayName("测试敏感信息过滤和告警 - 验证告警触发")
     void testFilterSecretStringAndAlarm_WithAlarm() {
         try (MockedStatic<AlarmUtil> alarmUtilMockedStatic = Mockito.mockStatic(AlarmUtil.class)) {
             // 准备测试数据

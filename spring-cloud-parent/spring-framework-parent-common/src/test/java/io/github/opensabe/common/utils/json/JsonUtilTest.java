@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * JsonUtil 工具类的测试类
  * 测试各种场景下的 JSON 序列化和反序列化功能
  */
+@DisplayName("JSON工具类测试")
 class JsonUtilTest {
 
     /**
@@ -34,6 +36,7 @@ class JsonUtilTest {
      * 2. null 值的序列化
      */
     @Test
+    @DisplayName("测试基本对象JSON序列化 - 包括null值处理")
     void testToJSONString() {
         // 测试基本对象序列化
         TestObject testObject = new TestObject("test", 123);
@@ -53,6 +56,7 @@ class JsonUtilTest {
      * 2. 验证序列化结果不为空
      */
     @Test
+    @DisplayName("测试对象序列化为字节数组")
     void testToJSONBytes() {
         TestObject testObject = new TestObject("test", 123);
         byte[] bytes = JsonUtil.toJSONBytes(testObject);
@@ -67,6 +71,7 @@ class JsonUtilTest {
      * 2. 字节数组转对象
      */
     @Test
+    @DisplayName("测试JSON反序列化为对象 - 字符串和字节数组")
     void testParseObject() {
         // 测试字符串转对象
         String json = "{\"name\":\"test\",\"value\":123}";
@@ -87,6 +92,7 @@ class JsonUtilTest {
      * 1. 使用 TypeReference 处理复杂类型
      */
     @Test
+    @DisplayName("测试使用TypeReference进行对象反序列化")
     void testParseObjectWithTypeReference() {
         String json = "{\"name\":\"test\",\"value\":123}";
         TypeReference<TestObject> typeRef = new TypeReference<>() {};
@@ -102,6 +108,7 @@ class JsonUtilTest {
      * 2. 字节数组转数组
      */
     @Test
+    @DisplayName("测试JSON数组反序列化 - 字符串和字节数组")
     void testParseArray() {
         // 测试字符串转数组
         String json = "[{\"name\":\"test1\",\"value\":1},{\"name\":\"test2\",\"value\":2}]";
@@ -123,6 +130,7 @@ class JsonUtilTest {
      * 2. 验证 List 中的对象属性
      */
     @Test
+    @DisplayName("测试JSON数组反序列化为List")
     void testParseList() {
         String json = "[{\"name\":\"test1\",\"value\":1},{\"name\":\"test2\",\"value\":2}]";
         List<TestObject> list = JsonUtil.parseList(json, TestObject.class);
@@ -138,6 +146,7 @@ class JsonUtilTest {
      * 2. 验证 Map 中的对象属性
      */
     @Test
+    @DisplayName("测试JSON反序列化为Map")
     void testParseMap() {
         String json = "{\"key1\":{\"name\":\"test1\",\"value\":1},\"key2\":{\"name\":\"test2\",\"value\":2}}";
         Map<String, TestObject> map = JsonUtil.parseMap(json, TestObject.class);
@@ -153,6 +162,7 @@ class JsonUtilTest {
      * 2. 验证 JsonNode 的属性访问
      */
     @Test
+    @DisplayName("测试JSON解析为JsonNode")
     void testParseObjectToJsonNode() {
         String json = "{\"name\":\"test\",\"value\":123}";
         JsonNode node = JsonUtil.parseObject(json);
@@ -171,6 +181,7 @@ class JsonUtilTest {
      * 4. null 值
      */
     @Test
+    @DisplayName("测试JSON字符串有效性验证")
     void testIsJsonValid() {
         // 测试有效的JSON
         assertTrue(JsonUtil.isJsonValid("{\"name\":\"test\"}"));
@@ -190,6 +201,7 @@ class JsonUtilTest {
      * 2. LocalDateTime 的反序列化
      */
     @Test
+    @DisplayName("测试日期时间类型序列化和反序列化")
     void testDateTimeHandling() {
         // 测试日期时间序列化和反序列化
         DateTimeObject dateTimeObject = new DateTimeObject(LocalDateTime.now());
@@ -206,6 +218,7 @@ class JsonUtilTest {
      * 3. 验证 Record 的属性访问
      */
     @Test
+    @DisplayName("测试Record类型序列化和反序列化")
     void testRecordSerialization() {
         // 测试基本 record 序列化
         BasicRecord record = new BasicRecord("test", 123);
@@ -227,6 +240,7 @@ class JsonUtilTest {
      * 3. 验证嵌套 Record 的属性访问
      */
     @Test
+    @DisplayName("测试嵌套Record序列化和反序列化")
     void testNestedRecordSerialization() {
         // 测试嵌套 record 序列化
         NestedRecord nested = new NestedRecord(
@@ -251,6 +265,7 @@ class JsonUtilTest {
      * 2. 验证 Record 字段的序列化和反序列化
      */
     @Test
+    @DisplayName("测试类中包含Record序列化和反序列化")
     void testClassWithRecordSerialization() {
         // 测试 class 中包含 record 的序列化
         ClassWithRecord classWithRecord = new ClassWithRecord(
@@ -275,6 +290,7 @@ class JsonUtilTest {
      * 2. 验证类字段的序列化和反序列化
      */
     @Test
+    @DisplayName("测试Record中包含类序列化和反序列化")
     void testRecordWithClassSerialization() {
         // 测试 record 中包含 class 的序列化
         RecordWithClass recordWithClass = new RecordWithClass(
@@ -301,6 +317,7 @@ class JsonUtilTest {
      * 4. 验证集合中对象的属性
      */
     @Test
+    @DisplayName("测试复杂集合类型序列化和反序列化")
     void testComplexCollectionTypes() {
         // 测试复杂集合类型
         ComplexCollectionObject complex = new ComplexCollectionObject(
@@ -325,6 +342,7 @@ class JsonUtilTest {
      * 3. 验证枚举值的正确性
      */
     @Test
+    @DisplayName("测试枚举类型序列化和反序列化")
     void testEnumTypes() {
         // 测试枚举类型
         EnumObject enumObject = new EnumObject(Status.ACTIVE, "test");
@@ -343,6 +361,7 @@ class JsonUtilTest {
      * 3. 验证泛型类型参数
      */
     @Test
+    @DisplayName("测试泛型类型序列化和反序列化")
     void testGenericTypes() {
         // 测试泛型类型
         GenericContainer<String> stringContainer = new GenericContainer<>("test", 1);
@@ -362,6 +381,7 @@ class JsonUtilTest {
      * 3. 复杂对象图的序列化
      */
     @Test
+    @DisplayName("测试多层级嵌套对象序列化和反序列化")
     void testMultiLevelNesting() {
         // 测试多层级嵌套
         MultiLevelObject multiLevel = new MultiLevelObject(
@@ -388,6 +408,7 @@ class JsonUtilTest {
      * 4. 验证特殊类型的正确性
      */
     @Test
+    @DisplayName("测试特殊数据类型序列化和反序列化")
     void testSpecialDataTypes() {
         // 测试特殊数据类型
         SpecialTypesObject special = new SpecialTypesObject(
@@ -412,6 +433,7 @@ class JsonUtilTest {
      * 3. 验证循环引用的正确性
      */
     @Test
+    @DisplayName("测试循环引用对象序列化和反序列化")
     void testCircularReference() {
         // 测试循环引用
         CircularParentChildObject parent = new CircularParentChildObject("parent");

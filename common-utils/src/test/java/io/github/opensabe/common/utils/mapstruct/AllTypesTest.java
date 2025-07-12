@@ -6,6 +6,7 @@ import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.mapstruct.core.FromMapMapper;
 import io.github.opensabe.mapstruct.core.MapperRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -16,9 +17,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@DisplayName("MapStruct所有类型映射测试")
 public class AllTypesTest {
 
     @Test
+    @DisplayName("测试类到Record的映射 - 验证所有数据类型转换")
     void testToRecord () {
         var m = System.currentTimeMillis();
         var allTypes = new Types();
@@ -65,6 +68,7 @@ public class AllTypesTest {
 
 
     @Test
+    @DisplayName("测试Record到类的映射 - 验证所有数据类型转换")
     void testToClass () {
         var m = System.currentTimeMillis();
         var record = new TypesDto("tom", 40, 28,
@@ -94,6 +98,7 @@ public class AllTypesTest {
     }
 
     @Test
+    @DisplayName("测试Map到类的映射 - 验证所有数据类型转换")
     void testFromMap () {
         var m = System.currentTimeMillis();
         Map<String, Object> map = new HashMap<>();

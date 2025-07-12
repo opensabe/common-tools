@@ -3,6 +3,7 @@ package io.github.opensabe.common.s3.test;
 import io.github.opensabe.common.s3.service.S3ClientWrapper;
 import io.github.opensabe.common.s3.test.common.S3BaseTest;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,6 +12,7 @@ import java.io.InputStream;
 import java.util.Base64;
 import java.util.Objects;
 
+@DisplayName("S3客户端包装器测试")
 public class S3ClientWrapperTest extends S3BaseTest {
 
     @Autowired
@@ -23,6 +25,7 @@ public class S3ClientWrapperTest extends S3BaseTest {
     }
 
     @Test
+    @DisplayName("测试文件上传和下载 - 验证数据完整性")
     public void testUploadFile() throws IOException {
         String upload = s3ClientWrapper.upload(bytes);
         try (InputStream download = s3ClientWrapper.download(upload.replaceAll(FOLDER_NAME + "/", ""))) {
@@ -32,6 +35,7 @@ public class S3ClientWrapperTest extends S3BaseTest {
     }
 
     @Test
+    @DisplayName("测试指定文件名上传 - 验证原始文件名保存")
     public void testUploadFileWithName() throws IOException {
         s3ClientWrapper.uploadWithOriginName(bytes, "funny-cat.jpeg", "image/jpeg", null);
         try (InputStream download = s3ClientWrapper.download("funny-cat.jpeg")){
@@ -41,6 +45,7 @@ public class S3ClientWrapperTest extends S3BaseTest {
     }
 
     @Test
+    @DisplayName("测试对象存在性检查和复制 - 验证文件操作")
     public void testDoesObjectExistsAndCopy() throws IOException {
         String fileName = "funny-cat-" + System.currentTimeMillis() + ".jpeg";
         boolean doesObjectExists = s3ClientWrapper.doesObjectExists(fileName);

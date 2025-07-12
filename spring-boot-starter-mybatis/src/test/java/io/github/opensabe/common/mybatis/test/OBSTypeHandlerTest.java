@@ -10,6 +10,7 @@ import io.github.opensabe.common.s3.typehandler.S3OBSService;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("OBS类型处理器测试")
 public class OBSTypeHandlerTest extends BaseMybatisTest {
     @Autowired
     private OrderMapper orderMapper;
@@ -28,6 +30,7 @@ public class OBSTypeHandlerTest extends BaseMybatisTest {
 
     @Test
     @SneakyThrows
+    @DisplayName("测试OBS类型处理器 - 验证数据存储和查询")
     public void create () {
         var order = new Order();
         order.setId("OBSTypeHandlerTestOrder1");

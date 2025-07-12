@@ -13,6 +13,7 @@ import io.github.opensabe.apple.appstoreconnectapi.inapppurchasesv2.InAppPurchas
 import io.github.opensabe.apple.appstoreconnectapi.subscriptiongroup.SubscriptionGroupsResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -26,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 //todo 在 github action 里面加入 secret，之后通过环境变量读取
 @Disabled
+@DisplayName("Apple自动配置测试")
 public class AppleAutoConfigurationTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withPropertyValues("apple.in-purchase.enable=true",
@@ -61,6 +63,7 @@ public class AppleAutoConfigurationTest {
     public static final String RECEIPT_SIGN = "${RECEIPT_SIGN}";
 
     @Test
+    @DisplayName("测试Apple自动配置 - 验证Bean创建和属性配置")
     public void appleAutoConfigurationTest() {
         contextRunner
                 .run(context -> {
@@ -79,6 +82,7 @@ public class AppleAutoConfigurationTest {
     }
 
     @Test
+    @DisplayName("测试Apple内购收据解码 - 验证收据解析功能")
     public void appleInPurchaseReceiptDecodeTest() {
         contextRunner
                 .run(context -> {
@@ -96,6 +100,7 @@ public class AppleAutoConfigurationTest {
     public static final String NOTIFY_SIGNED_PAYLOAD_SUBSCRIBED_INITIAL_BUY = "${NOTIFY_SIGNED_PAYLOAD_SUBSCRIBED_INITIAL_BUY}";
 
     @Test
+    @DisplayName("测试Apple内购通知解码 - 订阅初始购买")
     public void appleInPurchaseNotifyDecodeSubscribedInitialBuyTest() {
         contextRunner
                 .run(context -> {
@@ -116,6 +121,7 @@ public class AppleAutoConfigurationTest {
     public static final String NOTIFY_SIGNED_PAYLOAD_DID_RENEW = "${NOTIFY_SIGNED_PAYLOAD_DID_RENEW}";
 
     @Test
+    @DisplayName("测试Apple内购通知解码 - 续费通知")
     public void appleInPurchaseNotifyDecodeDidRenewTest() {
         contextRunner
                 .run(context -> {
@@ -131,6 +137,7 @@ public class AppleAutoConfigurationTest {
     public static final String NOTIFY_SIGNED_PAYLOAD_EXPIRED_VOLUNTARY = "${NOTIFY_SIGNED_PAYLOAD_EXPIRED_VOLUNTARY}";
 
     @Test
+    @DisplayName("测试Apple内购通知解码 - 自愿过期")
     public void appleInPurchaseNotifyDecodeExpiredVoluntaryTest() {
         contextRunner
                 .run(context -> {
@@ -141,6 +148,7 @@ public class AppleAutoConfigurationTest {
     }
 
     @Test
+    @DisplayName("测试Apple自动配置禁用 - 验证Bean不创建")
     public void appleAutoConfigurationNoAutoConfigurationTest() {
         contextRunner.withPropertyValues("apple.in-purchase.enable=false")
                 .run(context -> {
@@ -149,6 +157,7 @@ public class AppleAutoConfigurationTest {
     }
 
     @Test
+    @DisplayName("测试根证书加载 - 验证证书文件存在")
     public void rootCertificateTest() {
         Set<InputStream> rootCertificates = AppleInPurchaseConfiguration.getRootCertificates();
         Assertions.assertEquals(rootCertificates.isEmpty(), Boolean.FALSE);
@@ -156,6 +165,7 @@ public class AppleAutoConfigurationTest {
 
 
     @Test
+    @DisplayName("测试Apple Store Connect API客户端 - 验证API调用")
     public void appleStoreConnectApiClientTest() {
             ApplicationContextRunner contextRunner = new ApplicationContextRunner()
                 .run(context -> {
@@ -171,6 +181,7 @@ public class AppleAutoConfigurationTest {
 
 
     @Test
+    @DisplayName("测试内购签名 - 验证Bearer Token生成")
     public void useInPurchaseSign() {
         String signingKey = "${signingKey}";
         String keyId = "${keyId}";
@@ -183,6 +194,7 @@ public class AppleAutoConfigurationTest {
     }
 
     @Test
+    @DisplayName("测试Apple登录签名 - 验证客户端密钥生成")
     public void useAppleLoginSign() {
 
         String issuerId = "${issuerId}";
@@ -197,6 +209,7 @@ public class AppleAutoConfigurationTest {
     }
 
     @Test
+    @DisplayName("测试Apple登录Bean - 验证登录相关Bean创建")
     public void appleLoginBeanTest() {
         contextRunner.run(context -> {
             assertThat(context).hasSingleBean(AppleLoginProperties.class);

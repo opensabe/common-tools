@@ -6,6 +6,7 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @Log4j2
+@DisplayName("SocketIO客户端连接测试")
 public class SocketIOTest extends SocketIOStarter {
     private static final String URL = "http://localhost:";
     @Autowired
@@ -31,6 +33,7 @@ public class SocketIOTest extends SocketIOStarter {
      * @throws InterruptedException
      */
     @Test
+    @DisplayName("测试SocketIO客户端连接和事件订阅")
     public void testClient() throws InterruptedException, URISyntaxException {
         TimeUnit.SECONDS.sleep(1);
         connectToLocalhost();

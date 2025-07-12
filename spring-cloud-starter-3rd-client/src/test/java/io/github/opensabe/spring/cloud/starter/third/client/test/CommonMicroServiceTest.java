@@ -3,6 +3,7 @@ package io.github.opensabe.spring.cloud.starter.third.client.test;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
+import org.junit.jupiter.api.DisplayName;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.ToxiproxyContainer;
@@ -11,6 +12,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.IOException;
 
 @Testcontainers
+@DisplayName("通用微服务测试基类")
 public class CommonMicroServiceTest {
 
     private static final Network network = Network.newNetwork();

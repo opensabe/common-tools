@@ -2,10 +2,12 @@ package io.github.opensabe.common.jfr;
 
 import io.micrometer.observation.Observation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("观察者到JFR生成器测试")
 class ObservationToJFRGeneratorTest {
 
     private TestObservationToJFRGenerator generator;
@@ -20,6 +22,7 @@ class ObservationToJFRGeneratorTest {
     }
 
     @Test
+    @DisplayName("测试开始事件 - 当shouldGenerateOnStart返回true时应调用generateOnStart")
     void onStart_ShouldCallGenerateOnStart_WhenShouldGenerateOnStartReturnsTrue() {
         // given
         generator.setShouldGenerateOnStart(true);
@@ -32,6 +35,7 @@ class ObservationToJFRGeneratorTest {
     }
 
     @Test
+    @DisplayName("测试开始事件 - 当shouldGenerateOnStart返回false时不应调用generateOnStart")
     void onStart_ShouldNotCallGenerateOnStart_WhenShouldGenerateOnStartReturnsFalse() {
         // given
         generator.setShouldGenerateOnStart(false);
@@ -44,6 +48,7 @@ class ObservationToJFRGeneratorTest {
     }
 
     @Test
+    @DisplayName("测试停止事件 - 当shouldCommitOnStop返回true时应调用commitOnStop")
     void onStop_ShouldCallCommitOnStop_WhenShouldCommitOnStopReturnsTrue() {
         // given
         generator.setShouldCommitOnStop(true);
@@ -56,6 +61,7 @@ class ObservationToJFRGeneratorTest {
     }
 
     @Test
+    @DisplayName("测试停止事件 - 当shouldCommitOnStop返回false时不应调用commitOnStop")
     void onStop_ShouldNotCallCommitOnStop_WhenShouldCommitOnStopReturnsFalse() {
         // given
         generator.setShouldCommitOnStop(false);
@@ -68,16 +74,19 @@ class ObservationToJFRGeneratorTest {
     }
 
     @Test
+    @DisplayName("测试开始事件 - 当上下文类型不匹配时应抛出ClassCastException")
     void onStart_ShouldThrowClassCastException_WhenContextTypeMismatch() {
         assertThrows(ClassCastException.class, () -> generator.onStart(anotherContext));
     }
 
     @Test
+    @DisplayName("测试停止事件 - 当上下文类型不匹配时应抛出ClassCastException")
     void onStop_ShouldThrowClassCastException_WhenContextTypeMismatch() {
         assertThrows(ClassCastException.class, () -> generator.onStop(anotherContext));
     }
 
     @Test
+    @DisplayName("测试获取上下文类 - 应返回正确的类")
     void getContextClazz_ShouldReturnCorrectClass() {
         assertEquals(TestContext.class, generator.getContextClazz());
     }

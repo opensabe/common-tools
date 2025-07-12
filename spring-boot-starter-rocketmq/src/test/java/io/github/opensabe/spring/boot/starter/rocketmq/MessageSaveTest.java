@@ -12,6 +12,7 @@ import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
@@ -38,6 +39,7 @@ import java.sql.SQLException;
 })
 @SpringBootTest(classes = BaseRocketMQTest.App.class)
 @Import(MessageSaveTest.Config.class)
+@DisplayName("RocketMQ消息保存测试")
 public class MessageSaveTest {
 
     @DynamicPropertySource
@@ -72,6 +74,7 @@ public class MessageSaveTest {
     private static final String QUERY_SQL = "select * from t_common_mq_fail_log";
 
     @Test
+    @DisplayName("测试消息失败保存 - 验证失败消息存储到数据库")
     void test1() throws SQLException {
         try (
             var session = sqlSessionFactory.openSession();

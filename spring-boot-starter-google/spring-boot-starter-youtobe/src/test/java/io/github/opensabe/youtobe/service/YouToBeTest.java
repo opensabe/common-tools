@@ -11,6 +11,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +21,7 @@ import java.io.IOException;
 //todo 在 github action 里面加入 secret，之后通过环境变量读取
 @Disabled
 @SpringBootTest(classes = App.class)
+@DisplayName("YouTube服务测试")
 public class YouToBeTest {
 
     private static final String key = "${key}";
@@ -37,6 +39,7 @@ public class YouToBeTest {
     private YouToBeListService youToBeListService;
 
     @Test
+    @DisplayName("测试YouTube API直接调用 - 验证HTTP请求")
     public void getTest() throws IOException {
         okHttpClient = new OkHttpClient();
 
@@ -54,6 +57,7 @@ public class YouToBeTest {
      *
      */
     @Test
+    @DisplayName("测试YouTube搜索服务 - 验证搜索功能")
     public void getSearchTest() {
         YouToBeSearchReqDTO reqDTO = new YouToBeSearchReqDTO();
         reqDTO.setQ("West Adelaide Bearcats 60 - 66 South Adelaide Panthers | Highlights");
@@ -68,6 +72,7 @@ public class YouToBeTest {
      *
      */
     @Test
+    @DisplayName("测试YouTube列表服务 - 验证列表获取功能")
     public void getListTest() {
         YouToBeListReqDTO reqDTO = new YouToBeListReqDTO();
         reqDTO.setId("Ks-_Mh1QhMc,c0KYU2j0TM4,eIho2S0ZahI");

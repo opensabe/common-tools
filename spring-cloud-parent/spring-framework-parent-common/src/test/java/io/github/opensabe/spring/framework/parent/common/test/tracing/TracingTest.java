@@ -5,6 +5,7 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(
         classes = TracingTest.Main.class
 )
+@DisplayName("链路追踪测试")
 public class TracingTest {
     @SpringBootApplication
     public static class Main {
@@ -28,6 +30,7 @@ public class TracingTest {
     private UnifiedObservationFactory unifiedObservationFactory;
 
     @Test
+    @DisplayName("测试链路追踪功能 - 验证父子观察者和MDC上下文")
     public void testTracing() {
         var logger = LoggerFactory.getLogger("test");
         ObservationRegistry observationRegistry = unifiedObservationFactory.getObservationRegistry();

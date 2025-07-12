@@ -5,6 +5,7 @@ import io.github.opensabe.common.utils.mapstruct.vo.NodeDto;
 import io.github.opensabe.mapstruct.core.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("MapStruct循环引用测试")
 public class CycleTest {
 
     private Node node;
@@ -63,6 +65,7 @@ public class CycleTest {
     }
 
     @Test
+    @DisplayName("测试DTO映射器 - 验证循环引用处理")
     void testOriginDto () {
         DtoMapper mapper = Mappers.getMapper(DtoMapper.class);
         NodeDto newNode = mapper.map(node);
@@ -75,6 +78,7 @@ public class CycleTest {
     }
 
     @Test
+    @DisplayName("测试节点自映射 - 验证循环引用处理")
     void testOrigin () {
 
         NodeM mapper = Mappers.getMapper(NodeM.class);
@@ -86,6 +90,7 @@ public class CycleTest {
     }
 
     @Test
+    @DisplayName("测试Map到对象映射 - 验证循环引用处理")
     void testOriginMap () {
         var c1 = new Node("child1");
         var c2 = new Node("child2");
@@ -104,6 +109,7 @@ public class CycleTest {
                 .containsExactly("child1", "child2");
     }
     @Test
+    @DisplayName("测试自复制映射器 - 验证循环引用处理")
     void test () {
 
         SelfCopyMapper<Node> mapper = MapperRepository.getInstance().getMapper(Node.class);
@@ -115,6 +121,7 @@ public class CycleTest {
     }
 
     @Test
+    @DisplayName("测试通用复制映射器 - 验证循环引用处理")
     void testNormal () {
 
         CommonCopyMapper<Node, NodeDto> mapper = MapperRepository.getInstance().getMapper(Node.class, NodeDto.class);

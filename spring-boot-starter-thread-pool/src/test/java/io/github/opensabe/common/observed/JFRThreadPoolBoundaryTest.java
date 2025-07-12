@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,7 @@ import static org.junit.Assert.assertTrue;
 })
 //JFR 测试最好在本地做
 @Disabled
+@DisplayName("JFR线程池边界测试")
 public class JFRThreadPoolBoundaryTest {
     Logger logger = LogManager.getLogger(JFRThreadPoolBoundaryTest.class);
     private static final String threadNamePrefix = "threadPoolStat";
@@ -66,6 +68,7 @@ public class JFRThreadPoolBoundaryTest {
     private static final long UNIT = 500L;
 
     @Test
+    @DisplayName("测试正常Callable任务 - 验证JFR事件记录和链路追踪")
     public void testNormal() {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testNormal";
@@ -163,6 +166,7 @@ public class JFRThreadPoolBoundaryTest {
      * JFR 值测试 duration runnable
      */
     @Test
+    @DisplayName("测试Runnable任务持续时间 - 验证JFR事件记录")
     public void testDurationRunnable() throws InterruptedException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testDurationRunnable";
@@ -250,6 +254,7 @@ public class JFRThreadPoolBoundaryTest {
      * 测试3  JFR 值测试  exception  callable duration
      */
     @Test
+    @DisplayName("测试Callable任务异常处理 - 验证JFR事件记录")
     public void testCallableDurationException() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testCallableDurationException";
@@ -348,6 +353,7 @@ public class JFRThreadPoolBoundaryTest {
      * 线程池 线程执行任务1时会异常退出(线程一退出)，执行任务2时创建新线程
      */
     @Test
+    @DisplayName("测试Runnable任务异常处理 - 验证JFR事件记录")
     public void testRunnableDurationException() throws InterruptedException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testRunnableDurationException";
@@ -417,6 +423,7 @@ public class JFRThreadPoolBoundaryTest {
      * 测试5  JFR 值测试  throwable  callable duration
      */
     @Test
+    @DisplayName("测试Callable任务异常处理 - 验证JFR事件记录")
     public void testCallableDurationThrowable() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testCallableDurationThrowable";
@@ -514,6 +521,7 @@ public class JFRThreadPoolBoundaryTest {
      * 测试6  JFR 值测试  throwable  runnable duration
      */
     @Test
+    @DisplayName("测试Runnable任务异常处理 - 验证JFR事件记录")
     public void testRunnableDurationThrowable() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testRunnableDurationThrowable";

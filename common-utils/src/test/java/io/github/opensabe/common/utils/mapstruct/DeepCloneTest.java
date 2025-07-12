@@ -4,6 +4,7 @@ import io.github.opensabe.common.utils.mapstruct.vo.*;
 import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.mapstruct.core.MapperRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -11,9 +12,11 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+@DisplayName("MapStruct深度克隆测试")
 public class DeepCloneTest {
 
     @Test
+    @DisplayName("测试复杂对象深度克隆 - 验证对象引用和内容")
     void test () {
 
         CustomerDto customerDto = new CustomerDto();
@@ -54,6 +57,7 @@ public class DeepCloneTest {
     }
 
     @Test
+    @DisplayName("测试Record类型深度克隆 - 验证内部类型映射")
     void testInnerType () {
         var book1 = new PersonRecord.BookRecord("book1");
         var book2 = new PersonRecord.BookRecord("book2");

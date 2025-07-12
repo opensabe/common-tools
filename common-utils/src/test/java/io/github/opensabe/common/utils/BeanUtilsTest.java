@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("Bean工具类测试")
 public class BeanUtilsTest {
 
     public record RU (String  name, Integer age) {}
@@ -34,6 +36,7 @@ public class BeanUtilsTest {
     }
 
     @Test
+    @DisplayName("测试Record到普通类的属性复制 - Integer到int类型转换")
     void testRecord_Integer_to_int() {
         var source = new RU("rrr", 10);
         var target = new CU();
@@ -43,6 +46,7 @@ public class BeanUtilsTest {
     }
 
     @Test
+    @DisplayName("测试普通类属性复制 - int到Integer类型转换")
     void test_int_to_Integer() {
         var source = new CU("rrr", 10);
         var target = new CT();
@@ -52,6 +56,7 @@ public class BeanUtilsTest {
     }
 
     @Test
+    @DisplayName("测试嵌套对象属性复制")
     void testMixProperty () {
         var s = new CC(new CU("SSS", 10));
         var t = new CC();
@@ -65,6 +70,7 @@ public class BeanUtilsTest {
      * 其实这并不byte buddy本身性能有多好，而是这种用字节码提前生成针对与两个对象的复制属性代码的设计优势
      */
     @Test
+    @DisplayName("测试Bean复制性能对比 - ByteBuddy vs Spring BeanUtils")
     void testTime () {
 
         //先预热
