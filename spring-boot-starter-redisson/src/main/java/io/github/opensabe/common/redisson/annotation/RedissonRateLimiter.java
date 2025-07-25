@@ -1,6 +1,5 @@
 package io.github.opensabe.common.redisson.annotation;
 
-import org.redisson.api.RateIntervalUnit;
 import org.redisson.api.RateType;
 
 import java.lang.annotation.*;
@@ -37,31 +36,26 @@ public @interface RedissonRateLimiter {
 
     /**
      * @see RateType
-     * @return
      */
     RateType rateType();
 
     /**
      * 时间区间
-     * @return
      */
     long rateInterval();
 
     /**
      * 在 rateInterval 内，最多有多少个 permits
-     * @return
      */
     long rate();
 
     /**
      * 时间区间单位
-     * @return
      */
-    RateIntervalUnit rateIntervalUnit();
+    TimeUnit rateIntervalUnit();
 
     /**
      * 令牌存活时间,keepAliveTimeUnit()
-     * @return
      */
     long keepAlive() default 0L;
     /**

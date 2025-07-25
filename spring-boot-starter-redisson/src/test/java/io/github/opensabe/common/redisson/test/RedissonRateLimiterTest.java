@@ -8,7 +8,6 @@ import lombok.Getter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RRateLimiter;
-import org.redisson.api.RateIntervalUnit;
 import org.redisson.api.RateLimiterConfig;
 import org.redisson.api.RateType;
 import org.redisson.api.RedissonClient;
@@ -58,7 +57,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
                 rate = 1,
                 rateInterval = 1,
                 rateType = RateType.OVERALL,
-                rateIntervalUnit = RateIntervalUnit.SECONDS
+                rateIntervalUnit = TimeUnit.SECONDS
         )
         public void testRateLimiterBlockAcquire() {
             try {
@@ -81,7 +80,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
                 rate = 1,
                 rateInterval = 1,
                 rateType = RateType.OVERALL,
-                rateIntervalUnit = RateIntervalUnit.SECONDS
+                rateIntervalUnit = TimeUnit.SECONDS
         )
         public void testRateLimiterBlockAcquireWithParams(@RedissonRateLimiterName String permitsName) {
             try {
@@ -103,7 +102,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
                 rate = 1,
                 rateInterval = 1,
                 rateType = RateType.OVERALL,
-                rateIntervalUnit = RateIntervalUnit.SECONDS
+                rateIntervalUnit = TimeUnit.SECONDS
         )
         public void testRateLimiterBlockAcquireWithParams1(String permitsName) {
             try {
@@ -126,7 +125,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
                 rate = 1,
                 rateInterval = 1,
                 rateType = RateType.OVERALL,
-                rateIntervalUnit = RateIntervalUnit.SECONDS
+                rateIntervalUnit = TimeUnit.SECONDS
         )
         public void testRateLimiterTryAcquireNoWait() {
             try {
@@ -151,7 +150,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
                 rate = 1,
                 rateInterval = 1,
                 rateType = RateType.OVERALL,
-                rateIntervalUnit = RateIntervalUnit.SECONDS
+                rateIntervalUnit = TimeUnit.SECONDS
         )
         public void testRateLimiterTryAcquireWithWaitTime() {
             try {

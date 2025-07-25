@@ -75,8 +75,7 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
             rateLimiter.setRate(
                     redissonRateLimiter.rateType(),
                     redissonRateLimiter.rate(),
-                    redissonRateLimiter.rateInterval(),
-                    redissonRateLimiter.rateIntervalUnit()
+                    Duration.ofMillis(redissonRateLimiter.rateIntervalUnit().toMillis(redissonRateLimiter.rateInterval()))
             );
             config = rateLimiter.getConfig();
         }
@@ -88,7 +87,7 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
                     throw new RedissonRateLimiterException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
                 }
             } else {
-                if (!rateLimiter.tryAcquire(redissonRateLimiter.permits(), redissonRateLimiter.waitTime(), redissonRateLimiter.timeUnit())) {
+                if (!rateLimiter.tryAcquire(redissonRateLimiter.permits(),Duration.ofMillis(redissonRateLimiter.timeUnit().toMillis(redissonRateLimiter.waitTime())))) {
                     throw new RedissonRateLimiterException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
                 }
             }

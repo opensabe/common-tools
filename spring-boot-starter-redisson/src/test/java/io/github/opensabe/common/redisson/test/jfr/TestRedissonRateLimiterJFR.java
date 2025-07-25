@@ -1,29 +1,21 @@
 package io.github.opensabe.common.redisson.test.jfr;
 
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
 import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
-import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
-import org.redisson.api.RateIntervalUnit;
 import org.redisson.api.RateType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +24,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @Import(TestRedissonRateLimiterJFR.Config.class)
@@ -60,7 +51,7 @@ public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
                 rate = 1,
                 rateInterval = 1,
                 rateType = RateType.OVERALL,
-                rateIntervalUnit = RateIntervalUnit.SECONDS
+                rateIntervalUnit = TimeUnit.SECONDS
         )
         public void testRateLimiterTryAcquireWithWait() throws InterruptedException {
             TimeUnit.MILLISECONDS.sleep(100);
