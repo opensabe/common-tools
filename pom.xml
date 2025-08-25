@@ -156,6 +156,50 @@
         </profile>
     </profiles>
 
+    <build>
+        <plugins>
+            <!-- Maven License Plugin for automatic license header formatting -->
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.1</version>
+                <configuration>
+                    <header>${session.executionRootDirectory}/LICENSE_HEADER</header>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/target/**</exclude>
+                    </excludes>
+                    <strictCheck>false</strictCheck>
+                    <aggregate>true</aggregate>
+                    <useDefaultExcludes>false</useDefaultExcludes>
+                    <encoding>UTF-8</encoding>
+                    <properties>
+                        <copyright.year>2025</copyright.year>
+                        <copyright.holder>opensabe-tech</copyright.holder>
+                    </properties>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-license</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                    <execution>
+                        <id>format-license</id>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <reporting>
         <plugins>
             <plugin>
