@@ -35,8 +35,7 @@ public enum BizCodeEnum implements ErrorMessage {
     ERROR(19999, "error"),                              // unexpected system error
     /**
      * Specified BizCode {SrcEnum.id + 4 digits}
-     */
-    ;
+     */;
 
     private int val;
     private String defaultMsg;
