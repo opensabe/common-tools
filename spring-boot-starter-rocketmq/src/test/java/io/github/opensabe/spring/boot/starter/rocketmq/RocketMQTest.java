@@ -15,18 +15,13 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
-import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
-import io.github.opensabe.common.entity.base.vo.BaseMessage;
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.common.secret.SecretProvider;
-import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQTest;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.rocketmq.common.message.Message;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
@@ -36,50 +31,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import com.alibaba.fastjson.JSONException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.github.opensabe.common.entity.base.vo.BaseMessage;
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.common.secret.SecretProvider;
+import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQTest;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Import(RocketMQTest.Config.class)
 @DisplayName("RocketMQ消息队列测试")
 public class RocketMQTest extends BaseRocketMQTest {
 
-    private static volatile Long timestamp = System.currentTimeMillis();
+    public static final List<String> SENT_MESSAGES = new ArrayList<>();
     private static final CountDownLatch testSendLatch = new CountDownLatch(1);
     private static final String testSendLatchString = testSendLatch.toString();
+    private static final String SECRET = "secretString";
+    private static volatile Long timestamp = System.currentTimeMillis();
     private static boolean hasInfo = false;
     private static CountDownLatch latch;
-    public static final List<String> SENT_MESSAGES = new ArrayList<>();
-
-    public static class Config {
-        @Bean
-        public TestConsumer testConsumer() {
-            return new TestConsumer();
-        }
-
-        @Bean
-        public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
-            return new TestSecretProvider(globalSecretManager);
-        }
-    }
-
     @Autowired
     private MQProducer mqProducer;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class POJO {
-        private Long timestamp;
-        private String text;
-    }
 
     @Test
     @DisplayName("测试消息发送和消费 - 验证消息传递功能")
@@ -128,10 +106,32 @@ public class RocketMQTest extends BaseRocketMQTest {
         StringBuilder stringB = new StringBuilder(size);
         String paddingString = "abcdefghijklmnopqrs";
 
-        while (stringB.length() + paddingString.length() < size)
+        while (stringB.length() + paddingString.length() < size) {
             stringB.append(paddingString);
+        }
 
         return stringB.toString();
+    }
+
+    public static class Config {
+        @Bean
+        public TestConsumer testConsumer() {
+            return new TestConsumer();
+        }
+
+        @Bean
+        public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
+            return new TestSecretProvider(globalSecretManager);
+        }
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class POJO {
+        private Long timestamp;
+        private String text;
     }
 
     @RocketMQMessageListener(
@@ -158,8 +158,6 @@ public class RocketMQTest extends BaseRocketMQTest {
             }
         }
     }
-
-    private static final String SECRET = "secretString";
 
     public static class TestSecretProvider extends SecretProvider {
         protected TestSecretProvider(GlobalSecretManager globalSecretManager) {

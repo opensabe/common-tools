@@ -15,6 +15,10 @@
  */
 package io.github.opensabe.alive.client.impl;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -27,12 +31,8 @@ import org.apache.zookeeper.Watcher.Event.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 
-
-public class AliveServerList implements Watcher{
+public class AliveServerList implements Watcher {
 
     private static InetSocketAddress[] EMPTY_SERVER_LIST = new InetSocketAddress[]{};
 
@@ -80,6 +80,9 @@ public class AliveServerList implements Watcher{
                 }
             }
         });
+    }
+
+    public AliveServerList() {
     }
 
     public synchronized void start() {
@@ -145,18 +148,13 @@ public class AliveServerList implements Watcher{
                 }
             }
             serverList = newServerList.toArray(new InetSocketAddress[]{});
-                logger.info("alive server list " + StringUtils.join(serverList, ","));
+            logger.info("alive server list " + StringUtils.join(serverList, ","));
         } catch (Exception e) {
             logger.info("refresh server list error", e);
         }
         if (listener != null) {
             listener.serverListChanged();
         }
-    }
-
-    public interface AliveServerListListener {
-
-        void serverListChanged();
     }
 
     @Override
@@ -173,6 +171,8 @@ public class AliveServerList implements Watcher{
         return curator;
     }
 
-    public AliveServerList() {
+    public interface AliveServerListListener {
+
+        void serverListChanged();
     }
 }

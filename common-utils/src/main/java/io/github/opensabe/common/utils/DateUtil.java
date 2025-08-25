@@ -15,15 +15,20 @@
  */
 package io.github.opensabe.common.utils;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -31,10 +36,7 @@ import java.util.*;
  *
  * @author zhaogang
  */
-public class DateUtil
-
-{
-    private static Log log = LogFactory.getLog(DateUtil.class);
+public class DateUtil {
     /**
      * 默认的日期格式
      */
@@ -68,21 +70,17 @@ public class DateUtil
     public static final int FMT_DATE_YYMMDD = 13;
     public static final int FMT_DATE_YYMMDDHH = 14;
     public static final int FMT_DATE_MMDD_HHMM_CH = 15;
-
     /**
      * @add by wangmeng 添加日期转换格式MMdd
      */
     public static final int FMT_DATE_MMdd = 16;
-
     /**
      * @add by 李闯 添加日期转换格式2012年5月10日11点52分
      */
     public static final int FMT_DATE_YYYY年MM月DD日HH时SS分 = 17;
     public static final int FMT_DATE_MMDD_HHMMSS = 18;
-
     public static final int FMT_DATE_YYYYMMDD_DOT = 19; //add by luming 2013.09.04
     public static final int FMT_DATE_MMDD_HH_CH = 20;
-
     /**
      * 静态常量值 用于获取 某一个日期的 年 月 日 时 分 秒 标识
      **/
@@ -92,9 +90,8 @@ public class DateUtil
     public static final int GET_TIME_IF_HOUR = 400;// 获取日期的小时
     public static final int GET_TIME_OF_MINUTE = 500;
     public static final int GET_TIME_OF_SECOND = 600;
-
-
     public static String[] formatTab;
+    private static Log log = LogFactory.getLog(DateUtil.class);
 
     static {
         formatTab = new String[21];
@@ -936,7 +933,7 @@ public class DateUtil
     public static String getCouponDisplayExpireDate(Timestamp expireTime, boolean needModify) {
         //如果优惠券过期时间在当前时间20年后，则过期时间显示为“永久有效” added by mwlv
         Timestamp tmp = DateUtil.getCurrentTimestamp();
-        tmp.setTime(System.currentTimeMillis()+20*365*24*3600*1000L);
+        tmp.setTime(System.currentTimeMillis() + 20 * 365 * 24 * 3600 * 1000L);
         if (tmp.before(expireTime)) {
             return "forever valid";
         }

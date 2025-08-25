@@ -16,7 +16,6 @@
 package io.github.opensabe.alive.client.impl.future;
 
 import java.util.concurrent.TimeUnit;
-
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.ResponseFuture;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;
@@ -35,7 +34,7 @@ public class ResponseFutureImpl implements ResponseFuture {
     }
 
     private Response get0(long timeout, TimeUnit unit)
-        throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
+            throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         return future.get0(timeout, unit);
     }
 
@@ -46,7 +45,7 @@ public class ResponseFutureImpl implements ResponseFuture {
 
     @Override
     public Response get(long timeout, TimeUnit unit)
-        throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
+            throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         return get0(timeout, unit);
     }
 

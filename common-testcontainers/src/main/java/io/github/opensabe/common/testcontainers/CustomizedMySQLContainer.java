@@ -15,13 +15,6 @@
  */
 package io.github.opensabe.common.testcontainers;
 
-import com.github.dockerjava.api.command.InspectContainerResponse;
-import lombok.SneakyThrows;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.testcontainers.containers.Container;
-import org.testcontainers.containers.GenericContainer;
-
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +22,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
+
+import com.github.dockerjava.api.command.InspectContainerResponse;
+
+import lombok.SneakyThrows;
 
 public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLContainer> {
     public static final int MYSQL_PORT = 3306;

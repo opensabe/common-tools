@@ -15,8 +15,8 @@
  */
 package io.github.opensabe.common.redisson.jfr;
 
-import io.github.opensabe.common.redisson.observation.rlock.RLockForceReleaseContext;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.observation.rlock.RLockForceReleaseContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
 public class RLockForceReleaseObservationToJFRGenerator extends ObservationToJFRGenerator<RLockForceReleaseContext> {

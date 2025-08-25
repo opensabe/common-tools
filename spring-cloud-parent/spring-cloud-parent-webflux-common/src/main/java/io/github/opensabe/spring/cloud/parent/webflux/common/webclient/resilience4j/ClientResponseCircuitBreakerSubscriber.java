@@ -15,11 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilience4j;
 
-import io.github.opensabe.common.utils.AlarmUtil;
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfigurationProperties;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.reactor.AbstractSubscriber;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -28,31 +27,24 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.UnknownHttpStatusCodeException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.CoreSubscriber;
-
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.requireNonNull;
 
+import io.github.opensabe.common.utils.AlarmUtil;
+import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfigurationProperties;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.reactor.AbstractSubscriber;
+import lombok.extern.log4j.Log4j2;
+import reactor.core.CoreSubscriber;
+
 /**
  * 基于官方的 CircuitBreakerOperator 针对 CircuitBreakerSubscriber 改造，基于 ClientResponse 的 http status code
+ *
  * @see io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerSubscriber
  */
 @Log4j2
 public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<ClientResponse> {
-    private final CircuitBreaker circuitBreaker;
-    private final ServiceInstance serviceInstance;
-    private final WebClientConfigurationProperties.WebClientProperties webClientProperties;
-    private final long start;
-    private final boolean singleProducer;
-
-    private final AtomicBoolean successSignaled = new AtomicBoolean(false);
-    private final AtomicBoolean eventWasEmitted = new AtomicBoolean(false);
-
     private static final byte[] EMPTY = new byte[0];
-
     private static final Class<?> aClass;
     private static final Method request;
 
@@ -66,7 +58,13 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
         }
     }
 
-
+    private final CircuitBreaker circuitBreaker;
+    private final ServiceInstance serviceInstance;
+    private final WebClientConfigurationProperties.WebClientProperties webClientProperties;
+    private final long start;
+    private final boolean singleProducer;
+    private final AtomicBoolean successSignaled = new AtomicBoolean(false);
+    private final AtomicBoolean eventWasEmitted = new AtomicBoolean(false);
 
 
     protected ClientResponseCircuitBreakerSubscriber(

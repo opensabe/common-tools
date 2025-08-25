@@ -15,17 +15,21 @@
  */
 package io.github.opensabe.common.mybatis.jfr;
 
-import jdk.jfr.*;
+import jdk.jfr.Category;
+import jdk.jfr.Event;
+import jdk.jfr.Label;
+import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * sql执行监控
+ *
  * @author maheng
  */
 @Getter
 @Setter
-@Category({"observation","mybatis"})
+@Category({"observation", "mybatis"})
 @Label("SQL Execute Monitor")
 @StackTrace(value = false)
 public class SQLExecuteEvent extends Event {
@@ -38,11 +42,9 @@ public class SQLExecuteEvent extends Event {
 
     @Label("Transaction Id")
     private final String transactionName;
-
+    private final boolean success;
     private String traceId;
     private String spanId;
-
-    private final boolean success;
 
     public SQLExecuteEvent(String method, String transactionName, boolean success) {
         this.method = method;

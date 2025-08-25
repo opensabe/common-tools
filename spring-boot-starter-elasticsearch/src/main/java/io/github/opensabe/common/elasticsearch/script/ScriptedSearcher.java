@@ -15,7 +15,8 @@
  */
 package io.github.opensabe.common.elasticsearch.script;
 
-import lombok.extern.log4j.Log4j2;
+import java.io.IOException;
+
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -23,7 +24,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
-import java.io.IOException;
+import lombok.extern.log4j.Log4j2;
 
 
 @Log4j2

@@ -20,8 +20,9 @@ import org.apache.ibatis.session.SqlSession;
 
 /**
  * 自定义Mapper代理
- * @author maheng
+ *
  * @param <T>
+ * @author maheng
  */
 public class MapperProxyFactory<T> extends org.apache.ibatis.binding.MapperProxyFactory<T> {
     public MapperProxyFactory(Class<T> mapperInterface) {

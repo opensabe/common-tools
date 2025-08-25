@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.common.redisson.test;
 
-import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
-import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
-import lombok.Getter;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
@@ -26,13 +27,34 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
+import lombok.Getter;
 
 @Import(RedissonSemaphoreTest.Config.class)
 public class RedissonSemaphoreTest extends BaseRedissonTest {
     private static final int THREAD_COUNT = 16;
+    @Autowired
+    private TestRedissonRateLimiterClass testRedissonRateLimiterClass;
+
+    @Test
+    public void testBlockAcquire() throws InterruptedException {
+        testRedissonRateLimiterClass.getResult().set(true);
+        Thread[] threads = new Thread[THREAD_COUNT];
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            threads[i] = new Thread(() -> {
+                testRedissonRateLimiterClass.testBlockAcquire();
+            });
+        }
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            threads[i].start();
+        }
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            threads[i].join();
+        }
+        Assertions.assertTrue(testRedissonRateLimiterClass.getResult().get());
+        Assertions.assertTrue(testRedissonRateLimiterClass.getHasReachedMax().get());
+    }
 
     public static class Config {
         @Autowired
@@ -80,28 +102,6 @@ public class RedissonSemaphoreTest extends BaseRedissonTest {
             }
             count.decrementAndGet();
         }
-    }
-
-    @Autowired
-    private TestRedissonRateLimiterClass testRedissonRateLimiterClass;
-
-    @Test
-    public void testBlockAcquire() throws InterruptedException {
-        testRedissonRateLimiterClass.getResult().set(true);
-        Thread []threads = new Thread[THREAD_COUNT];
-        for (int i = 0; i < THREAD_COUNT; i++) {
-            threads[i] = new Thread(() -> {
-               testRedissonRateLimiterClass.testBlockAcquire();
-            });
-        }
-        for (int i = 0; i < THREAD_COUNT; i++) {
-            threads[i].start();
-        }
-        for (int i = 0; i < THREAD_COUNT; i++) {
-            threads[i].join();
-        }
-        Assertions.assertTrue(testRedissonRateLimiterClass.getResult().get());
-        Assertions.assertTrue(testRedissonRateLimiterClass.getHasReachedMax().get());
     }
 
 }

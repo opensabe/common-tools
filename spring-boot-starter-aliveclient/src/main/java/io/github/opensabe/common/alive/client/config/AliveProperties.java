@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.common.alive.client.config;
 
-import lombok.Data;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import lombok.Data;
 
 @ConfigurationProperties(prefix = "alive.push")
 @Data

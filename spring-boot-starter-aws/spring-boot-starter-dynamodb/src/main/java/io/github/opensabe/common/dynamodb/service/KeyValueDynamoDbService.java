@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.common.dynamodb.service;
 
+import org.springframework.core.env.Environment;
+
 import io.github.opensabe.common.dynamodb.annotation.HashKeyName;
 import io.github.opensabe.common.dynamodb.annotation.TableName;
-import org.springframework.core.env.Environment;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 
 public class KeyValueDynamoDbService extends DynamoDbBaseService<KeyValueDynamoDbService.KeyValueMap> {
 
 
-    public KeyValueDynamoDbService( Environment environment, DynamoDbEnhancedClient client) {
+    public KeyValueDynamoDbService(Environment environment, DynamoDbEnhancedClient client) {
         super(environment, client);
     }
 
@@ -37,12 +38,12 @@ public class KeyValueDynamoDbService extends DynamoDbBaseService<KeyValueDynamoD
             return key;
         }
 
-        public String getValue() {
-            return value;
-        }
-
         public void setKey(String key) {
             this.key = key;
+        }
+
+        public String getValue() {
+            return value;
         }
 
         public void setValue(String value) {

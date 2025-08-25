@@ -21,6 +21,7 @@ import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
  * connection监控指标
+ *
  * @author maheng
  */
 public enum ConnectionDocumentation implements ObservationDocumentation {

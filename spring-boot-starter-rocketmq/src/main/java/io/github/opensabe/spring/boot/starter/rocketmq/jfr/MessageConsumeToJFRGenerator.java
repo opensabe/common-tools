@@ -16,16 +16,9 @@
 package io.github.opensabe.spring.boot.starter.rocketmq.jfr;
 
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
-import io.github.opensabe.common.redisson.jfr.RExpirableExpireJFREvent;
 import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
-import jdk.jfr.Category;
-import jdk.jfr.Event;
-import jdk.jfr.Label;
-import jdk.jfr.StackTrace;
-import lombok.Getter;
-import lombok.Setter;
 
 public class MessageConsumeToJFRGenerator extends ObservationToJFRGenerator<MessageConsumeContext> {
 

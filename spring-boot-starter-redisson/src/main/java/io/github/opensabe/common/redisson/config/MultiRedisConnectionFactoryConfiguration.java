@@ -15,10 +15,12 @@
  */
 package io.github.opensabe.common.redisson.config;
 
-import com.google.common.collect.Maps;
-import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
-import io.lettuce.core.resource.ClientResources;
-import lombok.extern.log4j.Log4j2;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -40,14 +42,15 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.lang.NonNull;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Maps;
+
+import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
+import io.lettuce.core.resource.ClientResources;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 由于RedissonClient创建比较早，因此这里必须调整一下order
+ *
  * @author heng.ma
  */
 @Log4j2
@@ -93,6 +96,7 @@ public class MultiRedisConnectionFactoryConfiguration implements BeanPostProcess
 
     /**
      * 创建redissonClient需要RedissonProperties，因此需要替换掉默认的RedissonProperties
+     *
      * @see org.redisson.spring.starter.RedissonAutoConfiguration
      */
     @Override
@@ -116,11 +120,11 @@ public class MultiRedisConnectionFactoryConfiguration implements BeanPostProcess
         Map<String, List<LettuceConnectionFactory>> connectionFactoryMap = Maps.newHashMap();
         Map<String, RedisProperties> multi = multiRedisProperties.getMulti();
         multi.forEach((k, v) -> {
-            log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactory is initializing... {},{}", k,v.getHost());
+            log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactory is initializing... {},{}", k, v.getHost());
             try {
                 Object property = propertyConstructor.invoke(v);
                 Object configuration = configurationConstructor.invoke(v, standaloneConfigurationProvider, sentinelConfigurationProvider, clusterConfigurationProvider, property, sslBundles);
-                LettuceConnectionFactory lettuceConnectionFactory = (LettuceConnectionFactory)redisConnectionFactory.bindTo(configuration)
+                LettuceConnectionFactory lettuceConnectionFactory = (LettuceConnectionFactory) redisConnectionFactory.bindTo(configuration)
                         .invokeExact(builderCustomizers, clientOptionsBuilderCustomizers, clientResources);
                 lettuceConnectionFactory.setPipeliningFlushPolicy(LettuceConnection.PipeliningFlushPolicy.flushOnClose());
                 lettuceConnectionFactory.setShareNativeConnection(false);
@@ -132,24 +136,25 @@ public class MultiRedisConnectionFactoryConfiguration implements BeanPostProcess
         });
         return new MultiRedisLettuceConnectionFactory(connectionFactoryMap);
     }
+
     @Bean
     @ConditionalOnThreading(Threading.VIRTUAL)
     public MultiRedisLettuceConnectionFactory multiRedisLettuceConnectionFactoryVirtual(ObjectProvider<LettuceClientConfigurationBuilderCustomizer> builderCustomizers,
-                                                                                 ClientResources clientResources,
-                                                                                 ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
-                                                                                 ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
-                                                                                 ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider,
-                                                                                 ObjectProvider<SslBundles> sslBundles,
-                                                                                 ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers) {
+                                                                                        ClientResources clientResources,
+                                                                                        ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
+                                                                                        ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
+                                                                                        ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider,
+                                                                                        ObjectProvider<SslBundles> sslBundles,
+                                                                                        ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers) {
         log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactoryVirtual initialization starts... {}", multiRedisProperties.toString());
         Map<String, List<LettuceConnectionFactory>> connectionFactoryMap = Maps.newHashMap();
         Map<String, RedisProperties> multi = multiRedisProperties.getMulti();
         multi.forEach((k, v) -> {
-            log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactoryVirtual is initializing... {},{}", k,v.getHost());
+            log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactoryVirtual is initializing... {},{}", k, v.getHost());
             try {
                 Object property = propertyConstructor.invokeExact(v);
                 Object configuration = configurationConstructor.invoke(v, standaloneConfigurationProvider, sentinelConfigurationProvider, clusterConfigurationProvider, property, sslBundles);
-                LettuceConnectionFactory lettuceConnectionFactory = (LettuceConnectionFactory)redisConnectionFactoryVirtual.bindTo(configuration)
+                LettuceConnectionFactory lettuceConnectionFactory = (LettuceConnectionFactory) redisConnectionFactoryVirtual.bindTo(configuration)
                         .invokeExact(builderCustomizers, clientOptionsBuilderCustomizers, clientResources);
                 lettuceConnectionFactory.setPipeliningFlushPolicy(LettuceConnection.PipeliningFlushPolicy.flushOnClose());
                 lettuceConnectionFactory.setShareNativeConnection(false);

@@ -15,7 +15,8 @@
  */
 package io.github.opensabe.common.mybatis.monitor;
 
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -25,7 +26,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.lang.reflect.Method;
+import lombok.extern.log4j.Log4j2;
 
 /*
  * @author lyq

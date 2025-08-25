@@ -15,8 +15,8 @@
  */
 package io.github.opensabe.common.s3.jfr;
 
-import io.github.opensabe.common.s3.observation.S3OperationContext;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
+import io.github.opensabe.common.s3.observation.S3OperationContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 

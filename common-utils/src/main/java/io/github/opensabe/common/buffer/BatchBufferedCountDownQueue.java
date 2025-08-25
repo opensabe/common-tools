@@ -35,6 +35,7 @@ public abstract class BatchBufferedCountDownQueue<E extends BufferedCountDownLat
 
     /**
      * 目前不能在外层有事务，因为这里面的东西不会因为外层的事务回滚而回滚
+     *
      * @param e
      */
     @Override

@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.scheduler.listener;
 
-import io.github.opensabe.scheduler.conf.JobStatus;
-import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
-import io.github.opensabe.scheduler.job.SchedulerJob;
-import lombok.extern.log4j.Log4j2;
+import java.util.concurrent.TimeUnit;
+
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.concurrent.TimeUnit;
+import io.github.opensabe.scheduler.conf.JobStatus;
+import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
+import io.github.opensabe.scheduler.job.SchedulerJob;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class DefaultJobListener implements JobStartedListener, JobSuccessListener, JobFinishedListener, JobRetryListener {

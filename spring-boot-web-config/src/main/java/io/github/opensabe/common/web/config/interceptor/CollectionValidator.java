@@ -15,13 +15,13 @@
  */
 package io.github.opensabe.common.web.config.interceptor;
 
+import java.util.Collection;
+
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-
-import java.util.Collection;
 
 public class CollectionValidator implements Validator {
     private final Validator validator;

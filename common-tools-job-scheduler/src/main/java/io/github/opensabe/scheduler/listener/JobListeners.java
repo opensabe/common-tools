@@ -15,15 +15,17 @@
  */
 package io.github.opensabe.scheduler.listener;
 
-import org.apache.commons.collections4.CollectionUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import java.util.*;
+import org.apache.commons.collections4.CollectionUtils;
 
 public class JobListeners {
 
     private final List<JobListener> listeners;
 
-    public JobListeners(JobListener... jobListeners){
+    public JobListeners(JobListener... jobListeners) {
         this(Arrays.asList(jobListeners));
     }
 

@@ -15,18 +15,15 @@
  */
 package io.github.opensabe.alive.client.impl;
 
+import java.net.ConnectException;
 import io.github.opensabe.alive.client.callback.CallbackManager;
-
+import io.github.opensabe.alive.client.exception.AliveClientException;
+import io.github.opensabe.alive.protobuf.Message;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-
-import java.net.ConnectException;
-
-import io.github.opensabe.alive.client.exception.AliveClientException;
-import io.github.opensabe.alive.protobuf.Message;
 
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 

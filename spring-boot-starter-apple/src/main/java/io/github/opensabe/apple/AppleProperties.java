@@ -15,8 +15,9 @@
  */
 package io.github.opensabe.apple;
 
-import com.apple.itunes.storekit.model.Environment;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import com.apple.itunes.storekit.model.Environment;
 
 @ConfigurationProperties("apple.in-purchase")
 public class AppleProperties {

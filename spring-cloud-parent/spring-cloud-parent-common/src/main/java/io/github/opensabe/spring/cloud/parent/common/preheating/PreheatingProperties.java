@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.preheating;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.time.Duration;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

@@ -15,10 +15,9 @@
  */
 package io.github.opensabe.scheduler.utils;
 
-import io.github.opensabe.scheduler.job.SchedulerJob;
-
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import io.github.opensabe.scheduler.job.SchedulerJob;
 
 public class MisfireQueue {
 

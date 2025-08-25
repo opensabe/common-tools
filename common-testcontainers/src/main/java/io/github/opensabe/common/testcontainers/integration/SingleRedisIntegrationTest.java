@@ -15,13 +15,19 @@
  */
 package io.github.opensabe.common.testcontainers.integration;
 
-import io.github.opensabe.common.testcontainers.CustomizedRedisContainer;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
+import io.github.opensabe.common.testcontainers.CustomizedRedisContainer;
+
 public class SingleRedisIntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
     public static final CustomizedRedisContainer REDIS = new CustomizedRedisContainer();
+
+    public static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", REDIS::getHost);
+        registry.add("spring.data.redis.port", REDIS::getRedisPort);
+    }
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
@@ -33,11 +39,6 @@ public class SingleRedisIntegrationTest implements BeforeAllCallback, ExtensionC
                 }
             }
         }
-    }
-
-    public static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", REDIS::getHost);
-        registry.add("spring.data.redis.port", REDIS::getRedisPort);
     }
 
     @Override

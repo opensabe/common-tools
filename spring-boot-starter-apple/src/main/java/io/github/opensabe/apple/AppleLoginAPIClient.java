@@ -15,19 +15,28 @@
  */
 package io.github.opensabe.apple;
 
-import com.apple.itunes.storekit.client.APIException;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.*;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import com.apple.itunes.storekit.client.APIException;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import okhttp3.Call;
+import okhttp3.FormBody;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class AppleLoginAPIClient {
     private static final String BASE_URL = "https://appleid.apple.com";
@@ -42,10 +51,6 @@ public class AppleLoginAPIClient {
     private final String redirectUri;
 
     private final String clientId;
-
-    public String getClientId() {
-        return clientId;
-    }
 
     public AppleLoginAPIClient(String signingKey, String keyId, String issuerId, String bundleId, String redirectUri) {
         this.appleLoginClientSecretAuthenticator = new AppleLoginClientSecretAuthenticator(issuerId, keyId, bundleId, signingKey);
@@ -63,6 +68,9 @@ public class AppleLoginAPIClient {
         this.clientId = bundleId;
     }
 
+    public String getClientId() {
+        return clientId;
+    }
 
     private Response makeRequest(String path, String method, Map<String, List<String>> queryParameters, Object body, FormBody formBody) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         Request.Builder requestBuilder = new Request.Builder();
@@ -138,6 +146,14 @@ public class AppleLoginAPIClient {
         return tokenResponse;
     }
 
+    public AuthKeys authKeys() throws IOException {
+        Request.Builder requestBuilder = new Request.Builder();
+        HttpUrl.Builder urlBuilder = urlBase.resolve("/auth/keys").newBuilder();
+        requestBuilder.url(urlBuilder.build());
+        Response response = getResponse(requestBuilder.build());
+        return objectMapper.readValue(response.body().charStream(), AuthKeys.class);
+    }
+
     public static class TokenResponse {
 
         private String access_token;
@@ -209,14 +225,6 @@ public class AppleLoginAPIClient {
         public void setError_description(String error_description) {
             this.error_description = error_description;
         }
-    }
-
-    public AuthKeys authKeys() throws IOException {
-        Request.Builder requestBuilder = new Request.Builder();
-        HttpUrl.Builder urlBuilder = urlBase.resolve("/auth/keys").newBuilder();
-        requestBuilder.url(urlBuilder.build());
-        Response response = getResponse(requestBuilder.build());
-        return objectMapper.readValue(response.body().charStream(), AuthKeys.class);
     }
 
     public static class AuthKeys {

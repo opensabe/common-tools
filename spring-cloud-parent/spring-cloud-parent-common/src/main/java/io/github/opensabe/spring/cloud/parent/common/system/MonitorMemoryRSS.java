@@ -15,17 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.system;
 
-import io.github.opensabe.common.utils.json.JsonUtil;
-import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
-import io.github.opensabe.spring.cloud.parent.common.system.jfr.MemoryStatJfrEvent;
-import io.github.opensabe.spring.cloud.parent.common.system.jfr.MemorySwStatJfrEvent;
-import io.github.opensabe.spring.cloud.parent.common.system.jfr.OOMScoreJfrEvent;
-import io.github.opensabe.spring.cloud.parent.common.system.jfr.SmapsJfrEvent;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -35,6 +24,18 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+
+import io.github.opensabe.common.utils.json.JsonUtil;
+import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
+import io.github.opensabe.spring.cloud.parent.common.system.jfr.MemoryStatJfrEvent;
+import io.github.opensabe.spring.cloud.parent.common.system.jfr.MemorySwStatJfrEvent;
+import io.github.opensabe.spring.cloud.parent.common.system.jfr.OOMScoreJfrEvent;
+import io.github.opensabe.spring.cloud.parent.common.system.jfr.SmapsJfrEvent;
+import lombok.extern.log4j.Log4j2;
 
 
 /**
@@ -90,7 +91,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
     private void memoryStatProcess() throws IOException {
         List<String> strings = FileUtils.readLines(new File("/sys/fs/cgroup/memory/memory.stat"), Charset.defaultCharset());
         MemoryStatJfrEvent event = new MemoryStatJfrEvent();
-        strings.forEach( s -> {
+        strings.forEach(s -> {
             String[] split = s.split(" ");
             String fieldName = Stream.of(split[0].split("_")).map(s1 -> s1.substring(0, 1).toUpperCase() + s1.substring(1)).collect(Collectors.joining());
             long value = Long.parseLong(split[1]);
@@ -115,9 +116,9 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
             //oom_score_adj
             List<String> oomScoreAdjList = FileUtils.readLines(new File("/proc/" + pid + "/oom_score_adj"), Charset.defaultCharset());
             //oom_adj    oom_score   oom_score_adj  list实际只要一个数值
-            long oomAdj = oomAdjList.isEmpty() ? 0L :(oomAdjList.get(0) != null ? Long.parseLong(oomAdjList.get(0)) : 0L);
+            long oomAdj = oomAdjList.isEmpty() ? 0L : (oomAdjList.get(0) != null ? Long.parseLong(oomAdjList.get(0)) : 0L);
             long oomScore = oomScoreList.isEmpty() ? 0L : (oomScoreList.get(0) != null ? Long.parseLong(oomScoreList.get(0)) : 0L);
-            long oomScoreAdj = oomScoreAdjList.isEmpty() ? 0L : (oomScoreAdjList.get(0) != null ? Long.parseLong(oomScoreAdjList.get(0)) : 0L) ;
+            long oomScoreAdj = oomScoreAdjList.isEmpty() ? 0L : (oomScoreAdjList.get(0) != null ? Long.parseLong(oomScoreAdjList.get(0)) : 0L);
             log.info("Monitoring OOM Score, oom_adj: {} , oom_score: {} ,  oom_score_adj :{} .", oomAdj, oomScore, oomScoreAdj);
             //  /proc/<pid>/oom_adj, /proc/<pid>/oom_score, /proc/<pid>/oom_score_adj  将三个文件的内容抽象为一个 JFR 事件的三个字段生成 JFR 事件
             OOMScoreJfrEventProcess(oomAdj, oomScore, oomScoreAdj);
@@ -138,7 +139,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
     private void dynamicSetter(Object targetClass, Method method, long value) {
         try {
             method.invoke(targetClass, value);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Dynamic setter exception: method {}", method.getName(), e);
         }
     }

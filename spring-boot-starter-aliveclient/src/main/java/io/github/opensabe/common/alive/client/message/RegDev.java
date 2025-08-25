@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class RegDev extends MqMessage{
+public class RegDev extends MqMessage {
     private Integer requestId;
     private Integer productCode;
     private String deviceId;

@@ -15,12 +15,16 @@
  */
 package io.github.opensabe.common.jfr;
 
-import io.micrometer.observation.Observation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.micrometer.observation.Observation;
 
 @DisplayName("观察者到JFR生成器测试")
 class ObservationToJFRGeneratorTest {
@@ -106,8 +110,11 @@ class ObservationToJFRGeneratorTest {
         assertEquals(TestContext.class, generator.getContextClazz());
     }
 
-    private static class TestContext extends Observation.Context {}
-    private static class AnotherContext extends Observation.Context {}
+    private static class TestContext extends Observation.Context {
+    }
+
+    private static class AnotherContext extends Observation.Context {
+    }
 
     private static class TestObservationToJFRGenerator extends ObservationToJFRGenerator<TestContext> {
         private boolean shouldGenerateOnStart;

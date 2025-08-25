@@ -15,12 +15,11 @@
  */
 package io.github.opensabe.common.redisson.test.jfr;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
-import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
-import io.micrometer.observation.Observation;
-import io.micrometer.tracing.TraceContext;
-import jdk.jfr.consumer.RecordedEvent;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -32,13 +31,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
+import io.micrometer.observation.Observation;
+import io.micrometer.tracing.TraceContext;
+import jdk.jfr.consumer.RecordedEvent;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @Import(TestRedissonRateLimiterJFR.Config.class)
@@ -48,31 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     public JfrEvents jfrEvents = new JfrEvents();
-
-    public static class Config {
-        @Bean
-        public TestRedissonRateLimiterBean testRedissonRateLimiterBean() {
-            return new TestRedissonRateLimiterBean();
-        }
-    }
-
-    public static class TestRedissonRateLimiterBean {
-
-        @RedissonRateLimiter(
-                name = "TestRedissonRateLimiterJFR-testRateLimiterTryAcquireWithWait",
-                type = RedissonRateLimiter.Type.TRY,
-                waitTime = THREAD_COUNT / 2,
-                timeUnit = TimeUnit.SECONDS,
-                rate = 1,
-                rateInterval = 1,
-                rateType = RateType.OVERALL,
-                rateIntervalUnit = TimeUnit.SECONDS
-        )
-        public void testRateLimiterTryAcquireWithWait() throws InterruptedException {
-            TimeUnit.MILLISECONDS.sleep(100);
-        }
-    }
-
     @Autowired
     private TestRedissonRateLimiterBean testRedissonRateLimiterBean;
     @Autowired
@@ -80,7 +56,7 @@ public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
 
     @Test
     public void testRateLimiterTryAcquireWithWait() throws InterruptedException {
-        Thread []threads = new Thread[THREAD_COUNT];
+        Thread[] threads = new Thread[THREAD_COUNT];
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         for (int i = 0; i < THREAD_COUNT; i++) {
             threads[i] = new Thread(() -> {
@@ -117,5 +93,29 @@ public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
         );
         assertEquals(2, acquireSuccessfully.size());
         assertEquals(THREAD_COUNT, recordedEvents.stream().map(recordedEvent -> recordedEvent.getString("spanId")).distinct().count());
+    }
+
+    public static class Config {
+        @Bean
+        public TestRedissonRateLimiterBean testRedissonRateLimiterBean() {
+            return new TestRedissonRateLimiterBean();
+        }
+    }
+
+    public static class TestRedissonRateLimiterBean {
+
+        @RedissonRateLimiter(
+                name = "TestRedissonRateLimiterJFR-testRateLimiterTryAcquireWithWait",
+                type = RedissonRateLimiter.Type.TRY,
+                waitTime = THREAD_COUNT / 2,
+                timeUnit = TimeUnit.SECONDS,
+                rate = 1,
+                rateInterval = 1,
+                rateType = RateType.OVERALL,
+                rateIntervalUnit = TimeUnit.SECONDS
+        )
+        public void testRateLimiterTryAcquireWithWait() throws InterruptedException {
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
     }
 }

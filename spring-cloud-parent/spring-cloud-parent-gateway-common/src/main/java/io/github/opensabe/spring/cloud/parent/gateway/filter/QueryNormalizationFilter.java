@@ -15,17 +15,18 @@
  */
 package io.github.opensabe.spring.cloud.parent.gateway.filter;
 
-import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
+import java.net.URI;
+
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Mono;
 
-import java.net.URI;
+import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
 
 /**
  * 某些时候前端发的某些请求不规范，不符合 HTTP URL 编码，在这里对其修正

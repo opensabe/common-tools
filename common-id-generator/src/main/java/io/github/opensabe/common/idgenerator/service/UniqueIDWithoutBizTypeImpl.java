@@ -15,16 +15,6 @@
  */
 package io.github.opensabe.common.idgenerator.service;
 
-import io.github.opensabe.common.executor.ThreadPoolFactory;
-import io.github.opensabe.common.idgenerator.exception.IdGenerateException;
-import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -33,13 +23,20 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import io.github.opensabe.common.executor.ThreadPoolFactory;
+import io.github.opensabe.common.idgenerator.exception.IdGenerateException;
+
 public class UniqueIDWithoutBizTypeImpl implements UniqueIDWithouBizType {
 
-    public static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyMMddHHmmss");
-    public static DateTimeFormatter formatForShortId = DateTimeFormatter.ofPattern("yyMMddHHmmssSSS");
-
     private static final Long MAX_SEQUENCE_NUM = 10000000L;
-
     private static final Long MAX_SHORT_SEQUENCE_NUM = 10000L;
     /**
      * key for sequence
@@ -51,7 +48,8 @@ public class UniqueIDWithoutBizTypeImpl implements UniqueIDWithouBizType {
      */
     private static final String SEQUENCE_NUM_LOCK = "sequnce_num_lock";
     private static final String SHORT_SEQUENCE_NUM_LOCK_PREFIX = "sequnce_short_num_lock:";
-
+    public static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyMMddHHmmss");
+    public static DateTimeFormatter formatForShortId = DateTimeFormatter.ofPattern("yyMMddHHmmssSSS");
     private final StringRedisTemplate redisTemplate;
     private final RedissonClient redissonClient;
     private final ExecutorService threadPoolExecutor;

@@ -15,26 +15,21 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.test.config;
 
-import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.SpringApplicationEvent;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.env.StandardEnvironment;
-import org.springframework.test.context.TestPropertySource;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
 
 @SpringBootTest(
         classes = OnlyOnceApplicationListenerTest.TestConfig.class
@@ -42,23 +37,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OnlyOnceApplicationListenerTest {
 
     private static final AtomicInteger executionCount = new AtomicInteger(0);
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @BeforeEach
     void setUp() {
         // 重置计数器
         executionCount.set(0);
     }
-
-    @SpringBootApplication
-    static class TestConfig {
-
-        @Bean
-        public TestOnlyOnceListener testOnlyOnceListener() {
-            return new TestOnlyOnceListener();
-        }
-    }
-
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * 测试继承 OnlyOnceApplicationListener 的 ApplicationReadyEvent 监听器只执行一次
@@ -76,6 +62,15 @@ class OnlyOnceApplicationListenerTest {
         assertEquals(1, executionCount.get(), "ApplicationReadyEvent 监听器应该只执行一次");
     }
 
+    @SpringBootApplication
+    static class TestConfig {
+
+        @Bean
+        public TestOnlyOnceListener testOnlyOnceListener() {
+            return new TestOnlyOnceListener();
+        }
+    }
+
     /**
      * 特殊的 SpringApplicationEvent 用于测试 OnlyOnceApplicationListener
      */
@@ -89,7 +84,7 @@ class OnlyOnceApplicationListenerTest {
      * 测试用的 TestOnlyOnceSpringApplicationEvent 监听器
      */
     static class TestOnlyOnceListener extends OnlyOnceApplicationListener<TestOnlyOnceSpringApplicationEvent> {
-        
+
         @Override
         protected void onlyOnce(TestOnlyOnceSpringApplicationEvent event) {
             executionCount.incrementAndGet();

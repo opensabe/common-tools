@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.alive.client.impl;
 
-import io.github.opensabe.alive.util.ConsistentHash;
-import org.apache.commons.lang3.StringUtils;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
+import io.github.opensabe.alive.util.ConsistentHash;
 
 /**
  * @author lone

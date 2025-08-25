@@ -15,13 +15,13 @@
  */
 package io.github.opensabe.common.utils;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by houpu on 2017/7/26.
@@ -30,10 +30,6 @@ public class RegexUtil {
 
     private static Pattern DOMAIN_PATTERN = Pattern.compile("(?<=http://|\\.)[^.]*?\\.(com|cn|net|org|biz|info|cc|tv)", Pattern.CASE_INSENSITIVE);
     private static Pattern HOST_PATTERN = Pattern.compile("(http://|https://)?([^/]*)", Pattern.CASE_INSENSITIVE);
-
-    public boolean isMatch(String regex, String value) {
-        return Pattern.matches(regex, value);
-    }
 
     /**
      * 验证Email
@@ -99,6 +95,7 @@ public class RegexUtil {
         String regex = "^0?\\d{9}$";
         return Pattern.matches(regex, mobile);
     }
+
     public static boolean checkUgandaMobile(String mobile) {
         if (mobile == null) {
             return false;
@@ -124,7 +121,6 @@ public class RegexUtil {
                 return false;
         }
     }
-
 
     /**
      * 验证固定电话号码
@@ -301,6 +297,7 @@ public class RegexUtil {
         }
         return phoneList;
     }
+
     public static List<String> checkUgandaMobileAndGet(String message) {
         if (message == null) {
             return Collections.emptyList();
@@ -311,5 +308,9 @@ public class RegexUtil {
             phoneList.add(matcher.group());
         }
         return phoneList;
+    }
+
+    public boolean isMatch(String regex, String value) {
+        return Pattern.matches(regex, value);
     }
 }

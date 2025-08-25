@@ -15,11 +15,10 @@
  */
 package io.github.opensabe.apple.appstoreconnectapi.subscriptiongroup;
 
+import java.util.List;
 import io.github.opensabe.apple.appstoreconnectapi.PagedDocumentLinks;
 import io.github.opensabe.apple.appstoreconnectapi.PagingInformation;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * 订阅组响应

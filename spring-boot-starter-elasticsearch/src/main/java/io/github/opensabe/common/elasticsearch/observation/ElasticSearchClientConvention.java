@@ -21,6 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 public class ElasticSearchClientConvention implements ObservationConvention<ElasticSearchClientObservationContext> {
     public static final ElasticSearchClientConvention DEFAULT = new ElasticSearchClientConvention();
+
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof ElasticSearchClientObservationContext;

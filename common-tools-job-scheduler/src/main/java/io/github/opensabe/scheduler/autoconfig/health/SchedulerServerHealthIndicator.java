@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.scheduler.autoconfig.health;
 
-import io.github.opensabe.scheduler.conf.SchedulerProperties;
-import io.github.opensabe.scheduler.server.SchedulerServer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+
+import io.github.opensabe.scheduler.conf.SchedulerProperties;
+import io.github.opensabe.scheduler.server.SchedulerServer;
 
 public class SchedulerServerHealthIndicator implements HealthIndicator {
 
@@ -39,7 +40,7 @@ public class SchedulerServerHealthIndicator implements HealthIndicator {
         } else {
             schedulerServerProvider.ifAvailable(schedulerServer -> {
                 if (schedulerServer.isRunning()) {
-                    health.up().withDetail("schedulerServer", "enabled") .withDetail("schedulerServer", "running");
+                    health.up().withDetail("schedulerServer", "enabled").withDetail("schedulerServer", "running");
                 } else {
                     health.down().withDetail("schedulerServer", "enabled").withDetail("schedulerServer", "stopped");
                 }

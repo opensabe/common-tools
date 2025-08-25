@@ -15,11 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data

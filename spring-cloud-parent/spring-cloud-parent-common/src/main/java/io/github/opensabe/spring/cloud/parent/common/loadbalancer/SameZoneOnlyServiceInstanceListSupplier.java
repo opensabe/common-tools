@@ -15,16 +15,17 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.loadbalancer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 import org.springframework.cloud.loadbalancer.core.DelegatingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
-import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import reactor.core.publisher.Flux;
 
 /**
  * 只返回与当前实例同一个 Zone 的服务实例，不同 zone 之间的服务不互相调用

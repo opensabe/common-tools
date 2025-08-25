@@ -15,21 +15,15 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 
 @Getter
 public enum VersionEnum {
-    VERSION_1_0_0("1.0.0")
-    ;
-    VersionEnum(String value) {
-        this.value = value;
-    }
-    private final String value;
+    VERSION_1_0_0("1.0.0");
 
     private static List<VersionEnum> listOfEnum;
     private static Map<String, VersionEnum> mapOfEnum;
@@ -43,6 +37,12 @@ public enum VersionEnum {
         }
         listOfEnum = List.copyOf(tempList);
         mapOfEnum = Map.copyOf(tempTemp);
+    }
+
+    private final String value;
+
+    VersionEnum(String value) {
+        this.value = value;
     }
 
     public static VersionEnum getVersionEnum(String value) {

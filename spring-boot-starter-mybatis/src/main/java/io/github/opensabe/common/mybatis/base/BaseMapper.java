@@ -20,7 +20,8 @@ import tk.mybatis.mapper.common.Mapper;
 
 /**
  * 通用mapper实现基本的方法
+ *
  * @author maheng
  */
-public interface BaseMapper<T> extends Mapper<T>, InsertListMapper<T>,UpdateLimitMapper<T> {
+public interface BaseMapper<T> extends Mapper<T>, InsertListMapper<T>, UpdateLimitMapper<T> {
 }

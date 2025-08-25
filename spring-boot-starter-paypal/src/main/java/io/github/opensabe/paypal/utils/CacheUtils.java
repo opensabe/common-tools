@@ -15,12 +15,12 @@
  */
 package io.github.opensabe.paypal.utils;
 
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
-
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
 
@@ -55,16 +55,6 @@ public class CacheUtils {
             .initialCapacity(100)
             .maximumSize(1024)
             .build();
-
-    private static class CacheObject<T> {
-        T data;
-        long expire;
-
-        public CacheObject(T data, long second) {
-            this.data = data;
-            this.expire = TimeUnit.SECONDS.toNanos(second);
-        }
-    }
 
     public static <T> void set(String key, T value, long expire) {
         CacheObject<T> cacheObject = new CacheObject<>(value, expire);
@@ -131,6 +121,16 @@ public class CacheUtils {
         System.out.println(b);
         System.out.println(c);
         System.out.println("-----------------");
+    }
+
+    private static class CacheObject<T> {
+        T data;
+        long expire;
+
+        public CacheObject(T data, long second) {
+            this.data = data;
+            this.expire = TimeUnit.SECONDS.toNanos(second);
+        }
     }
 
 }

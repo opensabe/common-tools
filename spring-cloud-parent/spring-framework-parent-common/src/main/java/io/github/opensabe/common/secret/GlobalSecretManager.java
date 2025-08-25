@@ -15,14 +15,16 @@
  */
 package io.github.opensabe.common.secret;
 
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Sets;
-import io.github.opensabe.common.utils.AlarmUtil;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.Map;
-import java.util.Set;
+import io.github.opensabe.common.utils.AlarmUtil;
 
 public class GlobalSecretManager {
     private final Cache<String, Map<String, Set<String>>> cache = Caffeine.newBuilder().build();
@@ -33,6 +35,7 @@ public class GlobalSecretManager {
 
     /**
      * Filter sensitive string in content, and alarm if found
+     *
      * @param content
      * @return
      */

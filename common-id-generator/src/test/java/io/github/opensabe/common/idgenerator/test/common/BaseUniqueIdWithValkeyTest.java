@@ -15,8 +15,6 @@
  */
 package io.github.opensabe.common.idgenerator.test.common;
 
-import io.github.opensabe.common.testcontainers.integration.SingleValkeyIntegrationTest;
-import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,6 +24,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import io.github.opensabe.common.testcontainers.integration.SingleValkeyIntegrationTest;
+import lombok.extern.log4j.Log4j2;
+
 @Log4j2
 @JfrEventTest
 @AutoConfigureObservability
@@ -34,11 +35,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
         "eureka.client.enabled=false",
 }, classes = BaseUniqueIdWithValkeyTest.App.class)
 public abstract class BaseUniqueIdWithValkeyTest {
-    @SpringBootApplication(scanBasePackages = {"io.github.opensabe.common.idgenerator.test"})
-    public static class App {
-    }
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleValkeyIntegrationTest.setProperties(registry);
+    }
+
+    @SpringBootApplication(scanBasePackages = {"io.github.opensabe.common.idgenerator.test"})
+    public static class App {
     }
 }

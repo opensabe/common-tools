@@ -15,9 +15,12 @@
  */
 package io.github.opensabe.common.cache.config;
 
-import com.google.common.collect.Sets;
-import io.github.opensabe.common.cache.api.CompositeCacheManager;
-import io.github.opensabe.common.cache.redis.DynamicRedisCacheManager;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
@@ -30,17 +33,17 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Sets;
+
+import io.github.opensabe.common.cache.api.CompositeCacheManager;
+import io.github.opensabe.common.cache.redis.DynamicRedisCacheManager;
 
 /**
  * 根据<code>CachesProperties</code>,创建cacheManager添加到
  * <code>CompositedCacheManager</code>中
- * @see CachesProperties
+ *
  * @author heng.ma
+ * @see CachesProperties
  */
 public class RedisConfiguration implements InitializingBean {
 
@@ -50,6 +53,7 @@ public class RedisConfiguration implements InitializingBean {
     private final RedisConnectionFactory connectionFactory;
     private final CachesProperties properties;
     private final CompositeCacheManager compositeCacheManager;
+
     public RedisConfiguration(CacheManagerCustomizers customizers, RedisConnectionFactory connectionFactory, CachesProperties properties, CompositeCacheManager compositeCacheManager) {
         this.customizers = customizers;
         this.connectionFactory = connectionFactory;
@@ -78,7 +82,7 @@ public class RedisConfiguration implements InitializingBean {
                 .prefixCacheNameWith(DEFAULT_REDIS_KEY_PREFIX);
     }
 
-    private DynamicRedisCacheManager dynamicRedisCacheManager () {
+    private DynamicRedisCacheManager dynamicRedisCacheManager() {
         Map<String, RedisCacheConfiguration> map = new HashMap<>();
         List<CachesProperties.CustomCacheProperties> list = properties.getCustom();
         if (list != null) {
@@ -89,8 +93,7 @@ public class RedisConfiguration implements InitializingBean {
     }
 
 
-
-    private RedisCacheConfiguration configuration (CacheProperties.Redis redis) {
+    private RedisCacheConfiguration configuration(CacheProperties.Redis redis) {
         Duration timeToLive = redis.getTimeToLive();
         RedisCacheConfiguration configuration = defaultCacheConfig();
         if (timeToLive != null) {
@@ -109,7 +112,7 @@ public class RedisConfiguration implements InitializingBean {
         return configuration;
     }
 
-    private CacheManager redisCacheManager (RedisConnectionFactory redisConnectionFactory,CacheManagerCustomizers customizers, CacheProperties properties) {
+    private CacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory, CacheManagerCustomizers customizers, CacheProperties properties) {
         CacheProperties.Redis redis = properties.getRedis();
         RedisCacheConfiguration configuration = configuration(redis);
         RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager

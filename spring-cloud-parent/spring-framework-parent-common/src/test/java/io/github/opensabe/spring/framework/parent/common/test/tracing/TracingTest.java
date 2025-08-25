@@ -15,10 +15,6 @@
  */
 package io.github.opensabe.spring.framework.parent.common.test.tracing;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import io.micrometer.observation.ObservationRegistry;
-import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,16 +27,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static io.micrometer.observation.tck.ObservationRegistryAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import lombok.extern.log4j.Log4j2;
+
 @Log4j2
 @SpringBootTest(
         classes = TracingTest.Main.class
 )
 @DisplayName("链路追踪测试")
 public class TracingTest {
-    @SpringBootApplication
-    public static class Main {
-    }
-
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
@@ -86,5 +83,9 @@ public class TracingTest {
                 Assertions.assertNotNull(childLoggerSpanId);
             });
         });
+    }
+
+    @SpringBootApplication
+    public static class Main {
     }
 }

@@ -15,10 +15,13 @@
  */
 package io.github.opensabe.spring.framework.parent.common.test.log4j2;
 
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.common.secret.SecretProvider;
-import io.github.opensabe.common.utils.SpringUtil;
-import lombok.extern.log4j.Log4j2;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -29,30 +32,18 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.common.secret.SecretProvider;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SpringBootTest(
@@ -67,14 +58,6 @@ public class Log4j2SecretTest {
     private static final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     private static final AtomicBoolean hasSecret = new AtomicBoolean(false);
-
-    @SpringBootApplication
-    public static class Main {
-        @Bean
-        public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
-            return new TestSecretProvider(globalSecretManager);
-        }
-    }
 
     @Test
     /**
@@ -91,6 +74,14 @@ public class Log4j2SecretTest {
         countDownLatch.await();
         //不能有 secret 字符串
         Assertions.assertFalse(hasSecret.get());
+    }
+
+    @SpringBootApplication
+    public static class Main {
+        @Bean
+        public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
+            return new TestSecretProvider(globalSecretManager);
+        }
     }
 
     public static class TestSecretProvider extends SecretProvider {

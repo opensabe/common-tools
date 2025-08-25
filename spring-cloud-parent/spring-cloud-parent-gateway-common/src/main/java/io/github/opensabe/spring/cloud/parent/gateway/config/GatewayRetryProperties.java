@@ -16,11 +16,12 @@
 package io.github.opensabe.spring.cloud.parent.gateway.config;
 
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Set;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.Set;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

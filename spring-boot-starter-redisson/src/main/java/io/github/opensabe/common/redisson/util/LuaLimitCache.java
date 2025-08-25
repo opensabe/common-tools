@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.common.redisson.util;
 
-import lombok.extern.log4j.Log4j2;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.function.Supplier;
+
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
-import java.time.Duration;
-import java.util.Collections;
-import java.util.function.Supplier;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class LuaLimitCache {
@@ -36,12 +37,12 @@ public class LuaLimitCache {
     //ARGV[2] -> increment
     //ARGV[3] -> expire
     private static final String LUA_SCRIPT =
-                    "local limit = tonumber(redis.call(\"GET\", KEYS[1]))\n" +
+            "local limit = tonumber(redis.call(\"GET\", KEYS[1]))\n" +
                     "if not limit then\n" +
                     "    return " + SHOULD_LOAD + '\n' +
                     "end\n" +
                     "if limit and limit >= tonumber(ARGV[1]) then\n" +
-                    "    return "+ REACH_LIMIT + '\n' +
+                    "    return " + REACH_LIMIT + '\n' +
                     "else\n" +
                     "    local current = tonumber(redis.call(\"INCRBY\", KEYS[1], ARGV[2]))\n" +
                     "    redis.call(\"EXPIRE\", KEYS[1], ARGV[3])\n" +
@@ -54,6 +55,7 @@ public class LuaLimitCache {
         redisScript.setScriptText(LUA_SCRIPT);
         redisScript.setResultType(Long.class);
     }
+
     private final StringRedisTemplate redisTemplate;
     private final RedissonClient redissonClient;
 
@@ -64,14 +66,15 @@ public class LuaLimitCache {
 
     /**
      * 是否达到界限
-     * @param key redis key
+     *
+     * @param key       redis key
      * @param increment 增长的值
-     * @param limit 最大大小
-     * @param expire 过期时间
-     * @param loader 如果值不存在，加载值，可以保证并发安全
+     * @param limit     最大大小
+     * @param expire    过期时间
+     * @param loader    如果值不存在，加载值，可以保证并发安全
      * @return
      */
-    public boolean isReachLimit (
+    public boolean isReachLimit(
             String key,
             long limit,
             long increment,

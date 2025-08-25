@@ -15,14 +15,15 @@
  */
 package io.github.opensabe.paypal.service;
 
-import io.github.opensabe.common.utils.json.JsonUtil;
-import io.github.opensabe.paypal.bo.PayPalTokenResponseBO;
-import io.github.opensabe.paypal.config.PayPalProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import io.github.opensabe.common.utils.json.JsonUtil;
+import io.github.opensabe.paypal.bo.PayPalTokenResponseBO;
+import io.github.opensabe.paypal.config.PayPalProperties;
 
 //todo 在 github action 里面加入 secret，之后通过环境变量读取
 @Disabled

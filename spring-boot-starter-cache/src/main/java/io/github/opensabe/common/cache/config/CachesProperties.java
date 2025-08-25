@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.common.cache.config;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
+
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -32,12 +33,12 @@ public class CachesProperties {
 
     @Getter
     @Setter
-    public static class CustomCacheProperties extends CacheProperties{
+    public static class CustomCacheProperties extends CacheProperties {
 
         private String cacheDesc;
 
 
-        public Object getCacheSetting(){
+        public Object getCacheSetting() {
             return switch (getType()) {
                 case CAFFEINE -> getCaffeine();
                 case COUCHBASE -> getCouchbase();

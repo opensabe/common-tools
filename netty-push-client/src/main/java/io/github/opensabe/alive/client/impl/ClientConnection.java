@@ -15,13 +15,6 @@
  */
 package io.github.opensabe.alive.client.impl;
 
-import io.github.opensabe.alive.client.callback.ClientCallback;
-import io.github.opensabe.alive.client.vo.MessageVo;
-
-import io.github.opensabe.alive.client.vo.QueryVo;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,35 +26,39 @@ import org.slf4j.LoggerFactory;
 
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.ResponseFuture;
+import io.github.opensabe.alive.client.callback.ClientCallback;
 import io.github.opensabe.alive.client.exception.AliveClientException;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;
 import io.github.opensabe.alive.client.exception.AliveClientTimeoutException;
 import io.github.opensabe.alive.client.impl.future.BaseResponseFutureImpl;
 import io.github.opensabe.alive.client.impl.future.ResponseFutureImpl;
+import io.github.opensabe.alive.client.vo.MessageVo;
+import io.github.opensabe.alive.client.vo.QueryVo;
 import io.github.opensabe.alive.protobuf.Message;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
 
 public class ClientConnection extends AbstractClient {
 
-    private Logger logger = LoggerFactory.getLogger(ClientConnection.class);
-
+    private static AtomicInteger requestId = new AtomicInteger(1);
     private final SocketAddress address;
 
     private final Bootstrap bootstrap;
-
+    private Logger logger = LoggerFactory.getLogger(ClientConnection.class);
     private ClientHandler handler;
-
     private boolean closed = false;
-
-    private static AtomicInteger requestId = new AtomicInteger(1);
-
     private Map<Integer, BaseResponseFutureImpl> baseFutureMap = new HashMap<Integer, BaseResponseFutureImpl>();
 
     public ClientConnection(Bootstrap bootstrap, SocketAddress socketAddress, int productCode, String authToken,
-        long connectTimeout, long authTimeout) {
+                            long connectTimeout, long authTimeout) {
         super(productCode, authToken, connectTimeout, authTimeout);
 
         this.address = socketAddress;
         this.bootstrap = bootstrap;
+    }
+
+    public static int getReqeustId() {
+        return requestId.getAndIncrement();
     }
 
     private ClientHandler createOrGetHandler() throws AliveClientException {
@@ -73,7 +70,7 @@ public class ClientConnection extends AbstractClient {
             ChannelFuture future = bootstrap.connect(address);
             if (!future.awaitUninterruptibly(connectTimeout, TimeUnit.MILLISECONDS)) {
                 throw new AliveClientException("Create and init connection connect error.",
-                    new AliveClientTimeoutException("Connect timeout"));
+                        new AliveClientTimeoutException("Connect timeout"));
             }
 
             logger.info("connection to " + address + " successfully connect.");
@@ -117,10 +114,10 @@ public class ClientConnection extends AbstractClient {
 
         // 创建消息
         Message.AuthBackend msg = Message.AuthBackend.newBuilder()
-            .setRequestId(myRequestId)
-            .setProductCode(productCode)
-            .setAuthToken(authToken)
-            .build();
+                .setRequestId(myRequestId)
+                .setProductCode(productCode)
+                .setAuthToken(authToken)
+                .build();
 
         // 发送消息
         ClientHandler h = createOrGetHandler();
@@ -205,15 +202,14 @@ public class ClientConnection extends AbstractClient {
             int myRequestId = getReqeustId();
 
             Message.HeartBeat msg = Message.HeartBeat.newBuilder()
-                .setRequestId(myRequestId)
-                .build();
+                    .setRequestId(myRequestId)
+                    .build();
 
             handler.write(msg);
         } else {
             logger.debug("connection to " + address + " use a different channel " + this.handler + ".");
         }
     }
-
 
     public void recieve(ClientHandler handler, Message.Response resp) {
         setResponse(resp.getRequestId(), ClientUtils.retCode2Response(resp.getRetCode()));
@@ -232,11 +228,6 @@ public class ClientConnection extends AbstractClient {
                 baseFutureMap.remove(reqeustId);
             }
         }
-    }
-
-
-    public static int getReqeustId() {
-        return requestId.getAndIncrement();
     }
 
     public SocketAddress getAddress() {

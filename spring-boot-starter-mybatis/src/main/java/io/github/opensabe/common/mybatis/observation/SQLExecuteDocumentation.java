@@ -21,6 +21,7 @@ import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
  * 事务及sql执行监控指标
+ *
  * @author maheng
  */
 public enum SQLExecuteDocumentation implements ObservationDocumentation {

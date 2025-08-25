@@ -15,6 +15,16 @@
  */
 package io.github.opensabe.alive.client.impl;
 
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+
+import static io.github.opensabe.alive.client.Response.SUCEESS;
+
 import io.github.opensabe.alive.client.Client;
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.ResponseFuture;
@@ -30,15 +40,6 @@ import io.github.opensabe.alive.client.vo.QueryVo;
 import io.github.opensabe.alive.protobuf.Message;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.rocketmq.client.producer.SendCallback;
-import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
-
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static io.github.opensabe.alive.client.Response.SUCEESS;
 
 @Log4j2
 public class MQClientImpl implements Client {
@@ -47,7 +48,7 @@ public class MQClientImpl implements Client {
     private Integer productCode;
     private AtomicInteger requestId = new AtomicInteger(1);
 
-    public MQClientImpl(RocketMQTemplate producer,Integer productCode) {
+    public MQClientImpl(RocketMQTemplate producer, Integer productCode) {
         this.producer = producer;
         this.productCode = productCode;
     }
@@ -74,13 +75,13 @@ public class MQClientImpl implements Client {
 
     @Override
     public Response push(MessageVo messageVo) throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException {
-        producer.syncSend(getTopic(messageVo),build(messageVo));
+        producer.syncSend(getTopic(messageVo), build(messageVo));
         return SUCEESS;
     }
 
     @Override
     public Response push(MessageVo messageVo, long timeout, TimeUnit unit) throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException {
-        producer.syncSend(getTopic(messageVo),build(messageVo));
+        producer.syncSend(getTopic(messageVo), build(messageVo));
         return SUCEESS;
     }
 
@@ -130,15 +131,15 @@ public class MQClientImpl implements Client {
 
     }
 
-    private String getTopic (MessageVo message) {
+    private String getTopic(MessageVo message) {
         if (io.github.opensabe.alive.protobuf.Message.PushType.GROUP.equals(message.pushType)) {
             return MQTopic.BROAD_CAST.getTopic();
         }
         return MQTopic.SIMPLE.getTopic();
     }
 
-    private Message.Publish build (MessageVo messageVo) {
-        return  messageVo.buildPublush(messageVo.getRequestId()==0?requestId.incrementAndGet():messageVo.getRequestId(),
+    private Message.Publish build(MessageVo messageVo) {
+        return messageVo.buildPublush(messageVo.getRequestId() == 0 ? requestId.incrementAndGet() : messageVo.getRequestId(),
                 productCode);
     }
 }

@@ -16,6 +16,7 @@
 package io.github.opensabe.common.mybatis.base;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
+
 import tk.mybatis.mapper.entity.IDynamicTableName;
 
 public abstract class ArchivedTable implements IDynamicTableName {
@@ -28,7 +29,7 @@ public abstract class ArchivedTable implements IDynamicTableName {
     protected abstract String tableName();
 
     protected abstract String historyTableName();
-    
+
     @Override
     public String getDynamicTableName() {
         Boolean aBoolean = currentIsHistory.get();

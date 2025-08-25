@@ -28,24 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EnhancedStreamHandler<T> implements InvocationHandler {
-    private Stream<T> delegate;
-
-    public EnhancedStreamHandler(Stream<T> delegate) {
-        this.delegate = delegate;
-    }
-
     private static final Method ENHANCED_DISTINCT;
-    static {
-        try {
-            ENHANCED_DISTINCT = EnhancedStream.class.getMethod(
-                    "distinct", ToIntFunction.class, BiPredicate.class,
-                    BinaryOperator.class
-            );
-        } catch (NoSuchMethodException e) {
-            throw new Error(e);
-        }
-    }
-
     /**
      * 将EnhancedStream的方法与Stream的方法一一对应
      */
@@ -64,6 +47,22 @@ public class EnhancedStreamHandler<T> implements InvocationHandler {
                                 }
                             }));
 
+    static {
+        try {
+            ENHANCED_DISTINCT = EnhancedStream.class.getMethod(
+                    "distinct", ToIntFunction.class, BiPredicate.class,
+                    BinaryOperator.class
+            );
+        } catch (NoSuchMethodException e) {
+            throw new Error(e);
+        }
+    }
+
+    private Stream<T> delegate;
+
+    public EnhancedStreamHandler(Stream<T> delegate) {
+        this.delegate = delegate;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -85,6 +84,21 @@ public class EnhancedStreamHandler<T> implements InvocationHandler {
             //否则，直接用代理类调用
             return method.invoke(this.delegate, args);
         }
+    }
+
+    private EnhancedStream<T> distinct(EnhancedStream<T> proxy,
+                                       ToIntFunction<T> hashCode,
+                                       BiPredicate<T, T> equals,
+                                       BinaryOperator<T> merger) {
+        delegate = delegate.collect(Collectors.toMap(
+                        t -> new Key<>(t, hashCode, equals),
+                        Function.identity(),
+                        merger,
+                        //使用LinkedHashMap，保持入参原始顺序
+                        LinkedHashMap::new))
+                .values()
+                .stream();
+        return proxy;
     }
 
     private static final class Key<E> {
@@ -113,20 +127,5 @@ public class EnhancedStreamHandler<T> implements InvocationHandler {
             Key<E> that = (Key<E>) obj;
             return equals.test(this.e, that.e);
         }
-    }
-
-    private EnhancedStream<T> distinct(EnhancedStream<T> proxy,
-                                       ToIntFunction<T> hashCode,
-                                       BiPredicate<T, T> equals,
-                                       BinaryOperator<T> merger) {
-        delegate = delegate.collect(Collectors.toMap(
-                t -> new Key<>(t, hashCode, equals),
-                Function.identity(),
-                merger,
-                //使用LinkedHashMap，保持入参原始顺序
-                LinkedHashMap::new))
-                .values()
-                .stream();
-        return proxy;
     }
 }

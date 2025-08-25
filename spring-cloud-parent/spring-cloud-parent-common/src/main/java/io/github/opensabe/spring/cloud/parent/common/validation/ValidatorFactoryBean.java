@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.validation;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.Configuration;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.function.Consumer;
+
 import org.hibernate.validator.cfg.ConstraintMapping;
 import org.hibernate.validator.internal.engine.ConfigurationImpl;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import java.util.Locale;
-import java.util.Objects;
-import java.util.function.Consumer;
+import jakarta.annotation.Nullable;
+import jakarta.validation.Configuration;
 
 public class ValidatorFactoryBean extends LocalValidatorFactoryBean {
 
@@ -37,8 +38,9 @@ public class ValidatorFactoryBean extends LocalValidatorFactoryBean {
      * Post-process the given Bean Validation configuration,
      * adding to or overriding any of its settings.
      * <p>Invoked right before building the {@link jakarta.validation.ValidatorFactory}.
+     *
      * @param configuration the Configuration object, pre-populated with
-     * settings driven by LocalValidatorFactoryBean's properties
+     *                      settings driven by LocalValidatorFactoryBean's properties
      */
     protected void postProcessConfiguration(@Nullable Configuration<?> configuration) {
         if (configuration instanceof ConfigurationImpl config) {

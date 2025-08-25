@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;
 import io.github.opensabe.alive.client.exception.AliveClientTimeoutException;
@@ -62,7 +61,7 @@ public class BaseResponseFutureImpl extends FutureTask<Response> implements Base
 
     @Override
     public Response get0(long timeout, TimeUnit unit)
-        throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
+            throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         if (timeout <= 0) {
             return get0();
         }

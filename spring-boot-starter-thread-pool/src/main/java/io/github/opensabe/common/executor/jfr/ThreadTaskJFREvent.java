@@ -16,7 +16,13 @@
 package io.github.opensabe.common.executor.jfr;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import jdk.jfr.*;
+import jdk.jfr.Category;
+import jdk.jfr.Description;
+import jdk.jfr.Event;
+import jdk.jfr.Label;
+import jdk.jfr.StackTrace;
+import jdk.jfr.Threshold;
+import jdk.jfr.Timespan;
 import lombok.Getter;
 import lombok.Setter;
 

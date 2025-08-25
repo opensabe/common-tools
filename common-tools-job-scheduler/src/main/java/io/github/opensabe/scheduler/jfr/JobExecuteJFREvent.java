@@ -17,7 +17,6 @@ package io.github.opensabe.scheduler.jfr;
 
 import io.github.opensabe.common.utils.BeanUtils;
 import io.github.opensabe.scheduler.conf.JobStatus;
-
 import io.github.opensabe.scheduler.observation.JobExecuteContext;
 import jdk.jfr.Category;
 import jdk.jfr.Label;

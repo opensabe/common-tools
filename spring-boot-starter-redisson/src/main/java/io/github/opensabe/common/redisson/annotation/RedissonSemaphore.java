@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 )
 public @interface RedissonSemaphore {
     String DEFAULT_PREFIX = "redisson:semaphore:";
+
     /**
      * 注意，使用的不是 Redisson 的 Semaphore，而是更严谨的 PermitExpirableSemaphore
      * 可以通过 RedissonSemaphoreName 指定限流器名称
@@ -52,17 +53,6 @@ public @interface RedissonSemaphore {
      */
     Type type() default Type.BLOCK;
 
-    enum Type {
-        /**
-         * 获取不到就阻塞等待
-         */
-        BLOCK,
-        /**
-         * 获取不到就抛异常
-         */
-        TRY
-    }
-
     /**
      * 锁最长持有时间，为 -1 则是无限等待（这个是 Redisson API 的设计）
      */
@@ -78,4 +68,15 @@ public @interface RedissonSemaphore {
      * 时间单位
      */
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
+
+    enum Type {
+        /**
+         * 获取不到就阻塞等待
+         */
+        BLOCK,
+        /**
+         * 获取不到就抛异常
+         */
+        TRY
+    }
 }

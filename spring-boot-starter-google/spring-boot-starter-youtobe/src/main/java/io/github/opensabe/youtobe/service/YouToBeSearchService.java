@@ -15,6 +15,14 @@
  */
 package io.github.opensabe.youtobe.service;
 
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.cloud.parent.common.handler.FrontendException;
@@ -26,13 +34,6 @@ import lombok.extern.log4j.Log4j2;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Random;
 
 /**
  * youtobe search通用service
@@ -52,7 +53,7 @@ public class YouToBeSearchService {
         this.okHttpClient = okHttpClient;
     }
 
-    public YouToBeSearchRespDTO getSearch(YouToBeSearchReqDTO reqDTO)  {
+    public YouToBeSearchRespDTO getSearch(YouToBeSearchReqDTO reqDTO) {
         if (Objects.isNull(properties) || Objects.isNull(properties.getSearch()) || CollectionUtils.isEmpty(properties.getKeys())) {
             throw new FrontendException(BizCodeEnum.INVALID, "api or key not null");
         }
@@ -63,7 +64,7 @@ public class YouToBeSearchService {
         Request request = new Request.Builder().url(url).build();
 
         // remote request api
-        try(Response response = okHttpClient.newCall(request).execute()) {
+        try (Response response = okHttpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new FrontendException(BizCodeEnum.FAIL, response.message());
             }

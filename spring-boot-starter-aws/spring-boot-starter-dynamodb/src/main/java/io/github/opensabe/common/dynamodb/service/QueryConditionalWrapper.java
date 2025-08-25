@@ -15,11 +15,10 @@
  */
 package io.github.opensabe.common.dynamodb.service;
 
+import java.util.function.Consumer;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
-
-import java.util.function.Consumer;
 
 /**
  * @author heng.ma

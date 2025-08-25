@@ -15,25 +15,25 @@
  */
 package io.github.opensabe.common.s3.test;
 
-import io.github.opensabe.common.s3.service.S3ClientWrapper;
-import io.github.opensabe.common.s3.test.common.S3BaseTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import java.util.Objects;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.github.opensabe.common.s3.service.S3ClientWrapper;
+import io.github.opensabe.common.s3.test.common.S3BaseTest;
+
 @DisplayName("S3客户端包装器测试")
 public class S3ClientWrapperTest extends S3BaseTest {
 
+    byte[] bytes;
     @Autowired
     private S3ClientWrapper s3ClientWrapper;
-
-    byte[] bytes;
 
     public S3ClientWrapperTest() throws Exception {
         bytes = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("funny-cat.jpeg")).readAllBytes();
@@ -53,7 +53,7 @@ public class S3ClientWrapperTest extends S3BaseTest {
     @DisplayName("测试指定文件名上传 - 验证原始文件名保存")
     public void testUploadFileWithName() throws IOException {
         s3ClientWrapper.uploadWithOriginName(bytes, "funny-cat.jpeg", "image/jpeg", null);
-        try (InputStream download = s3ClientWrapper.download("funny-cat.jpeg")){
+        try (InputStream download = s3ClientWrapper.download("funny-cat.jpeg")) {
             byte[] allBytes = download.readAllBytes();
             Assertions.assertEquals(Base64.getEncoder().encodeToString(allBytes), Base64.getEncoder().encodeToString(bytes));
         }

@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.common.redisson.aop.ratelimiter;
 
-import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
-import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
-import io.github.opensabe.common.redisson.exceptions.RedissonRateLimiterException;
-import io.github.opensabe.common.utils.json.JsonUtil;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.time.Duration;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.redisson.api.RRateLimiter;
@@ -29,10 +30,11 @@ import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Method;
-import java.time.Duration;
+import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
+import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
+import io.github.opensabe.common.redisson.exceptions.RedissonRateLimiterException;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * redisson 限流器核心实现类
@@ -63,9 +65,9 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
         RedissonRateLimiter redissonRateLimiter = rateLimiterProperties.getRedissonRateLimiter();
         String rateLimiterName = rateLimiterProperties.resolve(method, invocation.getThis(), invocation.getArguments());
         RRateLimiter rateLimiter = redissonClient.getRateLimiter(rateLimiterName);
-        long keepAliveTime= redissonRateLimiter.keepAlive();
-        if(keepAliveTime>0){
-            Duration kat=Duration.ofMillis(redissonRateLimiter.keepAliveTimeUnit().toMillis(redissonRateLimiter.rateInterval()));
+        long keepAliveTime = redissonRateLimiter.keepAlive();
+        if (keepAliveTime > 0) {
+            Duration kat = Duration.ofMillis(redissonRateLimiter.keepAliveTimeUnit().toMillis(redissonRateLimiter.rateInterval()));
             rateLimiter.trySetRate(redissonRateLimiter.rateType(),
                     redissonRateLimiter.rate(),
                     Duration.ofMillis(redissonRateLimiter.rateIntervalUnit().toMillis(redissonRateLimiter.rateInterval())),
@@ -102,7 +104,7 @@ public class RedissonRateLimiterInterceptor implements MethodInterceptor {
                     throw new RedissonRateLimiterException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
                 }
             } else {
-                if (!rateLimiter.tryAcquire(redissonRateLimiter.permits(),Duration.ofMillis(redissonRateLimiter.timeUnit().toMillis(redissonRateLimiter.waitTime())))) {
+                if (!rateLimiter.tryAcquire(redissonRateLimiter.permits(), Duration.ofMillis(redissonRateLimiter.timeUnit().toMillis(redissonRateLimiter.waitTime())))) {
                     throw new RedissonRateLimiterException("Cannot acquire permits of RRateLimiter with name: " + rateLimiterName + ", rate: " + JsonUtil.toJSONString(config));
                 }
             }

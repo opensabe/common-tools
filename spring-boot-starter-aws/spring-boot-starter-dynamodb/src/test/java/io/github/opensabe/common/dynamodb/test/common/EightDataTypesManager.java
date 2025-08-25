@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.common.dynamodb.test.common;
 
-import io.github.opensabe.common.dynamodb.service.DynamoDbBaseService;
-import io.github.opensabe.common.dynamodb.test.po.EightDataTypesPo;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+
+import io.github.opensabe.common.dynamodb.service.DynamoDbBaseService;
+import io.github.opensabe.common.dynamodb.test.po.EightDataTypesPo;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 
 @Service

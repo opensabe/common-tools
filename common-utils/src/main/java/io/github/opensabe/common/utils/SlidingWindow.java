@@ -23,36 +23,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 滑动窗口类
  */
 public class SlidingWindow {
-    private AtomicInteger[] timeSlices;
-    private Semaphore semaphore = new Semaphore(0);
     /* 队列的总长度  */
     private final int timeSliceSize;
     /* 每个时间片的时长 */
     private final long timeMillisPerSlice;
     /* 窗口长度 */
     private final int windowSize;
-
+    private AtomicInteger[] timeSlices;
+    private Semaphore semaphore = new Semaphore(0);
     /* 当前所使用的时间片位置 */
     private AtomicInteger cursor = new AtomicInteger(0);
-
-    public static enum Time {
-        MILLISECONDS(1),
-        SECONDS(1000),
-        MINUTES(SECONDS.getMillis() * 60),
-        HOURS(MINUTES.getMillis() * 60),
-        DAYS(HOURS.getMillis() * 24),
-        WEEKS(DAYS.getMillis() * 7);
-
-        private long millis;
-
-        Time(long millis) {
-            this.millis = millis;
-        }
-
-        public long getMillis() {
-            return millis;
-        }
-    }
 
     public SlidingWindow(int windowSize, Time timeSlice) {
         this.timeMillisPerSlice = timeSlice.millis;
@@ -61,6 +41,27 @@ public class SlidingWindow {
         this.timeSliceSize = windowSize * 2 + 1;
 
         init();
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        SlidingWindow window = new SlidingWindow(5, Time.SECONDS);
+        long start = System.currentTimeMillis();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    window.await(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread().getId() + "在" + (System.currentTimeMillis() - start) + "ms 获取到了");
+            }
+        };
+
+        while (true) {
+            new Thread(runnable).start();
+            TimeUnit.MILLISECONDS.sleep(500);
+        }
     }
 
     /**
@@ -110,6 +111,7 @@ public class SlidingWindow {
 
     /**
      * 判断是否允许进行访问，未超过阈值的话才会对某个时间片+1
+     *
      * @param threshold
      * @return
      */
@@ -143,8 +145,9 @@ public class SlidingWindow {
     /**
      * 将fromIndex~toIndex之间的时间片计数都清零
      * 极端情况下，当循环队列已经走了超过1个timeSliceSize以上，这里的清零并不能如期望的进行
+     *
      * @param fromIndex 不包含
-     * @param toIndex 不包含
+     * @param toIndex   不包含
      */
     private void clearBetween(int fromIndex, int toIndex) {
         for (int index = (fromIndex + 1) % timeSliceSize; index != toIndex; index = (index + 1) % timeSliceSize) {
@@ -152,24 +155,22 @@ public class SlidingWindow {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        SlidingWindow window = new SlidingWindow(5, Time.SECONDS);
-        long start = System.currentTimeMillis();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    window.await(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(Thread.currentThread().getId() + "在" + (System.currentTimeMillis() - start) + "ms 获取到了");
-            }
-        };
+    public static enum Time {
+        MILLISECONDS(1),
+        SECONDS(1000),
+        MINUTES(SECONDS.getMillis() * 60),
+        HOURS(MINUTES.getMillis() * 60),
+        DAYS(HOURS.getMillis() * 24),
+        WEEKS(DAYS.getMillis() * 7);
 
-        while (true) {
-            new Thread(runnable).start();
-            TimeUnit.MILLISECONDS.sleep(500);
+        private long millis;
+
+        Time(long millis) {
+            this.millis = millis;
+        }
+
+        public long getMillis() {
+            return millis;
         }
     }
 }

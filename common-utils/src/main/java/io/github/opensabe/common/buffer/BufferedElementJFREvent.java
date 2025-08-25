@@ -34,16 +34,16 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BufferedElementJFREvent extends Event {
+    @Label("submitTime")
+    @Timestamp(value = Timestamp.MILLISECONDS_SINCE_EPOCH)
+    @Description("the time when submit to queue")
+    private final long submitTime;
     @Label("traceId when submit")
     private String submitTraceId;
     @Label("spanId when submit")
     private String submitSpanId;
     @Label("spanId when batch manipulate")
     private String batchSpanId;
-    @Label("submitTime")
-    @Timestamp(value = Timestamp.MILLISECONDS_SINCE_EPOCH)
-    @Description("the time when submit to queue")
-    private final long submitTime;
     @Timespan(value = Timespan.MILLISECONDS)
     @Description("the time in queue")
     private long queueTime;

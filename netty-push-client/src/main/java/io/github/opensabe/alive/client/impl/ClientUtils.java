@@ -15,16 +15,15 @@
  */
 package io.github.opensabe.alive.client.impl;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.protobuf.Message;
-import org.apache.commons.lang3.StringUtils;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 public class ClientUtils {
 

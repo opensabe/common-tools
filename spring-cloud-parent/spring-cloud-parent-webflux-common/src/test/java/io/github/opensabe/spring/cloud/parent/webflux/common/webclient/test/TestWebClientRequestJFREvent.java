@@ -15,15 +15,9 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.test;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
-import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.micrometer.observation.Observation;
-import io.micrometer.observation.ObservationRegistry;
-import io.micrometer.tracing.TraceContext;
-import jdk.jfr.consumer.RecordedEvent;
+import java.util.List;
+import java.util.Map;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -43,10 +37,6 @@ import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Flux;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -55,6 +45,17 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
+import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
+import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.tracing.TraceContext;
+import jdk.jfr.consumer.RecordedEvent;
+import reactor.core.publisher.Flux;
 
 @JfrEventTest
 @AutoConfigureObservability
@@ -76,11 +77,9 @@ import static org.mockito.Mockito.when;
 //JFR 测试最好在本地做
 @Disabled
 public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
-    @SpringBootApplication
-    public static class MockConfig {
-    }
-
     private final String serviceId = "testService";
+    public JfrEvents jfrEvents = new JfrEvents();
+    ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
     @Autowired
     private WebClientNamedContextFactory webClientNamedContextFactory;
     @Autowired
@@ -94,8 +93,6 @@ public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
     private TracedCircuitBreakerRoundRobinLoadBalancer loadBalancerClientFactoryInstance = spy(TracedCircuitBreakerRoundRobinLoadBalancer.class);
     private ServiceInstanceListSupplier serviceInstanceListSupplier = spy(ServiceInstanceListSupplier.class);
 
-    ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
-
     @BeforeEach
     void setup() {
         //初始化 loadBalancerClientFactoryInstance 负载均衡器
@@ -103,8 +100,6 @@ public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
         loadBalancerClientFactoryInstance.setCircuitBreakerExtractor(circuitBreakerExtractor);
         loadBalancerClientFactoryInstance.setServiceInstanceListSupplier(serviceInstanceListSupplier);
     }
-
-    public JfrEvents jfrEvents = new JfrEvents();
 
     /**
      * 测试 WebClient 正常调用
@@ -185,5 +180,9 @@ public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
             assertNotEquals(traceContext.spanId(), recordedEvent.getString("spanId"));
             assertEquals(200, recordedEvent.getInt("status"));
         });
+    }
+
+    @SpringBootApplication
+    public static class MockConfig {
     }
 }

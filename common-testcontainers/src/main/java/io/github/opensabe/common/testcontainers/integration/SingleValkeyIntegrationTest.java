@@ -15,13 +15,19 @@
  */
 package io.github.opensabe.common.testcontainers.integration;
 
-import io.github.opensabe.common.testcontainers.CustomizedValkeyContainer;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
+import io.github.opensabe.common.testcontainers.CustomizedValkeyContainer;
+
 public class SingleValkeyIntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
     public static final CustomizedValkeyContainer VALKEY = new CustomizedValkeyContainer();
+
+    public static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", VALKEY::getHost);
+        registry.add("spring.data.redis.port", VALKEY::getRedisPort);
+    }
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
@@ -33,11 +39,6 @@ public class SingleValkeyIntegrationTest implements BeforeAllCallback, Extension
                 }
             }
         }
-    }
-
-    public static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", VALKEY::getHost);
-        registry.add("spring.data.redis.port", VALKEY::getRedisPort);
     }
 
     @Override

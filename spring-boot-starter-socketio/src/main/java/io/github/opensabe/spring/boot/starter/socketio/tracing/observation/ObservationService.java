@@ -15,19 +15,18 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.tracing.observation;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.transport.NamespaceClient;
+
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.boot.starter.socketio.tracing.extend.MultiConsumer;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.EventEnum;
+import io.github.opensabe.spring.boot.starter.socketio.tracing.extend.MultiConsumer;
 import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 @Log4j2
 public class ObservationService {

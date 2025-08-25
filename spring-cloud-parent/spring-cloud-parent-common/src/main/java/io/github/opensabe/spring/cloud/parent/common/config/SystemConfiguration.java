@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
-import io.github.opensabe.spring.cloud.parent.common.system.MonitorMemoryRSS;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.opensabe.spring.cloud.parent.common.system.MonitorMemoryRSS;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)

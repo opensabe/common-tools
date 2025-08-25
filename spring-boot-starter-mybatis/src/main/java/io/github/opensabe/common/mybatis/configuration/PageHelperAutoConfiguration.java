@@ -15,8 +15,9 @@
  */
 package io.github.opensabe.common.mybatis.configuration;
 
-import io.github.opensabe.common.mybatis.interceptor.DataSourceSwitchInterceptor;
-import jakarta.annotation.PostConstruct;
+import java.util.List;
+import java.util.Properties;
+
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-import java.util.Properties;
-
 import static io.github.opensabe.common.mybatis.configuration.PageHelperProperties.PAGEHELPER_PREFIX;
+
+import io.github.opensabe.common.mybatis.interceptor.DataSourceSwitchInterceptor;
+import jakarta.annotation.PostConstruct;
 
 /**
  * 配置分页插件
@@ -44,6 +45,7 @@ public class PageHelperAutoConfiguration {
 
     @Autowired(required = false)
     private DataSourceSwitchInterceptor dataSourceSwitchInterceptor;
+
     /**
      * 接受分页插件额外的属性
      *

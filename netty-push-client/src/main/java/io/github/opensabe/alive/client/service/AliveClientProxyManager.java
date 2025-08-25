@@ -15,12 +15,11 @@
  */
 package io.github.opensabe.alive.client.service;
 
-import io.github.opensabe.alive.client.Client;
-import io.github.opensabe.alive.client.exception.AliveClientRuntimeException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import io.github.opensabe.alive.client.Client;
+import io.github.opensabe.alive.client.exception.AliveClientRuntimeException;
 
 public class AliveClientProxyManager {
     private List<AliveClientManager> managerList;

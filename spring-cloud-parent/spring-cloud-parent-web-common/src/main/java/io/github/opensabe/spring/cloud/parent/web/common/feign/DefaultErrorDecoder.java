@@ -15,14 +15,15 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.feign;
 
+import org.springframework.http.HttpStatus;
+
+import static feign.FeignException.errorStatus;
+
 import feign.Response;
 import feign.RetryableException;
 import feign.codec.ErrorDecoder;
 import io.github.opensabe.spring.cloud.parent.web.common.misc.SpecialHttpStatus;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
-
-import static feign.FeignException.errorStatus;
 
 @Log4j2
 public class DefaultErrorDecoder implements ErrorDecoder {
@@ -38,8 +39,8 @@ public class DefaultErrorDecoder implements ErrorDecoder {
         log.info("{} response: {}-{}, should retry: {}", methodKey, response.status(), response.reason(), shouldThrowRetryable);
         //对于查询请求以及可以重试的响应码的异常，进行重试，即抛出可重试异常 RetryableException
         if (shouldThrowRetryable) {
-                Long retry = null;
-                throw new RetryableException(response.status(), response.reason(), response.request().httpMethod(), retry, response.request());
+            Long retry = null;
+            throw new RetryableException(response.status(), response.reason(), response.request().httpMethod(), retry, response.request());
         } else {
             throw errorStatus(methodKey, response);
         }

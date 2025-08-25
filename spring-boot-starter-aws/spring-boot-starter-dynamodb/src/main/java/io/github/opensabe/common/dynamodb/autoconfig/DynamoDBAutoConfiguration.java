@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.common.dynamodb.autoconfig;
 
-import io.github.opensabe.common.dynamodb.config.DynamoDBConfiguration;
-import io.github.opensabe.common.dynamodb.config.MonitorConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.dynamodb.config.DynamoDBConfiguration;
+import io.github.opensabe.common.dynamodb.config.MonitorConfiguration;
 
 @AutoConfiguration
 @Import({DynamoDBConfiguration.class, MonitorConfiguration.class})

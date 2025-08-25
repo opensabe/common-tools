@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.starter.third.client.conf;
 
-import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(ThirdPartyWebClientConfigurationProperties.class)

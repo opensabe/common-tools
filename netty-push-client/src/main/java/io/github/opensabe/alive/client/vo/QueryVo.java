@@ -32,10 +32,10 @@ public class QueryVo extends PushVo {
 
     public Object build(int requestId, int productCode) {
         Message.Query.Builder builder = Message.Query.newBuilder()
-            .setRequestId(requestId)
-            .setProductCode(productCode)
-            .setTopic(topic)
-            .setPushType(pushType);
+                .setRequestId(requestId)
+                .setProductCode(productCode)
+                .setTopic(topic)
+                .setPushType(pushType);
         if (deviceId != null && !deviceId.isEmpty()) {
             builder.setDeviceId(deviceId);
         }

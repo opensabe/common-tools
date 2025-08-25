@@ -15,14 +15,11 @@
  */
 package io.github.opensabe.common.mybatis.configuration;
 
-import io.github.opensabe.common.mybatis.interceptor.CustomizedDataSourceTransactionManager;
-import io.github.opensabe.common.mybatis.interceptor.CustomizedTransactionInterceptor;
-import io.github.opensabe.common.mybatis.plugins.BeanDefiner;
-import io.github.opensabe.common.mybatis.plugins.DataSourceFactory;
-import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
-import io.github.opensabe.common.mybatis.properties.CountryProperties;
-import io.github.opensabe.common.mybatis.properties.SqlSessionFactoryProperties;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.sql.DataSource;
+
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -48,14 +45,19 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import io.github.opensabe.common.mybatis.interceptor.CustomizedDataSourceTransactionManager;
+import io.github.opensabe.common.mybatis.interceptor.CustomizedTransactionInterceptor;
+import io.github.opensabe.common.mybatis.plugins.BeanDefiner;
+import io.github.opensabe.common.mybatis.plugins.DataSourceFactory;
+import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
+import io.github.opensabe.common.mybatis.properties.CountryProperties;
+import io.github.opensabe.common.mybatis.properties.SqlSessionFactoryProperties;
+import lombok.extern.log4j.Log4j2;
 import tk.mybatis.mapper.autoconfigure.MybatisProperties;
 import tk.mybatis.mapper.autoconfigure.SpringBootVFS;
 import tk.mybatis.spring.mapper.ClassPathMapperScanner;
 import tk.mybatis.spring.mapper.SpringBootBindUtil;
-
-import javax.sql.DataSource;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * 配置sqlSessionFactory
@@ -70,189 +72,185 @@ import java.util.Properties;
 @EnableConfigurationProperties(SqlSessionFactoryProperties.class)
 @Configuration(proxyBeanMethods = false)
 public class SqlSessionFactoryConfiguration
-		implements ResourceLoaderAware, EnvironmentAware, BeanFactoryPostProcessor {
+        implements ResourceLoaderAware, EnvironmentAware, BeanFactoryPostProcessor {
 
-	private Environment environment;
+    public static CountryProperties countryProperties;
+    public static String defaultOperId;
+    private Environment environment;
+    private ResourceLoader resourceLoader;
 
-	private ResourceLoader resourceLoader;
+    /**
+     * 使用指定的sqlSessionFactory扫描不同的mapper
+     *
+     * @param registry         applicationContext
+     * @param sqlStringFactory sqlSessionFactory
+     * @param basePackage      mapper路径
+     */
+    private void doScan(BeanDefinitionRegistry registry, String sqlStringFactory, String... basePackage) {
+        ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
+        scanner.setMapperProperties(environment);
+        scanner.setSqlSessionFactoryBeanName(sqlStringFactory);
+        scanner.setResourceLoader(resourceLoader);
+        scanner.registerFilters();
+        scanner.doScan(basePackage);
+    }
 
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        try {
+            SqlSessionFactoryProperties sqlSessionFactoryProperties = SpringBootBindUtil.bind(environment,
+                    SqlSessionFactoryProperties.class, SqlSessionFactoryProperties.PREFIX);
+            Map<String, SqlSessionFactoryProperties.DatasourceConfiguration> configuration = sqlSessionFactoryProperties
+                    .getConfig();
+            if (configuration != null) {
+                MybatisProperties mybatisProperties = SpringBootBindUtil.bind(environment, MybatisProperties.class,
+                        MybatisProperties.MYBATIS_PREFIX);
+                DefaultListableBeanFactory register = (DefaultListableBeanFactory) beanFactory;
+                BeanDefiner beanDefiner = new BeanDefiner(register);
+                configuration.forEach((k, v) -> {
+                    // log.info("key:" + k);
+                    // log.info("value:" + v.toString());
 
-	public static CountryProperties countryProperties;
+                    Assert.notEmpty(v.getDataSource(), "datasource shall not be null");
+                    Assert.notEmpty(v.getBasePackages(), "basePackages shall not be null");
+                    Assert.hasLength(v.getDefaultClusterName(), "clusterName shall not be null");
 
-	public static String defaultOperId;
+                    // Create Datasource
+                    DynamicRoutingDataSource dynamicRoutingDataSource = DataSourceFactory
+                            .createDynamicRoutingDataSource(v.getDefaultClusterName(), v.getDataSource());
+                    beanDefiner.registerDataSource(k, dynamicRoutingDataSource);
 
-	/**
-	 * 使用指定的sqlSessionFactory扫描不同的mapper
-	 *
-	 * @param registry         applicationContext
-	 * @param sqlStringFactory sqlSessionFactory
-	 * @param basePackage      mapper路径
-	 */
-	private void doScan(BeanDefinitionRegistry registry, String sqlStringFactory, String... basePackage) {
-		ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
-		scanner.setMapperProperties(environment);
-		scanner.setSqlSessionFactoryBeanName(sqlStringFactory);
-		scanner.setResourceLoader(resourceLoader);
-		scanner.registerFilters();
-		scanner.doScan(basePackage);
-	}
+                    // Create and Register Transaction Manager
+                    String transactionManagerBeanName = beanDefiner.registerTransactionManager(k,
+                            transactionManager(dynamicRoutingDataSource));
+                    if (v.getTransactionServicePackages() != null) {
+                        for (String packageName : v.getTransactionServicePackages()) {
+                            log.info("register transaction manager name:{},{}", packageName, transactionManagerBeanName);
+                            CustomizedTransactionInterceptor.putTransactionManagerName(packageName,
+                                    transactionManagerBeanName);
+                        }
+                    }
 
-	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		try {
-			SqlSessionFactoryProperties sqlSessionFactoryProperties = SpringBootBindUtil.bind(environment,
-					SqlSessionFactoryProperties.class, SqlSessionFactoryProperties.PREFIX);
-			Map<String, SqlSessionFactoryProperties.DatasourceConfiguration> configuration = sqlSessionFactoryProperties
-					.getConfig();
-			if (configuration != null) {
-				MybatisProperties mybatisProperties = SpringBootBindUtil.bind(environment, MybatisProperties.class,
-						MybatisProperties.MYBATIS_PREFIX);
-				DefaultListableBeanFactory register = (DefaultListableBeanFactory) beanFactory;
-				BeanDefiner beanDefiner = new BeanDefiner(register);
-				configuration.forEach((k, v) -> {
-					// log.info("key:" + k);
-					// log.info("value:" + v.toString());
+                    // Create and Register SqlSessionFactory and Add Datasource Switch Interceptor
+                    SqlSessionFactory sqlSessionFactory = sqlSessionFactory(k, dynamicRoutingDataSource, mybatisProperties);
 
-					Assert.notEmpty(v.getDataSource(), "datasource shall not be null");
-					Assert.notEmpty(v.getBasePackages(), "basePackages shall not be null");
-					Assert.hasLength(v.getDefaultClusterName(), "clusterName shall not be null");
+                    String factory = beanDefiner.registerSqlSessionFactory(k, sqlSessionFactory);
+                    beanDefiner.registerSqlSessionTemplate(k, sqlSessionTemplate(sqlSessionFactory));
 
-					// Create Datasource
-					DynamicRoutingDataSource dynamicRoutingDataSource = DataSourceFactory
-							.createDynamicRoutingDataSource(v.getDefaultClusterName(), v.getDataSource());
-					beanDefiner.registerDataSource(k, dynamicRoutingDataSource);
+                    // Scan Mapper
+                    doScan(register, factory, v.getBasePackages());
+                });
 
-					// Create and Register Transaction Manager
-					String transactionManagerBeanName = beanDefiner.registerTransactionManager(k,
-							transactionManager(dynamicRoutingDataSource));
-					if (v.getTransactionServicePackages() != null) {
-						for (String packageName : v.getTransactionServicePackages()) {
-							log.info("register transaction manager name:{},{}", packageName, transactionManagerBeanName);
-							CustomizedTransactionInterceptor.putTransactionManagerName(packageName,
-									transactionManagerBeanName);
-						}
-					}
+                /**
+                 * 手动实现事务管理代理
+                 * @see org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration
+                 */
+                CustomizedTransactionInterceptor interceptor = new CustomizedTransactionInterceptor();
+                try {
+                    register.removeBeanDefinition("transactionInterceptor");
+                } catch (NoSuchBeanDefinitionException e) {
+                    log.info("No transactionInterceptor found, no need to remove");
+                }
+                try {
+                    register.removeBeanDefinition("transactionAttributeSource");
+                } catch (NoSuchBeanDefinitionException e) {
+                    log.info("No transactionAttributeSource found, no need to remove");
+                }
+                try {
+                    register.removeBeanDefinition("beanFactoryTransactionAttributeSourceAdvisor");
+                } catch (NoSuchBeanDefinitionException e) {
+                    log.info("No beanFactoryTransactionAttributeSourceAdvisor found, no need to remove");
+                }
+                register.registerBeanDefinition("transactionInterceptor",
+                        BeanDefinitionBuilder
+                                .genericBeanDefinition(CustomizedTransactionInterceptor.class, () -> interceptor)
+                                .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
 
-					// Create and Register SqlSessionFactory and Add Datasource Switch Interceptor
-					SqlSessionFactory sqlSessionFactory = sqlSessionFactory(k, dynamicRoutingDataSource, mybatisProperties);
+                TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
+                register.registerBeanDefinition("transactionAttributeSource",
+                        BeanDefinitionBuilder
+                                .genericBeanDefinition(TransactionAttributeSource.class, () -> transactionAttributeSource)
+                                .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+                interceptor.setTransactionAttributeSource(transactionAttributeSource);
 
-					String factory = beanDefiner.registerSqlSessionFactory(k, sqlSessionFactory);
-					beanDefiner.registerSqlSessionTemplate(k, sqlSessionTemplate(sqlSessionFactory));
+                BeanFactoryTransactionAttributeSourceAdvisor advisor = new BeanFactoryTransactionAttributeSourceAdvisor();
+                advisor.setTransactionAttributeSource(transactionAttributeSource);
+                advisor.setAdvice(interceptor);
+                register.registerBeanDefinition("beanFactoryTransactionAttributeSourceAdvisor",
+                        BeanDefinitionBuilder
+                                .genericBeanDefinition(BeanFactoryTransactionAttributeSourceAdvisor.class, () -> advisor)
+                                .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+            }
+        } catch (BeansException e) {
+            log.error("catch Exception {} while initiate sqlSessionFactory", e.getLocalizedMessage(), e);
+            throw e;
+        } catch (Throwable e) {
+            log.error("catch Exception {} while initiate sqlSessionFactory", e.getLocalizedMessage(), e);
+            throw new BeanCreationException("initiate error " + e.getLocalizedMessage(), e);
+        }
+    }
 
-					// Scan Mapper
-					doScan(register, factory, v.getBasePackages());
-				});
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+        SqlSessionFactoryConfiguration.countryProperties = SpringBootBindUtil.bind(environment, CountryProperties.class, CountryProperties.PREFIX);
+        SqlSessionFactoryConfiguration.defaultOperId = environment.getProperty("defaultOperId");
+    }
 
-				/**
-				 * 手动实现事务管理代理
-				 * @see org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration
-				 */
-				CustomizedTransactionInterceptor interceptor = new CustomizedTransactionInterceptor();
-				try {
-					register.removeBeanDefinition("transactionInterceptor");
-				} catch (NoSuchBeanDefinitionException e) {
-					log.info("No transactionInterceptor found, no need to remove");
-				}
-				try {
-					register.removeBeanDefinition("transactionAttributeSource");
-				} catch (NoSuchBeanDefinitionException e) {
-					log.info("No transactionAttributeSource found, no need to remove");
-				}
-				try {
-					register.removeBeanDefinition("beanFactoryTransactionAttributeSourceAdvisor");
-				} catch (NoSuchBeanDefinitionException e) {
-					log.info("No beanFactoryTransactionAttributeSourceAdvisor found, no need to remove");
-				}
-				register.registerBeanDefinition("transactionInterceptor",
-						BeanDefinitionBuilder
-								.genericBeanDefinition(CustomizedTransactionInterceptor.class, () -> interceptor)
-								.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+    @Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
-				TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
-				register.registerBeanDefinition("transactionAttributeSource",
-						BeanDefinitionBuilder
-								.genericBeanDefinition(TransactionAttributeSource.class, () -> transactionAttributeSource)
-								.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-				interceptor.setTransactionAttributeSource(transactionAttributeSource);
-
-				BeanFactoryTransactionAttributeSourceAdvisor advisor = new BeanFactoryTransactionAttributeSourceAdvisor();
-				advisor.setTransactionAttributeSource(transactionAttributeSource);
-				advisor.setAdvice(interceptor);
-				register.registerBeanDefinition("beanFactoryTransactionAttributeSourceAdvisor",
-						BeanDefinitionBuilder
-								.genericBeanDefinition(BeanFactoryTransactionAttributeSourceAdvisor.class, () -> advisor)
-								.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-			}
-		} catch (BeansException e) {
-			log.error("catch Exception {} while initiate sqlSessionFactory", e.getLocalizedMessage(), e);
-			throw e;
-		} catch (Throwable e) {
-			log.error("catch Exception {} while initiate sqlSessionFactory", e.getLocalizedMessage(), e);
-			throw new BeanCreationException("initiate error " + e.getLocalizedMessage(), e);
-		}
-	}
-
-	@Override
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
-		SqlSessionFactoryConfiguration.countryProperties = SpringBootBindUtil.bind(environment, CountryProperties.class, CountryProperties.PREFIX);
-		SqlSessionFactoryConfiguration.defaultOperId = environment.getProperty("defaultOperId");
-	}
-
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
-
-	/**
-	 * 创建sqlSessionFactory 初始化时不能设置configuration
-	 *
-	 * @param k          业务类型
-	 * @param dataSource 数据源
-	 * @param properties mybatis配置
-	 * @return sqlSessionFactory
-	 */
-	private SqlSessionFactory sqlSessionFactory(String k, DataSource dataSource, MybatisProperties properties) {
-		SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
-		factory.setDataSource(dataSource);
-		factory.setVfs(SpringBootVFS.class);
-		//为了添加Observation,我们自己指定configuration,而设置了configuration就不能设置configLocation
-		//自定义的Configuration重写了MapperRegistry,注册Mapper时生成我们自己的代理类，在代理类上添加Observation
-		factory.setConfiguration(new io.github.opensabe.common.mybatis.plugins.Configuration());
+    /**
+     * 创建sqlSessionFactory 初始化时不能设置configuration
+     *
+     * @param k          业务类型
+     * @param dataSource 数据源
+     * @param properties mybatis配置
+     * @return sqlSessionFactory
+     */
+    private SqlSessionFactory sqlSessionFactory(String k, DataSource dataSource, MybatisProperties properties) {
+        SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
+        factory.setDataSource(dataSource);
+        factory.setVfs(SpringBootVFS.class);
+        //为了添加Observation,我们自己指定configuration,而设置了configuration就不能设置configLocation
+        //自定义的Configuration重写了MapperRegistry,注册Mapper时生成我们自己的代理类，在代理类上添加Observation
+        factory.setConfiguration(new io.github.opensabe.common.mybatis.plugins.Configuration());
 //		if (StringUtils.hasText(properties.getConfigLocation())) {
 //			factory.setConfigLocation(resourceLoader.getResource(properties.getConfigLocation()));
 //		}
-		Properties configurationProperties = properties.getConfigurationProperties();
-		if (configurationProperties != null) {
-			factory.setConfigurationProperties(configurationProperties);
-		}
-		String typeAliasesPackage = properties.getTypeAliasesPackage();
-		if (StringUtils.hasLength(typeAliasesPackage)) {
-			factory.setTypeAliasesPackage(typeAliasesPackage);
-		}
-		if (properties.getTypeAliasesSuperType() != null) {
-			factory.setTypeAliasesSuperType(properties.getTypeAliasesSuperType());
-		}
-		if (StringUtils.hasLength(properties.getTypeHandlersPackage())) {
-			factory.setTypeHandlersPackage(properties.getTypeHandlersPackage());
-		}
-		if (!ObjectUtils.isEmpty(properties.resolveMapperLocations())) {
-			factory.setMapperLocations(properties.resolveMapperLocations());
-		}
-		try {
-			return factory.getObject();
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}
-	}
+        Properties configurationProperties = properties.getConfigurationProperties();
+        if (configurationProperties != null) {
+            factory.setConfigurationProperties(configurationProperties);
+        }
+        String typeAliasesPackage = properties.getTypeAliasesPackage();
+        if (StringUtils.hasLength(typeAliasesPackage)) {
+            factory.setTypeAliasesPackage(typeAliasesPackage);
+        }
+        if (properties.getTypeAliasesSuperType() != null) {
+            factory.setTypeAliasesSuperType(properties.getTypeAliasesSuperType());
+        }
+        if (StringUtils.hasLength(properties.getTypeHandlersPackage())) {
+            factory.setTypeHandlersPackage(properties.getTypeHandlersPackage());
+        }
+        if (!ObjectUtils.isEmpty(properties.resolveMapperLocations())) {
+            factory.setMapperLocations(properties.resolveMapperLocations());
+        }
+        try {
+            return factory.getObject();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	private SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-		SqlSessionTemplate sqlSessionTemplate = new SqlSessionTemplate(sqlSessionFactory);
-		return sqlSessionTemplate;
-	}
+    private SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
+        SqlSessionTemplate sqlSessionTemplate = new SqlSessionTemplate(sqlSessionFactory);
+        return sqlSessionTemplate;
+    }
 
-	private DataSourceTransactionManager transactionManager(DataSource dataSource) {
-		DataSourceTransactionManager transactionManager = new CustomizedDataSourceTransactionManager(dataSource);
-		return transactionManager;
-	}
+    private DataSourceTransactionManager transactionManager(DataSource dataSource) {
+        DataSourceTransactionManager transactionManager = new CustomizedDataSourceTransactionManager(dataSource);
+        return transactionManager;
+    }
 }

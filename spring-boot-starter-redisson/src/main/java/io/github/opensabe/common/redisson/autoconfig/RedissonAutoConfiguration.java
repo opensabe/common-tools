@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.common.redisson.autoconfig;
 
-import io.github.opensabe.common.redisson.config.RedissonAnnotationConfiguration;
-import io.github.opensabe.common.redisson.config.RedissonAopOrderProperties;
-import io.github.opensabe.common.redisson.config.RedissonClientBeanPostProcessor;
-import io.github.opensabe.common.redisson.config.RedissonScheduleProperties;
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.redisson.config.RedissonAnnotationConfiguration;
+import io.github.opensabe.common.redisson.config.RedissonAopOrderProperties;
+import io.github.opensabe.common.redisson.config.RedissonClientBeanPostProcessor;
+import io.github.opensabe.common.redisson.config.RedissonScheduleProperties;
 
 /**
  * 这里必须手动调整顺序，RedisAutoConfiguration 必须在 RedissonAutoConfigurationV2 之前执行

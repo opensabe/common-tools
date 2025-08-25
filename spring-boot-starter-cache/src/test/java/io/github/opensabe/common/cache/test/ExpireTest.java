@@ -15,13 +15,8 @@
  */
 package io.github.opensabe.common.cache.test;
 
-import io.github.opensabe.common.cache.api.Expire;
-import io.github.opensabe.common.cache.api.ExpireCacheManager;
-import io.github.opensabe.common.cache.config.RedisConfiguration;
-import io.github.opensabe.common.cache.test.entity.ItemObject;
-import io.github.opensabe.common.cache.test.service.CacheService;
-import io.github.opensabe.common.cache.test.storage.MockStorage;
-import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
+import java.time.Duration;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +30,13 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.Duration;
+import io.github.opensabe.common.cache.api.Expire;
+import io.github.opensabe.common.cache.api.ExpireCacheManager;
+import io.github.opensabe.common.cache.config.RedisConfiguration;
+import io.github.opensabe.common.cache.test.entity.ItemObject;
+import io.github.opensabe.common.cache.test.service.CacheService;
+import io.github.opensabe.common.cache.test.storage.MockStorage;
+import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 
 /**
  * @author heng.ma
@@ -55,11 +56,6 @@ import java.time.Duration;
 }, classes = App.class)
 public class ExpireTest {
 
-    @DynamicPropertySource
-    public static void setProperties(DynamicPropertyRegistry registry) {
-        SingleRedisIntegrationTest.setProperties(registry);
-    }
-
     private final CacheService cacheService;
     private final ExpireCacheManager cacheManager;
     private final StringRedisTemplate redisTemplate;
@@ -72,8 +68,13 @@ public class ExpireTest {
         this.storage = storage;
     }
 
+    @DynamicPropertySource
+    public static void setProperties(DynamicPropertyRegistry registry) {
+        SingleRedisIntegrationTest.setProperties(registry);
+    }
+
     @Test
-    void testCaffeine () throws InterruptedException, NoSuchMethodException {
+    void testCaffeine() throws InterruptedException, NoSuchMethodException {
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
         Expire expire = CacheService.class.getMethod("getCaffeineExpire", Long.class, String.class).getAnnotation(Expire.class);
@@ -87,8 +88,9 @@ public class ExpireTest {
         expire.timeUnit().sleep(expire.value());
         Assertions.assertNull(cache.get("1:id1"));
     }
+
     @Test
-    void testRedis () throws NoSuchMethodException {
+    void testRedis() throws NoSuchMethodException {
         ItemObject item = ItemObject.builder().id(2L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
         Expire expire = CacheService.class.getMethod("getRedisExpire", Long.class, String.class).getAnnotation(Expire.class);
@@ -98,16 +100,16 @@ public class ExpireTest {
 
         Assertions.assertInstanceOf(RedisCache.class, cache);
 
-        long ttl = redisTemplate.getExpire(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX+"test_redis::2:id2");
+        long ttl = redisTemplate.getExpire(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX + "test_redis::2:id2");
         long end = System.currentTimeMillis();
 
         System.out.println(ttl);
 
-        Assertions.assertTrue(ttl + Duration.ofMillis(end-start).get(expire.timeUnit().toChronoUnit()) == expire.value());
+        Assertions.assertTrue(ttl + Duration.ofMillis(end - start).get(expire.timeUnit().toChronoUnit()) == expire.value());
     }
 
     @Test
-    void testAssignment () throws NoSuchMethodException, InterruptedException {
+    void testAssignment() throws NoSuchMethodException, InterruptedException {
         ItemObject item = ItemObject.builder().id(2L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
         Expire expire = CacheService.class.getMethod("geAssignmentExpire", Long.class, String.class).getAnnotation(Expire.class);
@@ -120,7 +122,7 @@ public class ExpireTest {
     }
 
     @Test
-    void testRemoveCaffeine () throws NoSuchMethodException {
+    void testRemoveCaffeine() throws NoSuchMethodException {
         Long id = 3L;
         String filed = "id3";
         ItemObject item = ItemObject.builder().id(id).name(filed).value("Test_Caffeine").build();
@@ -131,20 +133,21 @@ public class ExpireTest {
 
         Assertions.assertInstanceOf(CaffeineCache.class, cache);
 
-        ItemObject cached = cache.get(id+":"+filed, ItemObject.class);
+        ItemObject cached = cache.get(id + ":" + filed, ItemObject.class);
         Assertions.assertEquals(current, cached);
         cacheService.deleteCaffeine(id, filed);
-        Assertions.assertNull(cache.get(id+":"+filed));
+        Assertions.assertNull(cache.get(id + ":" + filed));
     }
+
     @Test
-    void testRemoveRedis () throws NoSuchMethodException {
+    void testRemoveRedis() throws NoSuchMethodException {
         Long id = 4L;
         String filed = "id4";
         ItemObject item = ItemObject.builder().id(id).name(filed).value("Test_Caffeine").build();
         storage.addItem(item);
         cacheService.getRedisExpire(id, filed);
         cacheService.deleteRedis(id, filed);
-        String s = redisTemplate.opsForValue().get(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX  + "test_redis::" + id + ":" + filed);
+        String s = redisTemplate.opsForValue().get(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX + "test_redis::" + id + ":" + filed);
         Assertions.assertNull(s);
     }
 }

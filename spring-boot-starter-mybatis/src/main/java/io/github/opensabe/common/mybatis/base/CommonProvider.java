@@ -15,18 +15,21 @@
  */
 package io.github.opensabe.common.mybatis.base;
 
+import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+
 import com.google.common.base.CaseFormat;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import java.util.Collection;
-import java.util.concurrent.ExecutionException;
-
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class CommonProvider<T> {
     private static final int CACHE_SIZE = 2 << 16;
 
     private static final Cache<String, String> camelToUnderScoreCache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).build();
+    private static final Cache<String, String> underScoreToCamelCache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).build();
+    private static final ThreadLocal<StringBuilder> stringBuilderThreadLocal = ThreadLocal.withInitial(() -> new StringBuilder());
+    private static final ThreadLocal<CommonProvider> commonProviderThreadLocal = ThreadLocal.withInitial(() -> new CommonProvider<>());
 
     public static String camelToUnderScore(String name) {
         try {
@@ -36,8 +39,6 @@ public class CommonProvider<T> {
         }
     }
 
-    private static final Cache<String, String> underScoreToCamelCache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).build();
-
     public static String underScoreToCamel(String name) {
         try {
             return underScoreToCamelCache.get(name, () -> CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name));
@@ -45,8 +46,6 @@ public class CommonProvider<T> {
             return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name);
         }
     }
-
-    private static final ThreadLocal<StringBuilder> stringBuilderThreadLocal = ThreadLocal.withInitial(() -> new StringBuilder());
 
     public static String getFieldsFromStrCollection(Collection<String> strings) {
         StringBuilder stringBuilder = stringBuilderThreadLocal.get();
@@ -58,8 +57,7 @@ public class CommonProvider<T> {
         return stringBuilder.toString();
     }
 
-    
-	public static String getInStrFromStrCollection(Collection objects) {
+    public static String getInStrFromStrCollection(Collection objects) {
         if (objects.isEmpty()) {
             return "('')";
         }
@@ -73,8 +71,6 @@ public class CommonProvider<T> {
         stringBuilder.append(")");
         return stringBuilder.toString();
     }
-
-    private static final ThreadLocal<CommonProvider> commonProviderThreadLocal = ThreadLocal.withInitial(() -> new CommonProvider<>());
 
     public static <T> CommonProvider<T> common() {
         return commonProviderThreadLocal.get();

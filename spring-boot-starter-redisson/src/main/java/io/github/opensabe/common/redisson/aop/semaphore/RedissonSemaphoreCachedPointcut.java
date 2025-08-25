@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.common.redisson.aop.semaphore;
 
+import java.lang.reflect.Method;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
 import io.github.opensabe.common.redisson.aop.old.ExtraNamePointcut;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.lang.reflect.Method;
 
 public class RedissonSemaphoreCachedPointcut extends ExtraNamePointcut<RedissonSemaphoreProperties> {
 
@@ -40,7 +41,7 @@ public class RedissonSemaphoreCachedPointcut extends ExtraNamePointcut<RedissonS
                     findParameterAnnotation(method, io.github.opensabe.common.redisson.annotation.RedissonSemaphoreName.class);
             if (pair == null) {
                 return new RedissonSemaphoreProperties(evaluator, l);
-            }else {
+            } else {
                 return new RedissonSemaphoreProperties(l, pair.getKey(), pair.getValue());
             }
         }

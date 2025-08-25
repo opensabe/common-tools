@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientDefaultConfiguration;
 import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientDefaultConfiguration;
 
 public class WebClientNamedContextFactory extends NamedContextFactory<WebClientSpecification> {
     public static final String NAMESPACE = "webclient";
@@ -29,6 +30,7 @@ public class WebClientNamedContextFactory extends NamedContextFactory<WebClientS
 
     /**
      * 获取 WebClient
+     *
      * @param name
      * @return
      */

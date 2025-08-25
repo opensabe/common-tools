@@ -15,11 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
-import feign.RetryableException;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.retry.RetryRegistry;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +38,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import static org.mockito.Mockito.when;
+
+import feign.RetryableException;
+import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.RetryRegistry;
 
 
 @ActiveProfiles("circuitbreaker")
@@ -55,44 +56,14 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
     static final String CONTEXT_ID_CIRCUITBREAKER = "testServiceCircuitbreakerClient";
     static final int TEST_SERVICE_CIRCUITBREAKER_FAILURE_RATE_THRESHOLD = 30;
     static final int TEST_SERVICE_CIRCUITBREAKER_MINIMUM_NUMBER_OF_CALLS = 10;
-
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
-    @FeignClient(name = TEST_SERVICE_CIRCUITBREAKER, contextId = CONTEXT_ID_CIRCUITBREAKER)
-    static interface TestServiceCircuitbreakerClient {
-        @GetMapping("/anything")
-        HttpBinAnythingResponse anything();
-
-        @GetMapping("/status/200")
-        String testCircuitBreakerStatus200();
-
-        @GetMapping("/status/500")
-        String testCircuitBreakerStatus500();
-
-        @PostMapping("/status/500")
-        String testPostRetryStatus500();
-
-        @GetMapping("/delay/1")
-        String testGetDelayOneSecond();
-
-        @GetMapping("/delay/3")
-        String testGetDelayThreeSeconds();
-    }
-
     @Autowired
     CircuitBreakerRegistry circuitBreakerRegistry;
-
     @Autowired
     LoadBalancerClientFactory loadBalancerClientFactory;
-
     @Autowired
     RetryRegistry retryRegistry;
-
     @Autowired
     TestServiceCircuitbreakerClient testServiceCircuitbreakerClient;
-
     @MockBean
     SimpleDiscoveryClient discoveryClient;
     List<ServiceInstance> serviceInstances = List.of(new DefaultServiceInstance(
@@ -229,6 +200,31 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
         //验证断路器关闭后，可以正常请求
         var result3 = testServiceCircuitbreakerClient.testCircuitBreakerStatus200();
         Assertions.assertNull(result3);
+    }
+
+    @FeignClient(name = TEST_SERVICE_CIRCUITBREAKER, contextId = CONTEXT_ID_CIRCUITBREAKER)
+    static interface TestServiceCircuitbreakerClient {
+        @GetMapping("/anything")
+        HttpBinAnythingResponse anything();
+
+        @GetMapping("/status/200")
+        String testCircuitBreakerStatus200();
+
+        @GetMapping("/status/500")
+        String testCircuitBreakerStatus500();
+
+        @PostMapping("/status/500")
+        String testPostRetryStatus500();
+
+        @GetMapping("/delay/1")
+        String testGetDelayOneSecond();
+
+        @GetMapping("/delay/3")
+        String testGetDelayThreeSeconds();
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 
 }

@@ -15,12 +15,14 @@
  */
 package io.github.opensabe.common.location.service;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.github.opensabe.common.location.vo.IpLocation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 
 public class IpGeoHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<IpGeoHttpFetchIpInfoService.Response> {
     @Override

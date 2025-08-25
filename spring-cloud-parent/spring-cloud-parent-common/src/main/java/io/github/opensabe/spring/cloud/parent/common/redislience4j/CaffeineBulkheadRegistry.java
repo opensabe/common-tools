@@ -15,12 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.redislience4j;
 
-import io.github.resilience4j.bulkhead.Bulkhead;
-import io.github.resilience4j.bulkhead.BulkheadConfig;
-import io.github.resilience4j.bulkhead.BulkheadRegistry;
-import io.github.resilience4j.core.ConfigurationNotFoundException;
-import io.github.resilience4j.core.registry.RegistryEventConsumer;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -29,9 +23,15 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
 
+import io.github.resilience4j.bulkhead.Bulkhead;
+import io.github.resilience4j.bulkhead.BulkheadConfig;
+import io.github.resilience4j.bulkhead.BulkheadRegistry;
+import io.github.resilience4j.core.ConfigurationNotFoundException;
+import io.github.resilience4j.core.registry.RegistryEventConsumer;
+
 /**
- * @see io.github.resilience4j.bulkhead.internal.InMemoryBulkheadRegistry
  * @author maheng
+ * @see io.github.resilience4j.bulkhead.internal.InMemoryBulkheadRegistry
  */
 public class CaffeineBulkheadRegistry extends CaffeineResilienceRegistry<Bulkhead, BulkheadConfig> implements BulkheadRegistry {
 

@@ -15,8 +15,8 @@
  */
 package io.github.opensabe.common.web.config.interceptor;
 
-import io.github.opensabe.common.utils.json.JsonUtil;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -26,7 +26,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Method;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 该切面类主要是用来记录http相关接口的请求以及相应数据
@@ -36,10 +37,10 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 public class CommonAop {
-    
+
     @Value(value = "${log.http-request.max-length:200000000}")
     private Integer maxLengthForlogRequest;
-    
+
     public CommonAop() {
     }
 

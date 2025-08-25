@@ -15,31 +15,38 @@
  */
 package io.github.opensabe.common.redisson.annotation;
 
-import io.github.opensabe.common.redisson.annotation.slock.FairLock;
-import io.github.opensabe.common.redisson.annotation.slock.FencedLock;
-import io.github.opensabe.common.redisson.annotation.slock.ReadWriteLock;
-import io.github.opensabe.common.redisson.annotation.slock.SpinLock;
-import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
-import org.redisson.api.LockOptions;
-import org.redisson.api.RLock;
-import org.redisson.api.RReadWriteLock;
-import org.redisson.api.RedissonClient;
-
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.LockOptions;
+import org.redisson.api.RLock;
+import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RedissonClient;
+
+import io.github.opensabe.common.redisson.annotation.slock.FairLock;
+import io.github.opensabe.common.redisson.annotation.slock.FencedLock;
+import io.github.opensabe.common.redisson.annotation.slock.ReadWriteLock;
+import io.github.opensabe.common.redisson.annotation.slock.SpinLock;
+import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
+
 /**
  * 在方法或者类上添加该注释后，自动添加基于 Redisson 的分布式锁
- * @deprecated since 2.0.0 use {@link io.github.opensabe.common.redisson.annotation.slock} instead
+ *
  * @see io.github.opensabe.common.redisson.annotation.slock.RedissonLock
  * @see ReadWriteLock
  * @see FairLock
  * @see SpinLock
  * @see FencedLock
+ * @deprecated since 2.0.0 use {@link io.github.opensabe.common.redisson.annotation.slock} instead
  */
 @Deprecated(since = "2.0.0")
 @Documented
@@ -47,20 +54,6 @@ import java.util.concurrent.TimeUnit;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface RedissonLock {
-
-    /**
-     * 一般通过 RedissonLockName 指定锁名称
-     * 但如果锁和方法参数无关，则通过这个 name 指定
-     * 如果 RedissonLockName 为空，这个 name 也是默认的 空字符串，则锁不生效
-     */
-    String name() default "";
-
-
-    String prefix() default io.github.opensabe.common.redisson.annotation.slock.RedissonLock.DEFAULT_PREFIX;
-    /**
-     * 锁特性
-     */
-    LockFeature lockFeature() default LockFeature.DEFAULT;
 
     /**
      * 阻塞锁
@@ -74,6 +67,20 @@ public @interface RedissonLock {
      * try lock，包含等待
      */
     int TRY_LOCK = 3;
+
+    /**
+     * 一般通过 RedissonLockName 指定锁名称
+     * 但如果锁和方法参数无关，则通过这个 name 指定
+     * 如果 RedissonLockName 为空，这个 name 也是默认的 空字符串，则锁不生效
+     */
+    String name() default "";
+
+    String prefix() default io.github.opensabe.common.redisson.annotation.slock.RedissonLock.DEFAULT_PREFIX;
+
+    /**
+     * 锁特性
+     */
+    LockFeature lockFeature() default LockFeature.DEFAULT;
 
     /**
      * 锁类型
@@ -105,8 +112,10 @@ public @interface RedissonLock {
     /**
      * 以下三个参数在 LockFeature = SPIN， BackOffType = EXPONENTIAL 使用
      */
-    long backOffMaxDelay()  default 128;
+    long backOffMaxDelay() default 128;
+
     long backOffInitialDelay() default 1;
+
     int backOffMultiplier() default 2;
 
     /**
@@ -161,10 +170,9 @@ public @interface RedissonLock {
             public RLock getLock(String name, RedissonLock content, RedissonClient redissonClient) {
                 return redissonClient.getFencedLock(name);
             }
-        }
-        ;
+        };
 
-        public abstract RLock getLock (String name, RedissonLock content, RedissonClient redissonClient);
+        public abstract RLock getLock(String name, RedissonLock content, RedissonClient redissonClient);
     }
 
     enum BackOffType {
@@ -192,7 +200,7 @@ public @interface RedissonLock {
         },
         ;
 
-        abstract LockOptions.BackOff backOff (RedissonLock content);
+        abstract LockOptions.BackOff backOff(RedissonLock content);
     }
 
     enum ReadOrWrite {
@@ -210,7 +218,7 @@ public @interface RedissonLock {
         },
         ;
 
-        abstract RLock transform (RReadWriteLock lock);
+        abstract RLock transform(RReadWriteLock lock);
     }
 
     enum LockType {
@@ -245,21 +253,19 @@ public @interface RedissonLock {
             }
         };
 
+        private final static Map<Integer, LockType> map = new ConcurrentHashMap<>(3);
+        private final int value;
+
         LockType(int value) {
             this.value = value;
         }
 
-        private final static Map<Integer, LockType> map = new ConcurrentHashMap<>(3);
-
-        public abstract boolean lock (RedissonLock content, RLock lock);
-
-        private final int value;
-
-
-        public static LockType lockType (int value) {
+        public static LockType lockType(int value) {
             return map.computeIfAbsent(value, k -> Arrays.stream(values()).filter(e -> Objects.equals(e.value, value))
                     .findFirst()
                     .orElseThrow());
         }
+
+        public abstract boolean lock(RedissonLock content, RLock lock);
     }
 }

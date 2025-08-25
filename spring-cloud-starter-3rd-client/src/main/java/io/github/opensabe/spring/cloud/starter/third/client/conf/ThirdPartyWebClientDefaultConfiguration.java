@@ -15,11 +15,8 @@
  */
 package io.github.opensabe.spring.cloud.starter.third.client.conf;
 
-import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
-import io.netty.channel.ChannelOption;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.actuate.metrics.web.reactive.client.ObservationWebClientCustomizer;
@@ -28,27 +25,30 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
+import lombok.extern.log4j.Log4j2;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
-
-import java.util.Map;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 public class ThirdPartyWebClientDefaultConfiguration {
 
     /**
-     * @see org.springframework.boot.actuate.autoconfigure.observation.web.client.HttpClientObservationsAutoConfiguration
      * @param webClientConfigurationProperties
      * @param environment
      * @param observationWebClientCustomizer
      * @return
+     * @see org.springframework.boot.actuate.autoconfigure.observation.web.client.HttpClientObservationsAutoConfiguration
      */
 //    @Bean
 //    public ObservationWebClientCustomizer observationWebClientCustomizer () {
 //        return new ObservationWebClientCustomizer(unifiedObservationFactory.getObservationRegistry(), new DefaultClientRequestObservationConvention());
 //    }
-
     @Bean
     public WebClient getWebClient(
             ThirdPartyWebClientConfigurationProperties webClientConfigurationProperties,

@@ -15,16 +15,17 @@
  */
 package io.github.opensabe.common.location.service;
 
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import io.github.opensabe.common.location.vo.WorldCityData;
-import lombok.Getter;
-import lombok.SneakyThrows;
-
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+
+import io.github.opensabe.common.location.vo.WorldCityData;
+import lombok.Getter;
+import lombok.SneakyThrows;
 
 /**
  * 解析csv中的数据

@@ -15,12 +15,12 @@
  */
 package io.github.opensabe.common.buffer;
 
-import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * 内存批次队列，需要同步等待完成，并且将结果填充
+ *
  * @param <T>
  * @param <E>
  */

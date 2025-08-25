@@ -15,12 +15,11 @@
  */
 package io.github.opensabe.youtobe.dto.search;
 
+import java.util.List;
 import io.github.opensabe.youtobe.dto.PageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * google data api 请求youtobe查询返回结果DTO

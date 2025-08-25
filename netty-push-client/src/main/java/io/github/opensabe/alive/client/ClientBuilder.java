@@ -15,12 +15,12 @@
  */
 package io.github.opensabe.alive.client;
 
-import io.github.opensabe.alive.client.impl.MultiConnClientImpl;
-import io.github.opensabe.alive.client.task.ZkTasker;
+import org.apache.commons.lang3.StringUtils;
 
 import io.github.opensabe.alive.client.impl.ClientConstants;
 import io.github.opensabe.alive.client.impl.ClientImpl;
-import org.apache.commons.lang3.StringUtils;
+import io.github.opensabe.alive.client.impl.MultiConnClientImpl;
+import io.github.opensabe.alive.client.task.ZkTasker;
 
 public class ClientBuilder {
 
@@ -192,12 +192,12 @@ public class ClientBuilder {
         if (clientNum <= 1) {
             //每个节点 一个连接
             return new ClientImpl(productCode, authToken, zkString, zkPath, zkRetryInterval, zkRetryMax, zkMaxDelay, connectTimeout,
-                authTimeout, heartTimeout, heartInterval, zkTasker);
+                    authTimeout, heartTimeout, heartInterval, zkTasker);
         } else {
             //每个节点  多个连接
             return new MultiConnClientImpl(productCode, authToken, clientNum, zkString, zkPath, zkRetryInterval, zkRetryMax, zkMaxDelay,
-                connectTimeout,
-                authTimeout, heartTimeout, heartInterval, zkTasker);
+                    connectTimeout,
+                    authTimeout, heartTimeout, heartInterval, zkTasker);
         }
     }
 

@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.common.location.service;
 
+import java.util.List;
 import io.github.opensabe.common.location.observation.LocationContext;
 import io.github.opensabe.common.location.observation.LocationConvention;
 import io.github.opensabe.common.location.observation.LocationDocumentation;
@@ -23,9 +24,10 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
 import software.amazon.awssdk.services.geoplaces.GeoPlacesClient;
-import software.amazon.awssdk.services.geoplaces.model.*;
-
-import java.util.List;
+import software.amazon.awssdk.services.geoplaces.model.GeocodeRequest;
+import software.amazon.awssdk.services.geoplaces.model.GeocodeResponse;
+import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeRequest;
+import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
 
 /**
  * @author changhongwei

@@ -15,14 +15,13 @@
  */
 package io.github.opensabe.common.alive.client.message;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 import io.micrometer.core.instrument.util.StringUtils;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class PushVo {
 
-    private static final ThreadLocal<AtomicInteger> requestIdThreadLocal = ThreadLocal.withInitial(()-> new AtomicInteger());
+    private static final ThreadLocal<AtomicInteger> requestIdThreadLocal = ThreadLocal.withInitial(() -> new AtomicInteger());
 
     public final String topic;
     public final String deviceId;
@@ -58,19 +57,19 @@ public class PushVo {
         this.requestId = requestId;
     }
 
+    public static int generateRequestId() {
+        if (requestIdThreadLocal.get().intValue() < 0) {
+            requestIdThreadLocal.remove();
+        }
+        return requestIdThreadLocal.get().incrementAndGet();
+    }
+
     public int getRequestId() {
         return this.requestId;
     }
 
     public void setRequestId(int requestId) {
         this.requestId = requestId;
-    }
-
-    public static int generateRequestId() {
-        if(requestIdThreadLocal.get().intValue() < 0){
-            requestIdThreadLocal.remove();
-        }
-        return requestIdThreadLocal.get().incrementAndGet();
     }
 
 }

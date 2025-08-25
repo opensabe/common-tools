@@ -15,11 +15,8 @@
  */
 package io.github.opensabe.milvus.config;
 
-import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
-import dev.langchain4j.model.embedding.AllMiniLmL6V2QuantizedEmbeddingModel;
-import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.store.embedding.milvus.MilvusEmbeddingStore;
-import io.milvus.common.clientenum.ConsistencyLevelEnum;
+import java.util.Optional;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -27,10 +24,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
 
-import java.util.Optional;
-
 import static io.github.opensabe.milvus.config.MilvusEmbeddingStoreProperties.DEFAULT_CONSISTENCY_LEVEL;
 import static io.github.opensabe.milvus.config.MilvusEmbeddingStoreProperties.PREFIX;
+
+import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
+import dev.langchain4j.model.embedding.AllMiniLmL6V2QuantizedEmbeddingModel;
+import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.store.embedding.milvus.MilvusEmbeddingStore;
+import io.milvus.common.clientenum.ConsistencyLevelEnum;
 
 @AutoConfiguration
 @EnableConfigurationProperties(MilvusEmbeddingStoreProperties.class)

@@ -15,25 +15,26 @@
  */
 package io.github.opensabe.common.redisson.aop;
 
-import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.aop.support.StaticMethodMatcherPointcut;
-import org.springframework.lang.NonNull;
-
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nullable;
+
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.lang.NonNull;
+
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
+import lombok.extern.log4j.Log4j2;
+
 @Log4j2
 public abstract class AbstractRedissonCachePointcut<T extends AbstractRedissonProperties> extends StaticMethodMatcherPointcut {
+    protected final MethodArgumentsExpressEvaluator evaluator;
     /**
      * Key 为方法全限定名称 + 参数，value 为对应的 Redisson 锁注解以及锁名称
      */
     private final Map<Method, Object> cache = new ConcurrentHashMap<>();
-
-    protected final MethodArgumentsExpressEvaluator evaluator;
 
     protected AbstractRedissonCachePointcut(MethodArgumentsExpressEvaluator evaluator) {
         this.evaluator = evaluator;
@@ -53,9 +54,9 @@ public abstract class AbstractRedissonCachePointcut<T extends AbstractRedissonPr
 
     @SuppressWarnings("unchecked")
     public T getRedissonProperties(Method method, @SuppressWarnings("unused") Class<?> targetClass) {
-        return (T)cache.get(method);
+        return (T) cache.get(method);
     }
 
     @Nullable
-    protected abstract T findProperties (Method method, Class<?> targetClass);
+    protected abstract T findProperties(Method method, Class<?> targetClass);
 }

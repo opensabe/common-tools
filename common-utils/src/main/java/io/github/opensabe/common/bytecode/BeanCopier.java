@@ -17,8 +17,9 @@ package io.github.opensabe.common.bytecode;
 
 /**
  * 属性复制service
- * @param <S>   源对象类型
- * @param <T>   目标对象类型
+ *
+ * @param <S> 源对象类型
+ * @param <T> 目标对象类型
  * @author maheng
  */
 public interface BeanCopier<S, T> {
@@ -38,8 +39,9 @@ public interface BeanCopier<S, T> {
      * <tr><td>{@code List<Integer>}</td><td>{@code List<Long>}</td><td>no</td></tr>
      * <tr><td>{@code List<Integer>}</td><td>{@code List<Number>}</td><td>no</td></tr>
      * </table>
-     * @param source    源对象
-     * @param target    目标对象
+     *
+     * @param source 源对象
+     * @param target 目标对象
      */
-    void copy (S source, T target);
+    void copy(S source, T target);
 }

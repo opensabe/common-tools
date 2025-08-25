@@ -15,13 +15,14 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.jfr;
 
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ClientRequestObservationContext;
+import org.springframework.web.reactive.function.client.ClientResponse;
+
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ClientRequestObservationContext;
-import org.springframework.web.reactive.function.client.ClientResponse;
 
 @Log4j2
 public class WebClientObservationToJFRGenerator extends ObservationToJFRGenerator<ClientRequestObservationContext> {

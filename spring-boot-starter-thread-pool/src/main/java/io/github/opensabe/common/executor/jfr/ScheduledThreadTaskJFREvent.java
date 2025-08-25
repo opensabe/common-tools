@@ -15,12 +15,17 @@
  */
 package io.github.opensabe.common.executor.jfr;
 
+import java.util.concurrent.TimeUnit;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import jdk.jfr.*;
+import jdk.jfr.Category;
+import jdk.jfr.Description;
+import jdk.jfr.Event;
+import jdk.jfr.Label;
+import jdk.jfr.StackTrace;
+import jdk.jfr.Timespan;
+import jdk.jfr.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.concurrent.TimeUnit;
 
 @Category({"Executor Service"})
 @Label("Scheduled Thread Task JFR")

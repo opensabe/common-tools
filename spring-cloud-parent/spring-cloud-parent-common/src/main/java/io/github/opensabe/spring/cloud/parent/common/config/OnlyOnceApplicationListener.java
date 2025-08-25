@@ -15,14 +15,14 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationContextEvent;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 

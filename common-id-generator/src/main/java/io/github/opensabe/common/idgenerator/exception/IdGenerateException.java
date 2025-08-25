@@ -23,16 +23,14 @@ import java.io.Serial;
  * @author zhaozhou
  */
 
-public class IdGenerateException extends RuntimeException
-{
-	/**
-	 * 
-	 */
-	@Serial
-	private static final long serialVersionUID = 696109974714078172L;
+public class IdGenerateException extends RuntimeException {
+    /**
+     *
+     */
+    @Serial
+    private static final long serialVersionUID = 696109974714078172L;
 
-	public IdGenerateException(String msg)
-	{
-		super(msg);
-	}
+    public IdGenerateException(String msg) {
+        super(msg);
+    }
 }

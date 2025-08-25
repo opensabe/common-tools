@@ -16,10 +16,14 @@
 package io.github.opensabe.springdoc.responses;
 
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import io.github.opensabe.spring.cloud.parent.common.handler.ErrorMessage;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
-import java.lang.annotation.*;
 
 /**
  *
@@ -36,6 +40,7 @@ import java.lang.annotation.*;
  *     &#64;SchemaProperty(name = "bizCode", schema = @Schema(example = "10000", type = "int")),
  *     &#64;SchemaProperty(name = "message", schema = @Schema(example = "success"))}))
  * </code></pre>
+ *
  * @author heng.ma
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -46,7 +51,7 @@ import java.lang.annotation.*;
 public @interface BizResponse {
 
     /**
-     *  返回的ErrorMessage,将来开源改为 Class<? extends ErrorMessage>
+     * 返回的ErrorMessage,将来开源改为 Class<? extends ErrorMessage>
      */
     Class<? extends ErrorMessage> value();
 
@@ -62,12 +67,14 @@ public @interface BizResponse {
 
     /**
      * 是否使用Controller方法返回的类型作为文档
+     *
      * @see ApiResponse#useReturnTypeSchema()
      */
     boolean useReturnType() default false;
 
     /**
      * 什么情况下返回 value() 对应的枚举值
+     *
      * @see ApiResponse#description()
      */
     String condition() default "";

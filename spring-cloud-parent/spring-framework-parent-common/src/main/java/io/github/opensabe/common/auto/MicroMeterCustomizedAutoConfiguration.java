@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.common.auto;
 
-import io.github.opensabe.common.config.MicroMeterCustomizedConfiguration;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.config.MicroMeterCustomizedConfiguration;
 
 @AutoConfiguration(before = ObservationAutoConfiguration.class)
 @Import({

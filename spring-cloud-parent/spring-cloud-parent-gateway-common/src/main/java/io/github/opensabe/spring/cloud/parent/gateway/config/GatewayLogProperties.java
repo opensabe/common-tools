@@ -16,13 +16,14 @@
 package io.github.opensabe.spring.cloud.parent.gateway.config;
 
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -37,6 +38,21 @@ public class GatewayLogProperties {
      * 参数检查
      */
     private List<ParamCheck> paramChecks;
+
+    public enum Operation {
+        /**
+         * 直接忽略
+         */
+        IGNORE,
+        /**
+         * 报警
+         */
+        ALARM,
+        /**
+         * 直接返回参数非法，不报警
+         */
+        INVALID;
+    }
 
     @Data
     @NoArgsConstructor
@@ -66,21 +82,5 @@ public class GatewayLogProperties {
         private String platform;
         private Set<String> versions;
         private Operation operation;
-    }
-
-    public enum Operation {
-        /**
-         * 直接忽略
-         */
-        IGNORE,
-        /**
-         * 报警
-         */
-        ALARM,
-        /**
-         * 直接返回参数非法，不报警
-         */
-        INVALID
-        ;
     }
 }

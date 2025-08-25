@@ -16,9 +16,9 @@
 package io.github.opensabe.spring.boot.starter.socketio.tracing.extend;
 
 @FunctionalInterface
-public interface MultiConsumer<N,S,L,A> {
+public interface MultiConsumer<N, S, L, A> {
 
-    void accept(N n,S s,L l,A a);
+    void accept(N n, S s, L l, A a);
 
 
 }

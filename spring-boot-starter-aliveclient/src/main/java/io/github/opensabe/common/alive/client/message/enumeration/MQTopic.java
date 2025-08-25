@@ -21,11 +21,11 @@ public enum MQTopic {
 
     private String topic;
 
-    public String getTopic() {
-        return this.topic;
-    }
-
     private MQTopic(final String topic) {
         this.topic = topic;
+    }
+
+    public String getTopic() {
+        return this.topic;
     }
 }

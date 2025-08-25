@@ -15,14 +15,13 @@
  */
 package io.github.opensabe.common.executor.scheduler;
 
-import io.github.opensabe.common.executor.NamedThreadPoolExecutor;
-import io.github.opensabe.common.executor.ThreadPoolFactory;
-import io.github.opensabe.common.executor.jfr.ThreadPoolStatJFREvent;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.opensabe.common.executor.NamedThreadPoolExecutor;
+import io.github.opensabe.common.executor.ThreadPoolFactory;
+import io.github.opensabe.common.executor.jfr.ThreadPoolStatJFREvent;
 
 @SuppressFBWarnings("EI_EXPOSE_REP2")
 public class ThreadPoolStatScheduler {

@@ -15,18 +15,20 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.config;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.AntPathMatcher;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @SuppressFBWarnings({"EI_EXPOSE_REP2", "EI_EXPOSE_REP"})
 @Data
@@ -34,6 +36,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "webclient")
 public class WebClientConfigurationProperties {
     private Map<String, WebClientProperties> configs;
+
     @SuppressFBWarnings("EI_EXPOSE_REP")
     @Data
     @NoArgsConstructor
@@ -67,6 +70,7 @@ public class WebClientConfigurationProperties {
 
         /**
          * 是否匹配
+         *
          * @param path
          * @return
          */

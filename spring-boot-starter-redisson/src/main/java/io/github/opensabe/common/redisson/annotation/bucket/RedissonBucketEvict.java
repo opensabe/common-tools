@@ -16,7 +16,12 @@
 package io.github.opensabe.common.redisson.annotation.bucket;
 
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Documented
 @Inherited
@@ -26,6 +31,7 @@ public @interface RedissonBucketEvict {
 
     /**
      * 锁的名称表达式，锁的名称表达式。如果为空，则为类名+方法名
+     *
      * @see org.springframework.cache.annotation.Cacheable#cacheNames()
      */
 

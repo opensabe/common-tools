@@ -15,21 +15,23 @@
  */
 package io.github.opensabe.common.secret;
 
-import io.github.opensabe.common.utils.AlarmUtil;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+
+import io.github.opensabe.common.utils.AlarmUtil;
 
 @DisplayName("全局密钥管理器测试")
 class GlobalSecretManagerTest {
@@ -112,8 +114,8 @@ class GlobalSecretManagerTest {
             secretManager.filterSecretStringAndAlarm("Found password123");
 
             // 验证告警是否被调用
-            alarmUtilMockedStatic.verify(() -> 
-                AlarmUtil.fatal(anyString(), anyString(), anyString())
+            alarmUtilMockedStatic.verify(() ->
+                    AlarmUtil.fatal(anyString(), anyString(), anyString())
             );
         }
     }

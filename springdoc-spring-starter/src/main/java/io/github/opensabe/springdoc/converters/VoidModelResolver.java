@@ -15,16 +15,18 @@
  */
 package io.github.opensabe.springdoc.converters;
 
+import java.util.Iterator;
+
 import com.fasterxml.jackson.databind.type.SimpleType;
+
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.Iterator;
-
 /**
  * 生成swagger文档时，忽略Void类型，官方默认将Void类型显示为Object
+ *
  * @author heng.ma
  */
 public class VoidModelResolver implements ModelConverter {

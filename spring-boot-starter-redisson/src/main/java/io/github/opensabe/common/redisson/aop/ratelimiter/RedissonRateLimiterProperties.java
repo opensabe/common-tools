@@ -29,6 +29,7 @@ public class RedissonRateLimiterProperties extends ExtraNameProperties {
         super(redissonRateLimiterName.prefix(), redissonRateLimiter.name(), parameterIndex, redissonRateLimiterName.expression());
         this.redissonRateLimiter = redissonRateLimiter;
     }
+
     public RedissonRateLimiterProperties(MethodArgumentsExpressEvaluator evaluator, RedissonRateLimiter redissonRateLimiter) {
         super(evaluator, redissonRateLimiter.prefix(), redissonRateLimiter.name());
         this.redissonRateLimiter = redissonRateLimiter;

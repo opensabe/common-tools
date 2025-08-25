@@ -15,17 +15,18 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
-import com.corundumstudio.socketio.SocketIOClient;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.collect.Maps;
-import io.github.opensabe.spring.boot.starter.socketio.AttributedSocketIoClient;
-import lombok.extern.log4j.Log4j2;
-
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import com.corundumstudio.socketio.SocketIOClient;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.collect.Maps;
+
+import io.github.opensabe.spring.boot.starter.socketio.AttributedSocketIoClient;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class AttributedSocketIoClientFactory {
@@ -58,6 +59,7 @@ public class AttributedSocketIoClientFactory {
 
     /**
      * 这里在 OnConnect 时候放入
+     *
      * @param socketIOClient
      * @return
      */

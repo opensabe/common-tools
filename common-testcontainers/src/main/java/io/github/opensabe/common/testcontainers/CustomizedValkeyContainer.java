@@ -15,11 +15,13 @@
  */
 package io.github.opensabe.common.testcontainers;
 
-import com.github.dockerjava.api.command.InspectContainerResponse;
-import lombok.SneakyThrows;
+import java.util.concurrent.TimeUnit;
+
 import org.testcontainers.containers.GenericContainer;
 
-import java.util.concurrent.TimeUnit;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+
+import lombok.SneakyThrows;
 
 /**
  * 使用Valkey来做缓存服务
@@ -45,7 +47,7 @@ public class CustomizedValkeyContainer extends GenericContainer<CustomizedValkey
         ExecResult result = null;
         while (
                 result == null
-                || result.getExitCode() != 0
+                        || result.getExitCode() != 0
         ) {
             TimeUnit.SECONDS.sleep(1);
             System.out.println("executing command to check if valkey is started");

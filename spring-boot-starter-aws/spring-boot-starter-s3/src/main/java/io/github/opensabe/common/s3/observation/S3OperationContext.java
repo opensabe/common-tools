@@ -21,12 +21,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class S3OperationContext extends Observation.Context{
+public class S3OperationContext extends Observation.Context {
     private String fileName;
     private long fileSize;
     private String operateType;
     private boolean success;
-    public S3OperationContext(String fileName,String operateType){
+
+    public S3OperationContext(String fileName, String operateType) {
         this.fileName = fileName;
         this.operateType = operateType;
     }

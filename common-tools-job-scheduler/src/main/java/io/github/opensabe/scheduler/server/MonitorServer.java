@@ -15,16 +15,17 @@
  */
 package io.github.opensabe.scheduler.server;
 
-import io.github.opensabe.scheduler.conf.JobStatus;
-import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
-import io.github.opensabe.scheduler.job.SchedulerJob;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import io.github.opensabe.scheduler.conf.JobStatus;
+import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
+import io.github.opensabe.scheduler.job.SchedulerJob;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class MonitorServer implements Runnable {
@@ -51,12 +52,12 @@ public class MonitorServer implements Runnable {
                 return;
             }
 
-            stringRedisTemplate.<String,Object>opsForHash().entries(SchedulerServerConfiguration.REDIS_JOB_MONITOR_KEY).forEach((k, v) -> {
+            stringRedisTemplate.<String, Object>opsForHash().entries(SchedulerServerConfiguration.REDIS_JOB_MONITOR_KEY).forEach((k, v) -> {
                 try {
                     long expiredTime = Long.parseLong(v.toString());
                     if (expiredTime - System.currentTimeMillis() <= 0) {
                         stringRedisTemplate.opsForHash().delete(SchedulerServerConfiguration.REDIS_JOB_MONITOR_KEY, k);
-                        if (jobs.containsKey(k)){
+                        if (jobs.containsKey(k)) {
                             log.info("Update job {} status as FINISH", k);
                             jobs.get(k).setStatus(JobStatus.FINISHED);
                         }
@@ -66,12 +67,12 @@ public class MonitorServer implements Runnable {
                 }
             });
 
-            stringRedisTemplate.<String,Object>opsForHash().entries(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_KEY).forEach((k, v) -> {
+            stringRedisTemplate.<String, Object>opsForHash().entries(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_KEY).forEach((k, v) -> {
                 try {
                     long expiredTime = Long.parseLong(v.toString());
                     if (expiredTime - System.currentTimeMillis() <= 0) {
                         stringRedisTemplate.opsForHash().delete(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_KEY, k);
-                        if (jobs.containsKey(k)){
+                        if (jobs.containsKey(k)) {
                             log.info("Update misfire job {} status as FINISH", k);
                             jobs.get(k).setStatus(JobStatus.FINISHED);
                         }

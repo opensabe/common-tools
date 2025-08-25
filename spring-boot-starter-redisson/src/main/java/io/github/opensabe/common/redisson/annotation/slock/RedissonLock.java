@@ -15,16 +15,22 @@
  */
 package io.github.opensabe.common.redisson.annotation.slock;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 
-import java.lang.annotation.*;
-import java.util.concurrent.TimeUnit;
-
 /**
  * 代替之前的注解
- * @see org.redisson.api.RedissonClient#getLock(String)
+ *
  * @author heng.ma
+ * @see org.redisson.api.RedissonClient#getLock(String)
  */
 @Documented
 @Inherited
@@ -37,6 +43,7 @@ public @interface RedissonLock {
 
     /**
      * 锁的名称表达式
+     *
      * @see Cacheable#cacheNames()
      */
     @AliasFor(annotation = SLock.class)

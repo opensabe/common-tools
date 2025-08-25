@@ -21,6 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 public class MessageProduceObservationConvention implements ObservationConvention<MessageProduceContext> {
     public static final MessageProduceObservationConvention DEFAULT = new MessageProduceObservationConvention();
+
     @Override
     public KeyValues getLowCardinalityKeyValues(MessageProduceContext context) {
         return KeyValues.of(

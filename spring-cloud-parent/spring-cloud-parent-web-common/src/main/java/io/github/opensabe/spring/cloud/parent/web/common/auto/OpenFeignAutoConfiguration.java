@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.web.common.config.CommonOpenFeignConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.spring.cloud.parent.web.common.config.CommonOpenFeignConfiguration;
 
 @AutoConfiguration
 @Import({CommonOpenFeignConfiguration.class})

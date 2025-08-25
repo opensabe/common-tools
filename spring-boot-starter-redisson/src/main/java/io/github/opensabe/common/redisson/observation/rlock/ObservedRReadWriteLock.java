@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.common.redisson.observation.rlock;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 import org.springframework.lang.NonNull;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 
 public class ObservedRReadWriteLock implements RReadWriteLock {
     private final RReadWriteLock delegate;

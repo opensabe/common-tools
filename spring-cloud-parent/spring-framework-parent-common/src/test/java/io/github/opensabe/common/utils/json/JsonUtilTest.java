@@ -15,15 +15,6 @@
  */
 package io.github.opensabe.common.utils.json;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -31,6 +22,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -110,7 +111,8 @@ class JsonUtilTest {
     @DisplayName("测试使用TypeReference进行对象反序列化")
     void testParseObjectWithTypeReference() {
         String json = "{\"name\":\"test\",\"value\":123}";
-        TypeReference<TestObject> typeRef = new TypeReference<>() {};
+        TypeReference<TestObject> typeRef = new TypeReference<>() {
+        };
         TestObject obj = JsonUtil.parseObject(json, typeRef);
         assertEquals("test", obj.getName());
         assertEquals(123, obj.getValue());
@@ -259,8 +261,8 @@ class JsonUtilTest {
     void testNestedRecordSerialization() {
         // 测试嵌套 record 序列化
         NestedRecord nested = new NestedRecord(
-            new BasicRecord("test", 123),
-            "description"
+                new BasicRecord("test", 123),
+                "description"
         );
         String json = JsonUtil.toJSONString(nested);
         assertTrue(json.contains("\"basic\":{\"name\":\"test\",\"value\":123}"));
@@ -284,8 +286,8 @@ class JsonUtilTest {
     void testClassWithRecordSerialization() {
         // 测试 class 中包含 record 的序列化
         ClassWithRecord classWithRecord = new ClassWithRecord(
-            new BasicRecord("test", 123),
-            "additional"
+                new BasicRecord("test", 123),
+                "additional"
         );
         String json = JsonUtil.toJSONString(classWithRecord);
         assertTrue(json.contains("\"record\":{\"name\":\"test\",\"value\":123}"));
@@ -309,8 +311,8 @@ class JsonUtilTest {
     void testRecordWithClassSerialization() {
         // 测试 record 中包含 class 的序列化
         RecordWithClass recordWithClass = new RecordWithClass(
-            new TestObject("test", 123),
-            "metadata"
+                new TestObject("test", 123),
+                "metadata"
         );
         String json = JsonUtil.toJSONString(recordWithClass);
         assertTrue(json.contains("\"object\":{\"name\":\"test\",\"value\":123}"));
@@ -336,9 +338,9 @@ class JsonUtilTest {
     void testComplexCollectionTypes() {
         // 测试复杂集合类型
         ComplexCollectionObject complex = new ComplexCollectionObject(
-            List.of(new TestObject("item1", 1), new TestObject("item2", 2)),
-            Map.of("key1", new TestObject("value1", 1), "key2", new TestObject("value2", 2)),
-            Set.of("set1", "set2")
+                List.of(new TestObject("item1", 1), new TestObject("item2", 2)),
+                Map.of("key1", new TestObject("value1", 1), "key2", new TestObject("value2", 2)),
+                Set.of("set1", "set2")
         );
 
         String json = JsonUtil.toJSONString(complex);
@@ -400,11 +402,11 @@ class JsonUtilTest {
     void testMultiLevelNesting() {
         // 测试多层级嵌套
         MultiLevelObject multiLevel = new MultiLevelObject(
-            new Level1(
-                new Level2(
-                    new Level3("deep", 3)
+                new Level1(
+                        new Level2(
+                                new Level3("deep", 3)
+                        )
                 )
-            )
         );
 
         String json = JsonUtil.toJSONString(multiLevel);
@@ -427,9 +429,9 @@ class JsonUtilTest {
     void testSpecialDataTypes() {
         // 测试特殊数据类型
         SpecialTypesObject special = new SpecialTypesObject(
-            new BigDecimal("123.45"),
-            new Date(),
-            UUID.randomUUID()
+                new BigDecimal("123.45"),
+                new Date(),
+                UUID.randomUUID()
         );
 
         String json = JsonUtil.toJSONString(special);
@@ -475,6 +477,14 @@ class JsonUtilTest {
         assertEquals("second", identityParsed.getNext().getId());
         assertEquals("third", identityParsed.getNext().getNext().getId());
         assertEquals("first", identityParsed.getNext().getNext().getNext().getId());
+    }
+
+    /**
+     * 状态枚举
+     * 用于测试枚举类型的序列化和反序列化
+     */
+    private enum Status {
+        ACTIVE, INACTIVE, PENDING
     }
 
     /**
@@ -537,13 +547,15 @@ class JsonUtilTest {
      * 基本 Record 类型
      * 用于测试 Record 的基本序列化和反序列化功能
      */
-    private record BasicRecord(String name, int value) {}
+    private record BasicRecord(String name, int value) {
+    }
 
     /**
      * 嵌套 Record 类型
      * 用于测试 Record 的嵌套序列化和反序列化功能
      */
-    private record NestedRecord(BasicRecord basic, String description) {}
+    private record NestedRecord(BasicRecord basic, String description) {
+    }
 
     /**
      * 包含 Record 的类
@@ -576,7 +588,8 @@ class JsonUtilTest {
      * 包含类的 Record
      * 用于测试 Record 中包含类类型的序列化和反序列化
      */
-    private record RecordWithClass(TestObject object, String metadata) {}
+    private record RecordWithClass(TestObject object, String metadata) {
+    }
 
     /**
      * 复杂集合对象类
@@ -599,17 +612,17 @@ class JsonUtilTest {
             this.set = set;
         }
 
-        public List<TestObject> getList() { return list; }
-        public Map<String, TestObject> getMap() { return map; }
-        public Set<String> getSet() { return set; }
-    }
+        public List<TestObject> getList() {
+            return list;
+        }
 
-    /**
-     * 状态枚举
-     * 用于测试枚举类型的序列化和反序列化
-     */
-    private enum Status {
-        ACTIVE, INACTIVE, PENDING
+        public Map<String, TestObject> getMap() {
+            return map;
+        }
+
+        public Set<String> getSet() {
+            return set;
+        }
     }
 
     /**
@@ -630,13 +643,19 @@ class JsonUtilTest {
             this.name = name;
         }
 
-        public Status getStatus() { return status; }
-        public String getName() { return name; }
+        public Status getStatus() {
+            return status;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
     /**
      * 泛型容器类
      * 用于测试泛型类型的序列化和反序列化
+     *
      * @param <T> 容器中存储的数据类型
      */
     private static class GenericContainer<T> {
@@ -653,8 +672,13 @@ class JsonUtilTest {
             this.version = version;
         }
 
-        public T getData() { return data; }
-        public int getVersion() { return version; }
+        public T getData() {
+            return data;
+        }
+
+        public int getVersion() {
+            return version;
+        }
     }
 
     /**
@@ -672,7 +696,9 @@ class JsonUtilTest {
             this.level1 = level1;
         }
 
-        public Level1 getLevel1() { return level1; }
+        public Level1 getLevel1() {
+            return level1;
+        }
     }
 
     /**
@@ -690,7 +716,9 @@ class JsonUtilTest {
             this.level2 = level2;
         }
 
-        public Level2 getLevel2() { return level2; }
+        public Level2 getLevel2() {
+            return level2;
+        }
     }
 
     /**
@@ -708,7 +736,9 @@ class JsonUtilTest {
             this.level3 = level3;
         }
 
-        public Level3 getLevel3() { return level3; }
+        public Level3 getLevel3() {
+            return level3;
+        }
     }
 
     /**
@@ -729,8 +759,13 @@ class JsonUtilTest {
             this.value = value;
         }
 
-        public String getName() { return name; }
-        public int getValue() { return value; }
+        public String getName() {
+            return name;
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 
     /**
@@ -754,9 +789,17 @@ class JsonUtilTest {
             this.uuid = uuid;
         }
 
-        public BigDecimal getBigDecimal() { return bigDecimal; }
-        public Date getDate() { return date; }
-        public UUID getUuid() { return uuid; }
+        public BigDecimal getBigDecimal() {
+            return bigDecimal;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public UUID getUuid() {
+            return uuid;
+        }
     }
 
     /**
@@ -782,11 +825,25 @@ class JsonUtilTest {
             this.name = name;
         }
 
-        public String getName() { return name; }
-        public CircularParentChildObject getParent() { return parent; }
-        public void setParent(CircularParentChildObject parent) { this.parent = parent; }
-        public CircularParentChildObject getChild() { return child; }
-        public void setChild(CircularParentChildObject child) { this.child = child; }
+        public String getName() {
+            return name;
+        }
+
+        public CircularParentChildObject getParent() {
+            return parent;
+        }
+
+        public void setParent(CircularParentChildObject parent) {
+            this.parent = parent;
+        }
+
+        public CircularParentChildObject getChild() {
+            return child;
+        }
+
+        public void setChild(CircularParentChildObject child) {
+            this.child = child;
+        }
     }
 
     /**
@@ -809,9 +866,11 @@ class JsonUtilTest {
         public String getId() {
             return id;
         }
+
         public CircularIdentityObject getNext() {
             return next;
         }
+
         public void setNext(CircularIdentityObject next) {
             this.next = next;
         }

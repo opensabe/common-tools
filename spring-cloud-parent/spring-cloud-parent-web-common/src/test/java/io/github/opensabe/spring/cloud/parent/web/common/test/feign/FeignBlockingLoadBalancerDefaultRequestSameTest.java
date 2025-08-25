@@ -15,12 +15,9 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
-import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.retry.RetryRegistry;
+import java.util.List;
+import java.util.Map;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +28,6 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
@@ -44,15 +40,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.bind.annotation.GetMapping;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
+import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
+import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.RetryRegistry;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @EnableFeignClients
 @ActiveProfiles("feignDefaultRequest")
@@ -61,45 +61,24 @@ import static org.mockito.Mockito.when;
 public class FeignBlockingLoadBalancerDefaultRequestSameTest extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "testService1";
     static final String CONTEXT_ID_1 = "testService1Client";
-
-    //参考 TestRequestIsTheSame  spock test
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
-    @Autowired
-    private CircuitBreakerRegistry circuitBreakerRegistry;
-
-    @Autowired
-    private CircuitBreakerExtractor circuitBreakerExtractor;
-
-    @Autowired
-    private RetryRegistry retryRegistry;
-
-    private DefaultRequest[] requests;
-    private Integer idx = 0;
-
-    //有意让resilience4j 重试  会调用FeignBlockingLoadBalancerClientExtend
-    @FeignClient(name = TEST_SERVICE_1, contextId = CONTEXT_ID_1)
-    static interface TestService1Client {
-        @GetMapping("/status/500")
-        String testGetRetryStatus500();
-    }
-
     @Autowired
     TestService1Client testService1Client;
-
     @MockitoBean(name = "service1")
     ServiceInstance serviceInstance1;
-
-    @MockitoSpyBean
-    private LoadBalancerClientFactory loadBalancerClientFactory;
-
     @MockitoSpyBean
     DiscoveryClient discoveryClient;
-
     TracedCircuitBreakerRoundRobinLoadBalancer loadBalancerClientFactoryInstance = spy(TracedCircuitBreakerRoundRobinLoadBalancer.class);
     ServiceInstanceListSupplier serviceInstanceListSupplier = spy(ServiceInstanceListSupplier.class);
+    @Autowired
+    private CircuitBreakerRegistry circuitBreakerRegistry;
+    @Autowired
+    private CircuitBreakerExtractor circuitBreakerExtractor;
+    @Autowired
+    private RetryRegistry retryRegistry;
+    private DefaultRequest[] requests;
+    private Integer idx = 0;
+    @MockitoSpyBean
+    private LoadBalancerClientFactory loadBalancerClientFactory;
 
     @BeforeEach
     void setup() {
@@ -161,6 +140,18 @@ public class FeignBlockingLoadBalancerDefaultRequestSameTest extends CommonMicro
     private void updateRequest(DefaultRequest request) {
         System.out.println(request);
         requests[idx++] = request;
+    }
+
+    //有意让resilience4j 重试  会调用FeignBlockingLoadBalancerClientExtend
+    @FeignClient(name = TEST_SERVICE_1, contextId = CONTEXT_ID_1)
+    static interface TestService1Client {
+        @GetMapping("/status/500")
+        String testGetRetryStatus500();
+    }
+
+    //参考 TestRequestIsTheSame  spock test
+    @SpringBootApplication
+    static class MockConfig {
     }
 
 }

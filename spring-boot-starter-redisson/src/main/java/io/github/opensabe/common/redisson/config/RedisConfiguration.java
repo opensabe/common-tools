@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.common.redisson.config;
 
-import io.github.opensabe.common.redisson.util.LuaLimitCache;
-import io.github.opensabe.common.secret.GlobalSecretManager;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
+import io.github.opensabe.common.redisson.util.LuaLimitCache;
+import io.github.opensabe.common.secret.GlobalSecretManager;
 
 @Configuration(proxyBeanMethods = false)
 public class RedisConfiguration {

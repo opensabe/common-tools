@@ -21,6 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 public class RPermitSemaphoreReleasedObservationConvention implements ObservationConvention<RPermitSemaphoreReleasedContext> {
     public static final RPermitSemaphoreReleasedObservationConvention DEFAULT = new RPermitSemaphoreReleasedObservationConvention();
+
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof RPermitSemaphoreReleasedContext;

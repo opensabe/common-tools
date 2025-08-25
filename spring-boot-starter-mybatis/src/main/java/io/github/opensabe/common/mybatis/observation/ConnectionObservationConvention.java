@@ -21,6 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 /**
  * 上班connection指标
+ *
  * @author maheng
  */
 public class ConnectionObservationConvention implements ObservationConvention<ConnectionContext> {
@@ -44,18 +45,18 @@ public class ConnectionObservationConvention implements ObservationConvention<Co
     @Override
     public KeyValues getHighCardinalityKeyValues(ConnectionContext context) {
         if (context.isConnect()) {
-            return KeyValues.of("success", context.isSuccess()+"")
-                    .and("createTime", context.getConnectedTime()+"")
-                    .and("waitThread", context.getWaitThread()+"")
-                    .and("activeCount", context.getActiveCount()+"")
+            return KeyValues.of("success", context.isSuccess() + "")
+                    .and("createTime", context.getConnectedTime() + "")
+                    .and("waitThread", context.getWaitThread() + "")
+                    .and("activeCount", context.getActiveCount() + "")
 
-                    .and("maxActive", context.getMaxActive()+"")
-                    .and("maxWaitTime", context.getMaxWaitTime()+"")
-                    .and("maxWaitThread", context.getMaxWaitThread()+"");
-        }else {
-            return KeyValues.of("success", context.isSuccess()+"")
-                    .and("createTime", context.getConnectedTime()+"")
-                    .and("activeCount", context.getActiveCount()+"");
+                    .and("maxActive", context.getMaxActive() + "")
+                    .and("maxWaitTime", context.getMaxWaitTime() + "")
+                    .and("maxWaitThread", context.getMaxWaitThread() + "");
+        } else {
+            return KeyValues.of("success", context.isSuccess() + "")
+                    .and("createTime", context.getConnectedTime() + "")
+                    .and("activeCount", context.getActiveCount() + "");
         }
     }
 

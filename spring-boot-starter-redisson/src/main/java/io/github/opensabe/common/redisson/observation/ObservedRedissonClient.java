@@ -15,16 +15,23 @@
  */
 package io.github.opensabe.common.redisson.observation;
 
+import java.util.Collection;
+
+import org.redisson.api.LockOptions;
+import org.redisson.api.RFencedLock;
+import org.redisson.api.RLock;
+import org.redisson.api.RPermitExpirableSemaphore;
+import org.redisson.api.RRateLimiter;
+import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RedissonClient;
+import org.redisson.api.options.CommonOptions;
+
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.observation.ratelimiter.ObservedRRateLimiter;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRFencedLock;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRLock;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRReadWriteLock;
 import io.github.opensabe.common.redisson.observation.rsemaphore.ObservedRPermitExpirableSemaphore;
-import org.redisson.api.*;
-import org.redisson.api.options.CommonOptions;
-
-import java.util.Collection;
 
 public class ObservedRedissonClient extends RedissonClientDelegate {
     private final UnifiedObservationFactory unifiedObservationFactory;
@@ -48,7 +55,6 @@ public class ObservedRedissonClient extends RedissonClientDelegate {
                 delegate.getRateLimiter(options), unifiedObservationFactory
         );
     }
-
 
 
     @Override
@@ -110,7 +116,7 @@ public class ObservedRedissonClient extends RedissonClientDelegate {
 
     @Override
     public RLock getMultiLock(String group, Collection<Object> values) {
-        return getObservedLock(delegate.getMultiLock(group,values));
+        return getObservedLock(delegate.getMultiLock(group, values));
     }
 
     @Override

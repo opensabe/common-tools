@@ -26,9 +26,9 @@ public class ServerConfiguration {
     public Map<String, ServerVariable> variables;
 
     /**
-     * @param URL A URL to the target host.
+     * @param URL         A URL to the target host.
      * @param description A description of the host designated by the URL.
-     * @param variables A map between a variable name and its value. The value is used for substitution in the server's URL template.
+     * @param variables   A map between a variable name and its value. The value is used for substitution in the server's URL template.
      */
     public ServerConfiguration(String URL, String description, Map<String, ServerVariable> variables) {
         this.URL = URL;
@@ -46,7 +46,7 @@ public class ServerConfiguration {
         String url = this.URL;
 
         // go through variables and replace placeholders
-        for (Map.Entry<String, ServerVariable> variable: this.variables.entrySet()) {
+        for (Map.Entry<String, ServerVariable> variable : this.variables.entrySet()) {
             String name = variable.getKey();
             ServerVariable serverVariable = variable.getValue();
             String value = serverVariable.defaultValue;

@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common;
 
-import io.micrometer.observation.Observation;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import io.micrometer.observation.Observation;
 
 public class TracedCoreSubscriber<T> implements Subscriber<T> {
     private final Subscriber<T> delegate;

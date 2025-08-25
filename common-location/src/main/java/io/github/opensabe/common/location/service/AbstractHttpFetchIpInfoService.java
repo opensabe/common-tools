@@ -15,9 +15,13 @@
  */
 package io.github.opensabe.common.location.service;
 
-import io.github.opensabe.common.location.vo.IpLocation;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import io.github.opensabe.common.location.vo.IpLocation;
 
 public abstract class AbstractHttpFetchIpInfoService<T> {
     protected final RestTemplate restTemplate = new RestTemplate();

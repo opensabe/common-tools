@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.starter.third.client.auto;
 
-import io.github.opensabe.spring.cloud.starter.third.client.conf.ThirdPartyWebClientConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.spring.cloud.starter.third.client.conf.ThirdPartyWebClientConfiguration;
 
 @Import(ThirdPartyWebClientConfiguration.class)
 @Configuration(proxyBeanMethods = false)

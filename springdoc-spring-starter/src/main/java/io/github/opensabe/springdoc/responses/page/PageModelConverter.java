@@ -15,24 +15,26 @@
  */
 package io.github.opensabe.springdoc.responses.page;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import io.swagger.v3.core.util.Json;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.swagger.v3.core.util.Json;
 
 
 /**
  * spring data relation中Page简化字段，只返回 list 和 total
+ *
  * @author heng.ma
  */
 public class PageModelConverter {
 
-    public static void config () {
+    public static void config() {
         ObjectMapper mapper = Json.mapper();
         SerializationConfig config = mapper.getSerializationConfig();
         config = config.with(new ClassIntrospectorDecorator(config.getClassIntrospector()) {

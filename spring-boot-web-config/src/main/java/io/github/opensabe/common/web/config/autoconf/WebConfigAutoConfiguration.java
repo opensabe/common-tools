@@ -15,13 +15,14 @@
  */
 package io.github.opensabe.common.web.config.autoconf;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.annotation.Import;
+
 import io.github.opensabe.common.web.config.ConverterConfiguration;
 import io.github.opensabe.common.web.config.interceptor.ActuatorAdvice;
 import io.github.opensabe.common.web.config.interceptor.CommonAop;
 import io.github.opensabe.common.web.config.interceptor.ResponseAdvice;
 import io.github.opensabe.common.web.config.interceptor.ValidatorAdvice;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
 
 //@Configuration(proxyBeanMethods = false)
 @AutoConfiguration

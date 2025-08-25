@@ -15,18 +15,6 @@
  */
 package io.github.opensabe.springdoc.responses;
 
-import io.github.opensabe.spring.cloud.parent.common.handler.ErrorMessage;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.SchemaProperty;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.apache.commons.lang3.ArrayUtils;
-import org.springdoc.core.properties.SpringDocConfigProperties;
-import org.springdoc.core.service.GenericResponseService;
-import org.springdoc.core.service.OperationService;
-import org.springdoc.core.utils.PropertyResolverUtils;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -36,8 +24,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springdoc.core.service.GenericResponseService;
+import org.springdoc.core.service.OperationService;
+import org.springdoc.core.utils.PropertyResolverUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+
+import io.github.opensabe.spring.cloud.parent.common.handler.ErrorMessage;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.SchemaProperty;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 /**
  * 生成swagger文档时处理{@link BizResponse}
+ *
  * @author heng.ma
  */
 @Useless
@@ -66,8 +67,7 @@ public class SpringdocResponseService extends GenericResponseService {
     }
 
 
-
-    private Set<BizResponse> findBizResponse (Method method) {
+    private Set<BizResponse> findBizResponse(Method method) {
         Class<?> declaringClass = method.getDeclaringClass();
 
         Set<BizResponses> apiResponsesDoc = AnnotatedElementUtils.findAllMergedAnnotations(method, BizResponses.class);
@@ -87,8 +87,7 @@ public class SpringdocResponseService extends GenericResponseService {
     }
 
 
-
-    private Stream<ApiResponse> responseStream (BizResponse response) {
+    private Stream<ApiResponse> responseStream(BizResponse response) {
         return Arrays.stream(response.value().getEnumConstants())
                 .filter(message -> response.exclude().length == 0 || !ArrayUtils.contains(response.exclude(), message.code()))
                 .filter(message -> response.include().length == 0 || ArrayUtils.contains(response.include(), message.code()))
@@ -96,14 +95,14 @@ public class SpringdocResponseService extends GenericResponseService {
 
     }
 
-    private ApiResponse createApiResponse (BizResponse response, ErrorMessage message) {
+    private ApiResponse createApiResponse(BizResponse response, ErrorMessage message) {
         Content content = createContent(message);
         InvocationHandler invocationHandler = (Object proxy, Method method, Object[] args) -> {
             String methodName = method.getName();
             return switch (methodName) {
-                case "description" ->  response.condition();
-                case "responseCode" -> message.code()+"";
-                case "content" ->  response.useReturnType()? new Content[0]: new Content[]{content};
+                case "description" -> response.condition();
+                case "responseCode" -> message.code() + "";
+                case "content" -> response.useReturnType() ? new Content[0] : new Content[]{content};
                 case "ref" -> "";
                 case "useReturnTypeSchema" -> response.useReturnType();
                 case "extensions" -> useless.extensions();
@@ -113,47 +112,49 @@ public class SpringdocResponseService extends GenericResponseService {
                 default -> null;
             };
         };
-        return (ApiResponse) Proxy.newProxyInstance(ApiResponse.class.getClassLoader(),new Class[]{ApiResponse.class}, invocationHandler);
+        return (ApiResponse) Proxy.newProxyInstance(ApiResponse.class.getClassLoader(), new Class[]{ApiResponse.class}, invocationHandler);
     }
-    private Content createContent (ErrorMessage errorCode) {
+
+    private Content createContent(ErrorMessage errorCode) {
 
         InvocationHandler invocationHandler = (Object proxy, Method method, Object[] args) -> {
-                String methodName = method.getName();
-                return switch (methodName) {
-                    case "schemaProperties" ->  new SchemaProperty[] {
-                            createSchemaProperty("bizCode", errorCode.code()+"","int"),
-                            createSchemaProperty("message", errorCode.message(), ""),
-                            createSchemaProperty("data", String.valueOf(errorCode.data()), "")
-                        };
-                    case "schema", "_if", "_then", "_else", "additionalPropertiesSchema", "contentSchema",
-                         "propertyNames" -> useless.schema();
-                    case "array", "additionalPropertiesArraySchema" -> useless.array();
-                    case "encoding" -> useless.encoding();
-                    case "extensions" -> useless.extensions();
-                    case "examples" -> useless.examples();
-                    case "dependentSchemas" -> useless.dependentSchemas();
-                    case "oneOf", "anyOf", "allOf" -> useless.schemas();
-
-                    default -> null;
+            String methodName = method.getName();
+            return switch (methodName) {
+                case "schemaProperties" -> new SchemaProperty[]{
+                        createSchemaProperty("bizCode", errorCode.code() + "", "int"),
+                        createSchemaProperty("message", errorCode.message(), ""),
+                        createSchemaProperty("data", String.valueOf(errorCode.data()), "")
                 };
-            };
+                case "schema", "_if", "_then", "_else", "additionalPropertiesSchema", "contentSchema",
+                     "propertyNames" -> useless.schema();
+                case "array", "additionalPropertiesArraySchema" -> useless.array();
+                case "encoding" -> useless.encoding();
+                case "extensions" -> useless.extensions();
+                case "examples" -> useless.examples();
+                case "dependentSchemas" -> useless.dependentSchemas();
+                case "oneOf", "anyOf", "allOf" -> useless.schemas();
 
-        return (Content) Proxy.newProxyInstance(Content.class.getClassLoader(),new Class[]{Content.class}, invocationHandler);
+                default -> null;
+            };
+        };
+
+        return (Content) Proxy.newProxyInstance(Content.class.getClassLoader(), new Class[]{Content.class}, invocationHandler);
     }
-    private SchemaProperty createSchemaProperty (String name, String example, String type) {
+
+    private SchemaProperty createSchemaProperty(String name, String example, String type) {
 
         InvocationHandler invocationHandler = (Object proxy, Method method, Object[] args) -> {
-                String methodName = method.getName();
-                return switch (methodName) {
-                    case "name" ->  name;
+            String methodName = method.getName();
+            return switch (methodName) {
+                case "name" -> name;
 //                    case "schema" -> createSchema(example, type);
-                    case "schema" -> useless.schema();
-                    case "array" -> useless.array();
-                    default -> null;
-                };
+                case "schema" -> useless.schema();
+                case "array" -> useless.array();
+                default -> null;
             };
+        };
 
-        return (SchemaProperty) Proxy.newProxyInstance(SchemaProperty.class.getClassLoader(),new Class[]{SchemaProperty.class}, invocationHandler);
+        return (SchemaProperty) Proxy.newProxyInstance(SchemaProperty.class.getClassLoader(), new Class[]{SchemaProperty.class}, invocationHandler);
     }
 //    private Schema createSchema (String example, String type) {
 //
@@ -196,7 +197,7 @@ public class SpringdocResponseService extends GenericResponseService {
 //    }
 
 
-    private int hashCode (Object ... os) {
+    private int hashCode(Object... os) {
         return Objects.hash(os) & Integer.MAX_VALUE;
     }
 

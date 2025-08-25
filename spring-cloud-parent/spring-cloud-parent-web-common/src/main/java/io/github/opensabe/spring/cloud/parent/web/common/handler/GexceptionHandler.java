@@ -15,15 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.handler;
 
-import io.github.opensabe.base.code.BizCodeEnum;
-import io.github.opensabe.base.vo.BaseRsp;
-import io.github.opensabe.spring.cloud.parent.common.handler.BackendException;
-import io.github.opensabe.spring.cloud.parent.common.handler.ErrorHandler;
-import io.github.opensabe.spring.cloud.parent.common.handler.FrontendException;
-import io.github.opensabe.spring.cloud.parent.common.handler.I18nMessageResolver;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.validation.BindException;
@@ -33,9 +24,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
+import io.github.opensabe.base.code.BizCodeEnum;
+import io.github.opensabe.base.vo.BaseRsp;
+import io.github.opensabe.spring.cloud.parent.common.handler.BackendException;
+import io.github.opensabe.spring.cloud.parent.common.handler.ErrorHandler;
+import io.github.opensabe.spring.cloud.parent.common.handler.FrontendException;
+import io.github.opensabe.spring.cloud.parent.common.handler.I18nMessageResolver;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.log4j.Log4j2;
+
 
 /**
  * 全局异常处理
+ *
  * @author heng.ma
  */
 @Log4j2
@@ -94,18 +96,19 @@ public class GexceptionHandler extends ErrorHandler implements PriorityOrdered {
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
-    public BaseRsp<?> webExchangeBindException (WebExchangeBindException e) {
+    public BaseRsp<?> webExchangeBindException(WebExchangeBindException e) {
         var message = message(e.getBindingResult());
         return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(message).build();
     }
 
     /**
      * 参数校验
+     *
      * @param e
      * @return BaseRsp
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public BaseRsp<?> validateException (MethodArgumentNotValidException e) {
+    public BaseRsp<?> validateException(MethodArgumentNotValidException e) {
         var message = message(e.getBindingResult());
         return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(message).build();
     }

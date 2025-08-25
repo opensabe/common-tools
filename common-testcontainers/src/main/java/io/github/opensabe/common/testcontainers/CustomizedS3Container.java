@@ -15,12 +15,14 @@
  */
 package io.github.opensabe.common.testcontainers;
 
-import com.github.dockerjava.api.command.InspectContainerResponse;
-import lombok.SneakyThrows;
+import java.util.concurrent.TimeUnit;
+
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
-import java.util.concurrent.TimeUnit;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+
+import lombok.SneakyThrows;
 
 public class CustomizedS3Container extends GenericContainer<CustomizedS3Container> {
     public static final int S3_PORT = 4566;

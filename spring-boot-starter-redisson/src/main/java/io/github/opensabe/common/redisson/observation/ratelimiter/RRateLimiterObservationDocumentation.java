@@ -93,8 +93,7 @@ public enum RRateLimiterObservationDocumentation implements ObservationDocumenta
             public String asString() {
                 return "redisson.ratelimiter.set.rate.keep.alive";
             }
-        }
-        ;
+        };
     }
 
     public enum ACQUIRE_TAG implements KeyName {

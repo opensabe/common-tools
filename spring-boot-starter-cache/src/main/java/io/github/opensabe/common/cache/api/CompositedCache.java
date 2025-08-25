@@ -15,10 +15,10 @@
  */
 package io.github.opensabe.common.cache.api;
 
-import org.springframework.cache.Cache;
-
 import java.util.Collection;
 import java.util.concurrent.Callable;
+
+import org.springframework.cache.Cache;
 
 /**
  * 仅支持删除的缓存，如果遇到 <code>@CacheEvict</code>,不会指定
@@ -26,13 +26,14 @@ import java.util.concurrent.Callable;
  * <br>
  * <code>getCache(cacheName)</code>,因此，要返回该Cache去支持evict操作。
  * <p>
- *     <b>
- *     因为ExpireCacheManager都是动态创建缓存的，而evict操作仅需要当前已经存在的缓存，
- *     因此ExpireCacheManager在返回该缓存时，只需要添加当前已经创建的cache即可。
- *     </b>
+ * <b>
+ * 因为ExpireCacheManager都是动态创建缓存的，而evict操作仅需要当前已经存在的缓存，
+ * 因此ExpireCacheManager在返回该缓存时，只需要添加当前已经创建的cache即可。
+ * </b>
  * </p>
- * @see org.springframework.cache.CacheManager#getCache(String)
+ *
  * @author heng.ma
+ * @see org.springframework.cache.CacheManager#getCache(String)
  */
 public class CompositedCache implements Cache {
 
@@ -57,7 +58,7 @@ public class CompositedCache implements Cache {
 
     @Override
     public ValueWrapper get(Object key) {
-       throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.common.cache.config;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.github.opensabe.common.cache.api.CompositeCacheManager;
-import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
@@ -27,15 +28,17 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import io.github.opensabe.common.cache.api.CompositeCacheManager;
+import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
 
 /**
  * 根据<code>CachesProperties</code>,创建cacheManager添加到
  * <code>CompositedCacheManager</code>中
- * @see CachesProperties
+ *
  * @author heng.ma
+ * @see CachesProperties
  */
 @ConditionalOnClass(Caffeine.class)
 public class CaffeineConfiguration implements InitializingBean {
@@ -55,7 +58,7 @@ public class CaffeineConfiguration implements InitializingBean {
     public void afterPropertiesSet() {
         List<CacheManager> cacheManagers = new ArrayList<>();
         cacheManagers.add(dynamicCaffeineCacheManager());
-        if (cachesProperties.isEnabled() && cachesProperties.getCustom()!= null) {
+        if (cachesProperties.isEnabled() && cachesProperties.getCustom() != null) {
             List<CacheManager> list = cachesProperties.getCustom().stream().filter(p -> CacheType.CAFFEINE.equals(p.getType()))
                     .map(this::caffeineCacheManager)
                     .toList();
@@ -66,12 +69,12 @@ public class CaffeineConfiguration implements InitializingBean {
         compositeCacheManager.setCacheManagers(cacheManagers);
     }
 
-    public DynamicCaffeineCacheManager dynamicCaffeineCacheManager () {
+    public DynamicCaffeineCacheManager dynamicCaffeineCacheManager() {
         DynamicCaffeineCacheManager cacheManager = new DynamicCaffeineCacheManager(cachesProperties);
         return customizers.customize(cacheManager);
     }
 
-    private CacheManager caffeineCacheManager (CacheProperties properties) {
+    private CacheManager caffeineCacheManager(CacheProperties properties) {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
         if (properties != null) {
             CacheProperties.Caffeine caffeine = properties.getCaffeine();

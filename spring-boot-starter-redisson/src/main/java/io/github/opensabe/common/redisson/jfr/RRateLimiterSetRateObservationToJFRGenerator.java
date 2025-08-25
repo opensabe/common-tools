@@ -15,8 +15,8 @@
  */
 package io.github.opensabe.common.redisson.jfr;
 
-import io.github.opensabe.common.redisson.observation.ratelimiter.RRateLimiterSetRateContext;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.observation.ratelimiter.RRateLimiterSetRateContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
 public class RRateLimiterSetRateObservationToJFRGenerator extends ObservationToJFRGenerator<RRateLimiterSetRateContext> {

@@ -15,11 +15,10 @@
  */
 package io.github.opensabe.common.web.config.exception;
 
+import java.io.Serializable;
 import io.github.opensabe.common.web.config.base.ErrResponse;
 import io.github.opensabe.common.web.config.base.ErrorUtil;
 import lombok.Getter;
-
-import java.io.Serializable;
 
 /**
  * 17/8/17 下午7:31.

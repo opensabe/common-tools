@@ -15,6 +15,10 @@
  */
 package io.github.opensabe.common.mybatis.interceptor;
 
+import java.sql.SQLException;
+import java.time.Duration;
+import java.util.Objects;
+
 import com.alibaba.druid.filter.FilterAdapter;
 import com.alibaba.druid.filter.FilterChain;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -23,19 +27,17 @@ import com.alibaba.druid.proxy.jdbc.DataSourceProxy;
 import com.alibaba.druid.stat.JdbcConnectionStat;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+
 import io.github.opensabe.common.mybatis.observation.ConnectionContext;
 import io.github.opensabe.common.mybatis.observation.ConnectionDocumentation;
 import io.github.opensabe.common.mybatis.observation.ConnectionObservationConvention;
-import io.github.opensabe.common.utils.SpringUtil;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.utils.SpringUtil;
 import io.micrometer.observation.Observation;
-
-import java.sql.SQLException;
-import java.time.Duration;
-import java.util.Objects;
 
 /**
  * 监控连接池获取和释放
+ *
  * @author maheng
  */
 public class ConnectionObservationFilter extends FilterAdapter {
@@ -54,7 +56,7 @@ public class ConnectionObservationFilter extends FilterAdapter {
     @Override
     public void init(DataSourceProxy dataSource) {
         super.init(dataSource);
-        this.dataSourceProxy =  dataSource;
+        this.dataSourceProxy = dataSource;
     }
 
     public UnifiedObservationFactory getObservationFactory() {
@@ -67,6 +69,7 @@ public class ConnectionObservationFilter extends FilterAdapter {
 
     /**
      * 获取连接
+     *
      * @param chain
      * @param dataSource
      * @param maxWaitMillis
@@ -76,7 +79,7 @@ public class ConnectionObservationFilter extends FilterAdapter {
     @Override
     public DruidPooledConnection dataSource_getConnection(FilterChain chain, DruidDataSource dataSource, long maxWaitMillis) throws SQLException {
         UnifiedObservationFactory unifiedObservationFactory = getObservationFactory();
-        if (Objects.isNull(unifiedObservationFactory)  || Objects.isNull(unifiedObservationFactory.getObservationRegistry())) {
+        if (Objects.isNull(unifiedObservationFactory) || Objects.isNull(unifiedObservationFactory.getObservationRegistry())) {
             return super.dataSource_getConnection(chain, dataSource, maxWaitMillis);
         }
         ConnectionContext context = ConnectionContext.connect(
@@ -90,17 +93,17 @@ public class ConnectionObservationFilter extends FilterAdapter {
                         unifiedObservationFactory.getObservationRegistry())
                 .start();
         try {
-            DruidPooledConnection result =  super.dataSource_getConnection(chain, dataSource, maxWaitMillis);
+            DruidPooledConnection result = super.dataSource_getConnection(chain, dataSource, maxWaitMillis);
             context.setActiveCount(dataSource.getDataSourceStat().getConnections().size());
             context.setConnectedTime(result.getConnectedTimeMillis());
             context.setWaitThread(WAIT_THREAD_COUNT_CACHE.get("c", key -> dataSource.getLockQueueLength()));
             return result;
-        }catch (Throwable e) {
+        } catch (Throwable e) {
             context.setSuccess(false);
             context.setWaitThread(dataSource.getLockQueueLength());
             observation.error(e);
             throw e;
-        }finally {
+        } finally {
             observation.stop();
         }
 
@@ -108,6 +111,7 @@ public class ConnectionObservationFilter extends FilterAdapter {
 
     /**
      * 连接回收
+     *
      * @param chain
      * @param connection
      * @throws SQLException
@@ -124,7 +128,7 @@ public class ConnectionObservationFilter extends FilterAdapter {
                 connectionStat.getActiveMax(),
                 connectionStat.getActiveCount(),
                 connection.getConnectedTimeMillis()
-                );
+        );
         Observation observation = ConnectionDocumentation.RELEASE.observation(null,
                 ConnectionObservationConvention.DEFAULT,
                 () -> context,
@@ -133,11 +137,11 @@ public class ConnectionObservationFilter extends FilterAdapter {
         try {
             super.dataSource_releaseConnection(chain, connection);
             context.setActiveCount(connectionStat.getActiveCount());
-        }catch (Throwable e) {
+        } catch (Throwable e) {
             context.setSuccess(false);
             observation.error(e);
             throw e;
-        }finally {
+        } finally {
             observation.stop();
         }
     }

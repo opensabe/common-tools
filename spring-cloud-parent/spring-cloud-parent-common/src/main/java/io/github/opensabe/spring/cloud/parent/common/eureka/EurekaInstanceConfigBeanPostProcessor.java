@@ -15,11 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.eureka;
 
+import java.util.List;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
-
-import java.util.List;
 
 /**
  * 实现 EurekaInstanceConfigBeanCustomizer 在 EurekaInstanceConfigBean 初始化之后修改

@@ -29,11 +29,11 @@ public enum SearchTypeEnum {
 
     private String name;
 
-    public String getName() {
-        return name;
-    }
-
     SearchTypeEnum(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 }

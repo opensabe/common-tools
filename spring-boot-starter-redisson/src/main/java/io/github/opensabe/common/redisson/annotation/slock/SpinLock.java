@@ -15,11 +15,16 @@
  */
 package io.github.opensabe.common.redisson.annotation.slock;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
-
-import java.lang.annotation.*;
-import java.util.concurrent.TimeUnit;
 
 @Documented
 @Inherited
@@ -30,6 +35,7 @@ public @interface SpinLock {
 
     /**
      * 锁的名称表达式
+     *
      * @see Cacheable#cacheNames()
      */
     @AliasFor(annotation = SLock.class)
@@ -72,9 +78,11 @@ public @interface SpinLock {
      * 以下三个参数在 LockFeature = SPIN， BackOffType = EXPONENTIAL 使用
      */
     @AliasFor(annotation = SLock.class)
-    long backOffMaxDelay()  default 128;
+    long backOffMaxDelay() default 128;
+
     @AliasFor(annotation = SLock.class)
     long backOffInitialDelay() default 1;
+
     @AliasFor(annotation = SLock.class)
     int backOffMultiplier() default 2;
 

@@ -15,16 +15,17 @@
  */
 package io.github.opensabe.base.vo;
 
+import java.util.Objects;
+import java.util.function.BiFunction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.github.opensabe.base.code.BizCodeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Objects;
-import java.util.function.BiFunction;
 
 /**
  * Basic response format
@@ -47,12 +48,12 @@ public class BaseRsp<T> {
     private T data;                     // response content data
 
     @JsonIgnore
-    public boolean isSuccess () {
+    public boolean isSuccess() {
         return Objects.equals(bizCode, BizCodeEnum.SUCCESS.getVal());
     }
 
     @JsonIgnore
-    public T resolveData (BiFunction<Integer, String, RuntimeException> supplier) {
+    public T resolveData(BiFunction<Integer, String, RuntimeException> supplier) {
         if (isSuccess()) {
             return data;
         }

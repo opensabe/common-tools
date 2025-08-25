@@ -15,10 +15,18 @@
  */
 package io.github.opensabe.base.vo;
 
-import io.github.opensabe.base.code.BizCodeEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.github.opensabe.base.code.BizCodeEnum;
 
 @DisplayName("基础响应对象测试")
 class BaseRspTest {
@@ -71,7 +79,7 @@ class BaseRspTest {
         BaseRsp<String> successResponse = new BaseRsp<>();
         successResponse.setBizCode(BizCodeEnum.SUCCESS.getVal());
         successResponse.setData("测试数据");
-        
+
         String result = successResponse.resolveData((code, msg) -> new RuntimeException("不应该抛出异常"));
         assertEquals("测试数据", result);
 
@@ -81,7 +89,7 @@ class BaseRspTest {
         failResponse.setMessage("失败消息");
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            failResponse.resolveData((code, msg) -> new RuntimeException("业务失败: " + msg))
+                failResponse.resolveData((code, msg) -> new RuntimeException("业务失败: " + msg))
         );
         assertTrue(exception.getMessage().contains("业务失败"));
     }

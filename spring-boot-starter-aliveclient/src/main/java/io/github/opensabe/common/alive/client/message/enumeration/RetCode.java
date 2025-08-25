@@ -24,11 +24,11 @@ public enum RetCode {
 
     private int val;
 
-    public int getVal() {
-        return val;
-    }
-
     RetCode(int val) {
         this.val = val;
     }
+
+    public int getVal() {
+        return val;
     }
+}

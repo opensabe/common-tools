@@ -38,13 +38,12 @@ public enum BizCodeEnum implements ErrorMessage {
      */
     ;
 
+    private int val;
+    private String defaultMsg;
     BizCodeEnum(int val, String defaultMsg) {
         this.val = val;
         this.defaultMsg = defaultMsg;
     }
-
-    private int val;
-    private String defaultMsg;
 
     @Override
     public int code() {

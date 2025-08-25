@@ -15,12 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.redislience4j;
 
-import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
-import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
-import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
-import io.github.resilience4j.core.ConfigurationNotFoundException;
-import io.github.resilience4j.core.registry.RegistryEventConsumer;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +22,12 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
+
+import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
+import io.github.resilience4j.core.ConfigurationNotFoundException;
+import io.github.resilience4j.core.registry.RegistryEventConsumer;
 
 public class CaffeineThreadPoolBulkheadRegistry extends CaffeineResilienceRegistry<ThreadPoolBulkhead, ThreadPoolBulkheadConfig> implements ThreadPoolBulkheadRegistry {
 

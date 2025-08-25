@@ -15,7 +15,11 @@
  */
 package io.github.opensabe.common.cache.config;
 
-import io.github.opensabe.common.cache.api.ExpireCacheResolver;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.cache.annotation.CachingConfigurer;
@@ -23,10 +27,7 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.jcache.config.JCacheConfigurer;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import io.github.opensabe.common.cache.api.ExpireCacheResolver;
 
 /**
  * @author heng.ma
@@ -47,12 +48,12 @@ public class ExpireCachingConfigurer implements CachingConfigurer, JCacheConfigu
 
     @Override
     public KeyGenerator keyGenerator() {
-        return new SimpleKeyGenerator(){
+        return new SimpleKeyGenerator() {
             @Override
             public Object generate(Object target, Method method, Object... params) {
                 if (params.length == 0) {
                     return method.getName();
-                }else if (params.length == 1) {
+                } else if (params.length == 1) {
                     Object param = params[0];
                     if (param != null && !param.getClass().isArray()) {
                         return param;

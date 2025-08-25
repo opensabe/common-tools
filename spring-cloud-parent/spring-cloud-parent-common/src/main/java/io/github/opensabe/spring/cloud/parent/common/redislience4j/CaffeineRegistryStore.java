@@ -15,19 +15,21 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.redislience4j;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.RemovalListener;
-import io.github.resilience4j.core.RegistryStore;
-import lombok.extern.log4j.Log4j2;
-
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalListener;
+
+import io.github.resilience4j.core.RegistryStore;
+import lombok.extern.log4j.Log4j2;
+
 /**
  * 用于动态替换 resilience4j 的 InMemoryStore 默认的实现，默认实现永远不会过期，导致缓存不断变大
+ *
  * @param <E>
  */
 @Log4j2

@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.test.log4j2;
 
-import io.github.opensabe.spring.cloud.parent.common.config.Log4j2Configuration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,8 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import io.github.opensabe.spring.cloud.parent.common.config.Log4j2Configuration;
 
 @SpringJUnitConfig
 @AutoConfigureObservability
@@ -36,9 +37,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 public class Log4j2PrometheusMetricsTest {
-    @SpringBootApplication
-    public static class Main {}
-
     private final TestRestTemplate testRestTemplate;
 
     @Autowired
@@ -53,5 +51,9 @@ public class Log4j2PrometheusMetricsTest {
         // 验证响应内容是否包含预期的指标
         Assertions.assertNotNull(response);
         Assertions.assertTrue(response.contains(Log4j2Configuration.GAUGE_NAME_SUFFIX));
+    }
+
+    @SpringBootApplication
+    public static class Main {
     }
 }

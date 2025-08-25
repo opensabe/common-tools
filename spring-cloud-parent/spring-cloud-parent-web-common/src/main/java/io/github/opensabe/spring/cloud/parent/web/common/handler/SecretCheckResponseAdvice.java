@@ -15,8 +15,22 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.handler;
 
+import java.time.Duration;
+import java.util.Set;
+
+import org.springframework.core.MethodParameter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.DelegatingServerHttpResponse;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+
 import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.utils.json.JsonUtil;
@@ -29,18 +43,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.ServletResponseWrapper;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.MethodParameter;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.DelegatingServerHttpResponse;
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-
-import java.time.Duration;
-import java.util.Set;
 
 @Log4j2
 @ControllerAdvice
@@ -79,32 +81,32 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
                 servletResponse = wrapper.getResponse();
             }
             if (servletResponse instanceof HttpServletResponseImpl httpServletResponse) {
-                    HttpServerExchange httpServerExchange = httpServletResponse.getExchange();
-                    HeaderMap responseHeaders = httpServerExchange.getResponseHeaders();
-                    //先复制，防止遍历移除的时候抛出 ConcurrentModificationException
-                    Set<HttpString> headerNames = Set.copyOf(responseHeaders.getHeaderNames());
-                    for (HttpString headerName : headerNames) {
-                        FilterSecretStringResult headerNameFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(headerName.toString());
-                        //如果 headerName 有敏感信息，则移除整个 header
-                        if (headerNameFilterSecretStringResult.isFoundSensitiveString()) {
+                HttpServerExchange httpServerExchange = httpServletResponse.getExchange();
+                HeaderMap responseHeaders = httpServerExchange.getResponseHeaders();
+                //先复制，防止遍历移除的时候抛出 ConcurrentModificationException
+                Set<HttpString> headerNames = Set.copyOf(responseHeaders.getHeaderNames());
+                for (HttpString headerName : headerNames) {
+                    FilterSecretStringResult headerNameFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(headerName.toString());
+                    //如果 headerName 有敏感信息，则移除整个 header
+                    if (headerNameFilterSecretStringResult.isFoundSensitiveString()) {
+                        cache.put(path, true);
+                        responseHeaders.remove(headerName);
+                        continue;
+                    }
+                    //如果 headerName 没有敏感信息，则继续检查 headerValue
+                    HeaderValues headerValues = responseHeaders.get(headerName);
+                    for (String headerValue : headerValues) {
+                        FilterSecretStringResult headerFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(headerValue);
+                        if (headerFilterSecretStringResult.isFoundSensitiveString()) {
                             cache.put(path, true);
+                            //如果 value 中有敏感信息，则移除整个 header，填入掩码，这里忽略了多个值的情况
                             responseHeaders.remove(headerName);
-                            continue;
-                        }
-                        //如果 headerName 没有敏感信息，则继续检查 headerValue
-                        HeaderValues headerValues = responseHeaders.get(headerName);
-                        for (String headerValue : headerValues) {
-                            FilterSecretStringResult headerFilterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(headerValue);
-                            if (headerFilterSecretStringResult.isFoundSensitiveString()) {
-                                cache.put(path, true);
-                                //如果 value 中有敏感信息，则移除整个 header，填入掩码，这里忽略了多个值的情况
-                                responseHeaders.remove(headerName);
-                                responseHeaders.add(headerName, headerFilterSecretStringResult.getFilteredContent());
-                                break;
-                            }
+                            responseHeaders.add(headerName, headerFilterSecretStringResult.getFilteredContent());
+                            break;
                         }
                     }
-            }else {
+                }
+            } else {
                 log.error("wrapperResponse is not HttpServletResponseImpl, response: {}", servletResponse);
             }
         } else {

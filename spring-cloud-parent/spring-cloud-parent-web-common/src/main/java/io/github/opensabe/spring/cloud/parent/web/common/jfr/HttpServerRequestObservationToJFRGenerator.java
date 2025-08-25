@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.jfr;
 
+import java.util.stream.Collectors;
+
+import org.springframework.http.server.observation.ServerRequestObservationContext;
+
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.server.observation.ServerRequestObservationContext;
-
-import java.util.stream.Collectors;
 
 @Log4j2
 public class HttpServerRequestObservationToJFRGenerator extends ObservationToJFRGenerator<ServerRequestObservationContext> {

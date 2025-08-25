@@ -15,14 +15,13 @@
  */
 package io.github.opensabe.common.executor.forkjoin;
 
-import io.github.opensabe.common.executor.ThreadPoolFactory;
-import io.github.opensabe.common.executor.ThreadUnCaughtExceptionHandler;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import io.github.opensabe.common.executor.ThreadPoolFactory;
+import io.github.opensabe.common.executor.ThreadUnCaughtExceptionHandler;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 
 public class ForkJoinPoolFactory {
     private final ThreadPoolFactory threadPoolFactory;
@@ -57,10 +56,9 @@ public class ForkJoinPoolFactory {
         }
 
 
-
         public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
             var thread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-            thread.setName(name + "-" +COUNTER.getAndIncrement());
+            thread.setName(name + "-" + COUNTER.getAndIncrement());
             return thread;
         }
     }

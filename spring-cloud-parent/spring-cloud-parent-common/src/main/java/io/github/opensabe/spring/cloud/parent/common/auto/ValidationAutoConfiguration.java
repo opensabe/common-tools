@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.common.validation.ExtendValidatorConfigure;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.spring.cloud.parent.common.validation.ExtendValidatorConfigure;
 
 @AutoConfiguration
 @Import(ExtendValidatorConfigure.class)

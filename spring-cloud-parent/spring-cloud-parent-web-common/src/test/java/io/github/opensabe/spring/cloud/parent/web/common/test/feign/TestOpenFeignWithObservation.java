@@ -15,11 +15,9 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
-import io.micrometer.observation.Observation;
-import io.micrometer.observation.ObservationRegistry;
-import io.micrometer.tracing.TraceContext;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,32 +34,23 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.tracing.TraceContext;
 
 @SpringBootTest
 @AutoConfigureObservability
 @ActiveProfiles("observation")
 @EnableFeignClients
 public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
     static final String TEST_SERVICE_1 = "TestOpenFeignWithObservation-TestService1";
     static final String CONTEXT_ID_1 = "TestOpenFeignWithObservation-testService1Client";
-
-    @FeignClient(name = TEST_SERVICE_1, contextId = CONTEXT_ID_1)
-    interface TestService1Client {
-        //向这个 http://httpbin.org/anything 发送的请求的响应体中包含了请求的所有信息
-        @GetMapping("/anything")
-        HttpBinAnythingResponse anything();
-    }
-
     @MockBean
     SimpleDiscoveryClient discoveryClient;
     List<ServiceInstance> serviceInstances = List.of(
@@ -69,8 +58,6 @@ public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
                     TEST_SERVICE_1 + "_1", TEST_SERVICE_1,
                     GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1"))
             ));
-
-
     @Autowired
     private TestService1Client testService1Client;
     @Autowired
@@ -128,6 +115,17 @@ public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
                             })
             );
         });
+    }
+
+    @FeignClient(name = TEST_SERVICE_1, contextId = CONTEXT_ID_1)
+    interface TestService1Client {
+        //向这个 http://httpbin.org/anything 发送的请求的响应体中包含了请求的所有信息
+        @GetMapping("/anything")
+        HttpBinAnythingResponse anything();
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 
 }

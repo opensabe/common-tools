@@ -15,12 +15,8 @@
  */
 package io.github.opensabe.common.dynamodb.test;
 
-import io.github.opensabe.common.dynamodb.test.common.DynamicdbStarter;
-import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.lang.annotation.Annotation;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.Association;
@@ -30,7 +26,12 @@ import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.util.TypeInformation;
 
-import java.lang.annotation.Annotation;
+import io.github.opensabe.common.dynamodb.test.common.DynamicdbStarter;
+import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author heng.ma
@@ -41,7 +42,7 @@ public class DynamoConverterTest extends DynamicdbStarter {
     private DynamodbConverter converter;
 
     @Test
-    void testConvert () throws NoSuchFieldException {
+    void testConvert() throws NoSuchFieldException {
         BasicPersistentEntity entity = new BasicPersistentEntity<>(TypeInformation.of(Entity.class));
         entity.addPersistentProperty(new AbstractPersistentProperty(Property.of(TypeInformation.of(Entity.class), Entity.class.getDeclaredField("child")), entity, SimpleTypeHolder.DEFAULT) {
             @Override
@@ -74,7 +75,7 @@ public class DynamoConverterTest extends DynamicdbStarter {
                 return null;
             }
         });
-        String key = converter.write( new Child("sdfda", 20), () -> entity.getPersistentProperty("child"));
+        String key = converter.write(new Child("sdfda", 20), () -> entity.getPersistentProperty("child"));
         System.out.println(key);
         Object child = converter.read(key, () -> entity.getPersistentProperty("child"));
         System.out.println(child);
@@ -92,5 +93,6 @@ public class DynamoConverterTest extends DynamicdbStarter {
         private Child child;
     }
 
-    public record Child (String id, Integer age){}
+    public record Child(String id, Integer age) {
+    }
 }

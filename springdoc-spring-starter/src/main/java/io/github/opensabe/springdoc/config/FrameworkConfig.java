@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.springdoc.config;
 
-import io.github.opensabe.base.vo.IntValueEnum;
-import io.github.opensabe.springdoc.converters.EnumModelConverter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.opensabe.base.vo.IntValueEnum;
+import io.github.opensabe.springdoc.converters.EnumModelConverter;
 
 /**
  * @author heng.ma
@@ -31,7 +32,7 @@ public class FrameworkConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public EnumModelConverter enumModelConverter () {
+    public EnumModelConverter enumModelConverter() {
         return new EnumModelConverter();
     }
 }

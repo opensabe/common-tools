@@ -15,8 +15,8 @@
  */
 package io.github.opensabe.common.redisson.jfr;
 
-import io.github.opensabe.common.redisson.observation.rsemaphore.RPermitSemaphoreAcquiredContext;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.observation.rsemaphore.RPermitSemaphoreAcquiredContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
 public class RPermitSemaphoreAcquiredObservationToJFRGenerator extends ObservationToJFRGenerator<RPermitSemaphoreAcquiredContext> {

@@ -16,9 +16,15 @@
 package io.github.opensabe.common.buffer;
 
 //等 https://github.com/abel533/Mapper/releases/tag/5.0.0-rc2 发布，更新 tk mybatis 之后就可以去掉 javax 的依赖和注解
+
 import jakarta.persistence.Transient;
 
 public abstract class BufferedElement {
+    private final BufferedElementJFREvent bufferedElementJFREvent;
+    @Transient
+    private String traceId;
+    @Transient
+    private String spanId;
     protected BufferedElement() {
         bufferedElementJFREvent = new BufferedElementJFREvent();
         bufferedElementJFREvent.begin();
@@ -29,19 +35,14 @@ public abstract class BufferedElement {
      */
     public abstract String hashKey();
 
-    @Transient
-    private String traceId;
-    @Transient
-    private String spanId;
-
-    private final BufferedElementJFREvent bufferedElementJFREvent;
-
     public String traceId() {
         return traceId;
     }
+
     public String spanId() {
         return spanId;
     }
+
     public void setSubmitInfo(String traceId, String spanId) {
         this.traceId = traceId;
         this.bufferedElementJFREvent.setSubmitTraceId(traceId);

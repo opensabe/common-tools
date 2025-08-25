@@ -16,13 +16,13 @@
 package io.github.opensabe.common.location.vo;
 
 
+import javax.annotation.Nullable;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.annotation.Nullable;
 
 @Data
 @Builder

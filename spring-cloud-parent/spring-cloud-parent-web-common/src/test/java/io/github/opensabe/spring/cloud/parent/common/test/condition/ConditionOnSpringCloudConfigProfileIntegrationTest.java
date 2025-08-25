@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.test.condition;
 
-import io.github.opensabe.spring.cloud.parent.common.condition.ConditionOnSpringCloudConfigProfile;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +27,40 @@ import org.springframework.context.annotation.Configuration;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.opensabe.spring.cloud.parent.common.condition.ConditionOnSpringCloudConfigProfile;
+
 class ConditionOnSpringCloudConfigProfileIntegrationTest {
+
+    @Configuration
+    static class TestConfig {
+        @Bean
+        @ConditionOnSpringCloudConfigProfile(value = "test-profile", predicate = ConditionOnSpringCloudConfigProfile.Predicate.equals)
+        public String equalsBean() {
+            return "equals";
+        }
+
+        @Bean
+        @ConditionOnSpringCloudConfigProfile(value = "test-\\d+", predicate = ConditionOnSpringCloudConfigProfile.Predicate.regex)
+        public String regexBean() {
+            return "regex";
+        }
+
+        @Bean
+        @ConditionOnSpringCloudConfigProfile(value = "test-*", predicate = ConditionOnSpringCloudConfigProfile.Predicate.ant)
+        public String antBean() {
+            return "ant";
+        }
+
+        @Bean
+        @ConditionOnSpringCloudConfigProfile(value = {"profile1", "profile2"}, predicate = ConditionOnSpringCloudConfigProfile.Predicate.equals)
+        public String multipleProfilesBean() {
+            return "multiple";
+        }
+    }
 
     @Nested
     @SpringBootTest(properties = "spring.cloud.config.profile=test-profile")
     class EqualsPredicateTest {
-        @SpringBootApplication(scanBasePackages = "io.github.opensabe.spring.cloud.parent.common.test.condition")
-        public static class Main {}
-
         @Autowired
         private ApplicationContext applicationContext;
 
@@ -44,6 +69,10 @@ class ConditionOnSpringCloudConfigProfileIntegrationTest {
             assertTrue(applicationContext.containsBean("equalsBean"));
             assertFalse(applicationContext.containsBean("regexBean"));
             assertTrue(applicationContext.containsBean("antBean"));
+        }
+
+        @SpringBootApplication(scanBasePackages = "io.github.opensabe.spring.cloud.parent.common.test.condition")
+        public static class Main {
         }
     }
 
@@ -108,33 +137,6 @@ class ConditionOnSpringCloudConfigProfileIntegrationTest {
         @Test
         void testMultipleProfilesNoMatch() {
             assertFalse(applicationContext.containsBean("multipleProfilesBean"));
-        }
-    }
-
-    @Configuration
-    static class TestConfig {
-        @Bean
-        @ConditionOnSpringCloudConfigProfile(value = "test-profile", predicate = ConditionOnSpringCloudConfigProfile.Predicate.equals)
-        public String equalsBean() {
-            return "equals";
-        }
-
-        @Bean
-        @ConditionOnSpringCloudConfigProfile(value = "test-\\d+", predicate = ConditionOnSpringCloudConfigProfile.Predicate.regex)
-        public String regexBean() {
-            return "regex";
-        }
-
-        @Bean
-        @ConditionOnSpringCloudConfigProfile(value = "test-*", predicate = ConditionOnSpringCloudConfigProfile.Predicate.ant)
-        public String antBean() {
-            return "ant";
-        }
-
-        @Bean
-        @ConditionOnSpringCloudConfigProfile(value = {"profile1", "profile2"}, predicate = ConditionOnSpringCloudConfigProfile.Predicate.equals)
-        public String multipleProfilesBean() {
-            return "multiple";
         }
     }
 } 

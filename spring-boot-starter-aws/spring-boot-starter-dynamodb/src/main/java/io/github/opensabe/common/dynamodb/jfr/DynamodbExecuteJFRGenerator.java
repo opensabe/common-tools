@@ -15,12 +15,11 @@
  */
 package io.github.opensabe.common.dynamodb.jfr;
 
+import java.util.Objects;
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteContext;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
-
-import java.util.Objects;
 
 public class DynamodbExecuteJFRGenerator extends ObservationToJFRGenerator<DynamodbExecuteContext> {
     @Override
@@ -55,7 +54,7 @@ public class DynamodbExecuteJFRGenerator extends ObservationToJFRGenerator<Dynam
 
     @Override
     protected void generateOnStart(DynamodbExecuteContext context) {
-        DynamodbExecuteEvent event = new DynamodbExecuteEvent(context.getMethod(),context.getHashKey(), context.getRangeKey(), context.getExpression());
+        DynamodbExecuteEvent event = new DynamodbExecuteEvent(context.getMethod(), context.getHashKey(), context.getRangeKey(), context.getExpression());
         context.put(DynamodbExecuteEvent.class, event);
     }
 }

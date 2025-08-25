@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.common.cache.test.storage;
 
-import io.github.opensabe.common.cache.test.entity.ItemObject;
-import org.springframework.stereotype.Component;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.stereotype.Component;
+
+import io.github.opensabe.common.cache.test.entity.ItemObject;
 
 
 @Component

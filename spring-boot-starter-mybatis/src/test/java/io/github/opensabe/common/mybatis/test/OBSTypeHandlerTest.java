@@ -15,24 +15,21 @@
  */
 package io.github.opensabe.common.mybatis.test;
 
-import io.github.opensabe.common.dynamodb.service.KeyValueDynamoDbService;
+import java.util.Objects;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
 import io.github.opensabe.common.mybatis.test.common.BaseMybatisTest;
 import io.github.opensabe.common.mybatis.test.mapper.user.OrderMapper;
-import io.github.opensabe.common.mybatis.test.po.DynamodbPO;
 import io.github.opensabe.common.mybatis.test.po.Order;
 import io.github.opensabe.common.s3.typehandler.S3OBSService;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("OBS类型处理器测试")
 public class OBSTypeHandlerTest extends BaseMybatisTest {
@@ -46,7 +43,7 @@ public class OBSTypeHandlerTest extends BaseMybatisTest {
     @Test
     @SneakyThrows
     @DisplayName("测试OBS类型处理器 - 验证数据存储和查询")
-    public void create () {
+    public void create() {
         var order = new Order();
         order.setId("OBSTypeHandlerTestOrder1");
         var info = new Order.OrderInfo();
@@ -73,8 +70,8 @@ public class OBSTypeHandlerTest extends BaseMybatisTest {
 
         // 测试直接从数据库查询，验证原始数据的实现，即数据库中存储的是 key，具体数据在 s3 中
         try (
-            var connection = dynamicRoutingDataSource.getConnection();
-            var statement = connection.createStatement()
+                var connection = dynamicRoutingDataSource.getConnection();
+                var statement = connection.createStatement()
         ) {
             statement.execute("select * from t_order where id = '" + order.getId() + "'");
             var resultSet = statement.getResultSet();

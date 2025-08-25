@@ -15,10 +15,9 @@
  */
 package io.github.opensabe.common.utils.mapstruct.vo;
 
+import java.util.List;
 import io.github.opensabe.mapstruct.core.Binding;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 @Binding(PersonRecord.class)

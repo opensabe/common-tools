@@ -15,16 +15,17 @@
  */
 package io.github.opensabe.scheduler.job;
 
+import java.util.concurrent.TimeUnit;
+
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+
 import io.github.opensabe.scheduler.conf.JobStatus;
 import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
 import io.github.opensabe.scheduler.utils.MisfireQueue;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @NoArgsConstructor

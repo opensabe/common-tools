@@ -15,17 +15,19 @@
  */
 package io.github.opensabe.common.redisson.aop.scheduled;
 
-import com.google.common.collect.Maps;
-import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
-import io.github.opensabe.common.redisson.config.RedissonScheduleProperties;
-import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
-import java.lang.reflect.Method;
-import java.util.Map;
+import com.google.common.collect.Maps;
+
+import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
+import io.github.opensabe.common.redisson.config.RedissonScheduleProperties;
+import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class RedissonScheduledBeanPostProcessor implements BeanPostProcessor {

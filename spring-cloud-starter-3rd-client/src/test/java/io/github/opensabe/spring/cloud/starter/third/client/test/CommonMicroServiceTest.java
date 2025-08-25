@@ -15,23 +15,40 @@
  */
 package io.github.opensabe.spring.cloud.starter.third.client.test;
 
-import eu.rekawek.toxiproxy.Proxy;
-import eu.rekawek.toxiproxy.ToxiproxyClient;
-import eu.rekawek.toxiproxy.model.ToxicDirection;
+import java.io.IOException;
+
 import org.junit.jupiter.api.DisplayName;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.ToxiproxyContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
+import eu.rekawek.toxiproxy.Proxy;
+import eu.rekawek.toxiproxy.ToxiproxyClient;
+import eu.rekawek.toxiproxy.model.ToxicDirection;
 
 @Testcontainers
 @DisplayName("通用微服务测试基类")
 public class CommonMicroServiceTest {
 
+    public static final String GOOD_HOST;
+    public static final int GOOD_PORT;
+    /**
+     * 以下代表请求已经发出到服务端，但是响应超时，或者不能响应（比如服务器重启）
+     */
+    public static final String READ_TIMEOUT_HOST;
+    public static final int READ_TIMEOUT_PORT;
+    public static final String RESET_PEER_HOST;
+    public static final int RESET_PEER_PORT;
+    /**
+     * 以下代表请求都没有发出去，TCP 链接都没有建立
+     */
+    public static final String CONNECT_TIMEOUT_HOST = "localhost";
+    /**
+     * 端口一定连不上的
+     */
+    public static final int CONNECT_TIMEOUT_PORT = 9999;
     private static final Network network = Network.newNetwork();
-
     private static final String HTTPBIN = "httpbin";
     private static final int HTTPBIN_PORT = 8080;
     private static final GenericContainer<?> HTTPBIN_CONTAINER
@@ -47,30 +64,9 @@ public class CommonMicroServiceTest {
      */
     private static final ToxiproxyContainer TOXIPROXY_CONTAINER = new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
             .withNetwork(network);
-
     private static final int GOOD_HTTPBIN_PROXY_PORT = 8666;
     private static final int READ_TIMEOUT_HTTPBIN_PROXY_PORT = 8667;
     private static final int RESET_PEER_HTTPBIN_PROXY_PORT = 8668;
-
-    public static final String GOOD_HOST;
-    public static final int GOOD_PORT;
-    /**
-     * 以下代表请求已经发出到服务端，但是响应超时，或者不能响应（比如服务器重启）
-     */
-    public static final String READ_TIMEOUT_HOST;
-    public static final int READ_TIMEOUT_PORT;
-    public static final String RESET_PEER_HOST;
-    public static final int RESET_PEER_PORT;
-
-    /**
-     * 以下代表请求都没有发出去，TCP 链接都没有建立
-     */
-    public static final String CONNECT_TIMEOUT_HOST = "localhost";
-    /**
-     * 端口一定连不上的
-     */
-    public static final int CONNECT_TIMEOUT_PORT = 9999;
-
 
     static {
         //不使用 @Container 注解管理容器声明周期，因为我们需要在静态块生成代理，必须在这之前启动容器

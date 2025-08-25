@@ -15,18 +15,20 @@
  */
 package io.github.opensabe.spring.cloud.starter.third.client.conf;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.time.Duration;
 import java.util.Map;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "third-party.webclient")
 public class ThirdPartyWebClientConfigurationProperties {
     private Map<String, WebClientProperties> configs;
+
     @Data
     @NoArgsConstructor
     public static class WebClientProperties {

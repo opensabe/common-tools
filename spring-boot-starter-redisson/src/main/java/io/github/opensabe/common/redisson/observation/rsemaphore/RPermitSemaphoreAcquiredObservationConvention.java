@@ -21,6 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 public class RPermitSemaphoreAcquiredObservationConvention implements ObservationConvention<RPermitSemaphoreAcquiredContext> {
     public static final RPermitSemaphoreAcquiredObservationConvention DEFAULT = new RPermitSemaphoreAcquiredObservationConvention();
+
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof RPermitSemaphoreAcquiredContext;

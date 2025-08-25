@@ -15,16 +15,22 @@
  */
 package io.github.opensabe.common.executor.forkjoin;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
+import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import io.github.opensabe.common.executor.CustomerCallable;
 import io.github.opensabe.common.executor.CustomerRunnable;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * 包含 Observation 的 ForkJoinPool
@@ -52,20 +58,20 @@ public class TraceableForkJoinExecutorService extends ForkJoinPool {
     }
 
     public TraceableForkJoinExecutorService(
-        int parallelism, ForkJoinWorkerThreadFactory factory,
-        Thread.UncaughtExceptionHandler handler, boolean asyncMode,
-        UnifiedObservationFactory unifiedObservationFactory
+            int parallelism, ForkJoinWorkerThreadFactory factory,
+            Thread.UncaughtExceptionHandler handler, boolean asyncMode,
+            UnifiedObservationFactory unifiedObservationFactory
     ) {
         super(parallelism, factory, handler, asyncMode);
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
     public TraceableForkJoinExecutorService(
-        int parallelism, ForkJoinWorkerThreadFactory factory,
-        Thread.UncaughtExceptionHandler handler, boolean asyncMode,
-        int corePoolSize, int maximumPoolSize, int minimumRunnable,
-        Predicate<? super ForkJoinPool> saturate, long keepAliveTime, TimeUnit unit,
-        UnifiedObservationFactory unifiedObservationFactory
+            int parallelism, ForkJoinWorkerThreadFactory factory,
+            Thread.UncaughtExceptionHandler handler, boolean asyncMode,
+            int corePoolSize, int maximumPoolSize, int minimumRunnable,
+            Predicate<? super ForkJoinPool> saturate, long keepAliveTime, TimeUnit unit,
+            UnifiedObservationFactory unifiedObservationFactory
     ) {
         super(parallelism, factory, handler, asyncMode, corePoolSize, maximumPoolSize, minimumRunnable, saturate, keepAliveTime, unit);
         this.unifiedObservationFactory = unifiedObservationFactory;
@@ -149,52 +155,52 @@ public class TraceableForkJoinExecutorService extends ForkJoinPool {
     @Override
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
         List<CustomerCallable<T>> collect = tasks.stream()
-            .map(call -> {
-                if (call instanceof CustomerCallable) {
-                    return (CustomerCallable<T>) call;
-                }
-                return new CustomerCallable<>(unifiedObservationFactory, call);
-            })
-            .collect(Collectors.toList());
+                .map(call -> {
+                    if (call instanceof CustomerCallable) {
+                        return (CustomerCallable<T>) call;
+                    }
+                    return new CustomerCallable<>(unifiedObservationFactory, call);
+                })
+                .collect(Collectors.toList());
         return super.invokeAll(collect);
     }
 
     @Override
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
         List<CustomerCallable<T>> collect = tasks.stream()
-            .map(call -> {
-                if (call instanceof CustomerCallable) {
-                    return (CustomerCallable<T>) call;
-                }
-                return new CustomerCallable<>(unifiedObservationFactory, call);
-            })
-            .collect(Collectors.toList());
+                .map(call -> {
+                    if (call instanceof CustomerCallable) {
+                        return (CustomerCallable<T>) call;
+                    }
+                    return new CustomerCallable<>(unifiedObservationFactory, call);
+                })
+                .collect(Collectors.toList());
         return super.invokeAll(collect, timeout, unit);
     }
 
     @Override
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
         List<CustomerCallable<T>> collect = tasks.stream()
-            .map(call -> {
-                if (call instanceof CustomerCallable) {
-                    return (CustomerCallable<T>) call;
-                }
-                return new CustomerCallable<>(unifiedObservationFactory, call);
-            })
-            .collect(Collectors.toList());
+                .map(call -> {
+                    if (call instanceof CustomerCallable) {
+                        return (CustomerCallable<T>) call;
+                    }
+                    return new CustomerCallable<>(unifiedObservationFactory, call);
+                })
+                .collect(Collectors.toList());
         return super.invokeAny(collect);
     }
 
     @Override
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         List<CustomerCallable<T>> collect = tasks.stream()
-            .map(call -> {
-                if (call instanceof CustomerCallable) {
-                    return (CustomerCallable<T>) call;
-                }
-                return new CustomerCallable<>(unifiedObservationFactory, call);
-            })
-            .collect(Collectors.toList());
+                .map(call -> {
+                    if (call instanceof CustomerCallable) {
+                        return (CustomerCallable<T>) call;
+                    }
+                    return new CustomerCallable<>(unifiedObservationFactory, call);
+                })
+                .collect(Collectors.toList());
         return super.invokeAny(collect, timeout, unit);
     }
 

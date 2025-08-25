@@ -15,12 +15,6 @@
  */
 package io.github.opensabe.common.jackson;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import lombok.extern.log4j.Log4j2;
-
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -31,6 +25,13 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 从 long 类型的时间戳反序列化为 LocalDateTime
@@ -72,7 +73,7 @@ public class LongToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateT
             protected LocalDateTime _fromString(JsonParser p, DeserializationContext ctxt, String string0) {
                 try {
                     return super._fromString(p, ctxt, string0);
-                }catch (Throwable e) {
+                } catch (Throwable e) {
                     return parse(string0.trim(), 0, null);
                 }
             }
@@ -90,13 +91,13 @@ public class LongToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateT
         }
     }
 
-    private LocalDateTime parse (String str, int index, DateTimeParseException e) {
+    private LocalDateTime parse(String str, int index, DateTimeParseException e) {
         if (index >= formatters.size()) {
             throw e;
         }
         try {
             return LocalDateTime.parse(str, formatters.get(index));
-        }catch (DateTimeParseException e1) {
+        } catch (DateTimeParseException e1) {
             return parse(str, ++index, e1);
         }
     }

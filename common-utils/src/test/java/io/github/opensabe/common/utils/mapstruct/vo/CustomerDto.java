@@ -15,12 +15,11 @@
  */
 package io.github.opensabe.common.utils.mapstruct.vo;
 
+import java.util.List;
+import java.util.Map;
 import io.github.opensabe.mapstruct.core.Binding;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Sjaak Derksen

@@ -15,7 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.test;
 
-import lombok.extern.log4j.Log4j2;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,11 +29,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
-import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
 
 /**
  * 测试可以正常创建一个微服务
@@ -47,6 +48,22 @@ import java.util.concurrent.TimeUnit;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 public class TestWebFluxService {
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @Test
+    void test() {
+        String thread1 = webTestClient.get().uri("/test").exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).toString();
+        String thread2 = webTestClient.get().uri("/test-mono").exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).toString();
+        String thread3 = webTestClient.get().uri("/test-deferred").exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).toString();
+    }
+
     @SpringBootApplication
     static class TestConfiguration {
         @Bean
@@ -54,7 +71,6 @@ public class TestWebFluxService {
             return new TestService();
         }
     }
-
 
     @RestController
     static class TestService {
@@ -96,21 +112,5 @@ public class TestWebFluxService {
             log.info("method returned");
             return result;
         }
-    }
-
-    @Autowired
-    private WebTestClient webTestClient;
-
-    @Test
-    void test() {
-        String thread1 = webTestClient.get().uri("/test").exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class).toString();
-        String thread2 = webTestClient.get().uri("/test-mono").exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class).toString();
-        String thread3 = webTestClient.get().uri("/test-deferred").exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class).toString();
     }
 }

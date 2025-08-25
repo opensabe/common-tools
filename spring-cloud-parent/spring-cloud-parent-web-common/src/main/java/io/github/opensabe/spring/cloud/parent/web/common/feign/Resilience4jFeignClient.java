@@ -15,15 +15,24 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.feign;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
+
+import org.springframework.cloud.openfeign.FeignClient;
+
+import feign.Client;
+import feign.Request;
+import feign.Response;
+import feign.httpclient.ApacheHttpClient;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.Resilience4jUtil;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.ThreadPoolBulkHeadDecorated;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.ThreadPoolBulkHeadDecorator;
 import io.github.opensabe.spring.cloud.parent.web.common.misc.SpecialHttpStatus;
-import feign.Client;
-import feign.Request;
-import feign.Response;
-import feign.httpclient.ApacheHttpClient;
 import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
@@ -33,14 +42,6 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.ConfigurationNotFoundException;
 import io.micrometer.observation.Observation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.openfeign.FeignClient;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Supplier;
 
 @Slf4j
 public class Resilience4jFeignClient implements Client {
@@ -69,7 +70,7 @@ public class Resilience4jFeignClient implements Client {
     public Response execute(Request request, Request.Options options) throws IOException {
         //目前这个改动主要用于从feignClient 的proxy实体中获取其contextId 而不是从FeignClient的接口中的declaredMethod中获取contextId，原因是
         //需要预热的FeignClient的extends的预热接口的方法没有@FeignClient 这样会报错annotation is null, contextId cannot been found 详情参考FeignPreheatingBase
-        FeignClient annotation =request.requestTemplate().feignTarget().type().getAnnotation(FeignClient.class);
+        FeignClient annotation = request.requestTemplate().feignTarget().type().getAnnotation(FeignClient.class);
 //        FeignClient annotation = request.requestTemplate().methodMetadata().method().getDeclaringClass().getAnnotation(FeignClient.class);
         //和 Retry 保持一致，使用 contextId，而不是微服务名称
         String contextId = annotation.contextId();

@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class HeartBeat extends MqMessage{
+public class HeartBeat extends MqMessage {
     private Integer requestId;
 
 

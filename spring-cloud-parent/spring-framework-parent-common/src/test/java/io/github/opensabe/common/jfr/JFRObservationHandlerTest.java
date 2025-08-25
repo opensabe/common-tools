@@ -15,28 +15,33 @@
  */
 package io.github.opensabe.common.jfr;
 
-import io.micrometer.observation.Observation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import static org.mockito.Mockito.*;
+import io.micrometer.observation.Observation;
 
 @DisplayName("JFR观察者处理器测试")
 class JFRObservationHandlerTest {
 
     @Mock
     private ObservationToJFRGenerator<TestContext> generator1;
-    
+
     @Mock
     private ObservationToJFRGenerator<TestContext> generator2;
-    
+
     @Mock
     private ObservationToJFRGenerator<AnotherContext> generator3;
 
@@ -50,10 +55,10 @@ class JFRObservationHandlerTest {
         when(generator1.getContextClazz()).thenReturn(TestContext.class);
         when(generator2.getContextClazz()).thenReturn(TestContext.class);
         when(generator3.getContextClazz()).thenReturn(AnotherContext.class);
-        
+
         List<ObservationToJFRGenerator<TestContext>> generators = Arrays.asList(generator1, generator2);
         handler = new JFRObservationHandler<>(generators);
-        
+
         testContext = new TestContext();
         anotherContext = new AnotherContext();
     }
@@ -129,6 +134,9 @@ class JFRObservationHandlerTest {
         // No exceptions should be thrown
     }
 
-    private static class TestContext extends Observation.Context {}
-    private static class AnotherContext extends Observation.Context {}
+    private static class TestContext extends Observation.Context {
+    }
+
+    private static class AnotherContext extends Observation.Context {
+    }
 } 

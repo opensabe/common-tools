@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.starter.third.client.webclient;
 
-import io.github.opensabe.spring.cloud.starter.third.client.conf.ThirdPartyWebClientDefaultConfiguration;
 import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import io.github.opensabe.spring.cloud.starter.third.client.conf.ThirdPartyWebClientDefaultConfiguration;
 
 public class ThirdPartyWebClientNamedContextFactory extends NamedContextFactory<ThirdPartyWebClientSpecification> {
     public static final String NAMESPACE = "third-party.webclient";

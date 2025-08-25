@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.common.config.Resilience4jConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.spring.cloud.parent.common.config.Resilience4jConfiguration;
 
 @AutoConfiguration
 @Import({

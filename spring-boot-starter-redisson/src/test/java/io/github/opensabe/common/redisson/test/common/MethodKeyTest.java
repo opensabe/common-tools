@@ -15,37 +15,25 @@
  */
 package io.github.opensabe.common.redisson.test.common;
 
-import io.github.opensabe.common.redisson.annotation.slock.FencedLock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.github.opensabe.common.redisson.annotation.slock.FencedLock;
+
 /**
  * 测试Map以Method为key，遇到方法重载会不会有问题
+ *
  * @author heng.ma
  */
 public class MethodKeyTest {
 
 
-    public static class Animal {
-
-        @FencedLock(name = "eat default")
-        public void eat() {
-            System.out.println("Animal eat");
-        }
-
-        @FencedLock(name = "eat food")
-        public void eat(String food) {
-            System.out.println("Animal eat" + food);
-        }
-
-    }
-
     @Test
-    void testHash () throws NoSuchMethodException {
+    void testHash() throws NoSuchMethodException {
         Method method1 = Animal.class.getMethod("eat");
         Method method2 = Animal.class.getMethod("eat", String.class);
 
@@ -68,5 +56,19 @@ public class MethodKeyTest {
         Assertions.assertEquals("eat default", map.get(method1).name()[0]);
         Assertions.assertEquals(f2, map.get(method2));
         Assertions.assertEquals("eat food", map.get(method2).name()[0]);
+    }
+
+    public static class Animal {
+
+        @FencedLock(name = "eat default")
+        public void eat() {
+            System.out.println("Animal eat");
+        }
+
+        @FencedLock(name = "eat food")
+        public void eat(String food) {
+            System.out.println("Animal eat" + food);
+        }
+
     }
 }

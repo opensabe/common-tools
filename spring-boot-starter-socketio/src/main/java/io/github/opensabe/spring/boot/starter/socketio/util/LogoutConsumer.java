@@ -15,22 +15,25 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.util;
 
-import com.alibaba.fastjson.JSONObject;
-import com.corundumstudio.socketio.SocketIOClient;
-import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
-import io.github.opensabe.spring.boot.starter.rocketmq.AbstractMQConsumer;
-import io.github.opensabe.spring.boot.starter.socketio.SocketIoMessageTemplate;
-import lombok.extern.log4j.Log4j2;
+import java.util.Objects;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 
-import java.util.Objects;
+import com.alibaba.fastjson.JSONObject;
+import com.corundumstudio.socketio.SocketIOClient;
+
+import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
+import io.github.opensabe.spring.boot.starter.rocketmq.AbstractMQConsumer;
+import io.github.opensabe.spring.boot.starter.socketio.SocketIoMessageTemplate;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 收到退出登录的消息以后强行断开连接
+ *
  * @author hengma
  * @time 2023/9/26 14:54
  */

@@ -16,15 +16,17 @@
 package io.github.opensabe.common.secret;
 
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public abstract class SecretProvider implements ApplicationListener<ApplicationReadyEvent> {
@@ -35,20 +37,23 @@ public abstract class SecretProvider implements ApplicationListener<ApplicationR
 
     protected SecretProvider(GlobalSecretManager globalSecretManager) {
         this.globalSecretManager = globalSecretManager;
-        scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadFactoryBuilder().setNameFormat("secret-reload-"+ name())
-                        .setUncaughtExceptionHandler((t, e) -> {
-                            log.error("SecretProvider: secret reload error {}", e.getMessage(), e);
-                        })
-                        .build());
+        scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadFactoryBuilder().setNameFormat("secret-reload-" + name())
+                .setUncaughtExceptionHandler((t, e) -> {
+                    log.error("SecretProvider: secret reload error {}", e.getMessage(), e);
+                })
+                .build());
     }
 
     protected abstract String name();
+
     protected abstract long reloadTimeInterval();
+
     protected abstract TimeUnit reloadTimeIntervalUnit();
 
     /**
      * key: secret name
      * value: secret related values
+     *
      * @return
      */
     protected abstract Map<String, Set<String>> reload();

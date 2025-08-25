@@ -15,21 +15,21 @@
  */
 package io.github.opensabe.scheduler.health;
 
-import io.github.opensabe.common.utils.AlarmUtil;
-import io.github.opensabe.scheduler.conf.SchedulerProperties;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import io.github.opensabe.common.utils.AlarmUtil;
+import io.github.opensabe.scheduler.conf.SchedulerProperties;
+import lombok.extern.log4j.Log4j2;
+
 @Log4j2
 public class SimpleJobHealthService {
+    private static final long HEALTH_TIMEOUT_IN_MINUTE = 1;
     private final StringRedisTemplate stringRedisTemplate;
     private final SchedulerProperties schedulerProperties;
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
-
-    private static final long HEALTH_TIMEOUT_IN_MINUTE = 1;
 
     public SimpleJobHealthService(StringRedisTemplate stringRedisTemplate, SchedulerProperties schedulerProperties) {
         this.stringRedisTemplate = stringRedisTemplate;

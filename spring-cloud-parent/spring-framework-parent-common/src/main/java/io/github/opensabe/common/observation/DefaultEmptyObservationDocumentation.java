@@ -23,6 +23,5 @@ public enum DefaultEmptyObservationDocumentation implements ObservationDocumenta
         public String getName() {
             return "opensabe.default-empty";
         }
-    }
-    ;
+    };
 }

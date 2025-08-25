@@ -16,6 +16,7 @@
 package io.github.opensabe.common.alive.client.message;
 
 import com.alibaba.fastjson.JSON;
+
 import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.Builder;
@@ -25,7 +26,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @Builder
-public class RetMsg extends MqMessage{
+public class RetMsg extends MqMessage {
     private String body;
     private String topic;
     private PushType pushType;

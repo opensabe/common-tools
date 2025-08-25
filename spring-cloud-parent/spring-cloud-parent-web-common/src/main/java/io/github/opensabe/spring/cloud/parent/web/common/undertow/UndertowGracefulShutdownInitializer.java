@@ -15,20 +15,21 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.undertow;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.github.opensabe.common.utils.AlarmUtil;
-import io.undertow.server.handlers.GracefulShutdownHandler;
-import lombok.extern.log4j.Log4j2;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.boot.web.embedded.undertow.UndertowWebServer;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
-import java.util.Comparator;
-import java.util.List;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.opensabe.common.utils.AlarmUtil;
+import io.undertow.server.handlers.GracefulShutdownHandler;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SuppressFBWarnings("EI_EXPOSE_REP2")

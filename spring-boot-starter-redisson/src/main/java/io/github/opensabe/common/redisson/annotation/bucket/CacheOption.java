@@ -38,7 +38,7 @@ public enum CacheOption {
 
     /**
      * @see org.redisson.api.RBucket#getAndExpire(Duration)
-     * @see org.redisson.api.RBucket#getAndExpire(Instant) 
+     * @see org.redisson.api.RBucket#getAndExpire(Instant)
      */
     GET_AND_EXPIRE,
 

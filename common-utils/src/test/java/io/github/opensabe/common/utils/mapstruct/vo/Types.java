@@ -15,14 +15,13 @@
  */
 package io.github.opensabe.common.utils.mapstruct.vo;
 
-import io.github.opensabe.mapstruct.core.Binding;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
+import io.github.opensabe.mapstruct.core.Binding;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter

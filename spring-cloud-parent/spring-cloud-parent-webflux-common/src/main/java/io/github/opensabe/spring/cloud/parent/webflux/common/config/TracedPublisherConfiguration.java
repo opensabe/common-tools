@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.config;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.TracedPublisherFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.opensabe.spring.cloud.parent.webflux.common.TracedPublisherFactory;
 
 @Configuration(proxyBeanMethods = false)
 public class TracedPublisherConfiguration {

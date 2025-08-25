@@ -15,23 +15,21 @@
  */
 package io.github.opensabe.scheduler.conf;
 
-import lombok.extern.log4j.Log4j2;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisException;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class Commander {
 
-    private SchedulerProperties schedulerProperties;
-
     private final RedissonClient redissonClient;
-
     private final AtomicInteger exceptionCount = new AtomicInteger();
-
+    private SchedulerProperties schedulerProperties;
     private volatile RLock lock;
 
     private volatile boolean isLeader;

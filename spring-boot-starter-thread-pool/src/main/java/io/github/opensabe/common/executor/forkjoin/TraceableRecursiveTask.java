@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.common.executor.forkjoin;
 
+import java.util.concurrent.RecursiveTask;
 import io.github.opensabe.common.executor.JFRecordable;
 import io.github.opensabe.common.executor.Traceable;
 import io.github.opensabe.common.executor.jfr.ThreadTaskJFREvent;
@@ -22,8 +23,6 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import lombok.Getter;
-
-import java.util.concurrent.RecursiveTask;
 
 public abstract class TraceableRecursiveTask<V> extends RecursiveTask<V> implements JFRecordable<V>, Traceable<V> {
 
@@ -56,7 +55,7 @@ public abstract class TraceableRecursiveTask<V> extends RecursiveTask<V> impleme
         return record();
     }
 
-    protected abstract V compute0 ();
+    protected abstract V compute0();
 
     @Override
     public V inRecord() {

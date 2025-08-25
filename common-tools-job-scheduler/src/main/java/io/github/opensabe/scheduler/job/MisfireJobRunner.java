@@ -15,6 +15,14 @@
  */
 package io.github.opensabe.scheduler.job;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
 import io.github.opensabe.scheduler.conf.JobStatus;
 import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
 import io.github.opensabe.scheduler.listener.JobListeners;
@@ -23,13 +31,6 @@ import io.github.opensabe.scheduler.listener.JobSuccessListener;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @AllArgsConstructor

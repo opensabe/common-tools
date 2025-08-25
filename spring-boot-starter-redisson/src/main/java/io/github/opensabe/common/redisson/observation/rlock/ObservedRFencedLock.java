@@ -15,14 +15,15 @@
  */
 package io.github.opensabe.common.redisson.observation.rlock;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import org.redisson.api.RFencedLock;
-import org.redisson.api.RFuture;
-
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+
+import org.redisson.api.RFencedLock;
+import org.redisson.api.RFuture;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.micrometer.observation.Observation;
 
 /**
  * 观察者模式的分布式锁
@@ -53,19 +54,18 @@ public class ObservedRFencedLock extends ObservedRLock<RFencedLock> implements R
 
     @Override
     public Long tryLockAndGetToken() {
-        return observeAcquiringLockAndGetToken(-1L, -1,null, delegate::tryLockAndGetToken);
+        return observeAcquiringLockAndGetToken(-1L, -1, null, delegate::tryLockAndGetToken);
     }
 
     @Override
     public Long tryLockAndGetToken(long waitTime, TimeUnit unit) {
-        return observeAcquiringLockAndGetToken(waitTime, -1,unit, () -> delegate.tryLockAndGetToken(waitTime,unit));
+        return observeAcquiringLockAndGetToken(waitTime, -1, unit, () -> delegate.tryLockAndGetToken(waitTime, unit));
     }
 
     @Override
     public Long tryLockAndGetToken(long waitTime, long leaseTime, TimeUnit unit) {
-        return observeAcquiringLockAndGetToken(waitTime, leaseTime,unit, () -> delegate.tryLockAndGetToken(waitTime,leaseTime,unit));
+        return observeAcquiringLockAndGetToken(waitTime, leaseTime, unit, () -> delegate.tryLockAndGetToken(waitTime, leaseTime, unit));
     }
-
 
 
     private Long observeAcquiringLockAndGetToken(long waitTime, long leaseTime, TimeUnit unit, Supplier<Long> lockAcquire) {
@@ -87,10 +87,6 @@ public class ObservedRFencedLock extends ObservedRLock<RFencedLock> implements R
             observation.stop();
         }
     }
-
-
-
-
 
 
     @Override

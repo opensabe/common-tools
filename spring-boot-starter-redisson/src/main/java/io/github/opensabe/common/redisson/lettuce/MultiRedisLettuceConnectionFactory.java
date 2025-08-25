@@ -15,16 +15,6 @@
  */
 package io.github.opensabe.common.redisson.lettuce;
 
-import io.github.opensabe.common.redisson.config.MultiRedisProperties;
-import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.*;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +22,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.ReactiveRedisClusterConnection;
+import org.springframework.data.redis.connection.ReactiveRedisConnection;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisClusterConnection;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisSentinelConnection;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+
+import io.github.opensabe.common.redisson.config.MultiRedisProperties;
+import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
+import lombok.extern.log4j.Log4j2;
+
 @Log4j2
 public class MultiRedisLettuceConnectionFactory
         implements InitializingBean, DisposableBean, RedisConnectionFactory, ReactiveRedisConnectionFactory {
+    private static final ThreadLocal<String> currentRedis = new ThreadLocal<>();
     private final Map<String, List<LettuceConnectionFactory>> connectionFactoryMap;
     private final Map<String, AtomicInteger> positionMap;
-    private static final ThreadLocal<String> currentRedis = new ThreadLocal<>();
 
     public MultiRedisLettuceConnectionFactory(Map<String, List<LettuceConnectionFactory>> connectionFactoryMap) {
         this.connectionFactoryMap = connectionFactoryMap;

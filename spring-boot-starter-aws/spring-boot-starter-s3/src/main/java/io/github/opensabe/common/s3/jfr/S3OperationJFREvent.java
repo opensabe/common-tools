@@ -41,6 +41,6 @@ public class S3OperationJFREvent extends Event {
 
     public S3OperationJFREvent(S3OperationContext s3OperationContext) {
         this.fileName = s3OperationContext.getFileName();
-        this.operateType=s3OperationContext.getOperateType();
+        this.operateType = s3OperationContext.getOperateType();
     }
 }

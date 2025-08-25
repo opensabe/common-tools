@@ -15,7 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.system.jfr;
 
-import jdk.jfr.*;
+import jdk.jfr.Category;
+import jdk.jfr.Description;
+import jdk.jfr.Event;
+import jdk.jfr.Label;
+import jdk.jfr.StackTrace;
 import lombok.Getter;
 
 @Category({"OOM Score Monitoring Recording"})

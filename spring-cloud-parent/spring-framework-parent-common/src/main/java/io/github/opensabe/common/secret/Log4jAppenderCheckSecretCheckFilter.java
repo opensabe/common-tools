@@ -15,8 +15,8 @@
  */
 package io.github.opensabe.common.secret;
 
-import io.github.opensabe.common.utils.AlarmUtil;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
@@ -28,31 +28,14 @@ import org.apache.logging.log4j.core.filter.CompositeFilter;
 import org.apache.logging.log4j.core.filter.Filterable;
 import org.springframework.boot.CommandLineRunner;
 
-import java.util.Map;
+import io.github.opensabe.common.utils.AlarmUtil;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 检查 Log4j2 的 Appender 是否包含指定的 Filter
  */
 @Log4j2
 public class Log4jAppenderCheckSecretCheckFilter implements CommandLineRunner {
-
-    @Override
-    public void run(String... args) throws Exception {
-        LoggerContext context = (LoggerContext) LogManager.getContext(false);
-        Configuration config = context.getConfiguration();
-
-        // 要检查的 Filter 类
-        Class<?> filterClass = Log4j2SecretCheckFilter.class;
-
-        // 检查根 Logger
-        LoggerConfig rootLoggerConfig = config.getRootLogger();
-        checkFilter(rootLoggerConfig, filterClass);
-
-        // 检查所有其他 Logger
-        for (LoggerConfig loggerConfig : config.getLoggers().values()) {
-            checkFilter(loggerConfig, filterClass);
-        }
-    }
 
     private static boolean containsFilter(Filter filter, Class<?> filterClass) {
         if (filter == null) {
@@ -89,6 +72,24 @@ public class Log4jAppenderCheckSecretCheckFilter implements CommandLineRunner {
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
+        Configuration config = context.getConfiguration();
+
+        // 要检查的 Filter 类
+        Class<?> filterClass = Log4j2SecretCheckFilter.class;
+
+        // 检查根 Logger
+        LoggerConfig rootLoggerConfig = config.getRootLogger();
+        checkFilter(rootLoggerConfig, filterClass);
+
+        // 检查所有其他 Logger
+        for (LoggerConfig loggerConfig : config.getLoggers().values()) {
+            checkFilter(loggerConfig, filterClass);
         }
     }
 }

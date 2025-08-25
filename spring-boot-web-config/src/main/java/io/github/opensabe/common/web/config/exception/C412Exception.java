@@ -16,12 +16,13 @@
 package io.github.opensabe.common.web.config.exception;
 
 
-import io.github.opensabe.common.web.config.base.ErrResponse;
-import io.github.opensabe.common.web.config.base.ErrorUtil;
+import java.io.Serializable;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.io.Serializable;
+import io.github.opensabe.common.web.config.base.ErrResponse;
+import io.github.opensabe.common.web.config.base.ErrorUtil;
 
 @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 public class C412Exception extends RESTFull4xxBaseException implements Serializable {

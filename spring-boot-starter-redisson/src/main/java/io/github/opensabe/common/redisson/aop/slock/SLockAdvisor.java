@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.common.redisson.aop.slock;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author heng.ma

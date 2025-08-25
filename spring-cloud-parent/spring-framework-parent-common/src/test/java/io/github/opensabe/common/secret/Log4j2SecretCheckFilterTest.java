@@ -15,17 +15,11 @@
  */
 package io.github.opensabe.common.secret;
 
-import io.github.opensabe.common.utils.SpringUtil;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.Logger;
-import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +30,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
+
+import io.github.opensabe.common.utils.SpringUtil;
 
 @DisplayName("Log4j2密钥检查过滤器测试")
 class Log4j2SecretCheckFilterTest {
@@ -74,7 +71,7 @@ class Log4j2SecretCheckFilterTest {
         LogEvent event = Log4jLogEvent.newBuilder()
                 .setMessage(message)
                 .build();
-        
+
         FilterSecretStringResult result = FilterSecretStringResult.builder()
                 .foundSensitiveString(true)
                 .filteredContent("This contains ******")
@@ -99,7 +96,7 @@ class Log4j2SecretCheckFilterTest {
         LogEvent event = Log4jLogEvent.newBuilder()
                 .setMessage(message)
                 .build();
-        
+
         FilterSecretStringResult result = FilterSecretStringResult.builder()
                 .foundSensitiveString(false)
                 .filteredContent(normalMessage)

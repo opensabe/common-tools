@@ -15,11 +15,11 @@
  */
 package io.github.opensabe.node.manager;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NodeManagerInitializeListener implements ApplicationListener<ApplicationStartedEvent>, Ordered {
     public final static int ORDER = Ordered.HIGHEST_PRECEDENCE;

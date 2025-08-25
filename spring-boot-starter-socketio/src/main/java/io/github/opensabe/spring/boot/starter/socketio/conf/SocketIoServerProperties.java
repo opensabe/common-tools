@@ -15,32 +15,33 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
-import com.corundumstudio.socketio.Configuration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import com.corundumstudio.socketio.Configuration;
 
 @ConfigurationProperties(SocketIoServerProperties.PREFIX)
 public class SocketIoServerProperties extends Configuration {
-	public static final String PREFIX = "server.socketio";
-	//用来隔离 Store 订阅 topic 名称的，保证同一个 redis 上不同微服务不会收到来自其他微服务的消息
-	private String nameSpace = "socket-io";
+    public static final String PREFIX = "server.socketio";
+    //用来隔离 Store 订阅 topic 名称的，保证同一个 redis 上不同微服务不会收到来自其他微服务的消息
+    private String nameSpace = "socket-io";
 
-	private String healthCheckPacketName;
+    private String healthCheckPacketName;
 
-	public String getHealthCheckPacketName() {
-		return healthCheckPacketName;
-	}
+    public String getHealthCheckPacketName() {
+        return healthCheckPacketName;
+    }
 
-	public void setHealthCheckPacketName(String healthCheckPacketName) {
-		this.healthCheckPacketName = healthCheckPacketName;
-	}
+    public void setHealthCheckPacketName(String healthCheckPacketName) {
+        this.healthCheckPacketName = healthCheckPacketName;
+    }
 
-	public String getNameSpace() {
-		return nameSpace;
-	}
+    public String getNameSpace() {
+        return nameSpace;
+    }
 
-	public void setNameSpace(String nameSpace) {
-		this.nameSpace = nameSpace;
-	}
+    public void setNameSpace(String nameSpace) {
+        this.nameSpace = nameSpace;
+    }
 
 
 }

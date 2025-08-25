@@ -15,8 +15,9 @@
  */
 package io.github.opensabe.common.elasticsearch.config;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import lombok.Data;
 
 @ConfigurationProperties(prefix = "spring.data.elasticsearch")
 @Data

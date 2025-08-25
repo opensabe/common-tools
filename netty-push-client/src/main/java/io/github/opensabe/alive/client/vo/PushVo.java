@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.alive.client.vo;
 
+import org.apache.commons.lang3.StringUtils;
+
 import io.github.opensabe.alive.client.impl.ClientConnection;
 import io.github.opensabe.alive.protobuf.Message;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by jianing on 2016/7/15.
@@ -64,15 +65,15 @@ public class PushVo {
         this.requestId = requestId;
     }
 
+    public static int generateRequestId() {
+        return ClientConnection.getReqeustId();
+    }
+
     public int getRequestId() {
         return requestId;
     }
 
     public void setRequestId(int requestId) {
         this.requestId = requestId;
-    }
-
-    public static int generateRequestId() {
-        return ClientConnection.getReqeustId();
     }
 }

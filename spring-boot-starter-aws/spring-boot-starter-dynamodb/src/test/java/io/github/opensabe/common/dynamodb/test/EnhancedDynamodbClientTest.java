@@ -15,22 +15,23 @@
  */
 package io.github.opensabe.common.dynamodb.test;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import io.github.opensabe.common.dynamodb.test.common.DynamicdbStarter;
 import io.github.opensabe.common.dynamodb.test.po.Address;
 import io.github.opensabe.common.dynamodb.test.po.Person;
 import io.github.opensabe.common.dynamodb.test.po.PhoneNumber;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author heng.ma
@@ -42,7 +43,7 @@ public class EnhancedDynamodbClientTest extends DynamicdbStarter {
 
 
     @Test
-    void test () {
+    void test() {
         DynamoDbEnhancedClient client = DynamoDbEnhancedClient.builder()
                 .dynamoDbClient(dynamoDbClient)
                 .build();

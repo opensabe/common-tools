@@ -15,10 +15,9 @@
  */
 package io.github.opensabe.common.buffer;
 
-import lombok.extern.log4j.Log4j2;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public abstract class BufferedCountDownLatchElement extends BufferedElement {
@@ -55,6 +54,7 @@ public abstract class BufferedCountDownLatchElement extends BufferedElement {
 
     /**
      * 可以由外部调用
+     *
      * @param throwable
      */
     public void error(Throwable throwable) {

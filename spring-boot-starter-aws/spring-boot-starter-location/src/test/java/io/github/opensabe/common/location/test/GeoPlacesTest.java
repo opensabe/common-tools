@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.common.location.test;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import io.github.opensabe.common.location.service.GeocodeService;
 import io.github.opensabe.common.location.test.common.GeoPlacesBaseTest;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author changhongwei
@@ -40,14 +41,14 @@ public class GeoPlacesTest extends GeoPlacesBaseTest {
     @Autowired
     private GeocodeService geocodeService;
 
-//    @Test
+    //    @Test
     public void testGetCoordinates() {
         List<Double> coordinates = geocodeService.getCoordinates(address);
         assertNotNull(coordinates, "Coordinates should not be null");
         log.info("Coordinates: {}", coordinates);
     }
 
-//    @Test
+    //    @Test
     public void reverseGeocode() {
         ReverseGeocodeResponse reverseGeocodeResponse = geocodeService.reverseGeocode(position);
         log.info("Reverse Geocode Response: {}", reverseGeocodeResponse);

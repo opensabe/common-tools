@@ -15,15 +15,6 @@
  */
 package io.github.opensabe.common.utils.mapstruct;
 
-import io.github.opensabe.common.utils.mapstruct.vo.Types;
-import io.github.opensabe.common.utils.mapstruct.vo.TypesDto;
-import io.github.opensabe.mapstruct.core.CommonCopyMapper;
-import io.github.opensabe.mapstruct.core.FromMapMapper;
-import io.github.opensabe.mapstruct.core.MapperRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,12 +23,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import io.github.opensabe.common.utils.mapstruct.vo.Types;
+import io.github.opensabe.common.utils.mapstruct.vo.TypesDto;
+import io.github.opensabe.mapstruct.core.CommonCopyMapper;
+import io.github.opensabe.mapstruct.core.FromMapMapper;
+import io.github.opensabe.mapstruct.core.MapperRepository;
+
 @DisplayName("MapStruct所有类型映射测试")
 public class AllTypesTest {
 
     @Test
     @DisplayName("测试类到Record的映射 - 验证所有数据类型转换")
-    void testToRecord () {
+    void testToRecord() {
         var m = System.currentTimeMillis();
         var allTypes = new Types();
         allTypes.setName("tom");
@@ -84,7 +85,7 @@ public class AllTypesTest {
 
     @Test
     @DisplayName("测试Record到类的映射 - 验证所有数据类型转换")
-    void testToClass () {
+    void testToClass() {
         var m = System.currentTimeMillis();
         var record = new TypesDto("tom", 40, 28,
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(m), ZoneId.systemDefault()), Instant.ofEpochMilli(m), new Date(m),
@@ -114,7 +115,7 @@ public class AllTypesTest {
 
     @Test
     @DisplayName("测试Map到类的映射 - 验证所有数据类型转换")
-    void testFromMap () {
+    void testFromMap() {
         var m = System.currentTimeMillis();
         Map<String, Object> map = new HashMap<>();
         map.put("name", "tom");

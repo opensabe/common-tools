@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.common.cache.autoconfig;
 
-import io.github.opensabe.common.cache.config.RedisConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+
+import io.github.opensabe.common.cache.config.RedisConfiguration;
 
 /**
  * @author heng.ma

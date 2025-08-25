@@ -15,11 +15,8 @@
  */
 package io.github.opensabe.common.s3.test;
 
-import io.github.opensabe.common.s3.test.common.S3BaseTest;
-import io.github.opensabe.common.s3.typehandler.S3JsonConverter;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.lang.annotation.Annotation;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +28,11 @@ import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.util.TypeInformation;
 
-import java.lang.annotation.Annotation;
+import io.github.opensabe.common.s3.test.common.S3BaseTest;
+import io.github.opensabe.common.s3.typehandler.S3JsonConverter;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author heng.ma
@@ -45,7 +46,7 @@ public class ConverterTest extends S3BaseTest {
 
     @Test
     @DisplayName("测试S3 JSON转换器读写功能 - 验证对象序列化和反序列化")
-    void testRead () throws NoSuchFieldException {
+    void testRead() throws NoSuchFieldException {
         BasicPersistentEntity entity = new BasicPersistentEntity<>(TypeInformation.of(MyEntity.class));
         entity.addPersistentProperty(new AbstractPersistentProperty(Property.of(TypeInformation.of(MyEntity.class), MyEntity.class.getDeclaredField("child")), entity, SimpleTypeHolder.DEFAULT) {
             @Override
@@ -91,14 +92,6 @@ public class ConverterTest extends S3BaseTest {
     }
 
 
-
-
-
-
-
-
-
-
     @Getter
     @Setter
     public static class MyEntity {
@@ -110,5 +103,6 @@ public class ConverterTest extends S3BaseTest {
         private Child child;
     }
 
-    public record Child (String id, Integer age){}
+    public record Child(String id, Integer age) {
+    }
 }

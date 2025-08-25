@@ -28,6 +28,7 @@ import lombok.NoArgsConstructor;
 public class BaseAck<T> {
     /**
      * BizCode
+     *
      * @see BizCodeEnum
      */
     private Integer b;

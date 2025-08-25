@@ -21,12 +21,12 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Publish extends MqMessage{
+public class Publish extends MqMessage {
 
     private Integer requestId;
 
     /**
-     *产品标识:表示是哪个产品
+     * 产品标识:表示是哪个产品
      */
     private Integer productCode;
     /**

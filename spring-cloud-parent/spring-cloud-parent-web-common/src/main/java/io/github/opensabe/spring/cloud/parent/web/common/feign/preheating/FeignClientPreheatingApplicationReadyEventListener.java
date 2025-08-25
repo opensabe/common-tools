@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.feign.preheating;
 
-import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.ApplicationContext;
 
-import java.util.Map;
-import java.util.stream.Collectors;
+import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class FeignClientPreheatingApplicationReadyEventListener extends OnlyOnceApplicationListener<ApplicationReadyEvent> {

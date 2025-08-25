@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.config;
 
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
-import lombok.extern.log4j.Log4j2;
+import java.lang.management.ManagementFactory;
+
+import javax.management.ObjectName;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.ConditionalOnEnabledMetricsExport;
@@ -25,8 +26,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)

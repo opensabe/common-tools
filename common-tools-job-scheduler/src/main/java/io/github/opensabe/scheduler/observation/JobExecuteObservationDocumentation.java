@@ -39,7 +39,6 @@ public enum JobExecuteObservationDocumentation implements ObservationDocumentati
             public String asString() {
                 return "job.execute.status";
             }
-        }
-        ;
+        };
     }
 }

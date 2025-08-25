@@ -15,9 +15,6 @@
  */
 package io.github.opensabe.apple;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
@@ -27,16 +24,33 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+
 public class AppleLoginClientSecretAuthenticator {
     private static final String APPLE_LOGIN_AUDIENCE = "https://appleid.apple.com";
-
+    private final ECPrivateKey signingKey;
     private String issuerId;
-
     private String keyId;
-
     private String bundleId;
 
-    private final ECPrivateKey signingKey;
+    AppleLoginClientSecretAuthenticator(String issuerId, String keyId, String bundleId, String signingKey) {
+        try {
+            signingKey = signingKey.replace("-----BEGIN PRIVATE KEY-----", "").replaceAll("\\R+", "").replace("-----END PRIVATE KEY-----", "");
+            byte[] derEncodedSigningKey = Base64.getDecoder().decode(signingKey);
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(derEncodedSigningKey);
+            this.signingKey = (ECPrivateKey) keyFactory.generatePrivate(keySpec);
+        } catch (NoSuchAlgorithmException var8) {
+            throw new AssertionError(var8);
+        } catch (InvalidKeySpecException var9) {
+            throw new RuntimeException(var9);
+        }
+
+        this.keyId = keyId;
+        this.issuerId = issuerId;
+        this.bundleId = bundleId;
+    }
 
     public String getIssuerId() {
         return issuerId;
@@ -61,25 +75,6 @@ public class AppleLoginClientSecretAuthenticator {
     public void setBundleId(String bundleId) {
         this.bundleId = bundleId;
     }
-
-    AppleLoginClientSecretAuthenticator(String issuerId, String keyId, String bundleId, String signingKey) {
-        try {
-            signingKey = signingKey.replace("-----BEGIN PRIVATE KEY-----", "").replaceAll("\\R+", "").replace("-----END PRIVATE KEY-----", "");
-            byte[] derEncodedSigningKey = Base64.getDecoder().decode(signingKey);
-            KeyFactory keyFactory = KeyFactory.getInstance("EC");
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(derEncodedSigningKey);
-            this.signingKey = (ECPrivateKey) keyFactory.generatePrivate(keySpec);
-        } catch (NoSuchAlgorithmException var8) {
-            throw new AssertionError(var8);
-        } catch (InvalidKeySpecException var9) {
-            throw new RuntimeException(var9);
-        }
-
-        this.keyId = keyId;
-        this.issuerId = issuerId;
-        this.bundleId = bundleId;
-    }
-
 
     public String generateToken() {
         Instant now = Instant.now();

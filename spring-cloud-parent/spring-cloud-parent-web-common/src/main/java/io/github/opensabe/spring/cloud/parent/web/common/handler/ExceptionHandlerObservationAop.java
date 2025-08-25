@@ -16,17 +16,16 @@
 package io.github.opensabe.spring.cloud.parent.web.common.handler;
 
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.common.handler.IException;
-import io.micrometer.observation.Observation;
-import jakarta.validation.ValidationException;
-import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.micrometer.observation.Observation;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Aspect

@@ -15,6 +15,11 @@
  */
 package io.github.opensabe.common.redisson.util;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -25,11 +30,6 @@ import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.SpelParseException;
-
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author heng.ma
@@ -49,20 +49,20 @@ public class MethodArgumentsExpressEvaluator extends CachedExpressionEvaluator {
     }
 
 
-    public String resolve (Method method, Object target, Object[] arguments, String expression) {
+    public String resolve(Method method, Object target, Object[] arguments, String expression) {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
         try {
             return getExpression(method, targetClass, expression).getValue(createContext(method, target, targetClass, arguments), String.class);
-        }catch (SpelParseException | EvaluationException e) {
+        } catch (SpelParseException | EvaluationException e) {
             if (!StringUtils.contains(expression, "#")) {
                 return expression;
-            }else {
+            } else {
                 throw e;
             }
         }
     }
 
-    private MethodBasedEvaluationContext createContext (Method method, Object target, Class<?> targetClass, Object[] arguments) {
+    private MethodBasedEvaluationContext createContext(Method method, Object target, Class<?> targetClass, Object[] arguments) {
         MethodBasedEvaluationContext context = new MethodBasedEvaluationContext(new RootObject(method, arguments, target, targetClass), method, arguments, getParameterNameDiscoverer());
         if (Objects.nonNull(beanFactory)) {
             context.setBeanResolver(new BeanFactoryResolver(beanFactory));
@@ -70,7 +70,7 @@ public class MethodArgumentsExpressEvaluator extends CachedExpressionEvaluator {
         return context;
     }
 
-    private record RootObject (Method method, Object[] args, Object target, Class<?> targetClass) {
+    private record RootObject(Method method, Object[] args, Object target, Class<?> targetClass) {
 
     }
 }

@@ -16,13 +16,14 @@
 package io.github.opensabe.common.mybatis.configuration;
 
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import io.github.opensabe.common.mybatis.jfr.ConnectionJFRGenerator;
 import io.github.opensabe.common.mybatis.jfr.SQLExecuteJFRGenerator;
 import io.github.opensabe.common.mybatis.monitor.MonitorTransactionAspect;
 import io.github.opensabe.common.mybatis.properties.SqlSessionFactoryProperties;
 import io.github.opensabe.common.secret.GlobalSecretManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
 public class MonitorConfiguration {
@@ -34,10 +35,11 @@ public class MonitorConfiguration {
 
     /**
      * SQL执行时间监控上报JFR事件
+     *
      * @return
      */
     @Bean
-    public SQLExecuteJFRGenerator sqlExecutorJFRGenerator () {
+    public SQLExecuteJFRGenerator sqlExecutorJFRGenerator() {
         return new SQLExecuteJFRGenerator();
     }
 

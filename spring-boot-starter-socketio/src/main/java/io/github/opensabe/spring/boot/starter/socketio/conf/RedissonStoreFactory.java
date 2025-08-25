@@ -15,14 +15,15 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
+import java.util.Map;
+import java.util.UUID;
+
+import org.redisson.api.RedissonClient;
+
 import com.corundumstudio.socketio.store.RedissonStore;
 import com.corundumstudio.socketio.store.Store;
 import com.corundumstudio.socketio.store.pubsub.BaseStoreFactory;
 import com.corundumstudio.socketio.store.pubsub.PubSubStore;
-import org.redisson.api.RedissonClient;
-
-import java.util.Map;
-import java.util.UUID;
 
 public class RedissonStoreFactory extends BaseStoreFactory {
     private final RedissonClient redisClient;

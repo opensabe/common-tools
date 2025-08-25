@@ -15,13 +15,19 @@
  */
 package io.github.opensabe.common.cache.api;
 
-import org.springframework.boot.autoconfigure.cache.CacheType;
-
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.boot.autoconfigure.cache.CacheType;
 
 /**
  * 配合<code>@Cacheable</code>,<code>@CachePut</code>使用，指定过期时间
+ *
  * @author heng.ma
  */
 @Documented

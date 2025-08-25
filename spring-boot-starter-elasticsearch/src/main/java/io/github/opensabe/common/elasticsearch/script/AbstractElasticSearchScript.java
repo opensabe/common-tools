@@ -16,16 +16,15 @@
 package io.github.opensabe.common.elasticsearch.script;
 
 
-import jakarta.annotation.PostConstruct;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import jakarta.annotation.PostConstruct;
 
 public abstract class AbstractElasticSearchScript {
-    protected abstract String file();
-
     private String script;
+
+    protected abstract String file();
 
     @PostConstruct
     private void init() throws IOException {

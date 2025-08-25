@@ -21,7 +21,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Response extends MqMessage{
+public class Response extends MqMessage {
     private Integer requestId;
     private RetCode retCode;
     private String rightHost;

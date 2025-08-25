@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.util;
 
+import java.io.Serializable;
+import java.util.UUID;
+
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+
 import io.github.opensabe.spring.boot.starter.rocketmq.MQProducer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.rocketmq.client.producer.SendCallback;
-import org.apache.rocketmq.client.producer.SendResult;
-
-import java.io.Serializable;
-import java.util.UUID;
 
 @Log4j2
 public class ForceDisconnectProducer {
@@ -53,11 +54,12 @@ public class ForceDisconnectProducer {
 
     /**
      * 用户在主站退出登录以后踢下线
+     *
      * @param userId
      * @author hengma
      * @time 2023/9/26 14:40
      */
-    public void logout (String userId) {
+    public void logout(String userId) {
         mqProducer.sendAsync(MQ_TOPIC_LOGOUT, new ForceDisconnectDTO(userId, null, null), new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {
@@ -70,6 +72,7 @@ public class ForceDisconnectProducer {
             }
         });
     }
+
     @Setter
     @Getter
     public static class ForceDisconnectDTO implements Serializable {

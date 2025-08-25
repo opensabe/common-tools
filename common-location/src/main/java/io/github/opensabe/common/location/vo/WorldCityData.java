@@ -31,7 +31,7 @@ public record WorldCityData(
         String id
 ) {
 
-    public WorldCityData (String[] csvLine) {
+    public WorldCityData(String[] csvLine) {
         this(
                 csvLine[0],
                 csvLine[1],

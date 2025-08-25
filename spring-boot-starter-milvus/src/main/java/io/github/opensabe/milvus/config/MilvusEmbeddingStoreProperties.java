@@ -15,14 +15,15 @@
  */
 package io.github.opensabe.milvus.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import static io.milvus.common.clientenum.ConsistencyLevelEnum.STRONG;
+
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import static io.milvus.common.clientenum.ConsistencyLevelEnum.STRONG;
 
 @Getter
 @Setter
@@ -32,7 +33,7 @@ public class MilvusEmbeddingStoreProperties {
     static final String PREFIX = "langchain4j.milvus";
     static final ConsistencyLevelEnum DEFAULT_CONSISTENCY_LEVEL = STRONG;
 
-//    private String host;
+    //    private String host;
 //    private Integer port;
     private String collectionName;
     private Integer dimension;
@@ -49,7 +50,7 @@ public class MilvusEmbeddingStoreProperties {
      */
     private String token;
 
-//    private String username;
+    //    private String username;
 //    private String password;
     private ConsistencyLevelEnum consistencyLevel;
     private Boolean retrieveEmbeddingsOnSearch;

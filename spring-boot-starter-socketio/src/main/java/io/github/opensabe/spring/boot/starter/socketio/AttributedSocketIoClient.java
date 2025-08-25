@@ -15,16 +15,21 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio;
 
-import com.corundumstudio.socketio.*;
-import com.corundumstudio.socketio.protocol.EngineIOVersion;
-import com.corundumstudio.socketio.protocol.Packet;
-import com.google.common.collect.Maps;
-import lombok.extern.log4j.Log4j2;
-
 import java.net.SocketAddress;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import com.corundumstudio.socketio.AckCallback;
+import com.corundumstudio.socketio.HandshakeData;
+import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIONamespace;
+import com.corundumstudio.socketio.Transport;
+import com.corundumstudio.socketio.protocol.EngineIOVersion;
+import com.corundumstudio.socketio.protocol.Packet;
+import com.google.common.collect.Maps;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class AttributedSocketIoClient implements SocketIOClient {
@@ -55,12 +60,12 @@ public class AttributedSocketIoClient implements SocketIOClient {
         setAttribute(CommonAttribute.UID, userId);
     }
 
-    public void setOperId (String operId) {
-        setAttribute(CommonAttribute.OPERATOR_ID, operId);
+    public String getOperId() {
+        return (String) getAttribute(CommonAttribute.OPERATOR_ID);
     }
 
-    public String getOperId () {
-        return (String) getAttribute(CommonAttribute.OPERATOR_ID);
+    public void setOperId(String operId) {
+        setAttribute(CommonAttribute.OPERATOR_ID, operId);
     }
 
     @Override

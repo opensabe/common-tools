@@ -15,12 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.redislience4j;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.core.ConfigurationNotFoundException;
-import io.github.resilience4j.core.registry.RegistryEventConsumer;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -29,9 +23,15 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.core.ConfigurationNotFoundException;
+import io.github.resilience4j.core.registry.RegistryEventConsumer;
+
 /**
- * @see io.github.resilience4j.circuitbreaker.internal.InMemoryCircuitBreakerRegistry
  * @author maheng
+ * @see io.github.resilience4j.circuitbreaker.internal.InMemoryCircuitBreakerRegistry
  */
 public class CaffeineCircuitBreakerRegistry extends CaffeineResilienceRegistry<CircuitBreaker, CircuitBreakerConfig> implements CircuitBreakerRegistry {
 

@@ -15,10 +15,18 @@
  */
 package io.github.opensabe.common.redisson.aop.slock;
 
-import io.github.opensabe.common.redisson.annotation.slock.SLock;
-import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Objects;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.StringUtils;
@@ -28,12 +36,10 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisResponseTimeoutException;
 
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import io.github.opensabe.common.redisson.annotation.slock.SLock;
+import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author heng.ma
@@ -60,7 +66,7 @@ public class SLockInterceptor implements MethodInterceptor {
                 .map(name -> {
                     String resolved = properties.evaluator().resolve(method, invocation.getThis(), invocation.getArguments(), name);
                     if (StringUtils.isBlank(resolved)) {
-                        throw new RedissonLockException("can not resolved redisson lock name , expression: "+name+" method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
+                        throw new RedissonLockException("can not resolved redisson lock name , expression: " + name + " method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
                     }
                     return lock.prefix() + resolved;
                 })
@@ -69,14 +75,14 @@ public class SLockInterceptor implements MethodInterceptor {
         RLock rLock;
         if (locks.length == 1) {
             rLock = locks[0];
-        }else {
+        } else {
             rLock = new MLock(locks);
         }
 
         boolean locked = lock.lockType().lock(lock, rLock);
         if (!locked) {
             throw new RedissonLockException("can not get redisson lock,method:" + method.getName() + ", params: " + Arrays.toString(invocation.getArguments()));
-        }else {
+        } else {
             if (log.isDebugEnabled()) {
                 log.debug("RedissonLockInterceptor-invoke successfully locked lockName {}, method: {}, threadId: {}",
                         Arrays.stream(locks).map(RLock::getName).collect(Collectors.joining(",")), method.getName(), Thread.currentThread().threadId());
@@ -84,11 +90,10 @@ public class SLockInterceptor implements MethodInterceptor {
         }
         try {
             return invocation.proceed();
-        }finally {
+        } finally {
             release(rLock, method);
         }
     }
-
 
 
     /**
@@ -122,6 +127,7 @@ public class SLockInterceptor implements MethodInterceptor {
 
     static class MLock extends RedissonMultiLock {
         private final List<RLock> locks;
+
         public MLock(RLock... locks) {
             super(locks);
             this.locks = Arrays.asList(locks);
@@ -134,7 +140,7 @@ public class SLockInterceptor implements MethodInterceptor {
 
         @Override
         public boolean isLocked() {
-            return locks.stream().map(RLock::isLocked).reduce(true, (a,b) -> a && b);
+            return locks.stream().map(RLock::isLocked).reduce(true, (a, b) -> a && b);
         }
 
         @Override
@@ -142,7 +148,7 @@ public class SLockInterceptor implements MethodInterceptor {
             long newLeaseTime = -1;
             if (leaseTime > 0) {
                 if (waitTime > 0) {
-                    newLeaseTime = unit.toMillis(waitTime)*2;
+                    newLeaseTime = unit.toMillis(waitTime) * 2;
                 } else {
                     newLeaseTime = unit.toMillis(leaseTime);
                 }
@@ -157,7 +163,7 @@ public class SLockInterceptor implements MethodInterceptor {
 
             int failedLocksLimit = failedLocksLimit();
             List<RLock> acquiredLocks = new ArrayList<>(locks.size());
-            for (ListIterator<RLock> iterator = locks.listIterator(); iterator.hasNext();) {
+            for (ListIterator<RLock> iterator = locks.listIterator(); iterator.hasNext(); ) {
                 RLock lock = iterator.next();
                 boolean lockAcquired;
                 try {

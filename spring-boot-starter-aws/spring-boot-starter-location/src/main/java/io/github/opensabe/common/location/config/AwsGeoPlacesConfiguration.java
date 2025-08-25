@@ -15,23 +15,23 @@
  */
 package io.github.opensabe.common.location.config;
 
-import io.github.opensabe.common.location.jfr.LocationObservationToJFRGenerator;
-import io.github.opensabe.common.location.properties.GeoPlacesProperties;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Objects;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.opensabe.common.location.jfr.LocationObservationToJFRGenerator;
+import io.github.opensabe.common.location.properties.GeoPlacesProperties;
 import io.github.opensabe.common.location.service.AwsLocationGeocodeService;
 import io.github.opensabe.common.location.service.GeocodeService;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import lombok.extern.log4j.Log4j2;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.geoplaces.GeoPlacesClient;
-
-import java.util.Objects;
 
 
 @Log4j2
@@ -61,6 +61,7 @@ public class AwsGeoPlacesConfiguration {
                 )
                 .build();
     }
+
     private void validateProperties(GeoPlacesProperties properties) {
         if (Objects.isNull(properties.getAccessKey()) || Objects.isNull(properties.getSecretKey())) {
             throw new IllegalArgumentException("AWS access key and secret key must be provided.");
@@ -77,7 +78,7 @@ public class AwsGeoPlacesConfiguration {
     }
 
     @Bean
-    public LocationObservationToJFRGenerator locationObservationToJFRGenerator(){
+    public LocationObservationToJFRGenerator locationObservationToJFRGenerator() {
         return new LocationObservationToJFRGenerator();
     }
 }

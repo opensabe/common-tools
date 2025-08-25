@@ -15,11 +15,13 @@
  */
 package io.github.opensabe.common.testcontainers;
 
-import com.github.dockerjava.api.command.InspectContainerResponse;
-import lombok.SneakyThrows;
+import java.util.concurrent.TimeUnit;
+
 import org.testcontainers.containers.GenericContainer;
 
-import java.util.concurrent.TimeUnit;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+
+import lombok.SneakyThrows;
 
 /**
  * 由于初始化容器的时候还没有初始化日志框架，这里只能通过 System.out.println 打印日志
@@ -44,7 +46,7 @@ public class CustomizedRedisContainer extends GenericContainer<CustomizedRedisCo
         ExecResult result = null;
         while (
                 result == null
-                || result.getExitCode() != 0
+                        || result.getExitCode() != 0
         ) {
             TimeUnit.SECONDS.sleep(1);
             System.out.println("executing command to check if redis is started");

@@ -15,9 +15,9 @@
  */
 package io.github.opensabe.common.mybatis.configuration;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.Properties;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import static io.github.opensabe.common.mybatis.configuration.PageHelperProperties.PAGEHELPER_PREFIX;
 

@@ -29,6 +29,7 @@ public class RedissonSemaphoreProperties extends ExtraNameProperties {
         super(redissonSemaphoreName.prefix(), redissonSemaphore.name(), parameterIndex, redissonSemaphoreName.expression());
         this.redissonSemaphore = redissonSemaphore;
     }
+
     public RedissonSemaphoreProperties(MethodArgumentsExpressEvaluator evaluator, RedissonSemaphore redissonSemaphore) {
         super(evaluator, redissonSemaphore.prefix(), redissonSemaphore.name());
         this.redissonSemaphore = redissonSemaphore;

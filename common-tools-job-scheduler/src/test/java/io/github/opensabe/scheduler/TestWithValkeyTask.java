@@ -15,8 +15,8 @@
  */
 package io.github.opensabe.scheduler;
 
-import io.github.opensabe.common.testcontainers.integration.SingleValkeyIntegrationTest;
-import io.github.opensabe.scheduler.server.SchedulerServer;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
@@ -28,7 +28,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.concurrent.TimeUnit;
+import io.github.opensabe.common.testcontainers.integration.SingleValkeyIntegrationTest;
+import io.github.opensabe.scheduler.server.SchedulerServer;
 
 @JfrEventTest
 @AutoConfigureObservability
@@ -44,19 +45,15 @@ import java.util.concurrent.TimeUnit;
         classes = TestWithValkeyTask.App.class)
 public class TestWithValkeyTask {
 
-    @SpringBootApplication
-    public static class App {
-
-    }
-    @DynamicPropertySource
-    public static void setProperties(DynamicPropertyRegistry registry) {
-        SingleValkeyIntegrationTest.setProperties(registry);
-    }
-
     @Autowired
     private SchedulerServer schedulerServer;
     @Autowired
     private TempleTask templeTask;
+
+    @DynamicPropertySource
+    public static void setProperties(DynamicPropertyRegistry registry) {
+        SingleValkeyIntegrationTest.setProperties(registry);
+    }
 
     @Test
     public void testContainer() throws InterruptedException {
@@ -67,5 +64,10 @@ public class TestWithValkeyTask {
             TimeUnit.SECONDS.sleep(1);
             count++;
         }
+    }
+
+    @SpringBootApplication
+    public static class App {
+
     }
 }

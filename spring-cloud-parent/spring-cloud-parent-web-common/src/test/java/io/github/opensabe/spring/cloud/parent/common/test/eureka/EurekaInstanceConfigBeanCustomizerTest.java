@@ -15,9 +15,9 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.test.eureka;
 
-import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanAddNodeInfoCustomizer;
-import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanCustomizer;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,12 +25,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.context.annotation.Bean;
 
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanCustomizer;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * EurekaInstanceConfigBeanCustomizer 集成测试
@@ -46,50 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 )
 public class EurekaInstanceConfigBeanCustomizerTest {
 
-    @SpringBootApplication
-    static class TestConfiguration {
-
-        @Bean
-        public TestEurekaInstanceConfigBeanCustomizer testCustomizer() {
-            return new TestEurekaInstanceConfigBeanCustomizer();
-        }
-    }
-
-    /**
-     * 用于测试的自定义 EurekaInstanceConfigBeanCustomizer 实现
-     */
-    public static class TestEurekaInstanceConfigBeanCustomizer implements EurekaInstanceConfigBeanCustomizer {
-        private static final AtomicBoolean executed = new AtomicBoolean(false);
-        private static final String TEST_KEY = "test-customizer-key";
-        private static final String TEST_VALUE = "test-customizer-value";
-
-        @Override
-        public void customize(EurekaInstanceConfigBean eurekaInstanceConfigBean) {
-            log.info("TestEurekaInstanceConfigBeanCustomizer.customize() 被调用");
-            executed.set(true);
-            eurekaInstanceConfigBean.getMetadataMap().put(TEST_KEY, TEST_VALUE);
-        }
-
-        public static boolean isExecuted() {
-            return executed.get();
-        }
-
-        public static void reset() {
-            executed.set(false);
-        }
-
-        public static String getTestKey() {
-            return TEST_KEY;
-        }
-
-        public static String getTestValue() {
-            return TEST_VALUE;
-        }
-    }
-
     @Autowired
     private EurekaInstanceConfigBean eurekaInstanceConfigBean;
-
     @Autowired
     private TestEurekaInstanceConfigBeanCustomizer testCustomizer;
 
@@ -175,5 +133,46 @@ public class EurekaInstanceConfigBeanCustomizerTest {
         metadata.put(testKey, testValue);
 
         assertEquals(testValue, metadata.get(testKey), "应该能够正确获取添加的 metadata");
+    }
+
+    @SpringBootApplication
+    static class TestConfiguration {
+
+        @Bean
+        public TestEurekaInstanceConfigBeanCustomizer testCustomizer() {
+            return new TestEurekaInstanceConfigBeanCustomizer();
+        }
+    }
+
+    /**
+     * 用于测试的自定义 EurekaInstanceConfigBeanCustomizer 实现
+     */
+    public static class TestEurekaInstanceConfigBeanCustomizer implements EurekaInstanceConfigBeanCustomizer {
+        private static final AtomicBoolean executed = new AtomicBoolean(false);
+        private static final String TEST_KEY = "test-customizer-key";
+        private static final String TEST_VALUE = "test-customizer-value";
+
+        public static boolean isExecuted() {
+            return executed.get();
+        }
+
+        public static void reset() {
+            executed.set(false);
+        }
+
+        public static String getTestKey() {
+            return TEST_KEY;
+        }
+
+        public static String getTestValue() {
+            return TEST_VALUE;
+        }
+
+        @Override
+        public void customize(EurekaInstanceConfigBean eurekaInstanceConfigBean) {
+            log.info("TestEurekaInstanceConfigBeanCustomizer.customize() 被调用");
+            executed.set(true);
+            eurekaInstanceConfigBean.getMetadataMap().put(TEST_KEY, TEST_VALUE);
+        }
     }
 } 

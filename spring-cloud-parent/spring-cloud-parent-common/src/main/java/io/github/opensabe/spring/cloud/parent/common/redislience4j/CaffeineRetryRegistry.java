@@ -15,18 +15,21 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.redislience4j;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Supplier;
 import io.github.resilience4j.core.ConfigurationNotFoundException;
 import io.github.resilience4j.core.registry.RegistryEventConsumer;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 
-import java.util.*;
-import java.util.function.Supplier;
-
 /**
- * @see io.github.resilience4j.retry.internal.InMemoryRetryRegistry
  * @author maheng
+ * @see io.github.resilience4j.retry.internal.InMemoryRetryRegistry
  */
 public class CaffeineRetryRegistry extends CaffeineResilienceRegistry<Retry, RetryConfig> implements RetryRegistry {
 

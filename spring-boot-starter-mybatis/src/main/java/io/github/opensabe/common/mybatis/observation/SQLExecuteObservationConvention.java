@@ -21,6 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 /**
  * 统计SQL执行时间：SQL(mapper)或带事务的service方法名
+ *
  * @author maheng
  */
 public class SQLExecuteObservationConvention implements ObservationConvention<SQLExecuteContext> {
@@ -38,13 +39,13 @@ public class SQLExecuteObservationConvention implements ObservationConvention<SQ
 
     @Override
     public KeyValues getLowCardinalityKeyValues(SQLExecuteContext context) {
-        return KeyValues.of(TAG_METHOD,context.getMethod());
+        return KeyValues.of(TAG_METHOD, context.getMethod());
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(SQLExecuteContext context) {
-        return KeyValues.of(TAG_METHOD,context.getMethod())
-                .and(TAG_SUCCESS, context.isSuccess()+"")
-                .and(TAG_TRANSACTION_ID,context.getTransactionName());
+        return KeyValues.of(TAG_METHOD, context.getMethod())
+                .and(TAG_SUCCESS, context.isSuccess() + "")
+                .and(TAG_TRANSACTION_ID, context.getTransactionName());
     }
 }

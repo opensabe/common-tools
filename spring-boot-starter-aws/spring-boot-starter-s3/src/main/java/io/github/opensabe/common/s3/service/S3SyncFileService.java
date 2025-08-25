@@ -15,24 +15,30 @@
  */
 package io.github.opensabe.common.s3.service;
 
-import io.github.opensabe.common.s3.observation.S3OperationContext;
-import io.github.opensabe.common.s3.observation.S3OperationConvention;
-import io.github.opensabe.common.s3.observation.S3OperationObservationDocumentation;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.IOUtils;
-import software.amazon.awssdk.core.ResponseInputStream;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
-
 import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
+
 import static java.lang.String.format;
 import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
 import static software.amazon.awssdk.core.sync.RequestBody.fromFile;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.s3.observation.S3OperationContext;
+import io.github.opensabe.common.s3.observation.S3OperationConvention;
+import io.github.opensabe.common.s3.observation.S3OperationObservationDocumentation;
+import io.micrometer.observation.Observation;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 /**
  * s3文件上传service
@@ -41,8 +47,8 @@ import static software.amazon.awssdk.core.sync.RequestBody.fromFile;
  */
 public class S3SyncFileService extends BucketS3FileService {
 
-    private S3Client client;
     private final UnifiedObservationFactory unifiedObservationFactory;
+    private S3Client client;
 
     public S3SyncFileService(UnifiedObservationFactory unifiedObservationFactory) {
         this.unifiedObservationFactory = unifiedObservationFactory;
@@ -164,14 +170,13 @@ public class S3SyncFileService extends BucketS3FileService {
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
-            List<String> list= client.listObjects(ListObjectsRequest.builder()
+            List<String> list = client.listObjects(ListObjectsRequest.builder()
                             .bucket(bucket)
                             .marker(basePath)
                             .build())
                     .contents().stream()
                     .map(S3Object::key)
-                    .collect(Collectors.toList())
-                    ;
+                    .collect(Collectors.toList());
             s3OperationContext.setSuccess(true);
             s3OperationContext.setFileSize(CollectionUtils.isEmpty(list) ? 0 : list.size());
             return list;
@@ -192,14 +197,13 @@ public class S3SyncFileService extends BucketS3FileService {
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
-            List<String> list= client.listObjects(ListObjectsRequest.builder()
+            List<String> list = client.listObjects(ListObjectsRequest.builder()
                             .bucket(bucket)
                             .prefix(prefix)
                             .build())
                     .contents().stream()
                     .map(S3Object::key)
-                    .collect(Collectors.toList())
-                    ;
+                    .collect(Collectors.toList());
             s3OperationContext.setSuccess(true);
             return list;
         } catch (Throwable t) {

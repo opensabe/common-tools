@@ -15,9 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
-import lombok.extern.log4j.Log4j2;
+import java.lang.management.ManagementFactory;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -29,9 +31,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)

@@ -15,31 +15,32 @@
  */
 package io.github.opensabe.common.location.properties;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = GeoPlacesProperties.PREFIX)
 public class GeoPlacesProperties {
-	
-	public static final String PREFIX = "aws.location";
 
-	private Boolean enabled = true;
+    public static final String PREFIX = "aws.location";
 
-	/**
-	 * access_key
-	 */
-	private String accessKey;
+    private Boolean enabled = true;
 
-	/**
-	 * secret_key
-	 */
-	private String secretKey;
-	/**
-	 * 处于的 region
-	 */
-	private String region;
+    /**
+     * access_key
+     */
+    private String accessKey;
+
+    /**
+     * secret_key
+     */
+    private String secretKey;
+    /**
+     * 处于的 region
+     */
+    private String region;
 
 }

@@ -15,13 +15,10 @@
  */
 package io.github.opensabe.common.dynamodb.config;
 
-import io.github.opensabe.common.dynamodb.service.KeyValueDynamoDbService;
-import io.github.opensabe.common.dynamodb.service.ObservedTable;
-import io.github.opensabe.common.dynamodb.typehandler.DynamoDbOBService;
-import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import jakarta.annotation.PreDestroy;
-import lombok.extern.log4j.Log4j2;
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -29,6 +26,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+
+import io.github.opensabe.common.dynamodb.service.KeyValueDynamoDbService;
+import io.github.opensabe.common.dynamodb.service.ObservedTable;
+import io.github.opensabe.common.dynamodb.typehandler.DynamoDbOBService;
+import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import jakarta.annotation.PreDestroy;
+import lombok.extern.log4j.Log4j2;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -37,10 +42,6 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
-
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Author: duchaoqun
@@ -77,7 +78,7 @@ public class DynamoDBConfiguration {
                 secretKey);
         DynamoDbClientBuilder builder = DynamoDbClient.builder();
         builder.credentialsProvider(StaticCredentialsProvider.create(awsBasicCredentials)).region(region);
-        if(StringUtils.isNotEmpty(dynamolLocalUrl)){
+        if (StringUtils.isNotEmpty(dynamolLocalUrl)) {
             log.fatal("dynamolDB will use local url {}", dynamolLocalUrl);
             builder.endpointOverride(URI.create(dynamolLocalUrl));
         }
@@ -92,7 +93,7 @@ public class DynamoDBConfiguration {
     }
 
     @Bean
-    public DynamoDbEnhancedClient dynamoDbEnhancedClient (DynamoDbClient client, UnifiedObservationFactory unifiedObservationFactory) {
+    public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient client, UnifiedObservationFactory unifiedObservationFactory) {
         DynamoDbEnhancedClient delegate = DynamoDbEnhancedClient.builder().dynamoDbClient(client).build();
         return new DynamoDbEnhancedClient() {
             @Override
@@ -115,7 +116,7 @@ public class DynamoDBConfiguration {
     }
 
     @Bean
-    public DynamodbConverter dynamodbConverter (Environment environment, DynamoDbEnhancedClient client) {
+    public DynamodbConverter dynamodbConverter(Environment environment, DynamoDbEnhancedClient client) {
         return new DynamodbConverter(environment, client);
     }
 }

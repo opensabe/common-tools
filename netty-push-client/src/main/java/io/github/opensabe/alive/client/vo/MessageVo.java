@@ -16,6 +16,7 @@
 package io.github.opensabe.alive.client.vo;
 
 import com.google.protobuf.ByteString;
+
 import io.github.opensabe.alive.protobuf.Message;
 
 /**
@@ -54,14 +55,17 @@ public class MessageVo extends PushVo {
         this.expiry = expiry;
     }
 
+    public static void main(String[] args) {
+        new MessageVo("aa", new byte[]{}).buildPublush(1, 1);
+    }
 
     public Message.Publish buildPublush(int requestId, int productCode) {
         Message.Publish.Builder builder = Message.Publish.newBuilder()
-            .setRequestId(requestId)
-            .setProductCode(productCode)
-            .setTopic(topic)
-            .setPushType(pushType)
-            .setBody(ByteString.copyFrom(body));
+                .setRequestId(requestId)
+                .setProductCode(productCode)
+                .setTopic(topic)
+                .setPushType(pushType)
+                .setBody(ByteString.copyFrom(body));
         if (deviceId != null && !deviceId.isEmpty()) {
             builder.setDeviceId(deviceId);
         }
@@ -73,11 +77,6 @@ public class MessageVo extends PushVo {
         }
         return builder.build();
     }
-
-    public static void main(String[] args) {
-        new MessageVo("aa", new byte[]{}).buildPublush(1, 1);
-    }
-
 
     @Override
     public String toString() {

@@ -42,8 +42,7 @@ public enum RocketMQObservationDocumentation implements ObservationDocumentation
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return MessageConsumeObservationConvention.class;
         }
-    }
-    ;
+    };
 
     public enum MESSAGE_PRODUCE_TAG implements KeyName {
         TOPIC {

@@ -15,23 +15,14 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
-import com.corundumstudio.socketio.SocketIOServer;
-import com.corundumstudio.socketio.annotation.OnConnect;
-import com.corundumstudio.socketio.annotation.OnDisconnect;
-import com.corundumstudio.socketio.annotation.OnEvent;
-import com.corundumstudio.socketio.listener.DefaultExceptionListener;
-import com.corundumstudio.socketio.listener.ExceptionListener;
-import com.corundumstudio.socketio.store.StoreFactory;
-import com.netflix.discovery.EurekaClient;
-import io.github.opensabe.spring.boot.starter.rocketmq.AbstractMQConsumer;
-import io.github.opensabe.spring.boot.starter.rocketmq.MQProducer;
-import io.github.opensabe.spring.boot.starter.socketio.SocketIoMessageTemplate;
-import io.github.opensabe.spring.boot.starter.socketio.tracing.extend.NamespaceExtend;
-import io.github.opensabe.spring.boot.starter.socketio.util.ForceDisconnectConsumer;
-import io.github.opensabe.spring.boot.starter.socketio.util.ForceDisconnectProducer;
-import io.github.opensabe.spring.boot.starter.socketio.util.SocketConnectionUtil;
-import io.netty.channel.epoll.Epoll;
-import lombok.extern.log4j.Log4j2;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -47,9 +38,24 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.ReflectionUtils;
 
-import java.lang.annotation.Annotation;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.annotation.OnConnect;
+import com.corundumstudio.socketio.annotation.OnDisconnect;
+import com.corundumstudio.socketio.annotation.OnEvent;
+import com.corundumstudio.socketio.listener.DefaultExceptionListener;
+import com.corundumstudio.socketio.listener.ExceptionListener;
+import com.corundumstudio.socketio.store.StoreFactory;
+import com.netflix.discovery.EurekaClient;
+
+import io.github.opensabe.spring.boot.starter.rocketmq.AbstractMQConsumer;
+import io.github.opensabe.spring.boot.starter.rocketmq.MQProducer;
+import io.github.opensabe.spring.boot.starter.socketio.SocketIoMessageTemplate;
+import io.github.opensabe.spring.boot.starter.socketio.tracing.extend.NamespaceExtend;
+import io.github.opensabe.spring.boot.starter.socketio.util.ForceDisconnectConsumer;
+import io.github.opensabe.spring.boot.starter.socketio.util.ForceDisconnectProducer;
+import io.github.opensabe.spring.boot.starter.socketio.util.SocketConnectionUtil;
+import io.netty.channel.epoll.Epoll;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
@@ -62,7 +68,6 @@ public class SocketIoConfiguration {
 //    }
 
 
-
     @Bean
     @ConditionalOnMissingBean
     public OrderedSpringAnnotationScanner springAnnotationScanner() {
@@ -71,14 +76,94 @@ public class SocketIoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ListenerAdder listenerAdder (SocketIOServer server, OrderedSpringAnnotationScanner scanner) {
+    public ListenerAdder listenerAdder(SocketIOServer server, OrderedSpringAnnotationScanner scanner) {
         return new ListenerAdder(server, scanner);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ExceptionListener exceptionListener() {
+        return new DefaultExceptionListener();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SocketIOServer server(SocketIoServerProperties socketIoServerProperties, StoreFactory storeFactory, ExceptionListener exceptionListener) {
+        socketIoServerProperties.setStoreFactory(storeFactory);
+        socketIoServerProperties.setExceptionListener(exceptionListener);
+
+        if (socketIoServerProperties.isUseLinuxNativeEpoll()
+                && !Epoll.isAvailable()) {
+            log.warn("SocketIoConfiguration-server: Epoll library not available, disabling native epoll");
+            socketIoServerProperties.setUseLinuxNativeEpoll(false);
+        }
+
+        // config specific namespace
+        socketIoServerProperties.setDefaultNamespace(new NamespaceExtend(NamespaceExtend.DEFAULT_NAME, socketIoServerProperties.cloneForNamespace()));
+
+        SocketIOServer socketIOServer = new SocketIOServer(socketIoServerProperties);
+
+        return socketIOServer;
+    }
+
+    @Bean
+    public SocketIoMessageTemplate socketIoMessageTemplate(SocketIOServer server) {
+        return new SocketIoMessageTemplate(server);
+    }
+
+    @Bean
+    public SocketIOServerLifecycle serverLifecycle(SocketIOServer socketIOServer) {
+        return new SocketIOServerLifecycle(socketIOServer);
+    }
+
+    @Bean
+    public AttributedSocketIoClientFactory attributedSocketIoClientFactory() {
+        return new AttributedSocketIoClientFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RedissonStoreFactory redissonStoreFactory(RedissonClient redissonClient, SocketIoServerProperties serverProperties) {
+        return new RedissonStoreFactory(redissonClient, serverProperties);
+    }
+
+    @Bean
+    @ConditionalOnClass(EurekaClient.class)
+    public SocketIoEurekaMetadataModifier socketIoEurekaMetadataModifier(SocketIoServerProperties serverProperties) {
+        return new SocketIoEurekaMetadataModifier(serverProperties);
+    }
+
+    @Bean
+    @ConditionalOnBean(MQProducer.class)
+    public ForceDisconnectProducer forceDisconnectProducer(MQProducer mqProducer) {
+        return new ForceDisconnectProducer(mqProducer);
+    }
+
+    @Bean
+    @ConditionalOnClass(AbstractMQConsumer.class)
+    @ConditionalOnBean(MQProducer.class)
+    public ForceDisconnectConsumer forceDisconnectConsumer(SocketIOServer socketIOServer) {
+        return new ForceDisconnectConsumer(socketIOServer);
+    }
+
+    @Bean
+    @ConditionalOnBean(ForceDisconnectProducer.class)
+    public SocketConnectionUtil socketConnectionUtil(ForceDisconnectProducer forceDisconnectProducer) {
+
+        return new SocketConnectionUtil(forceDisconnectProducer);
+    }
+
+    @Bean
+    public SocketIoHealthCheck socketIoHealthCheck() {
+
+        return new SocketIoHealthCheck();
     }
 
     public static class ListenerAdder implements ApplicationListener<ApplicationStartedEvent> {
         private final OrderedSpringAnnotationScanner scanner;
         private final SocketIOServer server;
-        public ListenerAdder(SocketIOServer server,OrderedSpringAnnotationScanner scanner) {
+
+        public ListenerAdder(SocketIOServer server, OrderedSpringAnnotationScanner scanner) {
             this.server = server;
             this.scanner = scanner;
         }
@@ -125,59 +210,6 @@ public class SocketIoConfiguration {
         }
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ExceptionListener exceptionListener() {
-        return new DefaultExceptionListener();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public SocketIOServer server(SocketIoServerProperties socketIoServerProperties, StoreFactory storeFactory, ExceptionListener exceptionListener) {
-        socketIoServerProperties.setStoreFactory(storeFactory);
-        socketIoServerProperties.setExceptionListener(exceptionListener);
-
-        if (socketIoServerProperties.isUseLinuxNativeEpoll()
-                && !Epoll.isAvailable()) {
-            log.warn("SocketIoConfiguration-server: Epoll library not available, disabling native epoll");
-            socketIoServerProperties.setUseLinuxNativeEpoll(false);
-        }
-
-        // config specific namespace
-        socketIoServerProperties.setDefaultNamespace(new NamespaceExtend(NamespaceExtend.DEFAULT_NAME,socketIoServerProperties.cloneForNamespace()));
-
-        SocketIOServer socketIOServer = new SocketIOServer(socketIoServerProperties);
-
-        return socketIOServer;
-    }
-
-    @Bean
-    public SocketIoMessageTemplate socketIoMessageTemplate(SocketIOServer server) {
-        return new SocketIoMessageTemplate(server);
-    }
-
-    @Bean
-    public SocketIOServerLifecycle serverLifecycle(SocketIOServer socketIOServer) {
-        return new SocketIOServerLifecycle(socketIOServer);
-    }
-
-    @Bean
-    public AttributedSocketIoClientFactory attributedSocketIoClientFactory() {
-        return new AttributedSocketIoClientFactory();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public RedissonStoreFactory redissonStoreFactory(RedissonClient redissonClient, SocketIoServerProperties serverProperties) {
-        return new RedissonStoreFactory(redissonClient, serverProperties);
-    }
-
-    @Bean
-    @ConditionalOnClass(EurekaClient.class)
-    public SocketIoEurekaMetadataModifier socketIoEurekaMetadataModifier(SocketIoServerProperties serverProperties) {
-        return new SocketIoEurekaMetadataModifier(serverProperties);
-    }
-
     /**
      * 通过 SmartLifecycle 实现对于优雅关闭的兼容
      */
@@ -216,32 +248,6 @@ public class SocketIoConfiguration {
         public boolean isRunning() {
             return running;
         }
-    }
-
-    @Bean
-    @ConditionalOnBean(MQProducer.class)
-    public ForceDisconnectProducer forceDisconnectProducer(MQProducer mqProducer) {
-        return new ForceDisconnectProducer(mqProducer);
-    }
-
-    @Bean
-    @ConditionalOnClass(AbstractMQConsumer.class)
-    @ConditionalOnBean(MQProducer.class)
-    public ForceDisconnectConsumer forceDisconnectConsumer(SocketIOServer socketIOServer) {
-        return new ForceDisconnectConsumer(socketIOServer);
-    }
-
-    @Bean
-    @ConditionalOnBean(ForceDisconnectProducer.class)
-    public SocketConnectionUtil socketConnectionUtil(ForceDisconnectProducer forceDisconnectProducer) {
-
-        return new SocketConnectionUtil(forceDisconnectProducer);
-    }
-
-    @Bean
-    public SocketIoHealthCheck socketIoHealthCheck() {
-
-        return new SocketIoHealthCheck();
     }
 
 }

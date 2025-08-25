@@ -15,20 +15,21 @@
  */
 package io.github.opensabe.common.dynamodb.typehandler;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import io.github.opensabe.common.dynamodb.service.KeyValueDynamoDbService;
 import io.github.opensabe.common.typehandler.OBSService;
 import io.github.opensabe.common.typehandler.OBSTypeEnum;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Objects;
 
 @Log4j2
 public class DynamoDbOBService implements OBSService {
 
     private final KeyValueDynamoDbService dynamoDbUpdateService;
 
-    public DynamoDbOBService(KeyValueDynamoDbService dynamoDbBaseService){
+    public DynamoDbOBService(KeyValueDynamoDbService dynamoDbBaseService) {
         this.dynamoDbUpdateService = dynamoDbBaseService;
     }
 
@@ -48,7 +49,7 @@ public class DynamoDbOBService implements OBSService {
 
     @Override
     public String select(String key) {
-        if(Objects.isNull(key)
+        if (Objects.isNull(key)
                 || !StringUtils.containsIgnoreCase(key, OBSTypeEnum.DYNAMODB.getIdShortName())
                 || key.length() > 30) {
             log.warn("DynamoDbOBService.select [discovery illegality key] please check {}", key);

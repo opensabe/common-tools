@@ -15,6 +15,17 @@
  */
 package io.github.opensabe.springdoc.converters;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springdoc.core.customizers.ParameterCustomizer;
+import org.springframework.core.MethodParameter;
+
 import io.github.opensabe.base.vo.IntValueEnum;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverter;
@@ -23,15 +34,10 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.PrimitiveType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import org.apache.commons.lang3.StringUtils;
-import org.springdoc.core.customizers.ParameterCustomizer;
-import org.springframework.core.MethodParameter;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 生成swagger文档时处理枚举类型，description加上各个int对应的枚举值
+ *
  * @author heng.ma
  */
 public class EnumModelConverter implements ModelConverter, ParameterCustomizer {
@@ -44,12 +50,12 @@ public class EnumModelConverter implements ModelConverter, ParameterCustomizer {
             Map<Integer, String> map = Arrays.stream(rawClass.getEnumConstants())
                     .collect(Collectors.toMap(e -> ((IntValueEnum) e).getValue(), e -> ((Enum) e).name()));
             Schema schema = PrimitiveType.INT.createProperty();
-            schema.setDescription(map.entrySet().stream().map(e -> e.getKey()+"-"+e.getValue()).collect(Collectors.joining(",")));
+            schema.setDescription(map.entrySet().stream().map(e -> e.getKey() + "-" + e.getValue()).collect(Collectors.joining(",")));
             schema.setEnum(List.copyOf(map.keySet()));
             schema.setExamples(schema.getEnum());
             return schema;
         }
-        return chain.hasNext()? chain.next().resolve(type, context, chain) : null;
+        return chain.hasNext() ? chain.next().resolve(type, context, chain) : null;
     }
 
     @Override
@@ -61,8 +67,8 @@ public class EnumModelConverter implements ModelConverter, ParameterCustomizer {
         if (Objects.nonNull(schema) && StringUtils.isNotBlank(schema.getDescription())) {
             if (StringUtils.isBlank(parameterModel.getDescription())) {
                 parameterModel.setDescription(schema.getDescription());
-            }else {
-                parameterModel.setDescription(parameterModel.getDescription()+"("+schema.getDescription()+")");
+            } else {
+                parameterModel.setDescription(parameterModel.getDescription() + "(" + schema.getDescription() + ")");
             }
         }
         return parameterModel;

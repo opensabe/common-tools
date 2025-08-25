@@ -15,13 +15,14 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
-import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanAddNodeInfoCustomizer;
-import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanCustomizer;
-import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanPostProcessor;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
+import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanAddNodeInfoCustomizer;
+import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanCustomizer;
+import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanPostProcessor;
 
 @Configuration(proxyBeanMethods = false)
 public class CustomizedEurekaConfiguration {

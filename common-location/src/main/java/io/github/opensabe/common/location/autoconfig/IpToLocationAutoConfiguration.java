@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.common.location.autoconfig;
 
-import io.github.opensabe.common.location.config.IpToLocationConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.location.config.IpToLocationConfiguration;
 
 //@Configuration(proxyBeanMethods = false)
 @AutoConfiguration

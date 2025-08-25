@@ -25,10 +25,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Category({"observation","Socket-Connect"})
+@Category({"observation", "Socket-Connect"})
 @Label("Connect Event")
 @StackTrace(value = false)
-public class SocketIOConnectEvent extends Event{
+public class SocketIOConnectEvent extends Event {
 
     private String traceId;
 

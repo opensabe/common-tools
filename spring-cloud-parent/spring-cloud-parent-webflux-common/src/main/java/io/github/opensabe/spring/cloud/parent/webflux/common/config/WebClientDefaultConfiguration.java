@@ -15,13 +15,37 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.config;
 
+import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.boot.actuate.metrics.web.reactive.client.ObservationWebClientCustomizer;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.CustomizedReactorLoadBalancerExchangeFilterFunction;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.Resilience4jUtil;
 import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
-import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilience4j.retry.ClientResponseRetryOperator;
 import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilience4j.ClientResponseCircuitBreakerOperator;
+import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilience4j.retry.ClientResponseRetryOperator;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -36,30 +60,32 @@ import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.boot.actuate.metrics.web.reactive.client.ObservationWebClientCustomizer;
-import org.springframework.cloud.client.DefaultServiceInstance;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.CustomizedReactorLoadBalancerExchangeFilterFunction;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
-
-import java.net.URI;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 public class WebClientDefaultConfiguration {
+    private static ServiceInstance getServiceInstance(ClientRequest clientRequest) {
+        URI url = clientRequest.url();
+        DefaultServiceInstance defaultServiceInstance = new DefaultServiceInstance();
+        defaultServiceInstance.setHost(url.getHost());
+        defaultServiceInstance.setPort(url.getPort());
+        return defaultServiceInstance;
+    }
+
+    private static Mono<ClientResponse> tracedFilter(
+            ClientRequest clientRequest,
+            Supplier<Mono<ClientResponse>> supplier) {
+        Optional<Object> attribute =
+                clientRequest.attribute(TracedCircuitBreakerRoundRobinLoadBalancer.OBSERVATION_KEY);
+        if (attribute.isPresent() && attribute.get() instanceof Observation observation) {
+            return observation.scoped(supplier);
+        } else {
+            return supplier.get();
+        }
+    }
+
     @Bean
     public WebClient getWebClient(
             CustomizedReactorLoadBalancerExchangeFilterFunction lbFunction,
@@ -237,25 +263,5 @@ public class WebClientDefaultConfiguration {
         //使用 observationWebClientCustomizer 定制化 builder，这样可以在链路自动添加 Observation 并且可以从 Context 获取
         observationWebClientCustomizer.customize(builder);
         return builder.build();
-    }
-
-    private static ServiceInstance getServiceInstance(ClientRequest clientRequest) {
-        URI url = clientRequest.url();
-        DefaultServiceInstance defaultServiceInstance = new DefaultServiceInstance();
-        defaultServiceInstance.setHost(url.getHost());
-        defaultServiceInstance.setPort(url.getPort());
-        return defaultServiceInstance;
-    }
-
-    private static Mono<ClientResponse> tracedFilter(
-            ClientRequest clientRequest,
-            Supplier<Mono<ClientResponse>> supplier) {
-        Optional<Object> attribute =
-                clientRequest.attribute(TracedCircuitBreakerRoundRobinLoadBalancer.OBSERVATION_KEY);
-        if (attribute.isPresent() && attribute.get() instanceof Observation observation) {
-            return observation.scoped(supplier);
-        } else {
-            return supplier.get();
-        }
     }
 }

@@ -15,11 +15,10 @@
  */
 package io.github.opensabe.common.s3.typehandler;
 
-import cn.hutool.core.codec.Hashids;
-import com.fasterxml.jackson.core.type.TypeReference;
-import io.github.opensabe.common.s3.properties.S3Properties;
-import io.github.opensabe.common.s3.service.FileService;
-import io.github.opensabe.common.utils.json.JsonUtil;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.convert.PropertyValueConverter;
@@ -28,9 +27,12 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.http.MediaType;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import cn.hutool.core.codec.Hashids;
+import io.github.opensabe.common.s3.properties.S3Properties;
+import io.github.opensabe.common.s3.service.FileService;
+import io.github.opensabe.common.utils.json.JsonUtil;
 
 /**
  * @author heng.ma
@@ -42,6 +44,7 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
     private final String fileName;
 
     private final Hashids hashids;
+
     public S3JsonConverter(FileService service, S3Properties properties) {
         this.service = service;
         this.hashids = Hashids.create("swdfffqssasd".toCharArray());
@@ -70,7 +73,7 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
         return key;
     }
 
-    private String getFileName (PersistentProperty property) {
+    private String getFileName(PersistentProperty property) {
 
         return fileName.formatted(property.getOwner().getType().getSimpleName(),
                 property.getName(),
@@ -79,10 +82,6 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
 
     private static class JacksonParameterizedTypeTypeReference<T> extends TypeReference<T> {
         private final ParameterizedType type;
-
-        public static <T> JacksonParameterizedTypeTypeReference<T> fromTypeInformation(TypeInformation<T> typeInformation) {
-            return new JacksonParameterizedTypeTypeReference<>(typeInformation);
-        }
 
         JacksonParameterizedTypeTypeReference(final TypeInformation<T> information) {
             final List<TypeInformation<?>> arguments = information.getTypeArguments();
@@ -99,6 +98,10 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
                     return null;
                 }
             };
+        }
+
+        public static <T> JacksonParameterizedTypeTypeReference<T> fromTypeInformation(TypeInformation<T> typeInformation) {
+            return new JacksonParameterizedTypeTypeReference<>(typeInformation);
         }
 
         public Type getType() {

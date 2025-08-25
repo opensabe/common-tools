@@ -15,9 +15,15 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.preheating;
 
-import com.google.common.collect.Lists;
-import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
-import lombok.extern.log4j.Log4j2;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,14 +35,10 @@ import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.google.common.collect.Lists;
+
+import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 用于预热的
@@ -84,7 +86,7 @@ public class DelayApplicationReadyEventListener extends OnlyOnceApplicationListe
         discoveryClient.getServices().forEach(service -> {
             log.info("DelayApplicationReadyEventListener-onApplicationEvent: preheat load balance client for service {}", service);
             ReactorLoadBalancer<ServiceInstance> loadBalancer = clientFactory.getInstance(service, ReactorServiceInstanceLoadBalancer.class);
-            if(loadBalancer != null) {
+            if (loadBalancer != null) {
                 loadBalancer.choose(null).block();
             }
         });

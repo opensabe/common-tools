@@ -15,14 +15,13 @@
  */
 package io.github.opensabe.common.utils;
 
-import io.github.opensabe.common.utils.IpUtil;
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
-
-import java.util.List;
 
 @DisplayName("IP地址工具类测试")
 public class IpUtilTest {

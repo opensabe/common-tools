@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.handler;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.common.handler.I18nMessageResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.handler.I18nMessageResolver;
 
 /**
  * 拓展validation
@@ -36,7 +37,7 @@ public class ExceptionConfiguration {
     }
 
     @Bean
-    public I18nMessageResolver i18nMessageResolver (MessageSource messageSource) {
+    public I18nMessageResolver i18nMessageResolver(MessageSource messageSource) {
         return new I18nMessageResolver(messageSource);
     }
 
@@ -54,7 +55,7 @@ public class ExceptionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EnumConvertConfiguration enumConvertConfiguration () {
+    public EnumConvertConfiguration enumConvertConfiguration() {
         return new EnumConvertConfiguration();
     }
 }

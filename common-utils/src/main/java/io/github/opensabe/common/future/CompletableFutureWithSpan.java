@@ -15,13 +15,21 @@
  */
 package io.github.opensabe.common.future;
 
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
-
-import java.util.Arrays;
-import java.util.concurrent.*;
-import java.util.function.*;
-import java.util.stream.Collectors;
 
 public class CompletableFutureWithSpan<T> extends CompletableFuture<T> {
     private final CompletableFuture<T> completableFuture;

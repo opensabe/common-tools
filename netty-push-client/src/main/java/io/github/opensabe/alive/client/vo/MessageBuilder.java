@@ -26,6 +26,13 @@ public class MessageBuilder {
     private String accountId;
     private long expiry = 0;
 
+    private MessageBuilder() {
+    }
+
+    public static MessageBuilder newBuilder() {
+        return new MessageBuilder();
+    }
+
     public void setTopic(String topic) {
         this.topic = topic;
     }
@@ -48,13 +55,6 @@ public class MessageBuilder {
 
     public void setExpiry(long expiry) {
         this.expiry = expiry;
-    }
-
-    private MessageBuilder() {
-    }
-
-    public static MessageBuilder newBuilder() {
-        return new MessageBuilder();
     }
 
     public MessageVo build() {

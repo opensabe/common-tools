@@ -15,9 +15,8 @@
  */
 package io.github.opensabe.common.location.service;
 
-import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
-
 import java.util.List;
+import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
 
 /**
  * @author changhongwei
@@ -28,6 +27,7 @@ public interface GeocodeService {
 
     /**
      * 根据地址获取地理坐标
+     *
      * @param address 地址
      * @return 经纬度列表 (longitude, latitude)
      */
@@ -36,6 +36,7 @@ public interface GeocodeService {
 
     /**
      * 根据坐标获取地理位置
+     *
      * @param position
      * @return
      */

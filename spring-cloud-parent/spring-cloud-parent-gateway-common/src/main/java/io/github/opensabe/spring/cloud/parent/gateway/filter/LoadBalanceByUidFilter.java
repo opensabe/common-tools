@@ -15,10 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.gateway.filter;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
-import io.github.opensabe.spring.cloud.parent.gateway.config.GatewayLoadBalanceByUidProperties;
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +30,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Objects;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
+import io.github.opensabe.spring.cloud.parent.gateway.config.GatewayLoadBalanceByUidProperties;
+import reactor.core.publisher.Mono;
 
 /**
  * 通过 uid 负载均衡调用
@@ -43,10 +45,10 @@ import java.util.Objects;
 @EnableConfigurationProperties(GatewayLoadBalanceByUidProperties.class)
 public class LoadBalanceByUidFilter extends AbstractTracedFilter {
 
-    @Autowired
-    private GatewayLoadBalanceByUidProperties gatewayLoadBalanceByUidProperties;
     private final Cache<String, Boolean> filterCache = Caffeine.newBuilder()
             .maximumSize(10240).expireAfterAccess(Duration.ofHours(1)).build();
+    @Autowired
+    private GatewayLoadBalanceByUidProperties gatewayLoadBalanceByUidProperties;
 
     @Override
     public Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {

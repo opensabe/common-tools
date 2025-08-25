@@ -15,7 +15,8 @@
  */
 package io.github.opensabe.common.redisson.test;
 
-import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
 
 @Testcontainers
 @ExtendWith(SpringExtension.class)
@@ -54,30 +55,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MultiRedisTest {
 
 
-    @EnableAutoConfiguration
-    @Configuration
-    public static class App {
-    }
-
     @Container
     static GenericContainer redis1 = new FixedHostPortGenericContainer("redis")
-            .withFixedExposedPort(6378,6379)
+            .withFixedExposedPort(6378, 6379)
             .withExposedPorts(6379)
             .withCommand("redis-server");
     @Container
     static GenericContainer redis2 = new FixedHostPortGenericContainer("redis")
-            .withFixedExposedPort(6380,6379)
+            .withFixedExposedPort(6380, 6379)
             .withExposedPorts(6379)
             .withCommand("redis-server");
-
-
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
     private ReactiveStringRedisTemplate reactiveRedisTemplate;
     @Autowired
     private MultiRedisLettuceConnectionFactory multiRedisLettuceConnectionFactory;
-
 
     private void testMulti(String suffix) {
         redisTemplate.opsForValue().set("testDefault" + suffix, "testDefault");
@@ -118,5 +111,10 @@ public class MultiRedisTest {
             thread[i].join();
         }
         Assertions.assertTrue(result.get());
+    }
+
+    @EnableAutoConfiguration
+    @Configuration
+    public static class App {
     }
 }

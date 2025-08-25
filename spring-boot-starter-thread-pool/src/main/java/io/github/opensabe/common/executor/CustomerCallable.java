@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.common.executor;
 
+import java.util.concurrent.Callable;
 import io.github.opensabe.common.executor.jfr.ThreadTaskJFREvent;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
@@ -23,8 +24,6 @@ import io.micrometer.tracing.TraceContext;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.concurrent.Callable;
 
 @Log4j2
 public class CustomerCallable<T> implements JFRecordable<T>, Traceable<T>, Callable<T> {

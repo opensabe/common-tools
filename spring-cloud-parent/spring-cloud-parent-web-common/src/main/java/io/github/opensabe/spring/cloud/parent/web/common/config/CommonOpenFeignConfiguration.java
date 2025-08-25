@@ -15,17 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.config;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.opensabe.spring.cloud.parent.common.redislience4j.ThreadPoolBulkHeadDecorator;
-import io.github.opensabe.spring.cloud.parent.web.common.feign.FeignBlockingLoadBalancerClientDelegate;
-import io.github.opensabe.spring.cloud.parent.web.common.feign.FeignRequestCircuitBreakerExtractor;
-import io.github.opensabe.spring.cloud.parent.web.common.feign.Resilience4jFeignClient;
-import io.github.opensabe.spring.cloud.parent.web.common.jfr.FeignJFRProperties;
-import io.github.opensabe.spring.cloud.parent.web.common.jfr.FeignObservationToJFRGenerator;
-import feign.httpclient.ApacheHttpClient;
-import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
@@ -47,9 +40,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import feign.httpclient.ApacheHttpClient;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
+import io.github.opensabe.spring.cloud.parent.common.redislience4j.ThreadPoolBulkHeadDecorator;
+import io.github.opensabe.spring.cloud.parent.web.common.feign.FeignBlockingLoadBalancerClientDelegate;
+import io.github.opensabe.spring.cloud.parent.web.common.feign.FeignRequestCircuitBreakerExtractor;
+import io.github.opensabe.spring.cloud.parent.web.common.feign.Resilience4jFeignClient;
+import io.github.opensabe.spring.cloud.parent.web.common.jfr.FeignJFRProperties;
+import io.github.opensabe.spring.cloud.parent.web.common.jfr.FeignObservationToJFRGenerator;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(FeignJFRProperties.class)
@@ -68,7 +69,8 @@ public class CommonOpenFeignConfiguration implements BeanPostProcessor {
      * 开源化准备工作，不能写死 @EnableFeignClients 扫描路径，但是要实现添加我们框架中的默认配置
      * 监控{@link FeignClientFactory}, 如果configuration中包含default,就在default的配置类中追加
      * {@link DefaultOpenFeignConfiguration},如果不包含default,就创建一个包含{@link DefaultOpenFeignConfiguration}的configuration
-     * @param bean the new bean instance
+     *
+     * @param bean     the new bean instance
      * @param beanName the name of the bean
      * @return
      * @throws BeansException

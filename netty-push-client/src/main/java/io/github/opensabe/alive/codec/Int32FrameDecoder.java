@@ -15,11 +15,10 @@
  */
 package io.github.opensabe.alive.codec;
 
+import java.util.List;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-
-import java.util.List;
 
 /**
  * 通过给定的消息长度来解析数据包

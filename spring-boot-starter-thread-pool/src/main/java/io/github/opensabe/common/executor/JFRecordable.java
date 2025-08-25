@@ -19,20 +19,20 @@ import io.github.opensabe.common.executor.jfr.ThreadTaskJFREvent;
 
 public interface JFRecordable<V> {
 
-    ThreadTaskJFREvent getEvent ();
+    ThreadTaskJFREvent getEvent();
 
-    default V record () {
+    default V record() {
         var threadTaskJFREvent = getEvent();
         threadTaskJFREvent.setTaskRunStartTime(System.currentTimeMillis());
         threadTaskJFREvent.setTaskQueueTimeDuration(threadTaskJFREvent.getTaskRunStartTime() - threadTaskJFREvent.getSubmitTaskStartTime());
         try {
             return inRecord();
-        }finally {
+        } finally {
             threadTaskJFREvent.setTaskRunEndTime(System.currentTimeMillis());
             threadTaskJFREvent.setTaskRunTimeDuration(threadTaskJFREvent.getTaskRunEndTime() - threadTaskJFREvent.getTaskRunStartTime());
             threadTaskJFREvent.commit();
         }
     }
 
-    V inRecord () ;
+    V inRecord();
 }

@@ -18,6 +18,7 @@ package io.github.opensabe.common.mybatis.base;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.mapping.MappedStatement;
+
 import tk.mybatis.mapper.annotation.RegisterMapper;
 import tk.mybatis.mapper.mapperhelper.MapperHelper;
 import tk.mybatis.mapper.mapperhelper.MapperTemplate;
@@ -39,7 +40,7 @@ public interface UpdateLimitMapper<T> {
         }
 
 
-        public String updateByExampleSelectiveLimit (MappedStatement ms) {
+        public String updateByExampleSelectiveLimit(MappedStatement ms) {
             Class<?> entityClass = getEntityClass(ms);
             StringBuilder sql = new StringBuilder();
             if (isCheckExampleEntityClass()) {
@@ -56,7 +57,7 @@ public interface UpdateLimitMapper<T> {
             return sql.toString();
         }
 
-        public String updateByExampleLimit (MappedStatement ms) {
+        public String updateByExampleLimit(MappedStatement ms) {
             Class<?> entityClass = getEntityClass(ms);
             StringBuilder sql = new StringBuilder();
             if (isCheckExampleEntityClass()) {

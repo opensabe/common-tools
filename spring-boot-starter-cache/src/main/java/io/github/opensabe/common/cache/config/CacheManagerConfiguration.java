@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.common.cache.config;
 
-import io.github.opensabe.common.cache.api.CompositeCacheManager;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+
+import io.github.opensabe.common.cache.api.CompositeCacheManager;
 
 /**
  * @author heng.ma
@@ -36,7 +37,7 @@ public class CacheManagerConfiguration {
 
 
     @Bean
-    public CompositeCacheManager compositeCacheManager () {
+    public CompositeCacheManager compositeCacheManager() {
         return new CompositeCacheManager();
     }
 }

@@ -15,11 +15,8 @@
  */
 package io.github.opensabe.spring.cloud.starter.third.client.test;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
-import io.micrometer.observation.Observation;
-import io.micrometer.tracing.TraceContext;
-import lombok.extern.log4j.Log4j2;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,9 +31,13 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.stream.Collectors;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
+import io.micrometer.observation.Observation;
+import io.micrometer.tracing.TraceContext;
+import lombok.extern.log4j.Log4j2;
 
 @JfrEventTest
 @AutoConfigureObservability
@@ -46,20 +47,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Log4j2
 public class TestThirdPartyWebClient extends CommonMicroServiceTest {
 
-    @EnableAutoConfiguration
-    @Configuration
-    public static class App {
-    }
+    @Autowired
+    private ThirdPartyWebClientNamedContextFactory thirdPartyWebClientNamedContextFactory;
+    @Autowired
+    private UnifiedObservationFactory unifiedObservationFactory;
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         registry.add("third-party.webclient.configs.http-bin.base-url", () -> "http://" + GOOD_HOST + ":" + GOOD_PORT);
     }
-
-    @Autowired
-    private ThirdPartyWebClientNamedContextFactory thirdPartyWebClientNamedContextFactory;
-    @Autowired
-    private UnifiedObservationFactory unifiedObservationFactory;
 
     /**
      * 测试发出请求 Header 中包含 Accept-Encoding: gzip
@@ -113,5 +109,10 @@ public class TestThirdPartyWebClient extends CommonMicroServiceTest {
             );
         });
 
+    }
+
+    @EnableAutoConfiguration
+    @Configuration
+    public static class App {
     }
 }

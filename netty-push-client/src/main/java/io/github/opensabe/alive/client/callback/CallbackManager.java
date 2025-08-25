@@ -15,13 +15,13 @@
  */
 package io.github.opensabe.alive.client.callback;
 
-import io.github.opensabe.alive.protobuf.Message;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import io.github.opensabe.alive.protobuf.Message;
 
 /**
  * @author lone

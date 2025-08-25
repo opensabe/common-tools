@@ -15,7 +15,12 @@
  */
 package io.github.opensabe.common.redisson.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Documented
 @Inherited
@@ -36,6 +41,6 @@ public @interface RedissonScheduled {
      * 初始延迟
      */
     long initialDelay() default 0;
-    
+
     boolean stopOnceShutdown() default false;
 }

@@ -17,7 +17,12 @@ package io.github.opensabe.alive.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 
 /**
@@ -28,6 +33,10 @@ import java.util.*;
 public class ConsistentHash<T> {
 
     /**
+     * 圈大小
+     */
+    private static final int circleSize = 188833;
+    /**
      * 虚节点数量
      */
     private final int numberOfReplicas;
@@ -36,16 +45,11 @@ public class ConsistentHash<T> {
      */
     private volatile TreeMap<Integer, List<T>> circle = new TreeMap<>();
 
-    /**
-     * 圈大小
-     */
-    private static final int circleSize = 188833;
-
     //	private static final int circleSize = 18;
 
     /**
      * @param numberOfReplicas 虚节点数
-     * @param nodes 节点数
+     * @param nodes            节点数
      */
     public ConsistentHash(int numberOfReplicas, Collection<T> nodes) {
         this.numberOfReplicas = numberOfReplicas;
@@ -54,6 +58,27 @@ public class ConsistentHash<T> {
             addNode(circle, node);
         }
 
+    }
+
+    private static int hashCode(byte[] bytes) {
+        int hash = 0;
+        for (byte b : bytes) {
+            hash = hash * 31 + ((int) b & 0xFF);
+            if (hash > 0x4000000) {
+                hash = hash % 0x4000000;
+            }
+        }
+        return hash;
+    }
+
+    /**
+     * 获取0 到 (size-1)的一个随机数
+     *
+     * @param size 范围
+     * @return 返回 0到(size-1)的一个随机数
+     */
+    public static int getIndex(int size) {
+        return ((int) (Math.random() * 100)) % size;
     }
 
     public synchronized void add(T node) {
@@ -171,17 +196,6 @@ public class ConsistentHash<T> {
         return null;
     }
 
-    private static int hashCode(byte[] bytes) {
-        int hash = 0;
-        for (byte b : bytes) {
-            hash = hash * 31 + ((int) b & 0xFF);
-            if (hash > 0x4000000) {
-                hash = hash % 0x4000000;
-            }
-        }
-        return hash;
-    }
-
     /**
      * md5映射计算
      *
@@ -199,16 +213,6 @@ public class ConsistentHash<T> {
             e.printStackTrace();
         }
         return 0;
-    }
-
-    /**
-     * 获取0 到 (size-1)的一个随机数
-     *
-     * @param size 范围
-     * @return 返回 0到(size-1)的一个随机数
-     */
-    public static int getIndex(int size) {
-        return ((int) (Math.random() * 100)) % size;
     }
 
 }

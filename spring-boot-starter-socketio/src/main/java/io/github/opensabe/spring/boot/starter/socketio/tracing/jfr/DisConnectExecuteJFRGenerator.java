@@ -15,13 +15,12 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.tracing.jfr;
 
+import java.util.Objects;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.EventEnum;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.observation.SocketIOExecuteContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
-
-import java.util.Objects;
 
 public class DisConnectExecuteJFRGenerator extends ObservationToJFRGenerator<SocketIOExecuteContext> {
     @Override

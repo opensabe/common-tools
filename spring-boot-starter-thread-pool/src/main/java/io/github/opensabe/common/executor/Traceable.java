@@ -19,7 +19,7 @@ package io.github.opensabe.common.executor;
 import io.micrometer.observation.Observation;
 import jakarta.validation.constraints.NotNull;
 
-public interface Traceable<V>{
+public interface Traceable<V> {
 
     @NotNull
     Observation getObservation();

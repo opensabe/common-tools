@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.jfr;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 @NoArgsConstructor

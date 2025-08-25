@@ -15,11 +15,6 @@
  */
 package io.github.opensabe.common.utils;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.http.HttpHeaders;
-
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -28,6 +23,12 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Stream;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.http.HttpHeaders;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class IpUtil {

@@ -15,18 +15,10 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
-import io.github.opensabe.common.entity.base.vo.BaseMessage;
-import io.github.opensabe.common.entity.base.vo.MessageTypeReference;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.utils.json.JsonUtil;
-import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeContext;
-import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeObservationConvention;
-import io.github.opensabe.spring.boot.starter.rocketmq.observation.RocketMQObservationDocumentation;
-import io.micrometer.observation.Observation;
-import jakarta.annotation.Nonnull;
-import lombok.extern.log4j.Log4j2;
+import java.nio.charset.Charset;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -40,24 +32,30 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.util.TypeUtils;
 
-import java.nio.charset.Charset;
-import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
+import io.github.opensabe.common.entity.base.vo.BaseMessage;
+import io.github.opensabe.common.entity.base.vo.MessageTypeReference;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeContext;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsumeObservationConvention;
+import io.github.opensabe.spring.boot.starter.rocketmq.observation.RocketMQObservationDocumentation;
+import io.micrometer.observation.Observation;
+import jakarta.annotation.Nonnull;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt>, ApplicationListener<ApplicationReadyEvent>, InitializingBean, ConsumerAdjust {
-    @Autowired
-    private UnifiedObservationFactory unifiedObservationFactory;
-    @Autowired
-    protected Environment environment;
-    
-    protected String topic;
-
     //用来阻断消费，防止微服务 ApplicationContext 还没启动完全就开始消费
     private final CountDownLatch cdl;
-
     private final MessageTypeReference<T> typeReference;
-
+    @Autowired
+    protected Environment environment;
+    protected String topic;
+    @Autowired
+    private UnifiedObservationFactory unifiedObservationFactory;
     //用来防止每次消费都要读取 cdl 导致性能下降
     private volatile boolean isStarted = false;
 
@@ -77,7 +75,7 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
 
 
     @SuppressWarnings("unchecked")
-    protected BaseMessage<T> convert (MessageExt ext) {
+    protected BaseMessage<T> convert(MessageExt ext) {
 
         String payload = new String(ext.getBody(), Charset.defaultCharset());
 
@@ -95,7 +93,8 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
             }
             return message;
         }
-        BaseMQMessage  v1 = JsonUtil.parseObject(payload, new TypeReference<>() {});
+        BaseMQMessage v1 = JsonUtil.parseObject(payload, new TypeReference<>() {
+        });
 
         if (Objects.isNull(v1)) {
             v1 = new BaseMQMessage();
@@ -142,7 +141,7 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         observation.observe(() -> {
             if (StringUtils.isEmpty(message.getTraceId())) {
                 log.info("AbstractMQConsumer-onMessage: topic: {} -> message: {}", topic, new String(ext.getBody()));
-            }else {
+            } else {
                 log.info("AbstractMQConsumer-onMessage: topic: initial trace id {}, topic: {} -> message: {}", message.getTraceId(), topic, new String(ext.getBody()));
             }
             try {
@@ -156,7 +155,7 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
             }
         });
     }
-    
+
     @Override
     public void onApplicationEvent(@Nonnull ApplicationReadyEvent event) {
         cdl.countDown();

@@ -15,14 +15,15 @@
  */
 package io.github.opensabe.common.redisson.aop.scheduled;
 
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.observation.Observation;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.RedissonShutdownException;
 import org.redisson.api.RLock;
@@ -32,14 +33,15 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.observation.Observation;
+import lombok.extern.log4j.Log4j2;
 
 
 @Log4j2
@@ -80,7 +82,7 @@ public class RedissonScheduledListener {
                         throw new BeanCreationException("RedissonScheduled name duplicated");
                     } else {
                         map.put(name, new ExecutorWrapper(redissonClient, unifiedObservationFactory, () -> method.invoke(bean)
-                           , name, annotation.initialDelay(),
+                                , name, annotation.initialDelay(),
                                 annotation.fixedDelay(), annotation.stopOnceShutdown(), meterRegistry));
                     }
 
@@ -110,11 +112,10 @@ public class RedissonScheduledListener {
     private static class ExecutorWrapper {
         private final Thread leaderLatch;
         private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+        private final boolean stopOnceShutdown;
+        private final DistributionSummary distributionSummary;
         private volatile boolean isLeader;
         private volatile boolean isStopped = false;
-        private  final boolean stopOnceShutdown;
-
-        private final DistributionSummary distributionSummary;
 
         public ExecutorWrapper(RedissonClient redissonClient, UnifiedObservationFactory unifiedObservationFactory,
                                ScheduledService runnable,

@@ -17,7 +17,6 @@ package io.github.opensabe.alive.client.impl;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import io.github.opensabe.alive.client.Client;
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.ResponseFuture;
@@ -64,7 +63,7 @@ public abstract class AbstractClient implements Client {
 
     @Override
     public Response query(QueryVo queryVo, long timeout, TimeUnit unit)
-        throws AliveClientExecutionException, InterruptedException, AliveClientException {
+            throws AliveClientExecutionException, InterruptedException, AliveClientException {
         return queryAsync(queryVo).get();
     }
 
@@ -97,13 +96,13 @@ public abstract class AbstractClient implements Client {
 
     @Override
     public Response push(MessageVo messageVo)
-        throws AliveClientExecutionException, AliveClientTimeoutException, InterruptedException, AliveClientException {
+            throws AliveClientExecutionException, AliveClientTimeoutException, InterruptedException, AliveClientException {
         return push(messageVo, 0, TimeUnit.SECONDS);
     }
 
     @Override
     public Response push(MessageVo messageVo, long timeout, TimeUnit unit)
-        throws AliveClientExecutionException, AliveClientTimeoutException, InterruptedException, AliveClientException {
+            throws AliveClientExecutionException, AliveClientTimeoutException, InterruptedException, AliveClientException {
         return pushAsync(messageVo).get(timeout, unit);
     }
 }

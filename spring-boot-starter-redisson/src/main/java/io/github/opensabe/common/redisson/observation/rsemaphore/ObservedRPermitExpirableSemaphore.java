@@ -15,14 +15,15 @@
  */
 package io.github.opensabe.common.redisson.observation.rsemaphore;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
-import io.micrometer.observation.Observation;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.redisson.api.RFuture;
 import org.redisson.api.RPermitExpirableSemaphore;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
+import io.micrometer.observation.Observation;
 
 public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermitExpirableSemaphore> implements RPermitExpirableSemaphore {
 
@@ -37,7 +38,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
 
     @Override
     public boolean copy(String destination, int database) {
-        return delegate.copy(destination,database);
+        return delegate.copy(destination, database);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
 
     @Override
     public boolean copyAndReplace(String destination, int database) {
-        return delegate.copyAndReplace(destination,database);
+        return delegate.copyAndReplace(destination, database);
     }
 
     @Override
@@ -68,14 +69,6 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
     @Override
     public RFuture<Boolean> copyAndReplaceAsync(String destination, int database) {
         return delegate.copyAndReplaceAsync(destination, database);
-    }
-
-    interface PermitSemaphoreAcquire {
-        String run();
-    }
-
-    interface PermitsSemaphoreAcquire {
-        List<String> run();
     }
 
     private String observeAcquiringPermitSemaphore(boolean tryAcquire, long waitTime, long leaseTime, TimeUnit unit, PermitSemaphoreAcquire permitSemaphoreAcquire) {
@@ -117,7 +110,6 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
             observation.stop();
         }
     }
-
 
     @Override
     public String acquire() throws InterruptedException {
@@ -367,6 +359,11 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
     }
 
     @Override
+    public void setPermits(int permits) {
+        delegate.setPermits(permits);
+    }
+
+    @Override
     public int acquiredPermits() {
         return delegate.acquiredPermits();
     }
@@ -390,11 +387,6 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
         } finally {
             observation.stop();
         }
-    }
-
-    @Override
-    public void setPermits(int permits) {
-        delegate.setPermits(permits);
     }
 
     @Override
@@ -460,7 +452,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
 
     @Override
     public RFuture<List<String>> acquireAsync(int permits, long leaseTime, TimeUnit unit) {
-        return delegate.acquireAsync(permits,leaseTime,unit);
+        return delegate.acquireAsync(permits, leaseTime, unit);
     }
 
     @Override
@@ -485,7 +477,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
 
     @Override
     public RFuture<List<String>> tryAcquireAsync(int permits, long waitTime, long leaseTime, TimeUnit unit) {
-        return delegate.tryAcquireAsync(permits,waitTime,leaseTime,unit);
+        return delegate.tryAcquireAsync(permits, waitTime, leaseTime, unit);
     }
 
     @Override
@@ -546,5 +538,13 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermi
     @Override
     public RFuture<Long> getLeaseTimeAsync(String permitId) {
         return delegate.getLeaseTimeAsync(permitId);
+    }
+
+    interface PermitSemaphoreAcquire {
+        String run();
+    }
+
+    interface PermitsSemaphoreAcquire {
+        List<String> run();
     }
 }

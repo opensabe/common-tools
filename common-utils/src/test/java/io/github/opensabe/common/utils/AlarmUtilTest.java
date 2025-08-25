@@ -15,10 +15,10 @@
  */
 package io.github.opensabe.common.utils;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 @DisplayName("告警工具类测试")
 public class AlarmUtilTest {

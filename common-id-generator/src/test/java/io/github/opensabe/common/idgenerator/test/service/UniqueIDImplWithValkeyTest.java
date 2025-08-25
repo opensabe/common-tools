@@ -15,22 +15,22 @@
  */
 package io.github.opensabe.common.idgenerator.test.service;
 
-import cn.hutool.core.collection.ConcurrentHashSet;
-import io.github.opensabe.common.idgenerator.service.UniqueID;
-import io.github.opensabe.common.idgenerator.test.common.BaseUniqueIdWithValkeyTest;
+import java.util.Set;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Set;
+import cn.hutool.core.collection.ConcurrentHashSet;
+import io.github.opensabe.common.idgenerator.service.UniqueID;
+import io.github.opensabe.common.idgenerator.test.common.BaseUniqueIdWithValkeyTest;
 
 public class UniqueIDImplWithValkeyTest extends BaseUniqueIdWithValkeyTest {
 
-    @Autowired
-    private UniqueID uniqueID;
-
     private static final int THREAD_COUNT = 15;
     private static final int GET_COUNT = 100;
+    @Autowired
+    private UniqueID uniqueID;
 
     @Test
     public void testMultiThreadGetUniqueId() throws InterruptedException {

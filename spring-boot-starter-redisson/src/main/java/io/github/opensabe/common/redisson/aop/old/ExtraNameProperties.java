@@ -15,26 +15,25 @@
  */
 package io.github.opensabe.common.redisson.aop.old;
 
-import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
-import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
+import java.lang.reflect.Method;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import java.lang.reflect.Method;
+import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 
 /**
  * @author heng.ma
  */
 public abstract class ExtraNameProperties extends AbstractRedissonProperties {
 
-    private final int parameterIndex;
-    private final String expression;
-
-
     private static final SpelExpressionParser parser = new SpelExpressionParser();
     private static final ParserContext context = new TemplateParserContext();
+    private final int parameterIndex;
+    private final String expression;
 
     private ExtraNameProperties(MethodArgumentsExpressEvaluator evaluator, String prefix, String name, int parameterIndex, String expression) {
         super(evaluator, prefix, name);
@@ -45,6 +44,7 @@ public abstract class ExtraNameProperties extends AbstractRedissonProperties {
     protected ExtraNameProperties(String prefix, String name, Integer parameterIndex, String expression) {
         this(null, prefix, name, parameterIndex, expression);
     }
+
     protected ExtraNameProperties(MethodArgumentsExpressEvaluator evaluator, String prefix, String name) {
         this(evaluator, prefix, name, -1, null);
     }

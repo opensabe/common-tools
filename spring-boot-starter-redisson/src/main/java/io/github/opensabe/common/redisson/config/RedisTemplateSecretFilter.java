@@ -15,14 +15,15 @@
  */
 package io.github.opensabe.common.redisson.config;
 
-import io.github.opensabe.common.secret.FilterSecretStringResult;
-import io.github.opensabe.common.secret.GlobalSecretManager;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 
-import java.nio.charset.StandardCharsets;
+import io.github.opensabe.common.secret.FilterSecretStringResult;
+import io.github.opensabe.common.secret.GlobalSecretManager;
 
 public class RedisTemplateSecretFilter implements BeanPostProcessor {
     private final GlobalSecretManager globalSecretManager;
@@ -67,22 +68,22 @@ public class RedisTemplateSecretFilter implements BeanPostProcessor {
                                                  GlobalSecretManager globalSecretManager) implements RedisSerializer<T> {
 
         @Override
-            public byte[] serialize(T o) throws SerializationException {
-                byte[] serialize = delegate.serialize(o);
-                if (serialize != null) {
-                    String s = new String(serialize, StandardCharsets.UTF_8);
-                    FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(s);
-                    if (filterSecretStringResult.isFoundSensitiveString()) {
-                        throw new SerializationException("Sensitive string found in Redis request");
-                    }
+        public byte[] serialize(T o) throws SerializationException {
+            byte[] serialize = delegate.serialize(o);
+            if (serialize != null) {
+                String s = new String(serialize, StandardCharsets.UTF_8);
+                FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(s);
+                if (filterSecretStringResult.isFoundSensitiveString()) {
+                    throw new SerializationException("Sensitive string found in Redis request");
                 }
-                return serialize;
             }
-
-            @Override
-            public T deserialize(byte[] bytes) throws SerializationException {
-                return delegate.deserialize(bytes);
-            }
+            return serialize;
         }
+
+        @Override
+        public T deserialize(byte[] bytes) throws SerializationException {
+            return delegate.deserialize(bytes);
+        }
+    }
 }
 

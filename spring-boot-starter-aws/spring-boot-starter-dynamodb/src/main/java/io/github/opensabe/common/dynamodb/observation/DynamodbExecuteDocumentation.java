@@ -47,9 +47,7 @@ public enum DynamodbExecuteDocumentation implements ObservationDocumentation {
         public String getName() {
             return "aws.execute.dynamodb.update";
         }
-    }
-
-    ;
+    };
 
     @Override
     public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {

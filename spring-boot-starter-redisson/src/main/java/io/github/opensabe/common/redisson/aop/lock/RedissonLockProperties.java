@@ -28,6 +28,7 @@ public class RedissonLockProperties extends ExtraNameProperties {
         super(evaluator, redissonLock.prefix(), redissonLock.name());
         this.redissonLock = redissonLock;
     }
+
     @SuppressWarnings("removal")
     public RedissonLockProperties(RedissonLock redissonLock,
                                   io.github.opensabe.common.redisson.annotation.RedissonLockName redissonLockName,

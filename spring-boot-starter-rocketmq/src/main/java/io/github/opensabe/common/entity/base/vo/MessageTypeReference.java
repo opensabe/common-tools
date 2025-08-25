@@ -15,15 +15,17 @@
  */
 package io.github.opensabe.common.entity.base.vo;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import org.springframework.data.util.TypeInformation;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.springframework.data.util.TypeInformation;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
 /**
  * 消息反序列化帮助类
+ *
  * @author heng.ma
  */
 public class MessageTypeReference<T> extends TypeReference<T> {
@@ -35,11 +37,11 @@ public class MessageTypeReference<T> extends TypeReference<T> {
     private MessageTypeReference(final TypeInformation<T> information) {
         final List<TypeInformation<?>> arguments = information.getTypeArguments();
         this.type = new ParameterizedType() {
-            public Type [] getActualTypeArguments() {
+            public Type[] getActualTypeArguments() {
                 return arguments.stream().map(i -> i.toTypeDescriptor().getResolvableType().getType()).toArray(Type[]::new);
             }
 
-            public  Type getRawType() {
+            public Type getRawType() {
                 return information.getType();
             }
 
@@ -51,7 +53,7 @@ public class MessageTypeReference<T> extends TypeReference<T> {
             this.baseMessageType = new ParameterizedType() {
                 @Override
                 public Type[] getActualTypeArguments() {
-                    return new Type[] {information.toTypeDescriptor().getResolvableType().getType()};
+                    return new Type[]{information.toTypeDescriptor().getResolvableType().getType()};
                 }
 
                 @Override
@@ -64,12 +66,12 @@ public class MessageTypeReference<T> extends TypeReference<T> {
                     return null;
                 }
             };
-        }else {
+        } else {
             this.baseMessageType = null;
         }
     }
 
-    public static <T> MessageTypeReference<T> fromTypeInformation (TypeInformation<T> information) {
+    public static <T> MessageTypeReference<T> fromTypeInformation(TypeInformation<T> information) {
         return new MessageTypeReference<>(information);
     }
 
@@ -80,7 +82,7 @@ public class MessageTypeReference<T> extends TypeReference<T> {
 
 
     @SuppressWarnings("unchecked")
-    public TypeReference<BaseMessage<T>> baseMessageType () {
+    public TypeReference<BaseMessage<T>> baseMessageType() {
         if (baseMessageType == null) {
             return (TypeReference<BaseMessage<T>>) this;
         }

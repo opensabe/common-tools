@@ -15,7 +15,16 @@
  */
 package io.github.opensabe.common.executor.resilience4j;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import io.github.opensabe.common.executor.NamedThreadPoolExecutor;
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.ThreadUnCaughtExceptionHandler;
@@ -25,10 +34,6 @@ import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
 import io.github.resilience4j.bulkhead.internal.FixedThreadPoolBulkhead;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
-import java.util.concurrent.*;
 
 @Log4j2
 public class ThreadPoolBulkheadCustomizedDecorator implements ThreadPoolBulkHeadDecorator {

@@ -16,8 +16,8 @@
 package io.github.opensabe.scheduler.jfr;
 
 
-import io.github.opensabe.scheduler.observation.JobExecuteContext;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
+import io.github.opensabe.scheduler.observation.JobExecuteContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
 public class JobExecuteObservationToJFRGenerator extends ObservationToJFRGenerator<JobExecuteContext> {

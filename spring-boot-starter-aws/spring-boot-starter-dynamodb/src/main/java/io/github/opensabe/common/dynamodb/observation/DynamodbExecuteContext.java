@@ -15,6 +15,9 @@
  */
 package io.github.opensabe.common.dynamodb.observation;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import io.micrometer.observation.Observation;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,10 +26,6 @@ import lombok.ToString;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Getter
 @Setter
@@ -47,14 +46,16 @@ public class DynamodbExecuteContext extends Observation.Context {
         this.hashKey = resolveAttributeValue(hashKey);
         this.rangeKey = rangeKey.map(this::resolveAttributeValue).orElse(null);
     }
+
     public DynamodbExecuteContext(String method, Key key) {
-        this (method, key.partitionKeyValue(), key.sortKeyValue());
+        this(method, key.partitionKeyValue(), key.sortKeyValue());
     }
+
     public DynamodbExecuteContext(String method) {
         this.method = method;
     }
 
-    public void setExpression (Expression expression) {
+    public void setExpression(Expression expression) {
         Map<String, String> values = new HashMap<>(expression.expressionValues().size());
         expression.expressionValues().forEach((k, v) -> values.put(k, resolveAttributeValue(v)));
         this.expression = expression.expression();
@@ -66,7 +67,7 @@ public class DynamodbExecuteContext extends Observation.Context {
         }
     }
 
-    private String resolveAttributeValue (AttributeValue value) {
+    private String resolveAttributeValue(AttributeValue value) {
         return switch (value.type()) {
             case S -> value.s();
             case N -> value.n();

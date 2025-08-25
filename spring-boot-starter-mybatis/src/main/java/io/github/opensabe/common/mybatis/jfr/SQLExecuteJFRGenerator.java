@@ -15,12 +15,11 @@
  */
 package io.github.opensabe.common.mybatis.jfr;
 
-import io.github.opensabe.common.mybatis.observation.SQLExecuteContext;
+import java.util.Objects;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
+import io.github.opensabe.common.mybatis.observation.SQLExecuteContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
-
-import java.util.Objects;
 
 public class SQLExecuteJFRGenerator extends ObservationToJFRGenerator<SQLExecuteContext> {
     @Override

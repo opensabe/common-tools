@@ -16,10 +16,9 @@
 package io.github.opensabe.common.alive.client.message;
 
 
-import io.github.opensabe.common.alive.client.message.enumeration.PushType;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 
 public class MessageVo extends PushVo {
     public final String body;
@@ -27,11 +26,11 @@ public class MessageVo extends PushVo {
     public final long expiry;
 
     public MessageVo(String topic, String body, String id) {
-        this(topic, body, id, (String)null, PushType.GROUP);
+        this(topic, body, id, (String) null, PushType.GROUP);
     }
 
     public MessageVo(String topic, String body, String id, String deviceId, PushType pushType) {
-        this(topic, body, id, deviceId, pushType, 0L, (String)null);
+        this(topic, body, id, deviceId, pushType, 0L, (String) null);
     }
 
     public MessageVo(String topic, String body, String id, String deviceId, PushType pushType, long expiry, String accountId) {
@@ -52,6 +51,10 @@ public class MessageVo extends PushVo {
         this.id = id;
     }
 
+    public static void main(String[] args) {
+        (new MessageVo("aa", "", "")).buildPublish(1, 1);
+    }
+
     public Publish buildPublish(int requestId, int productCode) {
         Publish builder = new Publish();
         builder.setRequestId(requestId);
@@ -69,10 +72,6 @@ public class MessageVo extends PushVo {
         }
 
         return builder;
-    }
-
-    public static void main(String[] args) {
-        (new MessageVo("aa", "", "")).buildPublish(1, 1);
     }
 
     public String toString() {

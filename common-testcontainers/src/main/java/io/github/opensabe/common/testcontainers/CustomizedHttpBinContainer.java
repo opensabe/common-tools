@@ -15,11 +15,11 @@
  */
 package io.github.opensabe.common.testcontainers;
 
-import com.github.dockerjava.api.command.InspectContainerResponse;
-import lombok.SneakyThrows;
 import org.testcontainers.containers.GenericContainer;
 
-import java.util.concurrent.TimeUnit;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+
+import lombok.SneakyThrows;
 
 public class CustomizedHttpBinContainer extends GenericContainer<CustomizedHttpBinContainer> {
 

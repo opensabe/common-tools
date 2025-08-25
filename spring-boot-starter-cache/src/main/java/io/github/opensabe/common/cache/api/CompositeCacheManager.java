@@ -15,9 +15,16 @@
  */
 package io.github.opensabe.common.cache.api;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
-import io.github.opensabe.common.cache.redis.DynamicRedisCacheManager;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -25,27 +32,18 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.util.Assert;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
-import java.time.Duration;
-import java.util.*;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
+import io.github.opensabe.common.cache.redis.DynamicRedisCacheManager;
 
 /**
  * 实现 <code>Expire#cacheType()</code>逻辑
- * @see Expire#cacheType()
+ *
  * @author heng.ma
+ * @see Expire#cacheType()
  */
 public class CompositeCacheManager extends org.springframework.cache.support.CompositeCacheManager implements ExpireCacheManager {
-
-    private final List<CacheManager> cacheManagers = new ArrayList<>();
-
-    private Integer caffeineIndex;
-
-    private Integer redisIndex;
-
-    public CompositeCacheManager() {
-        super();
-    }
 
     private static VarHandle caffeineCacheBuilder;
 
@@ -57,6 +55,14 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
         } catch (NoSuchFieldException | IllegalAccessException ignore) {
 
         }
+    }
+
+    private final List<CacheManager> cacheManagers = new ArrayList<>();
+    private Integer caffeineIndex;
+    private Integer redisIndex;
+
+    public CompositeCacheManager() {
+        super();
     }
 
     @Override
@@ -84,15 +90,15 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
             }
         }
         //如果预定义的没有，优先使用caffeine,如果没有caffeine，使用redis
-        Integer index = caffeineIndex == null? redisIndex : caffeineIndex;
+        Integer index = caffeineIndex == null ? redisIndex : caffeineIndex;
         if (index != null) {
-            return ((ExpireCacheManager)cacheManagers.get(index)).getCache(name, ttl);
+            return ((ExpireCacheManager) cacheManagers.get(index)).getCache(name, ttl);
         }
         return null;
     }
 
     @Override
-    public Collection<String> settings (String cacheName) {
+    public Collection<String> settings(String cacheName) {
         Set<String> set = new HashSet<>();
         for (CacheManager cacheManager : cacheManagers) {
             Collection<String> settings;

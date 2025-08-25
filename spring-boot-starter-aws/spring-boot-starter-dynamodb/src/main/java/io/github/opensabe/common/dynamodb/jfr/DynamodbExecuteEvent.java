@@ -24,7 +24,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Category({"observation","Dynamodb-Execute"})
+@Category({"observation", "Dynamodb-Execute"})
 @Label("Dynamodb Execute Monitor")
 @StackTrace(value = false)
 public class DynamodbExecuteEvent extends Event {
@@ -38,7 +38,7 @@ public class DynamodbExecuteEvent extends Event {
     private String rangeKey;
     private String expression;
 
-    public DynamodbExecuteEvent(String method,String hashKey,String rangeKey, String expression) {
+    public DynamodbExecuteEvent(String method, String hashKey, String rangeKey, String expression) {
         this.method = method;
         this.hashKey = hashKey;
         this.rangeKey = rangeKey;

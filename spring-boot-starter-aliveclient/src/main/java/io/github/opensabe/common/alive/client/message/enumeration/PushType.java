@@ -21,11 +21,11 @@ public enum PushType {
     MULTI(3);
     private int val;
 
-    public int getVal() {
-        return val;
-    }
-
     PushType(int val) {
         this.val = val;
+    }
+
+    public int getVal() {
+        return val;
     }
 }

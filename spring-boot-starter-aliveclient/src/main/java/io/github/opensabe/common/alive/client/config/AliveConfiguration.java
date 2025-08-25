@@ -15,10 +15,6 @@
  */
 package io.github.opensabe.common.alive.client.config;
 
-import com.alibaba.fastjson.support.spring.messaging.MappingFastJsonMessageConverter;
-import io.github.opensabe.common.alive.client.Client;
-import io.github.opensabe.common.alive.client.MQClientImpl;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -30,7 +26,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 
+import com.alibaba.fastjson.support.spring.messaging.MappingFastJsonMessageConverter;
+
 import static io.github.opensabe.common.alive.client.config.AliveProperties.ROCKET_CLIENT_NAME;
+
+import io.github.opensabe.common.alive.client.Client;
+import io.github.opensabe.common.alive.client.MQClientImpl;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 
 
 //@Log4j2
@@ -40,22 +42,23 @@ public class AliveConfiguration {
     private AliveProperties aliveProperties;
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
+
     @Primary
     @Bean(ROCKET_CLIENT_NAME)
-    @ConditionalOnProperty(prefix = "alive.push",name = "rocketmq.name-server")
-    public Client rocketAliveClient (Environment environment) {
-         var producer = new RocketMQAutoConfiguration(environment).
+    @ConditionalOnProperty(prefix = "alive.push", name = "rocketmq.name-server")
+    public Client rocketAliveClient(Environment environment) {
+        var producer = new RocketMQAutoConfiguration(environment).
                 defaultMQProducer(aliveProperties.getRocketmq());
         producer.setInstanceName("aliveProducer");
         try {
             producer.start();
         } catch (MQClientException e) {
-            throw new BeanDefinitionValidationException(String.format("Failed to startup MQProducer for RocketMQTemplate {}",ROCKET_CLIENT_NAME), e);
+            throw new BeanDefinitionValidationException(String.format("Failed to startup MQProducer for RocketMQTemplate {}", ROCKET_CLIENT_NAME), e);
         }
         var template = new RocketMQTemplate();
         template.setProducer(producer);
         template.setMessageConverter(new MappingFastJsonMessageConverter());
-        return new MQClientImpl(template,aliveProperties.getProduct(),unifiedObservationFactory);
+        return new MQClientImpl(template, aliveProperties.getProduct(), unifiedObservationFactory);
     }
 
 }

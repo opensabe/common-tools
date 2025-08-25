@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.common.dynamodb.observation;
 
+import org.apache.commons.lang3.StringUtils;
+
 import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
-import org.apache.commons.lang3.StringUtils;
 
 public class DynamodbExecuteObservationConvention implements ObservationConvention<DynamodbExecuteContext> {
 
@@ -36,14 +37,14 @@ public class DynamodbExecuteObservationConvention implements ObservationConventi
 
     @Override
     public KeyValues getLowCardinalityKeyValues(DynamodbExecuteContext context) {
-        return KeyValues.of(TAG_METHOD,context.getMethod());
+        return KeyValues.of(TAG_METHOD, context.getMethod());
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(DynamodbExecuteContext context) {
         KeyValues keyValues = KeyValues.of(TAG_METHOD, context.getMethod());
         if (StringUtils.isNotBlank(context.getHashKey())) {
-           keyValues =  keyValues.and(TAG_HASH_KEY, context.getHashKey());
+            keyValues = keyValues.and(TAG_HASH_KEY, context.getHashKey());
         }
         if (StringUtils.isNotBlank(context.getRangeKey())) {
             keyValues = keyValues.and(TAG_RANGE_KEY, context.getRangeKey());

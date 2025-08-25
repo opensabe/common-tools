@@ -15,10 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.jfr;
 
-import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import feign.Request;
 import feign.Response;
 import feign.micrometer.FeignContext;
+import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 import lombok.extern.log4j.Log4j2;

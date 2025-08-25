@@ -25,6 +25,7 @@ public class EmojiUtil {
 
     /**
      * Split emoji string to list
+     *
      * @param s
      * @return
      */

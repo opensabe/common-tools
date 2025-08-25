@@ -16,10 +16,10 @@
 package io.github.opensabe.common.web.config.exception;
 
 
+import java.io.Serializable;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import java.io.Serializable;
 
 /**
  * 2017/2/9

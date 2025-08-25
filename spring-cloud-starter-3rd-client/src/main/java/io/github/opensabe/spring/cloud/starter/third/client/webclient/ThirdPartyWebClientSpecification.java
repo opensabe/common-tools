@@ -15,9 +15,9 @@
  */
 package io.github.opensabe.spring.cloud.starter.third.client.webclient;
 
-import org.springframework.cloud.context.named.NamedContextFactory;
-
 import java.util.Arrays;
+
+import org.springframework.cloud.context.named.NamedContextFactory;
 
 public class ThirdPartyWebClientSpecification implements NamedContextFactory.Specification {
 

@@ -15,19 +15,20 @@
  */
 package io.github.opensabe.apple;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Log4j2
 public class AppleLoginUtility {
@@ -100,6 +101,10 @@ public class AppleLoginUtility {
         return VerifyUserResult.builder().sub(subject).email(email).build();
     }
 
+    public enum AppleLoginPlafromEnum {
+        WEB, IOS
+    }
+
     @Data
     @Builder
     @NoArgsConstructor
@@ -111,9 +116,5 @@ public class AppleLoginUtility {
         private String email;
 
         private String error;
-    }
-
-    public enum AppleLoginPlafromEnum {
-        WEB, IOS
     }
 }

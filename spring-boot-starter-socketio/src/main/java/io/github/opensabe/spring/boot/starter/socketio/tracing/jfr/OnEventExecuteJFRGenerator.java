@@ -15,13 +15,12 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.tracing.jfr;
 
+import java.util.Objects;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.EventEnum;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.observation.SocketIOExecuteContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
-
-import java.util.Objects;
 
 public class OnEventExecuteJFRGenerator extends ObservationToJFRGenerator<SocketIOExecuteContext> {
     @Override
@@ -53,7 +52,7 @@ public class OnEventExecuteJFRGenerator extends ObservationToJFRGenerator<Socket
 
     @Override
     protected void generateOnStart(SocketIOExecuteContext context) {
-        SocketIOOnEvent event = new SocketIOOnEvent(context.getSocketIOClient(),context.getEventName());
+        SocketIOOnEvent event = new SocketIOOnEvent(context.getSocketIOClient(), context.getEventName());
         context.put(SocketIOOnEvent.class, event);
     }
 }

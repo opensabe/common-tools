@@ -15,8 +15,6 @@
  */
 package io.github.opensabe.common.redisson.config;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.observation.ObservedRedissonClient;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -25,9 +23,13 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.ObservedRedissonClient;
+
 /**
  * 将默认的RedissonClient替换为ObservedRedissonClient，
  * 因为RedissonClient创建比较早，因此这里必须调整一order，否则不经过BeanPostProcessor
+ *
  * @author heng.ma
  */
 public class RedissonClientBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware, Ordered {

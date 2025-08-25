@@ -18,11 +18,14 @@ package io.github.opensabe.common.utils;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class TextSimilarityUtil {
-    
+
+    private static final List<String> MATCHED_WORDS = List.of("ADJEI-AGYEI", "AGYEI-ADJEI", "ABDUL-ABUDU", "ABUDU-ABDUL", "JUNIOR-JNR", "JNR-JUNIOR");
+
     /**
      * Calculates the string distance between source and target strings using
      * the Damerau-Levenshtein algorithm. The distance is case-sensitive.
@@ -61,10 +64,10 @@ public class TextSimilarityUtil {
         }
         return dist[sourceLength][targetLength];
     }
-    
+
     /**
      * judge the similarity between 2 strings according to Damerau-Levenshtein Distance
-     * 
+     *
      * @param str1
      * @param str2
      * @return true-similar, false-not similar
@@ -87,7 +90,7 @@ public class TextSimilarityUtil {
                     .replaceAll("like Gecko", "").replaceAll(" network\\/([a-z])+", "");
             //int levenshteinDistance = LevenshteinDistance.getDefaultInstance().apply(str1, str2);
             int distance = getDameLevenDistance(str1, str2);
-            float ratio = (float) (Math.max(str1.length(), str2.length()) - distance)/(float) Math.max(str1.length(), str2.length());
+            float ratio = (float) (Math.max(str1.length(), str2.length()) - distance) / (float) Math.max(str1.length(), str2.length());
             //Double ratio = new JaroWinklerSimilarity().apply(str1, str2);
 
             log.debug("the similarity of between {} and {} is {}", str1, str2, ratio);
@@ -97,6 +100,4 @@ public class TextSimilarityUtil {
                 return true;
         }
     }
-   
-    private static final List<String> MATCHED_WORDS = List.of("ADJEI-AGYEI", "AGYEI-ADJEI", "ABDUL-ABUDU", "ABUDU-ABDUL","JUNIOR-JNR","JNR-JUNIOR");
 }

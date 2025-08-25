@@ -15,21 +15,24 @@
  */
 package io.github.opensabe.common.location.service;
 
-import com.sun.istack.NotNull;
-import io.github.opensabe.common.location.vo.GeoLocationData;
-import io.github.opensabe.common.location.vo.IpLocation;
-import io.github.opensabe.common.utils.json.JsonUtil;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import com.sun.istack.NotNull;
+
+import io.github.opensabe.common.location.vo.GeoLocationData;
+import io.github.opensabe.common.location.vo.IpLocation;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class IpToLocationImpl implements IpToLocation {

@@ -15,17 +15,18 @@
  */
 package io.github.opensabe.common.redisson.observation.rlock;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
-import io.micrometer.observation.Observation;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.function.Supplier;
+
 import org.redisson.api.RExpirable;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
 import org.springframework.lang.NonNull;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.function.Supplier;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
+import io.micrometer.observation.Observation;
 
 /**
  * 观察者模式的分布式锁
@@ -36,7 +37,7 @@ public class ObservedRLock<T extends RLock> extends ObservedRExpirable<RExpirabl
     protected final T delegate;
 
     public ObservedRLock(T delegate, UnifiedObservationFactory unifiedObservationFactory) {
-        super((RExpirable)delegate, unifiedObservationFactory);
+        super((RExpirable) delegate, unifiedObservationFactory);
         this.delegate = delegate;
     }
 

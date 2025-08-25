@@ -15,14 +15,19 @@
  */
 package io.github.opensabe.common.redisson.observation.ratelimiter;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
-import io.micrometer.observation.Observation;
-import org.redisson.api.*;
-
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import org.redisson.api.RFuture;
+import org.redisson.api.RRateLimiter;
+import org.redisson.api.RateIntervalUnit;
+import org.redisson.api.RateLimiterConfig;
+import org.redisson.api.RateType;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
+import io.micrometer.observation.Observation;
 
 public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> implements RRateLimiter {
 
@@ -54,7 +59,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
 
     @Override
     public boolean trySetRate(RateType mode, long rate, Duration rateInterval) {
-        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval,Duration.ZERO);
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, Duration.ZERO);
         Observation observation = RRateLimiterObservationDocumentation.SET_RATE.start(
                 null,
                 RRateLimiterSetRateConvention.DEFAULT,
@@ -155,10 +160,6 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
         }
     }
 
-    private interface AcquireCallable {
-        boolean acquire();
-    }
-
     private boolean acquire0(long permits, long timeout, TimeUnit unit, AcquireCallable callable) {
         RRateLimiterAcquireContext context = new RRateLimiterAcquireContext(
                 delegate.getName(), Thread.currentThread().getName(), permits, timeout, unit
@@ -215,7 +216,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
 
     @Override
     public boolean tryAcquire(Duration timeout) {
-        if(Objects.isNull(timeout)){
+        if (Objects.isNull(timeout)) {
             timeout = Duration.ZERO;
         }
         Duration finalTimeout = timeout;
@@ -230,7 +231,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
 
     @Override
     public boolean tryAcquire(long permits, Duration timeout) {
-        return acquire0(permits, timeout.toMillis(), TimeUnit.MILLISECONDS, () -> delegate.tryAcquire(permits,timeout));
+        return acquire0(permits, timeout.toMillis(), TimeUnit.MILLISECONDS, () -> delegate.tryAcquire(permits, timeout));
     }
 
     @Override
@@ -256,7 +257,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
 
     @Override
     public RFuture<Boolean> trySetRateAsync(RateType mode, long rate, Duration rateInterval, Duration keepAliveTime) {
-        return delegate.trySetRateAsync(mode,rate,rateInterval,keepAliveTime);
+        return delegate.trySetRateAsync(mode, rate, rateInterval, keepAliveTime);
     }
 
     @Override
@@ -298,7 +299,7 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
 
     @Override
     public RFuture<Boolean> tryAcquireAsync(long permits, Duration timeout) {
-        return delegate.tryAcquireAsync(permits,timeout);
+        return delegate.tryAcquireAsync(permits, timeout);
     }
 
     @Override
@@ -325,5 +326,9 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
     @Override
     public RFuture<Long> availablePermitsAsync() {
         return delegate.availablePermitsAsync();
+    }
+
+    private interface AcquireCallable {
+        boolean acquire();
     }
 }

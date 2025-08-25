@@ -25,7 +25,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Category({"observation","Socket-Disconnect"})
+@Category({"observation", "Socket-Disconnect"})
 @Label("Disconnect Event")
 @StackTrace(value = false)
 public class SocketIODisConnectEvent extends Event {

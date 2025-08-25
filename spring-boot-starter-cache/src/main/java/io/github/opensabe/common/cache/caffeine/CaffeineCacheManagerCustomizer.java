@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.common.cache.caffeine;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
 import org.springframework.cache.caffeine.CaffeineCache;
+
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * <code>caffeine</code>在创建缓存最后一步时，可以修改创建行为，
@@ -26,6 +27,7 @@ import org.springframework.cache.caffeine.CaffeineCache;
  * <p><b><code>caffeine</code>重复添加配置会报错，
  * 因此使用时需要注意一下{@link #createCache(String, Caffeine, boolean)}的name是否预先定义了配置
  * </b</p>
+ *
  * @author heng.ma
  */
 public interface CaffeineCacheManagerCustomizer extends CacheManagerCustomizer<DynamicCaffeineCacheManager> {
@@ -36,9 +38,10 @@ public interface CaffeineCacheManagerCustomizer extends CacheManagerCustomizer<D
 
     /**
      * 自定义创建Cache实例，可以添加监听器，设置引用类型等
-     * @param name      cacheName
-     * @param caffeine  CacheBuilder
-     * @return          spring cache instance of CaffeineCache
+     *
+     * @param name     cacheName
+     * @param caffeine CacheBuilder
+     * @return spring cache instance of CaffeineCache
      */
     CaffeineCache createCache(String name, Caffeine<Object, Object> caffeine, boolean allowNullValues);
 }

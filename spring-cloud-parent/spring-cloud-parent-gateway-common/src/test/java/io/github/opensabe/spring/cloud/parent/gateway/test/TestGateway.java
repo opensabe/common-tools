@@ -15,10 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.gateway.test;
 
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
-import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import java.time.Duration;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,11 +36,6 @@ import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
-
-import java.time.Duration;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,6 +47,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
+import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import reactor.core.publisher.Flux;
 
 @AutoConfigureObservability
 @SpringBootTest(
@@ -73,24 +74,11 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         classes = TestGateway.MockConfig.class
 )
 public class TestGateway extends CommonMicroServiceTest {
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
     private static final String serviceId = "testService";
-
-    @MockitoSpyBean
-    private LoadBalancerClientFactory loadBalancerClientFactory;
-    @Autowired
-    private CircuitBreakerRegistry circuitBreakerRegistry;
-    @Autowired
-    private CircuitBreakerExtractor circuitBreakerExtractor;
     @LocalServerPort
     protected int port = 0;
-
     @Autowired
     protected WebTestClient webClient;
-
     //Junit 默认方法执行生命周期是：
     //@BeforeAll -> 创建类构造器产生新实例 -> @BeforeEach -> 测试方法 1 -> @AfterEach
     //-> 创建类构造器产生新实例 -> @BeforeEach -> 测试方法 2 -> @AfterEach
@@ -101,9 +89,14 @@ public class TestGateway extends CommonMicroServiceTest {
     ServiceInstance zone1Instance2 = new DefaultServiceInstance("instance2", serviceId, CONNECT_TIMEOUT_HOST, CONNECT_TIMEOUT_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
     ServiceInstance zone1Instance3 = new DefaultServiceInstance("instance3", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
     ServiceInstance zone1Instance4 = new DefaultServiceInstance("instance3", serviceId, READ_TIMEOUT_HOST, READ_TIMEOUT_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
-
     TracedCircuitBreakerRoundRobinLoadBalancer loadBalancerClientFactoryInstance = spy(TracedCircuitBreakerRoundRobinLoadBalancer.class);
     ServiceInstanceListSupplier serviceInstanceListSupplier = spy(ServiceInstanceListSupplier.class);
+    @MockitoSpyBean
+    private LoadBalancerClientFactory loadBalancerClientFactory;
+    @Autowired
+    private CircuitBreakerRegistry circuitBreakerRegistry;
+    @Autowired
+    private CircuitBreakerExtractor circuitBreakerExtractor;
 
     @BeforeEach
     void setup() {
@@ -286,6 +279,10 @@ public class TestGateway extends CommonMicroServiceTest {
                 });
         verify(loadBalancerClientFactoryInstance, times(1)).choose(any());
 
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 
 }

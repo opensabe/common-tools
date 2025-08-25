@@ -15,35 +15,25 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import io.github.opensabe.spring.cloud.parent.web.common.feign.OpenfeignUtil;
-import io.github.opensabe.spring.cloud.parent.web.common.feign.RetryableMethod;
-import feign.MethodMetadata;
-import feign.Request;
-import feign.RequestTemplate;
+import java.lang.reflect.Method;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mockito;
 
-import java.lang.reflect.Method;
+import feign.MethodMetadata;
+import feign.Request;
+import feign.RequestTemplate;
+import io.github.opensabe.spring.cloud.parent.web.common.feign.OpenfeignUtil;
+import io.github.opensabe.spring.cloud.parent.web.common.feign.RetryableMethod;
 
 /**
  * Util 类静态方法测试
  */
 @Execution(ExecutionMode.CONCURRENT)
 public class OpenfeignUtilTest {
-    public static class SimpleClass {
-        public void testSimple() {}
-        @RetryableMethod
-        public void testAnnotated() {}
-    }
-
-    @RetryableMethod
-    public static class AnnotatedClass {
-        public void testSimple() {}
-    }
-
     @Test
     public void testGetMethod() {
         Request request = Mockito.mock(Request.class);
@@ -78,5 +68,20 @@ public class OpenfeignUtilTest {
     public void testAnnotatedClass() throws Exception {
         Request testSimple = getPostRequest(AnnotatedClass.class.getMethod("testSimple"));
         Assertions.assertTrue(OpenfeignUtil.isRetryableRequest(testSimple));
+    }
+
+    public static class SimpleClass {
+        public void testSimple() {
+        }
+
+        @RetryableMethod
+        public void testAnnotated() {
+        }
+    }
+
+    @RetryableMethod
+    public static class AnnotatedClass {
+        public void testSimple() {
+        }
     }
 }

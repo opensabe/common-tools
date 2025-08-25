@@ -15,10 +15,10 @@
  */
 package io.github.opensabe.alive.protobuf;
 
-import com.google.protobuf.GeneratedMessageV3;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.google.protobuf.GeneratedMessageV3;
 
 public class MessageType {
 
@@ -42,11 +42,11 @@ public class MessageType {
     public static final short USTATE_QUERY = 0x0206;
     public static final short USTATE_RESPONSE = 0x0207;
     public static final short UACTION_NOTICE = 0x0208;
-
-    public static Map<Short, String> methodIdToRequestName = new HashMap<Short, String>();
-    public static Map<String, Short> requestNameToMethodId = new HashMap<String, Short>();
     public static final Map<String, Class<? extends GeneratedMessageV3>> typeToMessageClass = new HashMap();
     public static final Map<Class<? extends GeneratedMessageV3>, String> classToMessageType = new HashMap();
+    public static Map<Short, String> methodIdToRequestName = new HashMap<Short, String>();
+    public static Map<String, Short> requestNameToMethodId = new HashMap<String, Short>();
+
     static {
         methodIdToRequestName.put(HEART_BEAT, Message.HeartBeat.class.getName());
         methodIdToRequestName.put(REG_DEVICE, Message.RegDev.class.getName());
@@ -72,8 +72,8 @@ public class MessageType {
         requestNameToMethodId.put(Message.ACK.class.getName(), ACK);
         requestNameToMethodId.put(Message.Response.class.getName(), RESPONSE);
         requestNameToMethodId.put(Message.RetMsg.class.getName(), RET_MESSAGE);
-        requestNameToMethodId.put(Message.ChatMsg.class.getName(),CHAT_MSG);
-        requestNameToMethodId.put(Message.AuthBackend.class.getName(),AUTH_BACKEND);
+        requestNameToMethodId.put(Message.ChatMsg.class.getName(), CHAT_MSG);
+        requestNameToMethodId.put(Message.AuthBackend.class.getName(), AUTH_BACKEND);
         requestNameToMethodId.put(Message.Publish.class.getName(), PUBLISH_MESSAGE);
         requestNameToMethodId.put(Message.Query.class.getName(), QUERY_CACHE);
         requestNameToMethodId.put(Message.SendSetCommand.class.getName(), SEND_SET_CMD);

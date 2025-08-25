@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.common.config.ShutdownOptimizeConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.spring.cloud.parent.common.config.ShutdownOptimizeConfiguration;
 
 @AutoConfiguration
 @Import(ShutdownOptimizeConfiguration.class)

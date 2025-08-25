@@ -21,6 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 public class RExpirableExpireConvention implements ObservationConvention<RExpirableExpireContext> {
     public static final RExpirableExpireConvention DEFAULT = new RExpirableExpireConvention();
+
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof RExpirableExpireContext;

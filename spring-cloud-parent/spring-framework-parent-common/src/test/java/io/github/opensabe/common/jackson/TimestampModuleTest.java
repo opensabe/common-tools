@@ -15,18 +15,22 @@
  */
 package io.github.opensabe.common.jackson;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("时间戳模块测试")
 class TimestampModuleTest {
@@ -64,16 +68,16 @@ class TimestampModuleTest {
     void testDeserializeFromStringFormats() throws Exception {
         // 测试各种字符串格式的反序列化
         String[] formats = {
-            "\"2024-03-15 14:30:45\"",
-            "\"2024-03-15 14:30:45.123\"",
-            "\"20240315143045\"",
-            "\"20240315143045123\"",
-            "\"20240315T14\"",
-            "\"20240315T1430\"",
-            "\"20240315T143045\"",
-            "\"2024-03-15T14\"",
-            "\"2024-03-15T14:30\"",
-            "\"2024-03-15T14:30:45\""
+                "\"2024-03-15 14:30:45\"",
+                "\"2024-03-15 14:30:45.123\"",
+                "\"20240315143045\"",
+                "\"20240315143045123\"",
+                "\"20240315T14\"",
+                "\"20240315T1430\"",
+                "\"20240315T143045\"",
+                "\"2024-03-15T14\"",
+                "\"2024-03-15T14:30\"",
+                "\"2024-03-15T14:30:45\""
         };
 
         for (String format : formats) {
@@ -109,7 +113,7 @@ class TimestampModuleTest {
         LocalDateTime dateTime = LocalDateTime.of(2024, 3, 15, 14, 30, 45, 123_456_789);
         String json = objectMapper.writeValueAsString(dateTime);
         LocalDateTime deserialized = objectMapper.readValue(json, LocalDateTime.class);
-        
+
         // 验证纳秒部分被截断到毫秒
         assertEquals(123_000_000, deserialized.getNano());
     }

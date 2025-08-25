@@ -15,12 +15,12 @@
  */
 package io.github.opensabe.common.redisson.observation;
 
+import java.util.concurrent.TimeUnit;
+
 import org.redisson.api.ObjectEncoding;
 import org.redisson.api.ObjectListener;
 import org.redisson.api.RFuture;
 import org.redisson.api.RObjectAsync;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * 该类实现 RObjectAsync 接口，将接口方法的调用委托给内部持有的 RObjectAsync 实例。

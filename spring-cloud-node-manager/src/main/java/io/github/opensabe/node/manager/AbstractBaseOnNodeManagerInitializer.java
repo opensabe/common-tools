@@ -15,17 +15,21 @@
  */
 package io.github.opensabe.node.manager;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 
 public abstract class AbstractBaseOnNodeManagerInitializer implements ApplicationListener<ApplicationStartedEvent>, Ordered {
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
+
+    static boolean isBootstrapContext(ApplicationStartedEvent applicationEvent) {
+        return applicationEvent.getApplicationContext().getEnvironment().getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME);
+    }
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
@@ -51,9 +55,5 @@ public abstract class AbstractBaseOnNodeManagerInitializer implements Applicatio
     public int getOrder() {
         //一定要在NodeManagerInitializeListener之后，否则NodeManager的NodeManager可能还没有初始化完成
         return NodeManagerInitializeListener.ORDER + 1;
-    }
-
-    static boolean isBootstrapContext(ApplicationStartedEvent applicationEvent) {
-        return applicationEvent.getApplicationContext().getEnvironment().getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME);
     }
 }

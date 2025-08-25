@@ -15,18 +15,20 @@
  */
 package io.github.opensabe.common.mybatis.configuration;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import io.github.opensabe.common.mybatis.properties.SqlSessionFactoryProperties;
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.common.secret.SecretProvider;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import io.github.opensabe.common.mybatis.properties.SqlSessionFactoryProperties;
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.common.secret.SecretProvider;
+
 public class DatabaseSecretProvider extends SecretProvider {
     private final SqlSessionFactoryProperties sqlSessionFactoryProperties;
+
     protected DatabaseSecretProvider(GlobalSecretManager globalSecretManager, SqlSessionFactoryProperties sqlSessionFactoryProperties) {
         super(globalSecretManager);
         this.sqlSessionFactoryProperties = sqlSessionFactoryProperties;

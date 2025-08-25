@@ -16,26 +16,27 @@
 package io.github.opensabe.common.dynamodb.test.po;
 
 
-import com.alibaba.fastjson.annotation.JSONField;
-import io.github.opensabe.common.dynamodb.annotation.HashKeyName;
-import io.github.opensabe.common.dynamodb.annotation.RangeKeyName;
-import io.github.opensabe.common.dynamodb.annotation.TableName;
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
+import io.github.opensabe.common.dynamodb.annotation.HashKeyName;
+import io.github.opensabe.common.dynamodb.annotation.RangeKeyName;
+import io.github.opensabe.common.dynamodb.annotation.TableName;
+import lombok.Data;
+
 @TableName(name = "dynamodb_${aws_env}_eight_data_types")
 @Data
 public class EightDataTypesPo {
 
-    @JSONField(name =  "id")
-    @HashKeyName(name="id")
+    @JSONField(name = "id")
+    @HashKeyName(name = "id")
     private String id;
     @JSONField(name = "order")
-    @RangeKeyName(name="order")
+    @RangeKeyName(name = "order")
     private Integer order;
     @JSONField(name = "it")
     private int num1;

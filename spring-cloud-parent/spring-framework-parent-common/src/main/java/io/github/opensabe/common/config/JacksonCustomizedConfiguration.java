@@ -16,10 +16,12 @@
 package io.github.opensabe.common.config;
 
 
-import com.fasterxml.jackson.databind.Module;
-import io.github.opensabe.common.jackson.TimestampModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.databind.Module;
+
+import io.github.opensabe.common.jackson.TimestampModule;
 
 @Configuration(proxyBeanMethods = false)
 public class JacksonCustomizedConfiguration {
@@ -31,7 +33,7 @@ public class JacksonCustomizedConfiguration {
      * @return
      */
     @Bean
-    public Module timstampModule () {
+    public Module timstampModule() {
         return new TimestampModule();
     }
 }

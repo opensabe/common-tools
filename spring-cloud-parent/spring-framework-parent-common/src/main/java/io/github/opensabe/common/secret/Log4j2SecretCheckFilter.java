@@ -16,9 +16,9 @@
 package io.github.opensabe.common.secret;
 
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.github.opensabe.common.utils.SpringUtil;
+import java.time.Duration;
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
@@ -30,16 +30,20 @@ import org.apache.logging.log4j.core.filter.AbstractFilter;
 import org.apache.logging.log4j.message.Message;
 import org.springframework.context.ApplicationContext;
 
-import java.time.Duration;
-import java.util.Objects;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import io.github.opensabe.common.utils.SpringUtil;
 
 @Plugin(name = "SecretCheckFilter", category = "Core", elementType = "filter", printObject = true)
 public class Log4j2SecretCheckFilter extends AbstractFilter {
     private final Cache<String, Boolean> hasSecretCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(1)).build();
+
     @PluginFactory
     public static Log4j2SecretCheckFilter createFilter() {
         return new Log4j2SecretCheckFilter();
     }
+
     @Override
     public Result filter(LogEvent event) {
         //对于异步日志，这里是单线程执行的，所以不能有太大消耗，不能每次都检查
@@ -75,6 +79,7 @@ public class Log4j2SecretCheckFilter extends AbstractFilter {
         }
         return Result.NEUTRAL;
     }
+
     @Override
     public Result filter(Logger logger, Level level, Marker marker, Object msg, Throwable t) {
         return check(Objects.toString(msg));

@@ -15,13 +15,15 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.util;
 
+import java.util.UUID;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.corundumstudio.socketio.SocketIOClient;
+
 import io.github.opensabe.spring.boot.starter.socketio.CommonAttribute;
 import io.netty.handler.codec.http.HttpHeaders;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.UUID;
 
 @Log4j2
 public class SocketConnectionUtil {
@@ -62,12 +64,12 @@ public class SocketConnectionUtil {
         forceDisconnectProducer.sendForceDisconnectMsg(userId, sessionId, checkPlatformRoom);
     }
 
+    public void logout(String userId) {
+        forceDisconnectProducer.logout(userId);
+    }
+
     public enum ForceTypeEnum {
         ONE_USER_ALL_PLATFORM,
         ONE_USER_ONE_PLATFORM;
-    }
-
-    public void logout (String userId) {
-        forceDisconnectProducer.logout(userId);
     }
 }

@@ -15,8 +15,21 @@
  */
 package io.github.opensabe.common.buffer;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jctools.queues.MpscBlockingConsumerArrayQueue;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.ForOverride;
+
 import io.github.opensabe.common.buffer.observation.BatchBufferQueueBatchManipulateObservationDocumentation;
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.ThreadPoolFactoryGracefulShutDownHandler;
@@ -25,17 +38,6 @@ import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jctools.queues.MpscBlockingConsumerArrayQueue;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * 内存批次队列，主要是将小事务合并
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
  * 1. 有很多并发用户更新某个表的不同行，同时这些更新，并没有被事务包裹，而是 auto commit 的，也就是每个语句是一个小事务
  * 2. 这个更新，不必立刻读取出来，而是允许延迟，允许最终一致
  * 3. 这个更新，允许丢失，业务自己做补偿与健壮性保证
+ *
  * @param <E> 实现了 BufferedElement 接口的方法
  */
 @Log4j2
@@ -55,7 +58,10 @@ public abstract class BatchBufferedQueue<E extends BufferedElement> {
     protected static final int DEFAULT_BATCH_SIZE = 2048;
     protected static final long DEFAULT_POLL_WAIT_TIME_IN_MILLIS = 1000L;
     protected static final long DEFAULT_MAX_WAIT_TIME_IN_MILLIS = 1000L;
-
+    /**
+     * 负载均衡使用，使用这个决定 hashKey 返回空的提交到哪个队列
+     */
+    private final AtomicInteger counter = new AtomicInteger(0);
     /**
      * 每个队列都是单线程消费者，但是是多线程提交，所以使用 MPSC
      */
@@ -64,11 +70,6 @@ public abstract class BatchBufferedQueue<E extends BufferedElement> {
      * 每个队列一个单线程池
      */
     private ExecutorService[] executorServices;
-    /**
-     * 负载均衡使用，使用这个决定 hashKey 返回空的提交到哪个队列
-     */
-    private final AtomicInteger counter = new AtomicInteger(0);
-
     /**
      * 公共线程池工厂
      */
@@ -80,6 +81,26 @@ public abstract class BatchBufferedQueue<E extends BufferedElement> {
 
     @Autowired
     private ThreadPoolFactoryGracefulShutDownHandler threadPoolFactoryGracefulShutDownHandler;
+
+    /**
+     * 找大于这个 n 的最近的 2^n
+     *
+     * @param n
+     * @return
+     */
+    private static int getNearest2Power(int n) {
+        //如果已经是 2^n 就直接返回
+        if ((n & (n - 1)) == 0) {
+            return n;
+        }
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+        n += 1;
+        return n;
+    }
 
     /**
      * @return 队列个数
@@ -255,8 +276,8 @@ public abstract class BatchBufferedQueue<E extends BufferedElement> {
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         TraceContext traceContext = UnifiedObservationFactory.getTraceContext(observation);
         e.setSubmitInfo(
-            traceContext == null ? null : traceContext.traceId(),
-            traceContext == null ? null : traceContext.spanId()
+                traceContext == null ? null : traceContext.traceId(),
+                traceContext == null ? null : traceContext.spanId()
         );
         log.info("BatchBufferedQueue-sumbit: {} -> {}", getClass().getSimpleName(), e.hashKey());
         String hashKey = e.hashKey();
@@ -270,26 +291,6 @@ public abstract class BatchBufferedQueue<E extends BufferedElement> {
             idx = Math.abs(counter.incrementAndGet() & (length - 1));
         }
         mpscBlockingConsumerArrayQueues[idx].offer(e);
-    }
-
-    /**
-     * 找大于这个 n 的最近的 2^n
-     *
-     * @param n
-     * @return
-     */
-    private static int getNearest2Power(int n) {
-        //如果已经是 2^n 就直接返回
-        if ((n & (n-1)) == 0) {
-            return n;
-        }
-        n |= n >>> 1;
-        n |= n >>> 2;
-        n |= n >>> 4;
-        n |= n >>> 8;
-        n |= n >>> 16;
-        n += 1;
-        return n;
     }
 
 }

@@ -15,6 +15,19 @@
  */
 package io.github.opensabe.common.redisson.test;
 
+import java.util.concurrent.TimeUnit;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import io.github.opensabe.common.redisson.annotation.slock.FairLock;
 import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.slock.SLock;
@@ -27,18 +40,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Import(SLockTest.Config.class)
 public class SLockTest extends BaseRedissonTest {
@@ -47,171 +48,6 @@ public class SLockTest extends BaseRedissonTest {
 
     @Autowired
     private RedissonAopOrderProperties redissonAopConfiguration;
-
-    public static class Config {
-        @Autowired
-        private RedissonClient redissonClient;
-
-        @Bean
-        @Primary
-        public TestRedissonLockClass testRedissonLockClass() {
-            return new TestRedissonLockClass(redissonClient);
-        }
-
-        @Bean
-        public TestRedissonLockClassExtends testRedissonLockClassExtends() {
-            return new TestRedissonLockClassExtends(redissonClient);
-        }
-
-        @Bean
-        public TestRedissonLockInterfaceImpl testRedissonLockInterface() {
-            return new TestRedissonLockInterfaceImpl(redissonClient);
-        }
-    }
-
-    public interface TestRedissonLockInterface1 {
-        @RedissonLock(prefix = "p1", name = "#name")
-        void testBlockLockWithName(String name) throws InterruptedException;
-    }
-
-    public interface TestRedissonLockInterface2 {
-        @SpinLock(prefix = "p1", name = "#name")
-        void testBlockSpinLock(String name) throws InterruptedException;
-    }
-
-    @Data
-    public static class BaseClass {
-        protected volatile int count = 0;
-        protected final RedissonClient redissonClient;
-
-        public void reset() {
-            count = 0;
-        }
-
-        protected void add() throws InterruptedException {
-            for (int i = 0; i < ADD_COUNT; i++) {
-                count = count + 1;
-            }
-        }
-    }
-
-
-    public static class TestRedissonLockInterfaceImpl extends BaseClass implements TestRedissonLockInterface1, TestRedissonLockInterface2{
-        public TestRedissonLockInterfaceImpl(RedissonClient redissonClient) {
-            super(redissonClient);
-        }
-
-        @Override
-        public void testBlockLockWithName(String name) throws InterruptedException {
-            add();
-        }
-
-        @Override
-        public void testBlockSpinLock(String name) throws InterruptedException {
-            add();
-        }
-    }
-
-    public static class TestRedissonLockClass extends BaseClass {
-        public TestRedissonLockClass(RedissonClient redissonClient) {
-            super(redissonClient);
-        }
-
-        @RedissonLock(prefix = "p1", name = "testNoLock")
-        public void testNoLock() throws InterruptedException {
-            add();
-        }
-
-        @RedissonLock(prefix = "p1", name = "testBlockLockWithNoName")
-        public void testBlockLockWithNoName() throws InterruptedException {
-            add();
-        }
-
-        @RedissonLock(prefix = "p1", name = "#name")
-        public void testBlockLock(String name) throws InterruptedException {
-            add();
-        }
-
-        @SpinLock(prefix = "p1", name = "#name")
-        public void testBlockSpinLock(String name) throws InterruptedException {
-            add();
-        }
-
-        @FairLock(prefix = "p1", name = "#name")
-        public void testBlockFairLock(String name) throws InterruptedException {
-            add();
-        }
-
-        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 100000, timeUnit = TimeUnit.MILLISECONDS)
-        public void testTryLock(String name) throws InterruptedException {
-            add();
-        }
-
-        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK_NOWAIT)
-        public void testTryLockNoWait( String name) throws InterruptedException {
-            add();
-            //3s 肯定够100个线程都 try lock 失败
-            TimeUnit.SECONDS.sleep(3);
-        }
-
-        @RedissonLock(prefix = "test:", name = "#student.id == null? #student.name:#student.id")
-        public void testRedissonLockNameProperty(Student student, String params) throws InterruptedException {
-            String lockName = student.getId() == null ? student.getName() : student.getId();
-            RLock lock = redissonClient.getLock("test:" + lockName);
-            Assertions.assertTrue(lock.isHeldByCurrentThread());
-        }
-
-        @RedissonLock(prefix = "p1", name = "#name", leaseTime = 1000L)
-        public void testLockTime(String name) throws InterruptedException {
-            RLock lock = redissonClient.getLock("p1"+name);
-            //验证获取了锁
-            Assertions.assertTrue(lock.isHeldByCurrentThread());
-            TimeUnit.SECONDS.sleep(2);
-            //过了两秒，锁应该被释放了
-            Assertions.assertFalse(lock.isLocked());
-        }
-
-        //waitTime只对于 trylock 有效
-        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 1000L)
-        public void testWaitTime(String name) throws InterruptedException {
-            RLock lock = redissonClient.getLock("p1"+name);
-            //验证获取了锁
-            Assertions.assertTrue(lock.isHeldByCurrentThread());
-            TimeUnit.SECONDS.sleep(10);
-        }
-
-        @RedissonLock(prefix = "p1", name = "#errorExpression")
-        public void testErrorExpression (String name) {
-        }
-        @RedissonLock(prefix = "p1", name = "suppressedExpression")
-        public void testSuppressedExpression (String name) throws InterruptedException {
-            RLock lock = redissonClient.getLock("p1suppressedExpression");
-            Assertions.assertTrue(lock.isHeldByCurrentThread());
-            TimeUnit.SECONDS.sleep(10);
-        }
-    }
-    public static class TestRedissonLockClassExtends extends TestRedissonLockClass {
-
-        public TestRedissonLockClassExtends(RedissonClient redissonClient) {
-            super(redissonClient);
-        }
-
-        @Override
-        public void testBlockLockWithNoName() throws InterruptedException {
-            add();
-        }
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Student {
-        private String name;
-        private String id;
-        private int age;
-    }
-
     @Autowired
     private TestRedissonLockClass testRedissonLockClass;
     @Autowired
@@ -283,7 +119,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockClass.testBlockSpinLock("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -299,7 +135,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockClass.testBlockFairLock("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -316,7 +152,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockClass.testTryLock("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -332,7 +168,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockClass.testTryLockNoWait("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -349,7 +185,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockInterfaceImpl.testBlockLockWithName("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -366,7 +202,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockInterfaceImpl.testBlockSpinLock("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -383,7 +219,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockInterface1.testBlockLockWithName("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -400,7 +236,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockInterface2.testBlockSpinLock("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -419,7 +255,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockClassExtends.testBlockLock("same");
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -435,7 +271,7 @@ public class SLockTest extends BaseRedissonTest {
                 try {
                     testRedissonLockClassExtends.testBlockLockWithNoName();
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -466,7 +302,7 @@ public class SLockTest extends BaseRedissonTest {
             try {
                 testRedissonLockClass.testWaitTime("same");
             } catch (Exception e) {
-                
+
             }
         });
         thread.start();
@@ -487,7 +323,7 @@ public class SLockTest extends BaseRedissonTest {
                     //相当于没有锁住
                     testRedissonLockClass.testBlockLock(threads[finalI].getName());
                 } catch (Exception e) {
-                    
+
                 }
             });
             threads[i].start();
@@ -499,13 +335,178 @@ public class SLockTest extends BaseRedissonTest {
     }
 
     @Test
-    void testErrorExpression () {
+    void testErrorExpression() {
         RedissonLockException exception = assertThrows(RedissonLockException.class, () -> testRedissonLockClass.testErrorExpression("aa"));
         System.out.println(exception.getMessage());
     }
 
     @Test
-    void testSuppressedExpression () throws InterruptedException {
+    void testSuppressedExpression() throws InterruptedException {
         testRedissonLockClass.testSuppressedExpression("addd");
+    }
+
+    public interface TestRedissonLockInterface1 {
+        @RedissonLock(prefix = "p1", name = "#name")
+        void testBlockLockWithName(String name) throws InterruptedException;
+    }
+
+    public interface TestRedissonLockInterface2 {
+        @SpinLock(prefix = "p1", name = "#name")
+        void testBlockSpinLock(String name) throws InterruptedException;
+    }
+
+    public static class Config {
+        @Autowired
+        private RedissonClient redissonClient;
+
+        @Bean
+        @Primary
+        public TestRedissonLockClass testRedissonLockClass() {
+            return new TestRedissonLockClass(redissonClient);
+        }
+
+        @Bean
+        public TestRedissonLockClassExtends testRedissonLockClassExtends() {
+            return new TestRedissonLockClassExtends(redissonClient);
+        }
+
+        @Bean
+        public TestRedissonLockInterfaceImpl testRedissonLockInterface() {
+            return new TestRedissonLockInterfaceImpl(redissonClient);
+        }
+    }
+
+    @Data
+    public static class BaseClass {
+        protected final RedissonClient redissonClient;
+        protected volatile int count = 0;
+
+        public void reset() {
+            count = 0;
+        }
+
+        protected void add() throws InterruptedException {
+            for (int i = 0; i < ADD_COUNT; i++) {
+                count = count + 1;
+            }
+        }
+    }
+
+    public static class TestRedissonLockInterfaceImpl extends BaseClass implements TestRedissonLockInterface1, TestRedissonLockInterface2 {
+        public TestRedissonLockInterfaceImpl(RedissonClient redissonClient) {
+            super(redissonClient);
+        }
+
+        @Override
+        public void testBlockLockWithName(String name) throws InterruptedException {
+            add();
+        }
+
+        @Override
+        public void testBlockSpinLock(String name) throws InterruptedException {
+            add();
+        }
+    }
+
+    public static class TestRedissonLockClass extends BaseClass {
+        public TestRedissonLockClass(RedissonClient redissonClient) {
+            super(redissonClient);
+        }
+
+        @RedissonLock(prefix = "p1", name = "testNoLock")
+        public void testNoLock() throws InterruptedException {
+            add();
+        }
+
+        @RedissonLock(prefix = "p1", name = "testBlockLockWithNoName")
+        public void testBlockLockWithNoName() throws InterruptedException {
+            add();
+        }
+
+        @RedissonLock(prefix = "p1", name = "#name")
+        public void testBlockLock(String name) throws InterruptedException {
+            add();
+        }
+
+        @SpinLock(prefix = "p1", name = "#name")
+        public void testBlockSpinLock(String name) throws InterruptedException {
+            add();
+        }
+
+        @FairLock(prefix = "p1", name = "#name")
+        public void testBlockFairLock(String name) throws InterruptedException {
+            add();
+        }
+
+        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 100000, timeUnit = TimeUnit.MILLISECONDS)
+        public void testTryLock(String name) throws InterruptedException {
+            add();
+        }
+
+        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK_NOWAIT)
+        public void testTryLockNoWait(String name) throws InterruptedException {
+            add();
+            //3s 肯定够100个线程都 try lock 失败
+            TimeUnit.SECONDS.sleep(3);
+        }
+
+        @RedissonLock(prefix = "test:", name = "#student.id == null? #student.name:#student.id")
+        public void testRedissonLockNameProperty(Student student, String params) throws InterruptedException {
+            String lockName = student.getId() == null ? student.getName() : student.getId();
+            RLock lock = redissonClient.getLock("test:" + lockName);
+            Assertions.assertTrue(lock.isHeldByCurrentThread());
+        }
+
+        @RedissonLock(prefix = "p1", name = "#name", leaseTime = 1000L)
+        public void testLockTime(String name) throws InterruptedException {
+            RLock lock = redissonClient.getLock("p1" + name);
+            //验证获取了锁
+            Assertions.assertTrue(lock.isHeldByCurrentThread());
+            TimeUnit.SECONDS.sleep(2);
+            //过了两秒，锁应该被释放了
+            Assertions.assertFalse(lock.isLocked());
+        }
+
+        //waitTime只对于 trylock 有效
+        @RedissonLock(prefix = "p1", name = "#name", lockType = SLock.LockType.TRY_LOCK, waitTime = 1000L)
+        public void testWaitTime(String name) throws InterruptedException {
+            RLock lock = redissonClient.getLock("p1" + name);
+            //验证获取了锁
+            Assertions.assertTrue(lock.isHeldByCurrentThread());
+            TimeUnit.SECONDS.sleep(10);
+        }
+
+        @RedissonLock(prefix = "p1", name = "#errorExpression")
+        public void testErrorExpression(String name) {
+        }
+
+        @RedissonLock(prefix = "p1", name = "suppressedExpression")
+        public void testSuppressedExpression(String name) throws InterruptedException {
+            RLock lock = redissonClient.getLock("p1suppressedExpression");
+            Assertions.assertTrue(lock.isHeldByCurrentThread());
+            TimeUnit.SECONDS.sleep(10);
+        }
+    }
+
+    public static class TestRedissonLockClassExtends extends TestRedissonLockClass {
+
+        public TestRedissonLockClassExtends(RedissonClient redissonClient) {
+            super(redissonClient);
+        }
+
+        @Override
+        public void testBlockLockWithNoName() throws InterruptedException {
+            add();
+        }
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Student {
+        private String name;
+        private String id;
+        private int age;
     }
 }

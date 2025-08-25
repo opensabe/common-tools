@@ -16,6 +16,7 @@
 package io.github.opensabe.alive.codec;
 
 import com.google.protobuf.GeneratedMessageV3;
+
 import io.github.opensabe.alive.protobuf.MessageType;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

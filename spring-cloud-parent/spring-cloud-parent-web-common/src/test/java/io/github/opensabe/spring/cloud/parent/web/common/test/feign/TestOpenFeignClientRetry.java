@@ -15,14 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import feign.Request;
-import feign.httpclient.ApacheHttpClient;
-import io.github.opensabe.spring.cloud.parent.web.common.feign.RetryableMethod;
-import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.core.registry.AbstractRegistry;
-import io.github.resilience4j.retry.RetryRegistry;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,17 +36,21 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import feign.Request;
+import feign.httpclient.ApacheHttpClient;
+import io.github.opensabe.spring.cloud.parent.web.common.feign.RetryableMethod;
+import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.core.registry.AbstractRegistry;
+import io.github.resilience4j.retry.RetryRegistry;
 
 @ActiveProfiles("retrytest")
 @SpringBootTest
@@ -79,102 +80,26 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
 
     static final String TEST_SERVICE_8 = "RetryTestService8";
     static final String CONTEXT_ID_8 = "RetryTestService8Client8";
-
-    @MockitoSpyBean
-    private ApacheHttpClient apacheHttpClient;
-
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
-    @FeignClient(name = TEST_SERVICE_8, contextId = CONTEXT_ID_8)
-    static interface TestService8Client {
-        @GetMapping("/status/200")
-        Map get();
-        @PostMapping("/status/200")
-        Map post();
-    }
-
-    @FeignClient(name = TEST_SERVICE_7, contextId = CONTEXT_ID_7)
-    static interface TestService7Client {
-        @PostMapping("/delay/3")
-        Map testPostDelayThreeSeconds();
-    }
-
-
-    @FeignClient(name = TEST_SERVICE_6, contextId = CONTEXT_ID_6)
-    static interface TestService6Client {
-        @GetMapping("/delay/3")
-        Map testGetDelayThreeSeconds();
-    }
-
-
-    @FeignClient(name = TEST_SERVICE_5, contextId = CONTEXT_ID_5)
-    static interface TestService5Client {
-        @GetMapping("/delay/1")
-        Map testGetDelayOneSecond();
-    }
-
-    @FeignClient(name = TEST_SERVICE_4, contextId = CONTEXT_ID_4)
-    static interface TestService4Client {
-        @PostMapping("/status/500")
-        Map testPostRetryStatus500();
-
-        @RetryableMethod
-        @PostMapping("/status/500")
-        Map testPostRetryMethodStatus500();
-    }
-
-
-    @FeignClient(name = TEST_SERVICE_3, contextId = CONTEXT_ID_3)
-    static interface TestService3Client {
-        @PostMapping("/status/500")
-        Map testPostRetryStatus500();
-    }
-
-
-    @FeignClient(name = TEST_SERVICE_1, contextId = CONTEXT_ID_1)
-    static interface TestService1Client {
-        @GetMapping("/status/500")
-        Map testGetRetryStatus500();
-    }
-
-
-    @FeignClient(name = TEST_SERVICE_2, contextId = CONTEXT_ID_2)
-    static interface TestService2Client {
-        @GetMapping("/status/500")
-        Map testGetRetryStatus500();
-    }
-
     @Autowired
     CircuitBreakerRegistry circuitBreakerRegistry;
-
     @Autowired
     RetryRegistry retryRegistry;
     @Autowired
     TestService2Client testService2Client;
-
     @Autowired
     TestService1Client testService1Client;
-
     @Autowired
     TestService3Client testService3Client;
-
     @Autowired
     TestService4Client testService4Client;
-
     @Autowired
     TestService5Client testService5Client;
-
     @Autowired
     TestService6Client testService6Client;
-
     @Autowired
     TestService7Client testService7Client;
-
     @Autowired
     TestService8Client testService8Client;
-
     @MockitoBean(name = "service8_2")
     ServiceInstance serviceInstance8_2;
     @MockitoBean(name = "service8_1")
@@ -193,17 +118,17 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     ServiceInstance serviceInstance2;
     @MockitoBean(name = "service1")
     ServiceInstance serviceInstance1;
-
     @MockitoBean
     SimpleDiscoveryClient discoveryClient;
-
+    @MockitoSpyBean
+    private ApacheHttpClient apacheHttpClient;
     @Autowired
     private List<AbstractRegistry> registries;
     private AtomicInteger atomicInteger = new AtomicInteger(0);
 
     @BeforeEach
     void setup() {
-        
+
         when(serviceInstance7.getMetadata()).thenReturn(Map.ofEntries(Map.entry("zone", "zone1")));
         when(serviceInstance7.getInstanceId()).thenReturn("service7Instance");
         when(serviceInstance7.getHost()).thenReturn(GOOD_HOST);
@@ -344,7 +269,6 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
                 .execute(any(Request.class), any(Request.Options.class));
     }
 
-
     /**
      * 测试默认 get 方法 readTimeout 为 2 秒，模拟对方 api 需要 1 秒，也就是不超时，直接 1 次
      */
@@ -376,7 +300,6 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
         verify(apacheHttpClient, times(3))
                 .execute(any(Request.class), any(Request.Options.class));
     }
-
 
     /**
      * 测试默认 post 方法 readTimeout 为 2 秒，模拟对方 api 需要 3 秒，也就是超时，但是 post 只需要重试 1 次
@@ -507,6 +430,67 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
         //针对 post 不会重试，就是调用 3 次
         verify(apacheHttpClient, times(3))
                 .execute(any(Request.class), any(Request.Options.class));
+    }
+
+    @FeignClient(name = TEST_SERVICE_8, contextId = CONTEXT_ID_8)
+    static interface TestService8Client {
+        @GetMapping("/status/200")
+        Map get();
+
+        @PostMapping("/status/200")
+        Map post();
+    }
+
+    @FeignClient(name = TEST_SERVICE_7, contextId = CONTEXT_ID_7)
+    static interface TestService7Client {
+        @PostMapping("/delay/3")
+        Map testPostDelayThreeSeconds();
+    }
+
+    @FeignClient(name = TEST_SERVICE_6, contextId = CONTEXT_ID_6)
+    static interface TestService6Client {
+        @GetMapping("/delay/3")
+        Map testGetDelayThreeSeconds();
+    }
+
+
+    @FeignClient(name = TEST_SERVICE_5, contextId = CONTEXT_ID_5)
+    static interface TestService5Client {
+        @GetMapping("/delay/1")
+        Map testGetDelayOneSecond();
+    }
+
+    @FeignClient(name = TEST_SERVICE_4, contextId = CONTEXT_ID_4)
+    static interface TestService4Client {
+        @PostMapping("/status/500")
+        Map testPostRetryStatus500();
+
+        @RetryableMethod
+        @PostMapping("/status/500")
+        Map testPostRetryMethodStatus500();
+    }
+
+
+    @FeignClient(name = TEST_SERVICE_3, contextId = CONTEXT_ID_3)
+    static interface TestService3Client {
+        @PostMapping("/status/500")
+        Map testPostRetryStatus500();
+    }
+
+    @FeignClient(name = TEST_SERVICE_1, contextId = CONTEXT_ID_1)
+    static interface TestService1Client {
+        @GetMapping("/status/500")
+        Map testGetRetryStatus500();
+    }
+
+    @FeignClient(name = TEST_SERVICE_2, contextId = CONTEXT_ID_2)
+    static interface TestService2Client {
+        @GetMapping("/status/500")
+        Map testGetRetryStatus500();
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 
 }

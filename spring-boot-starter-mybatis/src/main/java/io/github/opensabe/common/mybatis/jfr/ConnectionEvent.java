@@ -25,11 +25,12 @@ import lombok.Setter;
 
 /**
  * mysql连接池JFR事件，创建连接和关闭连接时上报
+ *
  * @author maheng
  */
 @Getter
 @Setter
-@Category({"observation","mybatis"})
+@Category({"observation", "mybatis"})
 @Label("Connection Pool Monitor")
 @StackTrace(value = false)
 public class ConnectionEvent extends Event {

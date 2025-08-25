@@ -15,14 +15,8 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.test;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
-import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.micrometer.observation.Observation;
-import io.netty.handler.timeout.ReadTimeoutException;
+import java.util.Map;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,11 +34,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
@@ -53,6 +42,18 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
+import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
+import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.micrometer.observation.Observation;
+import io.netty.handler.timeout.ReadTimeoutException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @AutoConfigureObservability
 @SpringBootTest(properties = {
@@ -75,11 +76,10 @@ import static org.mockito.Mockito.when;
         "resilience4j.circuitbreaker.configs.default.recordExceptions=java.lang.Exception"
 }, classes = LoadBalancerTest.MockConfig.class)
 public class LoadBalancerTest extends CommonMicroServiceTest {
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
     private final String serviceId = "testService";
+    ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
+    ServiceInstance zone1Instance2 = new DefaultServiceInstance("instance2", serviceId, CONNECT_TIMEOUT_HOST, CONNECT_TIMEOUT_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
+    ServiceInstance zone1Instance3 = new DefaultServiceInstance("instance3", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
     @Autowired
     private WebClientNamedContextFactory webClientNamedContextFactory;
     @Autowired
@@ -92,10 +92,6 @@ public class LoadBalancerTest extends CommonMicroServiceTest {
     private LoadBalancerClientFactory loadBalancerClientFactory;
     private TracedCircuitBreakerRoundRobinLoadBalancer loadBalancerClientFactoryInstance = spy(TracedCircuitBreakerRoundRobinLoadBalancer.class);
     private ServiceInstanceListSupplier serviceInstanceListSupplier = spy(ServiceInstanceListSupplier.class);
-
-    ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
-    ServiceInstance zone1Instance2 = new DefaultServiceInstance("instance2", serviceId, CONNECT_TIMEOUT_HOST, CONNECT_TIMEOUT_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
-    ServiceInstance zone1Instance3 = new DefaultServiceInstance("instance3", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
 
     @BeforeEach
     void setup() {
@@ -272,6 +268,10 @@ public class LoadBalancerTest extends CommonMicroServiceTest {
                         .retrieve().toBodilessEntity().map(ResponseEntity::getStatusCode))
                 .expectErrorMatches(t -> t instanceof WebClientResponseException.InternalServerError)
                 .verifyThenAssertThat();
-        Assertions.assertEquals(loadBalancerClientFactoryInstance.getRequestRequestDataContextMap().asMap().size(),1);
+        Assertions.assertEquals(loadBalancerClientFactoryInstance.getRequestRequestDataContextMap().asMap().size(), 1);
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 }

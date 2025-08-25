@@ -25,7 +25,7 @@ public class EnhancedStreamFactory {
                 //必须用EnhancedStream的classLoader，不能用Stream的，因为Stream是jdk的类，ClassLoader是rootClassLoader
                 EnhancedStream.class.getClassLoader(),
                 //代理接口
-                new Class<?>[] {EnhancedStream.class},
+                new Class<?>[]{EnhancedStream.class},
                 //代理类
                 new EnhancedStreamHandler<>(stream)
         );

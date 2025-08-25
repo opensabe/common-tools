@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.paypal.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "paypal.api")
 @Data

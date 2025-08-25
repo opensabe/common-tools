@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.test;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import io.micrometer.tracing.TraceContext;
-import jdk.jfr.consumer.RecordedEvent;
-import lombok.extern.log4j.Log4j2;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -41,19 +42,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
-import reactor.core.publisher.Mono;
-
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.micrometer.observation.Observation;
+import io.micrometer.tracing.TraceContext;
+import jdk.jfr.consumer.RecordedEvent;
+import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
 
 @JfrEventTest
 @Log4j2
@@ -72,70 +72,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Disabled
 public class TestHttpServerRequestJFREvent {
     public JfrEvents jfrEvents = new JfrEvents();
-
-    @SpringBootApplication
-    static class TestConfiguration {
-        @Bean
-        public TestService testService() {
-            return new TestService();
-        }
-    }
-
-    @RestController
-    static class TestService {
-        @PostMapping("/test-normal-get/{pathParam1}")
-        public String testNormalGet(
-                @PathVariable String pathParam1,
-                @RequestParam String param1,
-                @RequestParam String param2,
-                @RequestHeader String header1,
-                @RequestHeader String header2,
-                @RequestBody Map<String, String> map
-        ) {
-            log.info(
-                    "testNormalGet, pathParam1={}, param1={}, param2={}, header1={}, header2={}, map={}",
-                    pathParam1, param1, param2, header1, header2, map
-            );
-            return Thread.currentThread().getName();
-        }
-
-        @GetMapping("/test-mono")
-        public Mono<String> testMono() {
-            Mono<String> result = Mono.delay(Duration.ofSeconds(1))
-                    .flatMap(l -> {
-                        log.info("sleep {} complete", l);
-                        return Mono.just(Thread.currentThread().getName());
-                    });
-            log.info("method returned");
-            return result;
-        }
-
-        @GetMapping("/test-deferred")
-        public DeferredResult<String> testDeferred() {
-            DeferredResult<String> result = new DeferredResult<>();
-            CompletableFuture.runAsync(() -> {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                log.info("sleep complete");
-                result.setResult(Thread.currentThread().getName());
-            });
-            log.info("method returned");
-            return result;
-        }
-
-        @GetMapping("/exception")
-        public String exception() {
-            throw new RuntimeException();
-        }
-    }
-
     @Autowired
     private WebTestClient webTestClient;
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
+
     @Test
     public void test() {
         jfrEvents.reset();
@@ -255,5 +196,64 @@ public class TestHttpServerRequestJFREvent {
             assertEquals(recordedEvent.getInt("status"), 200);
             assertNotNull(recordedEvent.getString("responseHeaders"));
         });
+    }
+
+    @SpringBootApplication
+    static class TestConfiguration {
+        @Bean
+        public TestService testService() {
+            return new TestService();
+        }
+    }
+
+    @RestController
+    static class TestService {
+        @PostMapping("/test-normal-get/{pathParam1}")
+        public String testNormalGet(
+                @PathVariable String pathParam1,
+                @RequestParam String param1,
+                @RequestParam String param2,
+                @RequestHeader String header1,
+                @RequestHeader String header2,
+                @RequestBody Map<String, String> map
+        ) {
+            log.info(
+                    "testNormalGet, pathParam1={}, param1={}, param2={}, header1={}, header2={}, map={}",
+                    pathParam1, param1, param2, header1, header2, map
+            );
+            return Thread.currentThread().getName();
+        }
+
+        @GetMapping("/test-mono")
+        public Mono<String> testMono() {
+            Mono<String> result = Mono.delay(Duration.ofSeconds(1))
+                    .flatMap(l -> {
+                        log.info("sleep {} complete", l);
+                        return Mono.just(Thread.currentThread().getName());
+                    });
+            log.info("method returned");
+            return result;
+        }
+
+        @GetMapping("/test-deferred")
+        public DeferredResult<String> testDeferred() {
+            DeferredResult<String> result = new DeferredResult<>();
+            CompletableFuture.runAsync(() -> {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                log.info("sleep complete");
+                result.setResult(Thread.currentThread().getName());
+            });
+            log.info("method returned");
+            return result;
+        }
+
+        @GetMapping("/exception")
+        public String exception() {
+            throw new RuntimeException();
+        }
     }
 }

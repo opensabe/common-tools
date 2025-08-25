@@ -15,8 +15,9 @@
  */
 package io.github.opensabe.spring.cloud.parent.gateway.filter;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import io.micrometer.observation.Observation;
+import java.util.Optional;
+import java.util.Set;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -26,10 +27,11 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-import java.util.Set;
+import com.github.benmanes.caffeine.cache.Cache;
+
+import io.micrometer.observation.Observation;
+import reactor.core.publisher.Mono;
 
 
 /**

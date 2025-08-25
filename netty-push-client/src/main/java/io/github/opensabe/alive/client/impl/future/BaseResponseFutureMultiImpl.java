@@ -18,7 +18,6 @@ package io.github.opensabe.alive.client.impl.future;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.ResponseFuture;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;
@@ -51,7 +50,7 @@ public class BaseResponseFutureMultiImpl implements BaseResponseFuture {
 
     @Override
     public Response get0(long timeout, TimeUnit unit)
-        throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
+            throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         if (timeout <= 0) {
             return get0();
         } else {

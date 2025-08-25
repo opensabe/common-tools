@@ -15,19 +15,20 @@
  */
 package io.github.opensabe.common.utils.mapstruct;
 
-import io.github.opensabe.common.utils.mapstruct.vo.OrderItemDto;
-import io.github.opensabe.mapstruct.core.MapperRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import io.github.opensabe.common.utils.mapstruct.vo.OrderItemDto;
+import io.github.opensabe.mapstruct.core.MapperRepository;
 
 @DisplayName("MapStruct自映射测试")
 public class SelfTest {
 
     @Test
     @DisplayName("测试对象自映射功能")
-    void test1 () {
+    void test1() {
         var i = new OrderItemDto();
         i.setQuantity(10L);
         i.setName("order");

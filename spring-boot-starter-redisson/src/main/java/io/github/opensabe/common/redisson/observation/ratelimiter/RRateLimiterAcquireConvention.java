@@ -21,6 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 public class RRateLimiterAcquireConvention implements ObservationConvention<RRateLimiterAcquireContext> {
     public static final RRateLimiterAcquireConvention DEFAULT = new RRateLimiterAcquireConvention();
+
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof RRateLimiterAcquireContext;

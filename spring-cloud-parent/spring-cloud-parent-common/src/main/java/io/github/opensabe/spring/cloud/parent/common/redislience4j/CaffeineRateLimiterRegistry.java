@@ -15,13 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.redislience4j;
 
-import io.github.resilience4j.core.ConfigurationNotFoundException;
-import io.github.resilience4j.core.registry.RegistryEventConsumer;
-import io.github.resilience4j.ratelimiter.RateLimiter;
-import io.github.resilience4j.ratelimiter.RateLimiterConfig;
-import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.ratelimiter.internal.AtomicRateLimiter;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +22,13 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
+
+import io.github.resilience4j.core.ConfigurationNotFoundException;
+import io.github.resilience4j.core.registry.RegistryEventConsumer;
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiterConfig;
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
+import io.github.resilience4j.ratelimiter.internal.AtomicRateLimiter;
 
 public class CaffeineRateLimiterRegistry extends CaffeineResilienceRegistry<RateLimiter, RateLimiterConfig> implements RateLimiterRegistry {
 

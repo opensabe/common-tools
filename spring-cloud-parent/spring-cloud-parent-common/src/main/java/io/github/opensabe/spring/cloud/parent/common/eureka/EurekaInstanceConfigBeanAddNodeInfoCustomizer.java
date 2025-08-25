@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.eureka;
 
-import io.github.opensabe.common.utils.AlarmUtil;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
+
+import io.github.opensabe.common.utils.AlarmUtil;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 将环境变量中 NODE_NAME 加入 eureka 注册实例信息中的 metadata

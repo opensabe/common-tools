@@ -15,10 +15,9 @@
  */
 package io.github.opensabe.common.dynamodb.test.po;
 
+import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-
-import java.util.Objects;
 
 /**
  * @author heng.ma
@@ -38,28 +37,28 @@ public class Address {
         return this.street;
     }
 
-    public String getCity() {
-        return this.city;
-    }
-
-    public String getState() {
-        return this.state;
-    }
-
-    public String getZipCode() {
-        return this.zipCode;
-    }
-
     public void setStreet(String street) {
         this.street = street;
+    }
+
+    public String getCity() {
+        return this.city;
     }
 
     public void setCity(String city) {
         this.city = city;
     }
 
+    public String getState() {
+        return this.state;
+    }
+
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getZipCode() {
+        return this.zipCode;
     }
 
     public void setZipCode(String zipCode) {

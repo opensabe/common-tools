@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @deprecated  use {@link RedissonRateLimiter#name()} instead
+ * @deprecated use {@link RedissonRateLimiter#name()} instead
  */
 @Deprecated(forRemoval = true, since = "2.0.0")
 @Documented

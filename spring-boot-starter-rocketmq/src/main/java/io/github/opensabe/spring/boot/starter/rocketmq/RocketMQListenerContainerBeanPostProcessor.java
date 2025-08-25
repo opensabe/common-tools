@@ -28,6 +28,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * 这样得修改源码，侵入性比较强，不利于日后升级
  * 所以采用BeanPostProcessor的方式来扩展，如果要设置ConsumeFromWhere，只需要将
  * 我们的Consumer实现{@link ConsumerAdjust}接口即可
+ *
  * @author heng.ma
  */
 public class RocketMQListenerContainerBeanPostProcessor implements BeanPostProcessor {

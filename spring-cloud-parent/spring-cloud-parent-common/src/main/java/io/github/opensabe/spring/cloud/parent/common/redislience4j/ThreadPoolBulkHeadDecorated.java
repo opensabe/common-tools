@@ -15,12 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.redislience4j;
 
-import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
-import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
-
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionStage;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
 
 public class ThreadPoolBulkHeadDecorated implements ThreadPoolBulkhead {
     private final ThreadPoolBulkhead deletgate;

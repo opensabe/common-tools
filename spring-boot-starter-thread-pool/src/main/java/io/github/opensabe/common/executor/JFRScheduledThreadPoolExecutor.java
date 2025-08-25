@@ -15,17 +15,16 @@
  */
 package io.github.opensabe.common.executor;
 
-import io.github.opensabe.common.executor.jfr.ScheduledThreadTaskJFREvent;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import io.micrometer.tracing.TraceContext;
-import lombok.extern.log4j.Log4j2;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import io.github.opensabe.common.executor.jfr.ScheduledThreadTaskJFREvent;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.micrometer.observation.Observation;
+import io.micrometer.tracing.TraceContext;
+import lombok.extern.log4j.Log4j2;
 
 
 @Log4j2
@@ -36,6 +35,38 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
     public JFRScheduledThreadPoolExecutor(ScheduledThreadPoolExecutor threadPoolExecutor, UnifiedObservationFactory unifiedObservationFactory) {
         super(threadPoolExecutor, unifiedObservationFactory);
         this.scheduledThreadPoolExecutor = threadPoolExecutor;
+    }
+
+    @Override
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        return scheduledThreadPoolExecutor.schedule(
+                new RunnableWrapper(unifiedObservationFactory, command, -1, -1, delay, unit),
+                delay, unit
+        );
+    }
+
+    @Override
+    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+        return scheduledThreadPoolExecutor.schedule(
+                new CallableWrapper<>(unifiedObservationFactory, callable, -1, -1, delay, unit),
+                delay, unit
+        );
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+        return scheduledThreadPoolExecutor.scheduleAtFixedRate(
+                new RunnableWrapper(unifiedObservationFactory, command, initialDelay, period, -1, unit),
+                initialDelay, period, unit
+        );
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+        return scheduledThreadPoolExecutor.scheduleWithFixedDelay(
+                new RunnableWrapper(unifiedObservationFactory, command, initialDelay, -1, delay, unit),
+                initialDelay, delay, unit
+        );
     }
 
     protected static class CallableWrapper<T> implements Callable<T> {
@@ -81,7 +112,7 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
         private final Runnable runnable;
         private final ScheduledThreadTaskJFREvent threadTaskJFREvent;
 
-        private RunnableWrapper(UnifiedObservationFactory unifiedObservationFactory,  Runnable runnable,
+        private RunnableWrapper(UnifiedObservationFactory unifiedObservationFactory, Runnable runnable,
                                 long initialDelay, long period, long delay, TimeUnit unit) {
             Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
             this.observation = observation;
@@ -111,37 +142,5 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
                 }
             });
         }
-    }
-
-    @Override
-    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-        return scheduledThreadPoolExecutor.schedule(
-                new RunnableWrapper(unifiedObservationFactory, command, -1, -1, delay, unit),
-                delay, unit
-        );
-    }
-
-    @Override
-    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-        return scheduledThreadPoolExecutor.schedule(
-                new CallableWrapper<>(unifiedObservationFactory, callable, -1, -1, delay, unit),
-                delay, unit
-        );
-    }
-
-    @Override
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-        return scheduledThreadPoolExecutor.scheduleAtFixedRate(
-                new RunnableWrapper(unifiedObservationFactory, command, initialDelay, period, -1, unit),
-                initialDelay, period, unit
-        );
-    }
-
-    @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        return scheduledThreadPoolExecutor.scheduleWithFixedDelay(
-                new RunnableWrapper(unifiedObservationFactory, command, initialDelay, -1, delay, unit),
-                initialDelay, delay, unit
-        );
     }
 }

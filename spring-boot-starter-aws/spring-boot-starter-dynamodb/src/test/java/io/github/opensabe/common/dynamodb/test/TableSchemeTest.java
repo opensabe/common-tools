@@ -15,6 +15,14 @@
  */
 package io.github.opensabe.common.dynamodb.test;
 
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.util.TypeInformation;
+
 import cn.hutool.core.bean.BeanDesc;
 import cn.hutool.core.bean.BeanUtil;
 import io.github.opensabe.common.dynamodb.annotation.HashKeyName;
@@ -22,9 +30,6 @@ import io.github.opensabe.common.dynamodb.annotation.RangeKeyName;
 import io.github.opensabe.common.dynamodb.service.DynamoDbBaseService;
 import io.github.opensabe.common.dynamodb.service.KeyValueDynamoDbService;
 import io.github.opensabe.common.dynamodb.test.po.EightDataTypesPo;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.util.TypeInformation;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.BeanAttributeGetter;
@@ -32,10 +37,6 @@ import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.BeanAttributeSet
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
-
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author heng.ma

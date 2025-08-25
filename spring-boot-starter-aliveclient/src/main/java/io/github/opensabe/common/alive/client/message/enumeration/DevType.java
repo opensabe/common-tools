@@ -22,11 +22,11 @@ public enum DevType {
     WEB(4);
     private int val;
 
-    public int getVal() {
-        return val;
-    }
-
     DevType(int val) {
         this.val = val;
+    }
+
+    public int getVal() {
+        return val;
     }
 }

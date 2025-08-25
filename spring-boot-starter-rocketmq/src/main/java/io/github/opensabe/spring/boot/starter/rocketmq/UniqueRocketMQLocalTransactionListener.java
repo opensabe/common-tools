@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
-import io.github.opensabe.common.utils.json.JsonUtil;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.springframework.messaging.Message;
+
+import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
+import io.github.opensabe.common.utils.json.JsonUtil;
 
 public abstract class UniqueRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
     /**

@@ -15,9 +15,8 @@
  */
 package io.github.opensabe.common.alive.client;
 
-import io.github.opensabe.common.alive.client.message.Response;
-
 import java.util.Set;
+import io.github.opensabe.common.alive.client.message.Response;
 
 public interface ClientCallback {
     void opComplete(Set<Response> response);

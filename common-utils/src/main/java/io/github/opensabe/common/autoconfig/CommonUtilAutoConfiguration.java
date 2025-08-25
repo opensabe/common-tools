@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.common.autoconfig;
 
-import io.github.opensabe.common.config.SpringCommonUtilConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.config.SpringCommonUtilConfiguration;
 
 @AutoConfiguration
 @Import({

@@ -15,21 +15,23 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import io.github.opensabe.common.executor.ThreadPoolFactory;
-import jakarta.annotation.Nonnull;
-import lombok.extern.log4j.Log4j2;
+import java.util.concurrent.ExecutorService;
+
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
-import java.util.concurrent.ExecutorService;
+import io.github.opensabe.common.executor.ThreadPoolFactory;
+import jakarta.annotation.Nonnull;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class RocketMQTemplateBeanPostProcessor implements BeanPostProcessor {
     @Autowired
     private ThreadPoolFactory threadPoolFactory;
+
     @Override
     public Object postProcessAfterInitialization(@Nonnull Object bean, @Nonnull String beanName) throws BeansException {
         if (bean instanceof RocketMQTemplate rocketMQTemplate) {

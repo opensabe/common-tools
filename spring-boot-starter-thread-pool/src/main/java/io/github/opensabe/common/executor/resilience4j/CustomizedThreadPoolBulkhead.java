@@ -15,6 +15,15 @@
  */
 package io.github.opensabe.common.executor.resilience4j;
 
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import io.github.opensabe.common.executor.JFRThreadPoolExecutor;
 import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
@@ -25,9 +34,6 @@ import io.github.resilience4j.bulkhead.event.BulkheadOnCallPermittedEvent;
 import io.github.resilience4j.bulkhead.event.BulkheadOnCallRejectedEvent;
 import io.github.resilience4j.core.ContextPropagator;
 import io.github.resilience4j.core.EventConsumer;
-
-import java.util.Map;
-import java.util.concurrent.*;
 
 public class CustomizedThreadPoolBulkhead implements ThreadPoolBulkhead {
 

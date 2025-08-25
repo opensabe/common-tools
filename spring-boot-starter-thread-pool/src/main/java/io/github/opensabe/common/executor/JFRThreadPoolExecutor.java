@@ -15,14 +15,19 @@
  */
 package io.github.opensabe.common.executor;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 
 @Log4j2

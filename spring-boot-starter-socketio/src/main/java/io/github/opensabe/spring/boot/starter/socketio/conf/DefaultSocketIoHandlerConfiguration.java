@@ -15,11 +15,20 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
+import java.util.UUID;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnEvent;
+
 import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.socketio.AttributedSocketIoClient;
@@ -27,19 +36,12 @@ import io.github.opensabe.spring.boot.starter.socketio.BaseAck;
 import io.github.opensabe.spring.boot.starter.socketio.SocketIoMessageTemplate;
 import io.netty.handler.codec.http.HttpHeaders;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-
-import java.util.UUID;
 
 /**
  * 设置order为HIGHEST_PRECEDENCE + 1000
  */
 @Log4j2
-@Order(Ordered.HIGHEST_PRECEDENCE+1000)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1000)
 @Configuration(proxyBeanMethods = false)
 public class DefaultSocketIoHandlerConfiguration {
     @Autowired
@@ -47,6 +49,7 @@ public class DefaultSocketIoHandlerConfiguration {
 
     /**
      * 连接建立的时候要做的事情
+     *
      * @param client
      */
     @OnConnect
@@ -75,6 +78,7 @@ public class DefaultSocketIoHandlerConfiguration {
 
     /**
      * 订阅，其实就是进入某个房间
+     *
      * @param client
      * @param request
      * @param topic

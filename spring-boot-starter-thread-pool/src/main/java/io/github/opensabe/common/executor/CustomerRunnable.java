@@ -23,7 +23,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class CustomerRunnable implements JFRecordable<Void>, Traceable<Void>,Runnable {
+public class CustomerRunnable implements JFRecordable<Void>, Traceable<Void>, Runnable {
     private final Runnable runnable;
 
     @Getter
@@ -61,7 +61,7 @@ public class CustomerRunnable implements JFRecordable<Void>, Traceable<Void>,Run
     public Void inTrace() {
         try {
             this.runnable.run();
-        }catch (Throwable t) {
+        } catch (Throwable t) {
             log.error("CustomerRunnable-run error: trace: {}-{}, {}",
                     threadTaskJFREvent.getTraceId(), threadTaskJFREvent.getSpanId(), t.getMessage(), t);
             throw t;
@@ -71,6 +71,6 @@ public class CustomerRunnable implements JFRecordable<Void>, Traceable<Void>,Run
 
     @Override
     public void run() {
-       record();
+        record();
     }
 }

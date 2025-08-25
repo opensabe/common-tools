@@ -15,10 +15,11 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
-import io.github.opensabe.spring.cloud.parent.common.CommonConstant;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
+
+import io.github.opensabe.spring.cloud.parent.common.CommonConstant;
 
 public class SocketIoEurekaMetadataModifier implements BeanPostProcessor {
     private final SocketIoServerProperties serverProperties;

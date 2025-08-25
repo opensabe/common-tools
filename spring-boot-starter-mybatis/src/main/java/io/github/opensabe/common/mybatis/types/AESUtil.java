@@ -15,12 +15,12 @@
  */
 package io.github.opensabe.common.mybatis.types;
 
-import io.github.opensabe.common.utils.Base64;
-import lombok.extern.log4j.Log4j2;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import io.github.opensabe.common.utils.Base64;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author musaxi on 2017/11/2.
@@ -32,10 +32,10 @@ public class AESUtil {
      * AES加密（默认IV）
      */
     public static String Encrypt(String plain, String key) throws Exception {
-        if(key == null) {
+        if (key == null) {
             System.out.print("Key为空null");
             return null;
-        } else if(key.length() != 16) {
+        } else if (key.length() != 16) {
             System.out.print("Key长度不是16位");
             return null;
         } else {
@@ -54,10 +54,10 @@ public class AESUtil {
      */
     public static String Decrypt(String plain, String key) throws Exception {
         try {
-            if(key == null) {
+            if (key == null) {
                 log.error("Key为空null");
                 return null;
-            } else if(key.length() != 16) {
+            } else if (key.length() != 16) {
                 log.error("Key长度不是16位");
                 return null;
             } else {

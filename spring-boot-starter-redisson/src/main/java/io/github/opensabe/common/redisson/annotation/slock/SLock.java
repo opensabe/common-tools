@@ -15,15 +15,21 @@
  */
 package io.github.opensabe.common.redisson.annotation.slock;
 
-import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
+
 import org.redisson.api.LockOptions;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.annotation.Cacheable;
 
-import java.lang.annotation.*;
-import java.util.concurrent.TimeUnit;
+import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 
 @Documented
 @Inherited
@@ -33,6 +39,7 @@ public @interface SLock {
 
     /**
      * 锁的名称表达式
+     *
      * @see Cacheable#cacheNames()
      */
     String[] name();
@@ -69,8 +76,10 @@ public @interface SLock {
     /**
      * 以下三个参数在 LockFeature = SPIN， BackOffType = EXPONENTIAL 使用
      */
-    long backOffMaxDelay()  default 128;
+    long backOffMaxDelay() default 128;
+
     long backOffInitialDelay() default 1;
+
     int backOffMultiplier() default 2;
 
     /**
@@ -92,6 +101,7 @@ public @interface SLock {
         },
         /**
          * try lock，不等待，直接返回
+         *
          * @see org.redisson.api.RLock#tryLock()
          */
         TRY_LOCK_NOWAIT {
@@ -102,6 +112,7 @@ public @interface SLock {
         },
         /**
          * try lock，包含等待
+         *
          * @see org.redisson.api.RLock#tryLock(long, long, TimeUnit)
          */
         TRY_LOCK {
@@ -110,12 +121,12 @@ public @interface SLock {
                 try {
                     return lock.tryLock(content.waitTime(), content.leaseTime(), content.timeUnit());
                 } catch (InterruptedException e) {
-                    throw new RedissonLockException ("can not get redisson lock", e);
+                    throw new RedissonLockException("can not get redisson lock", e);
                 }
             }
         };
 
-        public abstract boolean lock (SLock content,RLock lock);
+        public abstract boolean lock(SLock content, RLock lock);
     }
 
     enum LockFeature {
@@ -165,12 +176,10 @@ public @interface SLock {
             public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return redissonClient.getFencedLock(name);
             }
-        }
-        ;
+        };
 
-        public abstract RLock getLock (String name, SLock content, RedissonClient redissonClient);
+        public abstract RLock getLock(String name, SLock content, RedissonClient redissonClient);
     }
-
 
 
     enum BackOffType {
@@ -198,7 +207,7 @@ public @interface SLock {
         },
         ;
 
-        abstract LockOptions.BackOff backOff (SLock content);
+        abstract LockOptions.BackOff backOff(SLock content);
     }
 
     enum ReadOrWrite {
@@ -223,7 +232,7 @@ public @interface SLock {
         },
         ;
 
-        abstract RLock transform (RReadWriteLock lock);
+        abstract RLock transform(RReadWriteLock lock);
     }
 
 }

@@ -15,17 +15,19 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+
+import org.redisson.api.RTopic;
+import org.redisson.api.RedissonClient;
+
 import com.corundumstudio.socketio.store.pubsub.PubSubListener;
 import com.corundumstudio.socketio.store.pubsub.PubSubMessage;
 import com.corundumstudio.socketio.store.pubsub.PubSubStore;
 import com.corundumstudio.socketio.store.pubsub.PubSubType;
-import io.netty.util.internal.PlatformDependent;
-import org.redisson.api.RTopic;
-import org.redisson.api.RedissonClient;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
+import io.netty.util.internal.PlatformDependent;
 
 public class RedissonPubSubStore implements PubSubStore {
     private final RedissonClient redissonPub;

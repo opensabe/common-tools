@@ -15,13 +15,12 @@
  */
 package io.github.opensabe.common.executor;
 
-import lombok.Getter;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 
 public class NamedThreadPoolExecutor extends ThreadPoolExecutor {
     @Getter

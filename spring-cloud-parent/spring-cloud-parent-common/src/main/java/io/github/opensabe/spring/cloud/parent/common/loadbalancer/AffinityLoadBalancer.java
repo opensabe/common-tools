@@ -15,9 +15,9 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.loadbalancer;
 
-import org.springframework.cloud.client.ServiceInstance;
-
 import java.util.List;
+
+import org.springframework.cloud.client.ServiceInstance;
 
 /**
  * 根据对象，决定负载均衡到哪个

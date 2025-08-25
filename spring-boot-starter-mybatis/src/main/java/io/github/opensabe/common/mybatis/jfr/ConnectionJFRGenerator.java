@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.common.mybatis.jfr;
 
-import io.github.opensabe.common.mybatis.observation.ConnectionContext;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
+import io.github.opensabe.common.mybatis.observation.ConnectionContext;
 
 /**
  * mysql连接池上报JFR
+ *
  * @author maheng
  */
 public class ConnectionJFRGenerator extends ObservationToJFRGenerator<ConnectionContext> {

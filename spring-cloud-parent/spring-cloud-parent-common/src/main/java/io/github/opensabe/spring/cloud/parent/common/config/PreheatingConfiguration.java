@@ -15,9 +15,6 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
-import io.github.opensabe.spring.cloud.parent.common.preheating.DelayApplicationReadyEventListener;
-import io.github.opensabe.spring.cloud.parent.common.preheating.PreheatingProperties;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.autoconfigure.endpoint.expose.EndpointExposure;
 import org.springframework.boot.actuate.health.HealthEndpoint;
@@ -25,6 +22,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.opensabe.spring.cloud.parent.common.preheating.DelayApplicationReadyEventListener;
+import io.github.opensabe.spring.cloud.parent.common.preheating.PreheatingProperties;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 预热配置

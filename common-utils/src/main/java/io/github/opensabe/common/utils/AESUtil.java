@@ -15,16 +15,15 @@
  */
 package io.github.opensabe.common.utils;
 
-import org.apache.commons.codec.binary.Base64;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * AES 加密工具类
@@ -51,6 +50,7 @@ public class AESUtil {
     public static String encrypt(String content, String key) throws Exception {
         return encrypt(content, key, DEFAULT_CIPHER_ALGORITHM);
     }
+
     public static String encryptNodeJS(String content, String key) throws Exception {
         return encrypt(content, key, "AES/ECB/PKCS5Padding");
     }
@@ -97,17 +97,18 @@ public class AESUtil {
     public static String decryptNodeJS(String base64Encrypted, String key) throws Exception {
         return decrypt(base64Encrypted, key, "AES/ECB/PKCS5Padding");
     }
+
     public static String decrypt(String base64Encrypted, String key) throws Exception {
         return decrypt(base64Encrypted, key, DEFAULT_CIPHER_ALGORITHM);
     }
 
-        /**
-         * 对密钥进行处理
-         *
-         * @param seed
-         * @return
-         * @throws Exception
-         */
+    /**
+     * 对密钥进行处理
+     *
+     * @param seed
+     * @return
+     * @throws Exception
+     */
     public static byte[] getRawKey(byte[] seed) throws Exception {
         KeyGenerator kgen = KeyGenerator.getInstance(KEY_ALGORITHM);
         //for android

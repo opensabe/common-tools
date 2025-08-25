@@ -15,17 +15,18 @@
  */
 package io.github.opensabe.common.cache.test.service;
 
-import io.github.opensabe.common.cache.api.Expire;
-import io.github.opensabe.common.cache.test.entity.ItemObject;
-import io.github.opensabe.common.cache.test.storage.MockStorage;
-import lombok.AllArgsConstructor;
+import java.util.Map;
+
 import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import io.github.opensabe.common.cache.api.Expire;
+import io.github.opensabe.common.cache.test.entity.ItemObject;
+import io.github.opensabe.common.cache.test.storage.MockStorage;
+import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
@@ -43,19 +44,23 @@ public class CacheService {
     public ItemObject getCaffeineExpire(Long id, String field) {
         return storage.getItem(id);
     }
+
     @CacheEvict(value = "test_caffeine")
     public void deleteCaffeine(Long id, String field) {
         storage.deleteItem(id);
     }
+
     @CacheEvict(value = "test_redis")
     public void deleteRedis(Long id, String field) {
         storage.deleteItem(id);
     }
+
     @Expire(5)
     @Cacheable(value = "test_redis")
     public ItemObject getRedisExpire(Long id, String field) {
         return storage.getItem(id);
     }
+
     @Expire(value = 5, cacheType = CacheType.CAFFEINE)
     @Cacheable(value = "test_redis")
     public ItemObject geAssignmentExpire(Long id, String field) {
@@ -106,5 +111,6 @@ public class CacheService {
     //Production Redis 禁止了 Keys 命令， 因此@CacheEvict 没有指定Key的情况下 方法不能使用
     //一定会报错
     @CacheEvict(value = "test_redis")
-    public void deleteAllItemFromRedis() {}
+    public void deleteAllItemFromRedis() {
+    }
 }

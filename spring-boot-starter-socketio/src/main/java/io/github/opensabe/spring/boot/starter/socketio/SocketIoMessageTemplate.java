@@ -16,13 +16,12 @@
 package io.github.opensabe.spring.boot.starter.socketio;
 
 
+import java.util.Collection;
+
 import com.corundumstudio.socketio.BroadcastAckCallback;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.protocol.Packet;
-
-import java.net.URI;
-import java.util.Collection;
 
 public class SocketIoMessageTemplate {
     public static final String USER_ID_ROOM_PREFIX = "uid:";
@@ -35,6 +34,7 @@ public class SocketIoMessageTemplate {
 
     /**
      * 获取当前这个实例，这个用户有几个连接
+     *
      * @param uid 用户 id
      * @return
      */
@@ -44,8 +44,9 @@ public class SocketIoMessageTemplate {
 
     /**
      * 给某个用户发送消息
-     * @param uid 用户 id
-     * @param packet 包
+     *
+     * @param uid         用户 id
+     * @param packet      包
      * @param ackCallback 广播回调
      * @param <T>
      */
@@ -72,6 +73,7 @@ public class SocketIoMessageTemplate {
 
     /**
      * 获取当前这个主题有几个连接
+     *
      * @param topic 主题
      * @return
      */
@@ -81,8 +83,9 @@ public class SocketIoMessageTemplate {
 
     /**
      * 给某个主题发送消息
-     * @param topic 主题
-     * @param packet 包
+     *
+     * @param topic       主题
+     * @param packet      包
      * @param ackCallback 广播回调
      * @param <T>
      */

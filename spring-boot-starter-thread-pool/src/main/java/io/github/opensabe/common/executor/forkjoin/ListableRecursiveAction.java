@@ -15,20 +15,22 @@
  */
 package io.github.opensabe.common.executor.forkjoin;
 
-import io.micrometer.observation.Observation;
-import org.apache.commons.collections4.CollectionUtils;
-
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import io.micrometer.observation.Observation;
+
 /**
  * 根据列表切分任务的action
+ *
+ * @param <T> 列表的数据类型
  * @author heng.ma
- * @param <T>   列表的数据类型
  */
-public class ListableRecursiveAction<T> extends SegmentRecursiveTask<T,Void> {
+public class ListableRecursiveAction<T> extends SegmentRecursiveTask<T, Void> {
 
 
     protected ListableRecursiveAction(int capacity, List<T> list, Function<T, Void> transformer, Observation observation) {
@@ -39,12 +41,12 @@ public class ListableRecursiveAction<T> extends SegmentRecursiveTask<T,Void> {
         super(capacity, list, t -> {
             consumer.accept(t);
             return null;
-        }, null,null, observation);
+        }, null, null, observation);
     }
 
     @Override
     protected SegmentRecursiveTask<T, Void> clone(List<T> current) {
-        return new ListableRecursiveAction<>(capacity,current,transformer, observation);
+        return new ListableRecursiveAction<>(capacity, current, transformer, observation);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class ListableRecursiveAction<T> extends SegmentRecursiveTask<T,Void> {
         var task = segmentation();
         if (CollectionUtils.isEmpty(task)) {
             list.forEach(transformer::apply);
-        }else {
+        } else {
             invokeAll(task).forEach(ListableRecursiveTask::join);
         }
         return null;

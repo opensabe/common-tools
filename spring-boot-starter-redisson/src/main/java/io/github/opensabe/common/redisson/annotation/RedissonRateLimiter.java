@@ -15,10 +15,15 @@
  */
 package io.github.opensabe.common.redisson.annotation;
 
-import org.redisson.api.RateType;
-
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
+
+import org.redisson.api.RateType;
 
 @Documented
 @Inherited
@@ -28,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 )
 public @interface RedissonRateLimiter {
     String DEFAULT_PREFIX = "redisson:rateLimiter:";
+
     /**
      * 可以通过 RedissonRateLimiterName 指定限流器名称
      * 对于不通过参数指定名称的，可以使用这个方法指定
@@ -73,6 +79,7 @@ public @interface RedissonRateLimiter {
      * 令牌存活时间,keepAliveTimeUnit()
      */
     long keepAlive() default 0L;
+
     /**
      * 时间单位
      */

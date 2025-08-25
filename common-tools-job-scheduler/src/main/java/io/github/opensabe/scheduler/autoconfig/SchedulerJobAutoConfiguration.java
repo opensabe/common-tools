@@ -15,17 +15,9 @@
  */
 package io.github.opensabe.scheduler.autoconfig;
 
-import io.github.opensabe.scheduler.autoconfig.health.SchedulerServerHealthIndicator;
-import io.github.opensabe.scheduler.conf.Commander;
-import io.github.opensabe.scheduler.conf.SchedulerProperties;
-import io.github.opensabe.scheduler.health.HealthCheckJob;
-import io.github.opensabe.scheduler.health.SimpleJobHealthService;
-import io.github.opensabe.scheduler.jfr.JobExecuteObservationToJFRGenerator;
-import io.github.opensabe.scheduler.listener.JobListener;
-import io.github.opensabe.scheduler.listener.TaskCanRunListener;
-import io.github.opensabe.scheduler.server.SchedulerServer;
-import io.github.opensabe.scheduler.utils.JobStatisticsAPI;
-import io.micrometer.core.instrument.MeterRegistry;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +34,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.github.opensabe.scheduler.autoconfig.health.SchedulerServerHealthIndicator;
+import io.github.opensabe.scheduler.conf.Commander;
+import io.github.opensabe.scheduler.conf.SchedulerProperties;
+import io.github.opensabe.scheduler.health.HealthCheckJob;
+import io.github.opensabe.scheduler.health.SimpleJobHealthService;
+import io.github.opensabe.scheduler.jfr.JobExecuteObservationToJFRGenerator;
+import io.github.opensabe.scheduler.listener.JobListener;
+import io.github.opensabe.scheduler.listener.TaskCanRunListener;
+import io.github.opensabe.scheduler.server.SchedulerServer;
+import io.github.opensabe.scheduler.utils.JobStatisticsAPI;
+import io.micrometer.core.instrument.MeterRegistry;
 
 //@Configuration
 //https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.7-Release-Notes#changes-to-auto-configuration
@@ -88,16 +89,6 @@ public class SchedulerJobAutoConfiguration {
         return new JobStatisticsAPI(schedulerServer);
     }
 
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(HealthIndicator.class)
-    @ConditionalOnEnabledHealthIndicator("schedulerjob")
-    public static class SchedulerServerHealthIndicatorAutoConfiguration {
-        @Bean
-        public HealthIndicator healthIndicator(SchedulerProperties schedulerProperties, ObjectProvider<SchedulerServer> schedulerServerProvider) {
-            return new SchedulerServerHealthIndicator(schedulerProperties, schedulerServerProvider);
-        }
-    }
-
     @Bean
     public TaskCanRunListener taskCanRunListener() {
         return new TaskCanRunListener();
@@ -116,5 +107,15 @@ public class SchedulerJobAutoConfiguration {
     @Bean
     public HealthCheckJob healthCheckJob(SimpleJobHealthService simpleJobHealthService) {
         return new HealthCheckJob(simpleJobHealthService);
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(HealthIndicator.class)
+    @ConditionalOnEnabledHealthIndicator("schedulerjob")
+    public static class SchedulerServerHealthIndicatorAutoConfiguration {
+        @Bean
+        public HealthIndicator healthIndicator(SchedulerProperties schedulerProperties, ObjectProvider<SchedulerServer> schedulerServerProvider) {
+            return new SchedulerServerHealthIndicator(schedulerProperties, schedulerServerProvider);
+        }
     }
 }

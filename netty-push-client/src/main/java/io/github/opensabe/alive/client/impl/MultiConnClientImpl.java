@@ -15,6 +15,20 @@
  */
 package io.github.opensabe.alive.client.impl;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.opensabe.alive.client.ResponseFuture;
 import io.github.opensabe.alive.client.callback.CallbackManager;
 import io.github.opensabe.alive.client.callback.ClientCallback;
@@ -40,14 +54,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 增加同一节点 多条连接支持
@@ -57,27 +63,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MultiConnClientImpl extends AbstractClient implements AliveServerListListener {
 
+    private static final int DEFAULT_CONNECTION_NUM = 1;//每个节点默认连接数
     private Logger logger = LoggerFactory.getLogger(MultiConnClientImpl.class);
-
     private Bootstrap bootstrap;
-
     private AliveServerList aliveServerList;
-
     private volatile ClientConnectionGetter clientConnectionGetter = new ClientConnectionGetter(new ArrayList<ClientConnection>());
-
     private volatile List<ClientConnection> clientConnectionList = new LinkedList<ClientConnection>();
-
     private volatile Map<InetSocketAddress, List<ClientConnection>> clientConnectionMap = new ConcurrentHashMap<>();
     private volatile Map<Integer, List<ClientConnection>> clientNumMap = new ConcurrentHashMap<>();
-
     private long heartInterval;
-
     private int clientConnectionNum = 1;
-    private static final int DEFAULT_CONNECTION_NUM = 1;//每个节点默认连接数
+    private AtomicInteger loopCount = new AtomicInteger(0);
 
     public MultiConnClientImpl(int productCode, String authToken, int clientConnectionNum,
-        String zkString, String zkPath, int zkRetryInterval, int zkRetryMax, int zkMaxDelay,
-        long connectTimeout, long authTimeout, long heartTimeout, long heartInterval, ZkTasker zkTasker) {
+                               String zkString, String zkPath, int zkRetryInterval, int zkRetryMax, int zkMaxDelay,
+                               long connectTimeout, long authTimeout, long heartTimeout, long heartInterval, ZkTasker zkTasker) {
 
         super(productCode, authToken, connectTimeout, authTimeout);
 
@@ -97,7 +97,7 @@ public class MultiConnClientImpl extends AbstractClient implements AliveServerLi
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast("IdleStateHandler", new IdleStateHandler(MultiConnClientImpl.this.heartInterval * 2,
-                    MultiConnClientImpl.this.heartInterval, 0L, TimeUnit.MILLISECONDS));
+                        MultiConnClientImpl.this.heartInterval, 0L, TimeUnit.MILLISECONDS));
                 ch.pipeline().addLast("Int32FrameEncoder", new Int32FrameEncoder());
                 ch.pipeline().addLast("ProtoBufEncoder", new ProtoBufEncoder());
                 ch.pipeline().addLast("Int32FrameDecoder", new Int32FrameDecoder());
@@ -217,8 +217,6 @@ public class MultiConnClientImpl extends AbstractClient implements AliveServerLi
         this.clientConnectionMap = newClientConnectionMap;
         this.initClientNumMap();
     }
-
-    private AtomicInteger loopCount = new AtomicInteger(0);
 
     private ClientConnection getConnection() {
         List<ClientConnection> connList = clientConnectionList;

@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.common.mybatis.test.po;
 
+import org.apache.ibatis.type.JdbcType;
+
 import io.github.opensabe.common.mybatis.types.DynamoDbTypeHandler;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.ibatis.type.JdbcType;
 import tk.mybatis.mapper.annotation.ColumnType;
 
 

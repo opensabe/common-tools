@@ -16,21 +16,22 @@
 package io.github.opensabe.common.mybatis.test.mapper.user;
 
 
-import io.github.opensabe.common.mybatis.base.BaseMapper;
-import io.github.opensabe.common.mybatis.test.po.User;
-import org.apache.ibatis.annotations.Update;
-import io.github.opensabe.common.mybatis.types.JSONTypeHandler;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.type.JdbcType;
 
-import java.util.List;
+import io.github.opensabe.common.mybatis.base.BaseMapper;
+import io.github.opensabe.common.mybatis.test.po.User;
+import io.github.opensabe.common.mybatis.types.JSONTypeHandler;
 
 public interface UserMapper extends BaseMapper<User> {
 
     @Update("truncate table t_user")
-    void truncateTable ();
+    void truncateTable();
 
     @Select("select id, first_name, last_name, create_time, properties from t_user where id = #{id,jdbcType=VARCHAR}")
     @Results(id = "findUserById", value = {
@@ -38,10 +39,10 @@ public interface UserMapper extends BaseMapper<User> {
             @Result(column = "first_name", property = "firstName", jdbcType = JdbcType.VARCHAR),
             @Result(column = "last_name", property = "lastName", jdbcType = JdbcType.VARCHAR),
             @Result(column = "create_time", property = "createTime", jdbcType = JdbcType.DATE),
-            @Result(column = "properties", property = "properties", jdbcType = JdbcType.VARCHAR ,typeHandler = JSONTypeHandler.class),
+            @Result(column = "properties", property = "properties", jdbcType = JdbcType.VARCHAR, typeHandler = JSONTypeHandler.class),
     })
     User findUserById(String id);
 
     @Select("select /*# mode=readonly */ * from t_user")
-    List<User> selectReadOnly ();
+    List<User> selectReadOnly();
 }

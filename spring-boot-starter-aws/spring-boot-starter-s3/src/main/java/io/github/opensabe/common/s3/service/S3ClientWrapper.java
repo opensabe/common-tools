@@ -15,16 +15,6 @@
  */
 package io.github.opensabe.common.s3.service;
 
-import io.github.opensabe.common.s3.observation.S3OperationContext;
-import io.github.opensabe.common.s3.observation.S3OperationConvention;
-import io.github.opensabe.common.s3.observation.S3OperationObservationDocumentation;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +22,22 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.lang3.StringUtils;
+
 import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.s3.observation.S3OperationContext;
+import io.github.opensabe.common.s3.observation.S3OperationConvention;
+import io.github.opensabe.common.s3.observation.S3OperationObservationDocumentation;
+import io.micrometer.observation.Observation;
+import lombok.extern.log4j.Log4j2;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Log4j2
 public record S3ClientWrapper(S3Client s3Client, String folderName, String bucketName,

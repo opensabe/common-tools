@@ -15,18 +15,12 @@
  */
 package io.github.opensabe.scheduler.server;
 
-import io.github.opensabe.scheduler.conf.Commander;
-import io.github.opensabe.scheduler.conf.SchedulerProperties;
-import io.github.opensabe.scheduler.conf.SimpleTask;
-import io.github.opensabe.scheduler.job.JobExecutor;
-import io.github.opensabe.scheduler.job.SchedulerJob;
-import io.github.opensabe.scheduler.job.SimpleJob;
-import io.github.opensabe.scheduler.listener.DefaultJobListener;
-import io.github.opensabe.scheduler.listener.JobListener;
-import io.github.opensabe.scheduler.listener.JobListeners;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.core.instrument.MeterRegistry;
-import lombok.extern.log4j.Log4j2;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.ApplicationContext;
@@ -37,11 +31,18 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.util.ClassUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.scheduler.conf.Commander;
+import io.github.opensabe.scheduler.conf.SchedulerProperties;
+import io.github.opensabe.scheduler.conf.SimpleTask;
+import io.github.opensabe.scheduler.job.JobExecutor;
+import io.github.opensabe.scheduler.job.SchedulerJob;
+import io.github.opensabe.scheduler.job.SimpleJob;
+import io.github.opensabe.scheduler.listener.DefaultJobListener;
+import io.github.opensabe.scheduler.listener.JobListener;
+import io.github.opensabe.scheduler.listener.JobListeners;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class SchedulerServer {
@@ -61,7 +62,7 @@ public class SchedulerServer {
     //private final SchedulerProperties schedulerProperties;
     private final Commander commander;
 
-//    private volatile Instant firstHeartbeat;
+    //    private volatile Instant firstHeartbeat;
 //    private volatile ScheduledExecutorService monitorServerExecutorService;
 //    private volatile ScheduledExecutorService misfireJobServerExecutorService;
     private volatile Map<String, SchedulerJob> jobs;

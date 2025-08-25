@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Subscribe extends MqMessage{
+public class Subscribe extends MqMessage {
     private Integer requestId;
 
     private String topic;

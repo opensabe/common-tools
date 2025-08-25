@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.common.testcontainers.integration;
 
-import io.github.opensabe.common.testcontainers.CustomizedMySQLContainer;
-import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
+
+import io.github.opensabe.common.testcontainers.CustomizedMySQLContainer;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 注意使用这个类的单元测试，用的是同一个 MySQL，不同单元测试注意隔离不同的 key
@@ -28,21 +29,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 public class ReadWriteMySQLIntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
     public static final CustomizedMySQLContainer MYSQL_WRITE = new CustomizedMySQLContainer();
     public static final CustomizedMySQLContainer MYSQL_READ = new CustomizedMySQLContainer();
-
-    @Override
-    public void beforeAll(ExtensionContext extensionContext) throws Exception {
-        //由于单元测试并发执行，这个只能启动一次，所以加锁
-        if (!MYSQL_READ.isRunning()) {
-            synchronized (ReadWriteMySQLIntegrationTest.class) {
-                if (!MYSQL_WRITE.isRunning()) {
-                    MYSQL_WRITE.start();
-                }
-                if (!MYSQL_READ.isRunning()) {
-                    MYSQL_READ.start();
-                }
-            }
-        }
-    }
 
     public static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("country.map.0", () -> "public");
@@ -75,6 +61,21 @@ public class ReadWriteMySQLIntegrationTest implements BeforeAllCallback, Extensi
         registry.add("mybatis.configuration.map-underscore-to-camel-case", () -> true);
         registry.add("pagehelper.offset-as-page-num", () -> true);
         registry.add("pagehelper.support-methods-arguments", () -> true);
+    }
+
+    @Override
+    public void beforeAll(ExtensionContext extensionContext) throws Exception {
+        //由于单元测试并发执行，这个只能启动一次，所以加锁
+        if (!MYSQL_READ.isRunning()) {
+            synchronized (ReadWriteMySQLIntegrationTest.class) {
+                if (!MYSQL_WRITE.isRunning()) {
+                    MYSQL_WRITE.start();
+                }
+                if (!MYSQL_READ.isRunning()) {
+                    MYSQL_READ.start();
+                }
+            }
+        }
     }
 
     @Override

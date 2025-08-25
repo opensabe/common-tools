@@ -15,20 +15,22 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.util;
 
-import com.alibaba.fastjson.JSON;
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.SocketIOServer;
-import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
-import io.github.opensabe.common.utils.json.JsonUtil;
-import io.github.opensabe.spring.boot.starter.rocketmq.AbstractMQConsumer;
-import lombok.extern.log4j.Log4j2;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.UUID;
+import com.alibaba.fastjson.JSON;
+import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIOServer;
+
+import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import io.github.opensabe.spring.boot.starter.rocketmq.AbstractMQConsumer;
+import lombok.extern.log4j.Log4j2;
 
 
 @Log4j2

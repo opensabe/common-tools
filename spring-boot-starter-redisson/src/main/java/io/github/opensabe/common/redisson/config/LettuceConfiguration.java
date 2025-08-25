@@ -15,17 +15,18 @@
  */
 package io.github.opensabe.common.redisson.config;
 
-import io.lettuce.core.event.DefaultEventPublisherOptions;
-import io.lettuce.core.metrics.DefaultCommandLatencyCollector;
-import io.lettuce.core.metrics.DefaultCommandLatencyCollectorOptions;
-import io.lettuce.core.tracing.MicrometerTracing;
-import io.micrometer.observation.ObservationRegistry;
+import java.time.Duration;
+
 import org.springframework.boot.autoconfigure.data.redis.ClientResourcesBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import java.time.Duration;
+import io.lettuce.core.event.DefaultEventPublisherOptions;
+import io.lettuce.core.metrics.DefaultCommandLatencyCollector;
+import io.lettuce.core.metrics.DefaultCommandLatencyCollectorOptions;
+import io.lettuce.core.tracing.MicrometerTracing;
+import io.micrometer.observation.ObservationRegistry;
 
 @Configuration(proxyBeanMethods = false)
 public class LettuceConfiguration {

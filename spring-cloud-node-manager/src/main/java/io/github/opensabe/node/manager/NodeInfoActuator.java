@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.node.manager;
 
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+
 import io.github.opensabe.base.RespUtil;
 import io.github.opensabe.base.vo.BaseRsp;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
-import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 
 @Log4j2
 @Endpoint(id = NodeInfoActuator.PATH)

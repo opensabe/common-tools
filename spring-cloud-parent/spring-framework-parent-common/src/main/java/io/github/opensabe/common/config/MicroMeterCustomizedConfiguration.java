@@ -15,6 +15,13 @@
  */
 package io.github.opensabe.common.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import io.github.opensabe.common.jfr.JFRObservationHandler;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
@@ -29,12 +36,6 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;
 import io.micrometer.tracing.handler.TracingAwareMeterObservationHandler;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration(proxyBeanMethods = false)
 public class MicroMeterCustomizedConfiguration {
@@ -42,6 +43,7 @@ public class MicroMeterCustomizedConfiguration {
     public JFRObservationHandler jfrTracingObservationHandler(List<ObservationToJFRGenerator<? extends Observation.Context>> generators) {
         return new JFRObservationHandler(generators);
     }
+
     @Bean
     public UnifiedObservationFactory unifiedObservationFactory(ObjectProvider<ObservationRegistry> observationRegistry) {
         return new UnifiedObservationFactory(observationRegistry);

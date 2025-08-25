@@ -15,14 +15,8 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.test;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
-import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.micrometer.observation.Observation;
-import io.micrometer.observation.ObservationRegistry;
-import io.micrometer.tracing.TraceContext;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,13 +31,22 @@ import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
+import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
+import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.tracing.TraceContext;
+import reactor.core.publisher.Flux;
 
 @AutoConfigureObservability
 @SpringBootTest(properties = {
@@ -62,11 +65,9 @@ import static org.mockito.Mockito.*;
         "resilience4j.circuitbreaker.configs.default.recordExceptions=java.lang.Exception"
 }, classes = TestWebFluxObservation.MockConfig.class)
 public class TestWebFluxObservation extends CommonMicroServiceTest {
-    @SpringBootApplication
-    public static class MockConfig {
-    }
-
     private final String serviceId = "testService";
+    ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
+    ServiceInstance zone1Instance3 = new DefaultServiceInstance("instance3", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
     @Autowired
     private WebClientNamedContextFactory webClientNamedContextFactory;
     @Autowired
@@ -79,9 +80,6 @@ public class TestWebFluxObservation extends CommonMicroServiceTest {
     private UnifiedObservationFactory unifiedObservationFactory;
     private TracedCircuitBreakerRoundRobinLoadBalancer loadBalancerClientFactoryInstance = spy(TracedCircuitBreakerRoundRobinLoadBalancer.class);
     private ServiceInstanceListSupplier serviceInstanceListSupplier = spy(ServiceInstanceListSupplier.class);
-
-    ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
-    ServiceInstance zone1Instance3 = new DefaultServiceInstance("instance3", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
 
     @BeforeEach
     void setup() {
@@ -145,5 +143,9 @@ public class TestWebFluxObservation extends CommonMicroServiceTest {
                             })
             );
         });
+    }
+
+    @SpringBootApplication
+    public static class MockConfig {
     }
 }

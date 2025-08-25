@@ -15,9 +15,15 @@
  */
 package io.github.opensabe.common.cache.redis;
 
-import io.github.opensabe.common.cache.api.CompositedCache;
-import io.github.opensabe.common.cache.api.ExpireCacheManager;
-import lombok.extern.log4j.Log4j2;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.TransactionAwareCacheDecorator;
 import org.springframework.data.redis.cache.RedisCache;
@@ -26,10 +32,9 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
+import io.github.opensabe.common.cache.api.CompositedCache;
+import io.github.opensabe.common.cache.api.ExpireCacheManager;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author heng.ma
@@ -62,30 +67,10 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
         });
     }
 
-    public static class RCache extends RedisCache {
-
-        private RCache(String name, RedisCacheWriter cacheWriter, RedisCacheConfiguration cacheConfiguration) {
-            super(name, cacheWriter, cacheConfiguration);
-        }
-
-        /**
-         * Override to log the key.
-         * @param key will never be {@literal null}.
-         * @return  最终发到redis的key
-         */
-        @Override
-        protected String createCacheKey(Object key) {
-            String cacheKey = super.createCacheKey(key);
-            if (log.isDebugEnabled()) {
-                log.debug("Spring cache redis key: {}", cacheKey);
-            }
-            return cacheKey;
-        }
-    }
-
     /**
      *
      * 因为redis是分布式缓存，相同的key只需要删除一次，为了避免重复操作，返回任意一个cache实例即可
+     *
      * @see CompositedCache
      */
     @Override
@@ -117,16 +102,36 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
                 .stream()
                 .map(Map::values)
                 .flatMap(Collection::stream)
-                .map(c -> isTransactionAware()? ((TransactionAwareCacheDecorator)c).getTargetCache():c)
-                .map(c -> (RedisCache)c)
+                .map(c -> isTransactionAware() ? ((TransactionAwareCacheDecorator) c).getTargetCache() : c)
+                .map(c -> (RedisCache) c)
                 .toList();
     }
-
-
 
     public DynamicRedisCacheManager onRedisCacheConfiguration(Function<RedisCacheConfiguration, RedisCacheConfiguration> onRedisCacheConfiguration) {
         this.onRedisCacheConfiguration = this.onRedisCacheConfiguration.andThen(onRedisCacheConfiguration);
         return this;
+    }
+
+    public static class RCache extends RedisCache {
+
+        private RCache(String name, RedisCacheWriter cacheWriter, RedisCacheConfiguration cacheConfiguration) {
+            super(name, cacheWriter, cacheConfiguration);
+        }
+
+        /**
+         * Override to log the key.
+         *
+         * @param key will never be {@literal null}.
+         * @return 最终发到redis的key
+         */
+        @Override
+        protected String createCacheKey(Object key) {
+            String cacheKey = super.createCacheKey(key);
+            if (log.isDebugEnabled()) {
+                log.debug("Spring cache redis key: {}", cacheKey);
+            }
+            return cacheKey;
+        }
     }
 
 }

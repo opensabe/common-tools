@@ -15,17 +15,17 @@
  */
 package io.github.opensabe.common.cache.api;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.core.annotation.AnnotationUtils;
-
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author heng.ma
@@ -34,6 +34,7 @@ public class ExpireCacheInterceptor extends CacheInterceptor {
 
     private final ExpireCacheResolver cacheResolver;
     private final Map<Method, Boolean> map = new ConcurrentHashMap<>();
+
     public ExpireCacheInterceptor(ExpireCacheResolver cacheResolver) {
         this.cacheResolver = cacheResolver;
     }

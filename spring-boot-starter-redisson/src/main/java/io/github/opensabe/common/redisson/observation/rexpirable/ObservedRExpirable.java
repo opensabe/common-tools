@@ -15,26 +15,24 @@
  */
 package io.github.opensabe.common.redisson.observation.rexpirable;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.observation.RObjectDelegate;
-import io.micrometer.observation.Observation;
-import org.redisson.api.RExpirable;
-import org.redisson.api.RFuture;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RExpirable;
+import org.redisson.api.RFuture;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.RObjectDelegate;
+import io.micrometer.observation.Observation;
+
 public class ObservedRExpirable<T extends RExpirable> extends RObjectDelegate<T> implements RExpirable {
     protected final UnifiedObservationFactory unifiedObservationFactory;
+
     public ObservedRExpirable(T rExpirable, UnifiedObservationFactory unifiedObservationFactory) {
         super(rExpirable);
         this.unifiedObservationFactory = unifiedObservationFactory;
-    }
-
-    private interface ExpireCallable {
-        boolean expire();
     }
 
     private boolean expire0(String expire, ExpireCallable callable) {
@@ -259,5 +257,9 @@ public class ObservedRExpirable<T extends RExpirable> extends RObjectDelegate<T>
     @Override
     public RFuture<Long> getExpireTimeAsync() {
         return delegate.getExpireTimeAsync();
+    }
+
+    private interface ExpireCallable {
+        boolean expire();
     }
 }

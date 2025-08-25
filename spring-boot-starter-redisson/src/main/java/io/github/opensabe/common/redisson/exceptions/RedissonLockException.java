@@ -24,6 +24,7 @@ public class RedissonLockException extends RedissonClientException {
     public RedissonLockException(String message) {
         super(message);
     }
+
     public RedissonLockException(String message, Throwable e) {
         super(message, e);
     }

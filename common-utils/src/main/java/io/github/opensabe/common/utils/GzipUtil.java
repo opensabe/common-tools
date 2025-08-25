@@ -15,12 +15,14 @@
  */
 package io.github.opensabe.common.utils;
 
-import cn.hutool.core.util.ZipUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.lang.StringUtils;
-
 import java.nio.charset.Charset;
 import java.util.Base64;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.google.common.base.Charsets;
+
+import cn.hutool.core.util.ZipUtil;
 
 /**
  * Gzip 工具类，如果数据库中字段过长，则需要压缩
@@ -31,6 +33,7 @@ public class GzipUtil {
 
     /**
      * 先将字符串用gzip压缩, 然后再base64编码为字符串
+     *
      * @param source
      * @return
      */
@@ -41,6 +44,7 @@ public class GzipUtil {
 
     /**
      * 先 Base64 解码，之后将字节码解压, 再将解压后的字节码转为字符串
+     *
      * @param source
      * @return
      */

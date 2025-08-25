@@ -15,12 +15,11 @@
  */
 package io.github.opensabe.common.observed;
 
-import io.github.opensabe.common.executor.ThreadPoolFactory;
-import io.github.opensabe.common.executor.scheduler.ThreadPoolStatScheduler;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import jdk.jfr.consumer.RecordedEvent;
-import lombok.extern.log4j.Log4j2;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,13 +31,14 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import io.github.opensabe.common.executor.ThreadPoolFactory;
+import io.github.opensabe.common.executor.scheduler.ThreadPoolStatScheduler;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.micrometer.observation.Observation;
+import jdk.jfr.consumer.RecordedEvent;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @JfrEventTest
@@ -52,18 +52,13 @@ import static org.junit.Assert.assertTrue;
 @DisplayName("线程池统计测试")
 public class TheadPoolStatTest {
 
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
+    public JfrEvents jfrEvents = new JfrEvents();
     @Autowired
     ThreadPoolFactory threadPoolFactory;
     @Autowired
     ThreadPoolStatScheduler scheduler;
     @Autowired
     UnifiedObservationFactory unifiedObservationFactory;
-
-    public JfrEvents jfrEvents = new JfrEvents();
 
     @Test
     @DisplayName("测试线程池统计功能 - 验证JFR事件记录")
@@ -92,6 +87,10 @@ public class TheadPoolStatTest {
                 ).collect(Collectors.toList());
         log.info(events);
         assertTrue(!events.isEmpty());
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 
 }

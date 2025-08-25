@@ -15,19 +15,21 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilience4j;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfigurationProperties;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.reactor.IllegalPublisherException;
+import java.util.function.UnaryOperator;
+
 import org.reactivestreams.Publisher;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.reactive.function.client.ClientResponse;
+
+import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfigurationProperties;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.reactor.IllegalPublisherException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.function.UnaryOperator;
-
 /**
  * 基于官方的 CircuitBreakerOperator 针对 ClientResponse 改造，基于 ClientResponse 的 http status code
+ *
  * @see io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator
  */
 public class ClientResponseCircuitBreakerOperator implements UnaryOperator<Publisher<ClientResponse>> {

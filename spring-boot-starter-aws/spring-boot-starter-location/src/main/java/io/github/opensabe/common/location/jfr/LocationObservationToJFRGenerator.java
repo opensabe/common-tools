@@ -15,13 +15,12 @@
  */
 package io.github.opensabe.common.location.jfr;
 
+import java.util.Objects;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.common.location.observation.LocationContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.Objects;
 
 /**
  * @author changhongwei

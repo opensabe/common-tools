@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.common.redisson.autoconfig;
 
-import io.github.opensabe.common.redisson.config.MultiRedisProperties;
-import io.github.opensabe.common.redisson.config.RedisConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import io.github.opensabe.common.redisson.config.MultiRedisConnectionFactoryConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.redisson.config.MultiRedisConnectionFactoryConfiguration;
+import io.github.opensabe.common.redisson.config.MultiRedisProperties;
+import io.github.opensabe.common.redisson.config.RedisConfiguration;
 
 @AutoConfiguration(before = RedissonAutoConfiguration.class)
 @Import({MultiRedisConnectionFactoryConfiguration.class, RedisConfiguration.class})

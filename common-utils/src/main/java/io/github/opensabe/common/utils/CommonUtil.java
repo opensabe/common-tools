@@ -15,13 +15,6 @@
  */
 package io.github.opensabe.common.utils;
 
-import io.github.opensabe.common.utils.exception.BusinessException;
-import io.github.opensabe.common.utils.json.JsonUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -32,17 +25,41 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import io.github.opensabe.common.utils.exception.BusinessException;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author xliao
  */
 
 public class CommonUtil {
-    private static Log log = LogFactory.getLog(CommonUtil.class);
+    //错误码状态
+    public static final int PAY_RESULT_SUCCESS = 0;
+    public static final int PAY_RESULT_EXCEPTION = 1;
     private static final BigDecimal ssqAmount = new BigDecimal("2");
+    private static final char[] bcdLookup =
+            {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    private static final Pattern namePattern = Pattern.compile("^[\u0391-\uFFE5]{2,10}$");
+    private static final int IDENTITYNO_MAX_BYTES = 30;
+    private static final int ACCOUNTNAME_MAX_BYTES = 30;
+    private static final int MOBILE_MAX_BYTES = 20;
+    private static Log log = LogFactory.getLog(CommonUtil.class);
     private static String[] citys = new String[]
             {"11", "12", "13", "14", "15", "21", "22", "23", "31", "32", "33", "34", "35", "36", "37", "41", "42", "43", "44",
                     "45", "46", "50", "51", "52", "53", "54", "61", "62", "63", "64", "65", "71", "81", "82", "91"};
@@ -55,23 +72,12 @@ public class CommonUtil {
     private static String[] CANDIDATECHAR = new String[]
             {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
 
-    private static final char[] bcdLookup =
-            {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-    private static final Pattern namePattern = Pattern.compile("^[\u0391-\uFFE5]{2,10}$");
-    private static final int IDENTITYNO_MAX_BYTES = 30;
-    private static final int ACCOUNTNAME_MAX_BYTES = 30;
-    private static final int MOBILE_MAX_BYTES = 20;
-    //错误码状态
-    public static final int PAY_RESULT_SUCCESS = 0;
-    public static final int PAY_RESULT_EXCEPTION = 1;
-
     /**
      * 活动ini的key 正则校验
      * 校验规则：不能包含汉字，只有大小写字母、数字和特殊符号，总长度不超过100
      */
 //    private static final String ACTIVITY_INI_KEY_PARRERN = "^[A-Za-z0-9._-]+$";
 //    private static final int ACTIVITY_INI_KEY_LENGTH = 100;
-
     private CommonUtil() {
 
     }
@@ -145,9 +151,10 @@ public class CommonUtil {
         if (srcToCheck == null)
             return false;
         int size = srcToCheck.length();
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < size; i++) {
             if (!Character.isDigit(srcToCheck.charAt(i)))
                 return false;
+        }
 
         return true;
 
@@ -1367,8 +1374,8 @@ public class CommonUtil {
     }
 
     /*
-    * 将字符数组转换为16进制字符串
-    */
+     * 将字符数组转换为16进制字符串
+     */
     public static final String bytesToHexStr(byte[] bcd) {
         StringBuffer s = new StringBuffer(bcd.length * 2);
 

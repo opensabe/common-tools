@@ -15,15 +15,16 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.loadbalancer;
 
-import lombok.extern.log4j.Log4j2;
+import java.util.List;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.loadbalancer.core.DelegatingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.util.CollectionUtils;
-import reactor.core.publisher.Flux;
 
-import java.util.List;
+import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Flux;
 
 /**
  * 如果为空集合，就返回上次的服务列表
