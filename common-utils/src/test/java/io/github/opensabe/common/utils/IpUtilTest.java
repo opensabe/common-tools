@@ -66,7 +66,15 @@ public class IpUtilTest {
     public void testGetIpFromHeader_AllInternalIps() {
         var request = new MockHttpServletRequest();
         request.addHeader("x-forwarded-for", "10.0.0.1, 192.168.1.1, 172.16.0.1");
-        Assertions.assertEquals("10.0.0.1", IpUtil.getIpFromHeader(request));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试从请求头中获取IP地址 - 多个代理IP，中间有公网IP")
+    public void testGetIpFromHeader_MultipleProxies_MiddlePublic() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "10.0.0.1, 203.208.60.1, 192.168.1.1");
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(request));
     }
 
     @Test
@@ -129,6 +137,31 @@ public class IpUtilTest {
     }
 
     @Test
+    @DisplayName("测试从请求头中获取IP地址 - 优先级测试：x-forwarded-for为空，Proxy-Client-IP优先")
+    public void testGetIpFromHeader_PriorityOrder_SecondPriority() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "");
+        request.addHeader("Proxy-Client-IP", "203.208.60.2");
+        request.addHeader("X-Real-IP", "203.208.60.3");
+        request.setRemoteAddr("203.208.60.4");
+        Assertions.assertEquals("203.208.60.2", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试从请求头中获取IP地址 - 优先级测试：前几个头都为空，使用RemoteAddr")
+    public void testGetIpFromHeader_PriorityOrder_LastPriority() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "");
+        request.addHeader("Proxy-Client-IP", "");
+        request.addHeader("WL-Proxy-Client-IP", "");
+        request.addHeader("HTTP_CLIENT_IP", "");
+        request.addHeader("HTTP_X_FORWARDED_FOR", "");
+        request.addHeader("X-Real-IP", "");
+        request.setRemoteAddr("203.208.60.4");
+        Assertions.assertEquals("203.208.60.4", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
     @DisplayName("测试从请求头中获取IP地址 - 空值处理")
     public void testGetIpFromHeader_EmptyValues() {
         var request = new MockHttpServletRequest();
@@ -157,7 +190,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_FilterIp_SingleItem_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of("0.0.0.0"));
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -220,7 +253,7 @@ public class IpUtilTest {
         headers.put("HTTP_CLIENT_IP", List.of("UNKNOWN"));
         headers.put("HTTP_X_FORWARDED_FOR", List.of("Unknown"));
         headers.put("X-Real-IP", List.of("unknown"));
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -228,7 +261,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_EmptyList_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of());
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -236,7 +269,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_EmptyStringList_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of(""));
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -350,7 +383,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_Boundary_EmptyList_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of());
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -358,7 +391,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_Boundary_EmptyStringList_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of(""));
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -366,7 +399,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_Boundary_NullList_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", null);
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -374,7 +407,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_Complex_EmptyIpString_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of(""));
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -382,7 +415,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_Complex_OnlyZeroIp_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of("0.0.0.0"));
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -398,7 +431,7 @@ public class IpUtilTest {
     public void testGetIpFromHeader_Complex_MultipleZeroIps_ByHeader() {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of("0.0.0.0, 0.0.0.0, 0.0.0.0"));
-        Assertions.assertEquals("", IpUtil.getIpFromHeader(headers));
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(headers));
     }
 
     @Test
@@ -407,5 +440,113 @@ public class IpUtilTest {
         var headers = new HttpHeaders();
         headers.put("x-forwarded-for", List.of(" 0.0.0.0 , 203.208.60.1 , 0.0.0.0 "));
         Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(headers));
+    }
+
+    // ==================== 重构后的新逻辑测试 ====================
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - 多个头都有IP，按优先级选择")
+    public void testGetIpFromHeader_Refactored_MultipleHeaders() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "10.0.0.1, 192.168.1.1");
+        request.addHeader("Proxy-Client-IP", "203.208.60.1");
+        request.addHeader("X-Real-IP", "203.208.60.2");
+        request.setRemoteAddr("203.208.60.3");
+        // 应该返回第一个非内网IP，即Proxy-Client-IP中的203.208.60.1
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - 第一个头有多个IP，包含公网IP")
+    public void testGetIpFromHeader_Refactored_FirstHeaderMultipleIps() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "10.0.0.1, 203.208.60.1, 192.168.1.1");
+        // 应该返回第一个非内网IP，即203.208.60.1
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - 第一个头只有内网IP，第二个头有公网IP")
+    public void testGetIpFromHeader_Refactored_SecondHeaderHasPublicIp() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "10.0.0.1, 192.168.1.1");
+        request.addHeader("Proxy-Client-IP", "203.208.60.1");
+        // 应该返回第一个非内网IP，即Proxy-Client-IP中的203.208.60.1
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - 所有头都只有内网IP")
+    public void testGetIpFromHeader_Refactored_AllInternalIps() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "10.0.0.1, 192.168.1.1");
+        request.addHeader("Proxy-Client-IP", "172.16.0.1");
+        request.setRemoteAddr("192.168.0.1");
+        // 应该返回第一个IP，即10.0.0.1
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - HttpHeaders版本，多个头都有IP")
+    public void testGetIpFromHeader_Refactored_HttpHeaders_MultipleHeaders() {
+        var headers = new HttpHeaders();
+        headers.put("x-forwarded-for", List.of("10.0.0.1, 192.168.1.1"));
+        headers.put("Proxy-Client-IP", List.of("203.208.60.1"));
+        headers.put("X-Real-IP", List.of("203.208.60.2"));
+        // 应该返回第一个非内网IP，即Proxy-Client-IP中的203.208.60.1
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(headers));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - HttpHeaders版本，第一个头有多个IP包含公网IP")
+    public void testGetIpFromHeader_Refactored_HttpHeaders_FirstHeaderMultipleIps() {
+        var headers = new HttpHeaders();
+        headers.put("x-forwarded-for", List.of("10.0.0.1, 203.208.60.1, 192.168.1.1"));
+        // 应该返回第一个非内网IP，即203.208.60.1
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(headers));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - 异常处理：所有IP源都无效")
+    public void testGetIpFromHeader_Refactored_AllInvalidIps() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "invalid-ip");
+        request.addHeader("Proxy-Client-IP", "unknown");
+        request.addHeader("WL-Proxy-Client-IP", "");
+        request.addHeader("HTTP_CLIENT_IP", "   ");
+        request.addHeader("HTTP_X_FORWARDED_FOR", "null");
+        request.addHeader("X-Real-IP", "UNKNOWN");
+        request.setRemoteAddr("invalid-remote");
+        // 应该返回默认值0.0.0.0
+        Assertions.assertEquals("0.0.0.0", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - 混合有效和无效IP")
+    public void testGetIpFromHeader_Refactored_MixedValidInvalidIps() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "invalid-ip, 203.208.60.1, unknown");
+        request.addHeader("Proxy-Client-IP", "10.0.0.1");
+        // 应该返回第一个非内网IP，即203.208.60.1
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - IP字符串包含0.0.0.0和有效IP")
+    public void testGetIpFromHeader_Refactored_ZeroIpWithValidIp() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "0.0.0.0, 203.208.60.1, 0.0.0.0");
+        // 应该返回第一个非内网IP，即203.208.60.1
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(request));
+    }
+
+    @Test
+    @DisplayName("测试重构后的逻辑 - 只有0.0.0.0")
+    public void testGetIpFromHeader_Refactored_OnlyZeroIp() {
+        var request = new MockHttpServletRequest();
+        request.addHeader("x-forwarded-for", "0.0.0.0");
+        request.setRemoteAddr("203.208.60.1");
+        // 应该返回RemoteAddr，因为0.0.0.0被过滤掉了
+        Assertions.assertEquals("203.208.60.1", IpUtil.getIpFromHeader(request));
     }
 }

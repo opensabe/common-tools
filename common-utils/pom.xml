@@ -20,6 +20,7 @@
         <poi.version>5.4.0</poi.version>
         <hutool.version>5.8.36</hutool.version>
         <jctools.version>4.0.5</jctools.version>
+        <commons-validator.version>1.10.0</commons-validator.version>
     </properties>
 
     <dependencies>
@@ -91,6 +92,13 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>${commons-validator.version}</version>
         </dependency>
     </dependencies>
 
