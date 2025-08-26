@@ -26,12 +26,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import io.github.opensabe.common.utils.AlarmUtil;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-
-import io.github.opensabe.common.utils.AlarmUtil;
 
 @DisplayName("全局密钥管理器测试")
 class GlobalSecretManagerTest {

@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class EmojiUtil {
-    private static final Pattern pattern = Pattern.compile("\\P{M}\\p{M}*+");
+    private static final Pattern PATTERN = Pattern.compile("\\P{M}\\p{M}*+");
 
     /**
      * Split emoji string to list
@@ -30,7 +30,7 @@ public class EmojiUtil {
      * @return
      */
     public static List<String> splitEmojiString(String s) {
-        return pattern.matcher(s)
+        return PATTERN.matcher(s)
                 .results()
                 .map(MatchResult::group)
                 .collect(Collectors.toList());

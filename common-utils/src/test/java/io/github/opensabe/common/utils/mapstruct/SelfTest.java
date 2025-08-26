@@ -18,10 +18,10 @@ package io.github.opensabe.common.utils.mapstruct;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.github.opensabe.common.utils.mapstruct.vo.OrderItemDto;
 import io.github.opensabe.mapstruct.core.MapperRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("MapStruct自映射测试")
 public class SelfTest {

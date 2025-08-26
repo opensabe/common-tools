@@ -30,11 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.RedissonLockName;
@@ -42,6 +37,11 @@ import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JfrEventTest
 @Import(TestRedissonLockJFR.Config.class)

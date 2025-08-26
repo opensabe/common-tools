@@ -16,6 +16,7 @@
 package io.github.opensabe.common.redisson.observation.ratelimiter;
 
 import java.util.concurrent.TimeUnit;
+
 import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;

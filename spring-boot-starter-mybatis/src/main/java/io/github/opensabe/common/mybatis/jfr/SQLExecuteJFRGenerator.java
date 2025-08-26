@@ -16,6 +16,7 @@
 package io.github.opensabe.common.mybatis.jfr;
 
 import java.util.Objects;
+
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.common.mybatis.observation.SQLExecuteContext;
 import io.micrometer.tracing.TraceContext;

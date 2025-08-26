@@ -19,6 +19,7 @@ package io.github.opensabe.common.executor.forkjoin;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+
 import io.micrometer.observation.Observation;
 
 public abstract class SegmentRecursiveTask<T, R> extends ListableRecursiveTask<T, R> {

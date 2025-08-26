@@ -17,13 +17,13 @@ package io.github.opensabe.spring.cloud.parent.web.common.feign;
 
 import org.springframework.http.HttpStatus;
 
-import static feign.FeignException.errorStatus;
-
 import feign.Response;
 import feign.RetryableException;
 import feign.codec.ErrorDecoder;
 import io.github.opensabe.spring.cloud.parent.web.common.misc.SpecialHttpStatus;
 import lombok.extern.log4j.Log4j2;
+
+import static feign.FeignException.errorStatus;
 
 @Log4j2
 public class DefaultErrorDecoder implements ErrorDecoder {

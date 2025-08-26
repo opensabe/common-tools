@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,22 +70,40 @@ public class IpUtil {
             return null;
         }
     }
+    
+    private static boolean isValidIp(String ip) {
+        if (
+                StringUtils.isBlank(ip) 
+                || StringUtils.isEmpty(ip) 
+                || StringUtils.equalsIgnoreCase("unknown", ip)
+                || StringUtils.equalsIgnoreCase("null", ip)
+        ) {
+            return false;
+        }
+        return true;
+    }
 
     public static String getIpFromHeader(HttpServletRequest request) {
         try {
             String ipField = request.getHeader("x-forwarded-for");
-            if (ipField == null || ipField.length() == 0 || "unknown".equalsIgnoreCase(ipField))
+            if (!isValidIp(ipField)) {
                 ipField = request.getHeader("Proxy-Client-IP");
-            if (ipField == null || ipField.length() == 0 || "unknown".equalsIgnoreCase(ipField))
+            }
+            if (!isValidIp(ipField)) {
                 ipField = request.getHeader("WL-Proxy-Client-IP");
-            if (ipField == null || ipField.length() == 0 || "unknown".equalsIgnoreCase(ipField))
+            }
+            if (!isValidIp(ipField)) {
                 ipField = request.getHeader("HTTP_CLIENT_IP");
-            if (ipField == null || ipField.length() == 0 || "unknown".equalsIgnoreCase(ipField))
+            }
+            if (!isValidIp(ipField)) {
                 ipField = request.getHeader("HTTP_X_FORWARDED_FOR");
-            if (ipField == null || ipField.length() == 0 || "unknown".equalsIgnoreCase(ipField))
+            }
+            if (!isValidIp(ipField)) {
                 ipField = request.getHeader("X-Real-IP");
-            if (ipField == null || ipField.length() == 0 || "unknown".equalsIgnoreCase(ipField))
+            }
+            if (!isValidIp(ipField)) {
                 ipField = request.getRemoteAddr();
+            }
 
             // remove 0.0.0.0
             String[] split = getIpFromIpString(ipField);
@@ -150,7 +169,7 @@ public class IpUtil {
     }
 
     private static boolean internalIp(String ip) {
-        if (ip.startsWith("127.") || ip.startsWith("10.") || ip.startsWith("192.168.") || ip.equals("0.0.0.0"))
+        if (ip.startsWith("127.") || ip.startsWith("10.") || ip.startsWith("192.168.") || "0.0.0.0".equals(ip))
             return true;
         if (ip.startsWith("172.")) {
             String[] ipSegs = ip.split("\\.");
@@ -160,10 +179,4 @@ public class IpUtil {
         }
         return false;
     }
-
-//    private static String trueIp(String ip) {
-//        if (ip.startsWith("52.80") || ip.startsWith("52.81"))
-//            return "35.156.137.1";
-//        return ip;
-//    }
 }

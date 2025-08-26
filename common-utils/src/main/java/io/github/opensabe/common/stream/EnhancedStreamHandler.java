@@ -32,20 +32,7 @@ public class EnhancedStreamHandler<T> implements InvocationHandler {
     /**
      * 将EnhancedStream的方法与Stream的方法一一对应
      */
-    private static final Map<Method, Method> METHOD_MAP =
-            Stream.of(EnhancedStream.class.getMethods())
-                    .filter(m -> !m.equals(ENHANCED_DISTINCT))
-                    .filter(m -> !Modifier.isStatic(m.getModifiers()))
-                    .collect(Collectors.toUnmodifiableMap(
-                            Function.identity(),
-                            m -> {
-                                try {
-                                    return Stream.class.getMethod(
-                                            m.getName(), m.getParameterTypes());
-                                } catch (NoSuchMethodException e) {
-                                    throw new Error(e);
-                                }
-                            }));
+    private static final Map<Method, Method> METHOD_MAP;
 
     static {
         try {
@@ -53,6 +40,19 @@ public class EnhancedStreamHandler<T> implements InvocationHandler {
                     "distinct", ToIntFunction.class, BiPredicate.class,
                     BinaryOperator.class
             );
+            METHOD_MAP = Stream.of(EnhancedStream.class.getMethods())
+                            .filter(m -> !m.equals(ENHANCED_DISTINCT))
+                            .filter(m -> !Modifier.isStatic(m.getModifiers()))
+                            .collect(Collectors.toUnmodifiableMap(
+                                    Function.identity(),
+                                    m -> {
+                                        try {
+                                            return Stream.class.getMethod(
+                                                    m.getName(), m.getParameterTypes());
+                                        } catch (NoSuchMethodException e) {
+                                            throw new Error(e);
+                                        }
+                                    }));
         } catch (NoSuchMethodException e) {
             throw new Error(e);
         }
@@ -106,7 +106,7 @@ public class EnhancedStreamHandler<T> implements InvocationHandler {
         private final ToIntFunction<E> hashCode;
         private final BiPredicate<E, E> equals;
 
-        public Key(E e, ToIntFunction<E> hashCode,
+        Key(E e, ToIntFunction<E> hashCode,
                    BiPredicate<E, E> equals) {
             this.e = e;
             this.hashCode = hashCode;

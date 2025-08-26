@@ -40,9 +40,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.google.common.collect.Sets;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import io.github.opensabe.common.buffer.BatchBufferedCountDownQueue;
 import io.github.opensabe.common.buffer.BatchBufferedQueue;
 import io.github.opensabe.common.buffer.BufferedCountDownLatchElement;
@@ -53,6 +50,9 @@ import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @JfrEventTest
 @AutoConfigureObservability

@@ -29,14 +29,14 @@ import org.mockito.Mockito;
 
 import com.alibaba.fastjson.JSONObject;
 
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doAnswer;
-
 import io.github.opensabe.common.mybatis.types.JSONTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
 
 @DisplayName("MyBatis类型处理器测试")
 public class TypeHandlerTest {

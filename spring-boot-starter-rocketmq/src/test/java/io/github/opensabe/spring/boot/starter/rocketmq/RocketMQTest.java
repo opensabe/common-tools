@@ -33,9 +33,6 @@ import org.springframework.context.annotation.Import;
 
 import com.alibaba.fastjson.JSONException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import io.github.opensabe.common.entity.base.vo.BaseMessage;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
@@ -44,6 +41,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Import(RocketMQTest.Config.class)
 @DisplayName("RocketMQ消息队列测试")

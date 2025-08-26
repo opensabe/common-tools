@@ -27,7 +27,7 @@ import org.springframework.context.event.ApplicationContextEvent;
 import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 public abstract class OnlyOnceApplicationListener<T extends ApplicationEvent> implements ApplicationListener<T> {
-    private final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     @Override
     public void onApplicationEvent(T event) {
@@ -36,12 +36,12 @@ public abstract class OnlyOnceApplicationListener<T extends ApplicationEvent> im
         }
         //由于spring-cloud的org.springframework.cloud.context.restart.RestartListener导致同一个context触发多次
         //以及 ApplicationContext 的 refresh 也会触发，虽然我们基本不用，为了保证全局只加载一次，使用这个
-        synchronized (INITIALIZED) {
-            if (INITIALIZED.get()) {
+        synchronized (initialized) {
+            if (initialized.get()) {
                 return;
             }
             onlyOnce(event);
-            INITIALIZED.set(true);
+            initialized.set(true);
         }
     }
 

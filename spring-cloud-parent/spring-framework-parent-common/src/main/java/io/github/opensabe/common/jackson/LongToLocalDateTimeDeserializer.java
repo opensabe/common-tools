@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -40,11 +41,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class LongToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
 
+    @Getter
     private static final LongToLocalDateTimeDeserializer INSTANCE = new LongToLocalDateTimeDeserializer();
-
-    public static LongToLocalDateTimeDeserializer getInstance() {
-        return INSTANCE;
-    }
 
     private final ZoneId zoneId = ZoneId.systemDefault();
 

@@ -26,8 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.RedissonLockName;
 import io.github.opensabe.common.redisson.config.RedissonAopOrderProperties;
@@ -37,6 +35,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Import(RedissonLockTest.Config.class)
 public class RedissonLockTest extends BaseRedissonTest {

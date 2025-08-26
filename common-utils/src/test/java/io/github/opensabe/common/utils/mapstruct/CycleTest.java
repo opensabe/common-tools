@@ -26,8 +26,6 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.github.opensabe.common.utils.mapstruct.vo.Node;
 import io.github.opensabe.common.utils.mapstruct.vo.NodeDto;
 import io.github.opensabe.mapstruct.core.CommonCopyMapper;
@@ -37,6 +35,8 @@ import io.github.opensabe.mapstruct.core.MapperRepository;
 import io.github.opensabe.mapstruct.core.ObjectConverter;
 import io.github.opensabe.mapstruct.core.SelfConvertor;
 import io.github.opensabe.mapstruct.core.SelfCopyMapper;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("MapStruct循环引用测试")
 public class CycleTest {

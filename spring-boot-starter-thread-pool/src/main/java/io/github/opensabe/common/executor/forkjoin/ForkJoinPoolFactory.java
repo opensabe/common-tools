@@ -19,6 +19,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.ThreadUnCaughtExceptionHandler;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
@@ -49,7 +50,7 @@ public class ForkJoinPoolFactory {
 
     public class NamedForkJoinWorkerThreadFactory implements ForkJoinPool.ForkJoinWorkerThreadFactory {
         final String name;
-        final AtomicLong COUNTER = new AtomicLong();
+        final AtomicLong counter = new AtomicLong();
 
         public NamedForkJoinWorkerThreadFactory(String name) {
             this.name = name;
@@ -58,7 +59,7 @@ public class ForkJoinPoolFactory {
 
         public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
             var thread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-            thread.setName(name + "-" + COUNTER.getAndIncrement());
+            thread.setName(name + "-" + counter.getAndIncrement());
             return thread;
         }
     }

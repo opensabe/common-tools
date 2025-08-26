@@ -18,6 +18,7 @@ package io.github.opensabe.alive.client.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import io.github.opensabe.alive.client.Client;
 import io.github.opensabe.alive.client.exception.AliveClientRuntimeException;
 

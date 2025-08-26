@@ -24,13 +24,16 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
+import lombok.Getter;
+
 /**
  * LocalDateTime 序列化为毫秒时间戳
  * 注意，这里的时间戳是毫秒级别的，LocalDateTime 是纳秒级别的，所以会丢失精度
  */
 public class TimestampLocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
 
-    public static final TimestampLocalDateTimeSerializer INSTANCE = new TimestampLocalDateTimeSerializer();
+    @Getter
+    private static final TimestampLocalDateTimeSerializer INSTANCE = new TimestampLocalDateTimeSerializer();
 
     private final ZoneId zoneId;
 

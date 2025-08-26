@@ -21,14 +21,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static java.util.Collections.emptyMap;
-
 import io.github.resilience4j.core.ConfigurationNotFoundException;
 import io.github.resilience4j.core.registry.RegistryEventConsumer;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.ratelimiter.internal.AtomicRateLimiter;
+
+import static java.util.Collections.emptyMap;
 
 public class CaffeineRateLimiterRegistry extends CaffeineResilienceRegistry<RateLimiter, RateLimiterConfig> implements RateLimiterRegistry {
 

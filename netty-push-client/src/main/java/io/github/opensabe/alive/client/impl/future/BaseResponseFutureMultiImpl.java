@@ -18,6 +18,7 @@ package io.github.opensabe.alive.client.impl.future;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.ResponseFuture;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;

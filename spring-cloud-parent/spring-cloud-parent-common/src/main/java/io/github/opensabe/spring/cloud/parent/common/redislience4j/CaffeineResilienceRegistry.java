@@ -18,6 +18,7 @@ package io.github.opensabe.spring.cloud.parent.common.redislience4j;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+
 import io.github.resilience4j.core.registry.AbstractRegistry;
 import io.github.resilience4j.core.registry.RegistryEventConsumer;
 

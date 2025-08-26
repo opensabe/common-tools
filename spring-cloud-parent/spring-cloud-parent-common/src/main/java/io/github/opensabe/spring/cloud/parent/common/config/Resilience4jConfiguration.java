@@ -24,8 +24,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import static java.util.Optional.ofNullable;
-
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineBulkheadRegistry;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineCircuitBreakerRegistry;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineRateLimiterRegistry;
@@ -75,6 +73,8 @@ import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import io.github.resilience4j.timelimiter.event.TimeLimiterEvent;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * 自己创建resilience4j相关组件的registry，代替InMemoryXXX

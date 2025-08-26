@@ -59,9 +59,9 @@ public class BatchRecursiveTask<T, R> extends SegmentRecursiveTask<T, R> {
 
     @Override
     protected R aggregate(Stream<R> result) {
-        return reducer == null ?
-                combiner.apply(result.collect(Collectors.toList())) :
-                result.reduce(reducer).orElse(null);
+        return reducer == null
+                ? combiner.apply(result.collect(Collectors.toList()))
+                : result.reduce(reducer).orElse(null);
     }
 
     @Override

@@ -42,11 +42,11 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.github.opensabe.apple.appstoreconnectapi.AppleStoreConnectAPIClient;
 import io.github.opensabe.apple.appstoreconnectapi.inapppurchasesv2.InAppPurchasesV2Response;
 import io.github.opensabe.apple.appstoreconnectapi.subscriptiongroup.SubscriptionGroupsResponse;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 //todo 在 github action 里面加入 secret，之后通过环境变量读取
 @Disabled

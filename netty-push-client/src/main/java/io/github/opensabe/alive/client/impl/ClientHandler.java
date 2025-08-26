@@ -16,6 +16,7 @@
 package io.github.opensabe.alive.client.impl;
 
 import java.net.ConnectException;
+
 import io.github.opensabe.alive.client.callback.CallbackManager;
 import io.github.opensabe.alive.client.exception.AliveClientException;
 import io.github.opensabe.alive.protobuf.Message;

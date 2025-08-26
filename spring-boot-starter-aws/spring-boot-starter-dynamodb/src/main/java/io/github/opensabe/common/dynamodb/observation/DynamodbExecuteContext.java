@@ -18,6 +18,7 @@ package io.github.opensabe.common.dynamodb.observation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 import io.micrometer.observation.Observation;
 import lombok.AccessLevel;
 import lombok.Getter;

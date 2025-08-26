@@ -19,6 +19,7 @@ package io.github.opensabe.common.elasticsearch.script;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+
 import jakarta.annotation.PostConstruct;
 
 public abstract class AbstractElasticSearchScript {

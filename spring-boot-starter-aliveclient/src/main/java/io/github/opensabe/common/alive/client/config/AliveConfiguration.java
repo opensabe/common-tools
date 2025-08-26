@@ -28,11 +28,11 @@ import org.springframework.core.env.Environment;
 
 import com.alibaba.fastjson.support.spring.messaging.MappingFastJsonMessageConverter;
 
-import static io.github.opensabe.common.alive.client.config.AliveProperties.ROCKET_CLIENT_NAME;
-
 import io.github.opensabe.common.alive.client.Client;
 import io.github.opensabe.common.alive.client.MQClientImpl;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+
+import static io.github.opensabe.common.alive.client.config.AliveProperties.ROCKET_CLIENT_NAME;
 
 
 //@Log4j2

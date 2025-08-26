@@ -31,14 +31,14 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.Assert.assertTrue;
-
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.scheduler.ThreadPoolStatScheduler;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 import jdk.jfr.consumer.RecordedEvent;
 import lombok.extern.log4j.Log4j2;
+
+import static org.junit.Assert.assertTrue;
 
 @Log4j2
 @JfrEventTest

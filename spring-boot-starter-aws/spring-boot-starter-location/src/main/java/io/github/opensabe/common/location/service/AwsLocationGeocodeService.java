@@ -16,6 +16,7 @@
 package io.github.opensabe.common.location.service;
 
 import java.util.List;
+
 import io.github.opensabe.common.location.observation.LocationContext;
 import io.github.opensabe.common.location.observation.LocationConvention;
 import io.github.opensabe.common.location.observation.LocationDocumentation;

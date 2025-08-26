@@ -18,6 +18,7 @@ package io.github.opensabe.common.alive.client.message;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+
 import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 
 public class MessageVo extends PushVo {

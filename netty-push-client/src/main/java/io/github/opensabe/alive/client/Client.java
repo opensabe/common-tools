@@ -16,6 +16,7 @@
 package io.github.opensabe.alive.client;
 
 import java.util.concurrent.TimeUnit;
+
 import io.github.opensabe.alive.client.callback.ClientCallback;
 import io.github.opensabe.alive.client.exception.AliveClientException;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;

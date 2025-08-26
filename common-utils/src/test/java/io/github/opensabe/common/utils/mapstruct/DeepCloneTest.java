@@ -25,9 +25,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 import io.github.opensabe.common.utils.mapstruct.vo.Customer;
 import io.github.opensabe.common.utils.mapstruct.vo.CustomerDto;
 import io.github.opensabe.common.utils.mapstruct.vo.OrderItemDto;
@@ -36,6 +33,9 @@ import io.github.opensabe.common.utils.mapstruct.vo.Person;
 import io.github.opensabe.common.utils.mapstruct.vo.PersonRecord;
 import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.mapstruct.core.MapperRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 @DisplayName("MapStruct深度克隆测试")
 public class DeepCloneTest {

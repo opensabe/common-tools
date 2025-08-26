@@ -23,8 +23,6 @@ import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 
-import static io.github.opensabe.alive.client.Response.SUCEESS;
-
 import io.github.opensabe.alive.client.Client;
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.ResponseFuture;
@@ -40,6 +38,8 @@ import io.github.opensabe.alive.client.vo.QueryVo;
 import io.github.opensabe.alive.protobuf.Message;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+
+import static io.github.opensabe.alive.client.Response.SUCEESS;
 
 @Log4j2
 public class MQClientImpl implements Client {

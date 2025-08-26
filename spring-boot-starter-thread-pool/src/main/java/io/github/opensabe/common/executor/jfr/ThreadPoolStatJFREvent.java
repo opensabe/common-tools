@@ -17,6 +17,7 @@ package io.github.opensabe.common.executor.jfr;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadPoolExecutor;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jdk.jfr.Category;
 import jdk.jfr.Event;

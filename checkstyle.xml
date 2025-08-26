@@ -53,7 +53,6 @@
         <!-- See http://checkstyle.sf.net/config_whitespace.html -->
         <module name="EmptyForIteratorPad"/>
         <module name="MethodParamPad"/>
-        <module name="NoWhitespaceBefore"/>
         <module name="OperatorWrap">
            <property name="tokens" value="QUESTION, COLON, EQUAL, NOT_EQUAL, DIV, MINUS, STAR, MOD, SR, BSR, GE, GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, TYPE_EXTENSION_AND, LITERAL_INSTANCEOF"/>
         </module>
@@ -150,22 +149,9 @@
              <property name="tokens" value="POST_DEC"/>
         </module>
 
-        <!-- Checks for class design                         -->
-        <!-- See http://checkstyle.sf.net/config_design.html -->
-        <!--module name="DesignForExtension"/-->
-        <module name="FinalClass"/>
-        <module name="VisibilityModifier">
-          <property name="packageAllowed" value="true"/>
-          <property name="protectedAllowed" value="true"/>
-        </module>
-
         <!-- Miscellaneous other checks.                   -->
         <!-- See http://checkstyle.sf.net/config_misc.html -->
         <module name="ArrayTypeStyle"/>
-        <module name="Regexp">
-            <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
-            <property name="illegalPattern" value="true"/>
-        </module>
         <module name="Regexp">
             <property name="format" value="System\.exit"/>
             <property name="illegalPattern" value="true"/>

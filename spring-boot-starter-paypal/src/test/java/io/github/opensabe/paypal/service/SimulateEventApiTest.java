@@ -24,10 +24,10 @@ import org.openapitools.client.api.SimulateEventApi;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.github.opensabe.paypal.config.PayPalAutoConfig;
 import io.github.opensabe.paypal.config.PayPalProperties;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 //todo 在 github action 里面加入 secret，之后通过环境变量读取
 @Disabled

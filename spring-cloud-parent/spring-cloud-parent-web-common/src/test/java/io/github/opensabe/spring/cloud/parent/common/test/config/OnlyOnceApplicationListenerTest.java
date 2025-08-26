@@ -27,9 +27,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(
         classes = OnlyOnceApplicationListenerTest.TestConfig.class

@@ -22,10 +22,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 
-import static java.lang.String.format;
-import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
-import static software.amazon.awssdk.core.sync.RequestBody.fromFile;
-
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.s3.observation.S3OperationContext;
 import io.github.opensabe.common.s3.observation.S3OperationConvention;
@@ -39,6 +35,10 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
+
+import static java.lang.String.format;
+import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
+import static software.amazon.awssdk.core.sync.RequestBody.fromFile;
 
 /**
  * s3文件上传service

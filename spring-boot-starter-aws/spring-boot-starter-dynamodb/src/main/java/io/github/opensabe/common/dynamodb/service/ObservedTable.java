@@ -17,6 +17,7 @@ package io.github.opensabe.common.dynamodb.service;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteContext;
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteDocumentation;
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteObservationConvention;

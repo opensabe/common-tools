@@ -16,6 +16,7 @@
 package io.github.opensabe.common.location.jfr;
 
 import java.util.Objects;
+
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.common.location.observation.LocationContext;
 import io.micrometer.tracing.TraceContext;

@@ -18,11 +18,11 @@ package io.github.opensabe.base;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.base.vo.BaseRsp;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @DisplayName("响应工具类测试")
 class RespUtilTest {

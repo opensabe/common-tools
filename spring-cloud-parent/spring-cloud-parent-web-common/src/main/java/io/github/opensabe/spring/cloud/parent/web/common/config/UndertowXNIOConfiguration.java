@@ -48,8 +48,7 @@ public class UndertowXNIOConfiguration {
     @EventListener(ContextRefreshedEvent.class)
     public synchronized void init() {
         if (!isInitialized) {
-            Gauge.builder("http_servlet_queue_size", () ->
-            {
+            Gauge.builder("http_servlet_queue_size", () -> {
                 try {
                     return (Integer) ManagementFactory.getPlatformMBeanServer()
                             .getAttribute(new ObjectName("org.xnio:type=Xnio,provider=\"nio\",worker=\"XNIO-2\""), "WorkerQueueSize");

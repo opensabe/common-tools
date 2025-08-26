@@ -16,6 +16,7 @@
 package io.github.opensabe.apple.appstoreconnectapi.subscriptiongroup;
 
 import java.util.List;
+
 import io.github.opensabe.apple.appstoreconnectapi.PagedDocumentLinks;
 import io.github.opensabe.apple.appstoreconnectapi.PagingInformation;
 import lombok.Data;

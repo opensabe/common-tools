@@ -45,8 +45,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 
-import static org.springframework.cloud.openfeign.loadbalancer.LoadBalancerUtils.executeWithLoadBalancerLifecycleProcessing;
-
 import feign.Client;
 import feign.Request;
 import feign.RequestTemplate;
@@ -55,6 +53,8 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
+
+import static org.springframework.cloud.openfeign.loadbalancer.LoadBalancerUtils.executeWithLoadBalancerLifecycleProcessing;
 
 /**
  * FeignBlockingLoadBalancerClient 的改写，将获取每个实例的断路器数据需要的信息填充到 lb 请求

@@ -26,11 +26,11 @@ import org.springframework.cloud.openfeign.FeignClientFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 
-import static feign.FeignException.errorStatus;
-
 import feign.Request;
 import feign.Response;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+
+import static feign.FeignException.errorStatus;
 
 public class OpenfeignUtil {
     private static final String CLIENT_NAME_PROPERTY_KEY;

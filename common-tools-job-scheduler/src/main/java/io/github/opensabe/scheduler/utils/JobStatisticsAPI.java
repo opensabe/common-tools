@@ -17,6 +17,7 @@ package io.github.opensabe.scheduler.utils;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
+
 import io.github.opensabe.scheduler.job.JobBriefInfo;
 import io.github.opensabe.scheduler.server.SchedulerServer;
 

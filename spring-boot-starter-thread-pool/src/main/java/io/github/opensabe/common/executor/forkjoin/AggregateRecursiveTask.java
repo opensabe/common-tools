@@ -20,6 +20,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import io.micrometer.observation.Observation;
 
 public class AggregateRecursiveTask<T, R> extends SegmentRecursiveTask<T, R> {
@@ -42,8 +43,8 @@ public class AggregateRecursiveTask<T, R> extends SegmentRecursiveTask<T, R> {
 
     @Override
     protected R aggregate(Stream<R> result) {
-        return reducer == null ?
-                combiner.apply(result.collect(Collectors.toList()))
+        return reducer == null
+                ? combiner.apply(result.collect(Collectors.toList()))
                 : result.reduce(reducer).orElse(null);
     }
 }

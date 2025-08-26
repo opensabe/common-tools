@@ -43,18 +43,18 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationReadyEvent> {
-    private static final ScheduledThreadPoolExecutor sc = new ScheduledThreadPoolExecutor(1);
+    private static final ScheduledThreadPoolExecutor SCHEDULED_THREAD_POOL_EXECUTOR = new ScheduledThreadPoolExecutor(1);
 
     @Override
     protected void onlyOnce(ApplicationReadyEvent event) {
-        sc.scheduleAtFixedRate(() -> {
+        SCHEDULED_THREAD_POOL_EXECUTOR.scheduleAtFixedRate(() -> {
             long pid = ProcessHandle.current().pid();
             try {
                 smapsProcess(pid);
                 memoryStatProcess();
                 memorySwStatProcess();
                 //oom score
-                OOMScoreRecording(pid);
+                oomScoreRecording(pid);
             } catch (IOException ignore) {
             }
 
@@ -106,7 +106,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
         log.info("MonitorMemoryRSS, memoryStat: {}", StringUtils.join(strings, "\n"));
     }
 
-    private void OOMScoreRecording(long pid) {
+    private void oomScoreRecording(long pid) {
         //oom 三个分数  /proc/<pid>/oom_adj, /proc/<pid>/oom_score, /proc/<pid>/oom_score_adj 由于与memory都有关，合并到这个方法
         //oom_adj
         try {
@@ -121,13 +121,13 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
             long oomScoreAdj = oomScoreAdjList.isEmpty() ? 0L : (oomScoreAdjList.get(0) != null ? Long.parseLong(oomScoreAdjList.get(0)) : 0L);
             log.info("Monitoring OOM Score, oom_adj: {} , oom_score: {} ,  oom_score_adj :{} .", oomAdj, oomScore, oomScoreAdj);
             //  /proc/<pid>/oom_adj, /proc/<pid>/oom_score, /proc/<pid>/oom_score_adj  将三个文件的内容抽象为一个 JFR 事件的三个字段生成 JFR 事件
-            OOMScoreJfrEventProcess(oomAdj, oomScore, oomScoreAdj);
+            oomScoreJfrEventProcess(oomAdj, oomScore, oomScoreAdj);
         } catch (Throwable e) {
             log.error("Retrieve OOM Score from /proc/pid/oom exception!", e);
         }
     }
 
-    private void OOMScoreJfrEventProcess(long oomAdj, long oomScore, long oomScoreAdj) {
+    private void oomScoreJfrEventProcess(long oomAdj, long oomScore, long oomScoreAdj) {
         try {
             OOMScoreJfrEvent oomScoreJfrEvent = new OOMScoreJfrEvent(oomAdj, oomScore, oomScoreAdj);
             oomScoreJfrEvent.commit();

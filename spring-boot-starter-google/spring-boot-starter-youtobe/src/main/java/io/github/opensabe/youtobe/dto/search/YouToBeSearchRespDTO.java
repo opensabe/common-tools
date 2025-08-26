@@ -16,6 +16,7 @@
 package io.github.opensabe.youtobe.dto.search;
 
 import java.util.List;
+
 import io.github.opensabe.youtobe.dto.PageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;

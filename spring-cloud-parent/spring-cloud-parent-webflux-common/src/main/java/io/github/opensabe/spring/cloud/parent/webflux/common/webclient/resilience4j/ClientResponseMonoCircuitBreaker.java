@@ -18,14 +18,14 @@ package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilien
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
-import static io.github.resilience4j.circuitbreaker.CallNotPermittedException.createCallNotPermittedException;
-
 import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfigurationProperties;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoOperator;
 import reactor.core.publisher.Operators;
+
+import static io.github.resilience4j.circuitbreaker.CallNotPermittedException.createCallNotPermittedException;
 
 public class ClientResponseMonoCircuitBreaker extends MonoOperator<ClientResponse, ClientResponse> {
     private final CircuitBreaker circuitBreaker;

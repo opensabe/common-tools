@@ -18,6 +18,7 @@ package io.github.opensabe.common.dynamodb.test.po;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.EqualsAndHashCode;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;

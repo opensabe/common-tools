@@ -31,13 +31,13 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import lombok.extern.log4j.Log4j2;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JfrEventTest
 @AutoConfigureObservability

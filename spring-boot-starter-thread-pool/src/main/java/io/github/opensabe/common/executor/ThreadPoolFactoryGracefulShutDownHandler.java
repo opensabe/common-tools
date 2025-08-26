@@ -45,7 +45,7 @@ public class ThreadPoolFactoryGracefulShutDownHandler implements UndertowGracefu
         isShuttingDown = true;
         log.info("ThreadPoolFactoryGracefulShutDownHandler-onApplicationEvent shutdownSuccessful");
         List<ExecutorService> executorServices = this.threadPoolFactory.getAllExecutors().stream().map(Reference::get).filter(Objects::nonNull).collect(Collectors.toList());
-        for (int i = 0; i < 3; ) {
+        for (int i = 0; i < 3;) {
             //连续三次，以随机乱序检查所有的线程池都完成了，才认为是真正完成
             Collections.shuffle(executorServices);
             if (executorServices.stream().allMatch(ThreadPoolFactory::isCompleted)) {

@@ -20,10 +20,10 @@ import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import static io.github.opensabe.common.mybatis.properties.CountryProperties.PREFIX;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import static io.github.opensabe.common.mybatis.properties.CountryProperties.PREFIX;
 
 @ConfigurationProperties(prefix = PREFIX)
 @Getter

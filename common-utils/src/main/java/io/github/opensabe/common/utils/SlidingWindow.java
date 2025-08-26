@@ -81,35 +81,6 @@ public class SlidingWindow {
     }
 
     /**
-     * 对时间片计数+1，并返回窗口中所有的计数总和
-     * 该方法只要调用就一定会对某个时间片进行+1
-     * @return
-     */
-//    private int incrementAndSum() {
-//        int index = locationIndex();
-//        int sum = 0;
-//        // cursor等于index，返回true
-//        // cursor不等于index，返回false，并会将cursor设置为index
-//        int oldCursor = cursor.getAndSet(index);
-//        if (oldCursor == index) {
-//            // 在当前时间片里继续+1
-//            sum += timeSlices[index].incrementAndGet();
-//        } else {
-//            //轮到新的时间片，置0，可能有其它线程也置了该值，容许
-//            timeSlices[index].set(0);
-//            // 清零，访问量不大时会有时间片跳跃的情况
-//            clearBetween(oldCursor, index);
-//
-//            sum += timeSlices[index].incrementAndGet();
-//        }
-//
-//        for (int i = 1; i < windowSize; i++) {
-//            sum += timeSlices[(index - i + timeSliceSize) % timeSliceSize].get();
-//        }
-//        return sum;
-//    }
-
-    /**
      * 判断是否允许进行访问，未超过阈值的话才会对某个时间片+1
      *
      * @param threshold

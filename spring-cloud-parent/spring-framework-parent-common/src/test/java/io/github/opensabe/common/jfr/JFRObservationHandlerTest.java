@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import io.micrometer.observation.Observation;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import io.micrometer.observation.Observation;
 
 @DisplayName("JFR观察者处理器测试")
 class JFRObservationHandlerTest {

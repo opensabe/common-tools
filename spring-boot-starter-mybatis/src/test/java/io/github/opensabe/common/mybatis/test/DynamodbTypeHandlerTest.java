@@ -23,8 +23,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.github.opensabe.common.dynamodb.service.KeyValueDynamoDbService;
 import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
 import io.github.opensabe.common.mybatis.test.common.BaseMybatisTest;
@@ -32,6 +30,8 @@ import io.github.opensabe.common.mybatis.test.mapper.user.DynamodbTypeHandlerMap
 import io.github.opensabe.common.mybatis.test.po.DynamodbPO;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.SneakyThrows;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("DynamoDB类型处理器测试")
 public class DynamodbTypeHandlerTest extends BaseMybatisTest {

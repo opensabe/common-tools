@@ -28,7 +28,7 @@ public class TimestampModule extends SimpleModule {
         //LocalDateTime 与 Long 序列化，反序列化，会转换为毫秒时间戳，毫秒以下的时间戳会被忽略
         //所以，LocalDateTime 最好在生成的时候 truncate 到毫秒，比如：
         //LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
-        addSerializer(LocalDateTime.class, TimestampLocalDateTimeSerializer.INSTANCE);
-        addDeserializer(LocalDateTime.class, LongToLocalDateTimeDeserializer.INSTANCE);
+        addSerializer(LocalDateTime.class, TimestampLocalDateTimeSerializer.getINSTANCE());
+        addDeserializer(LocalDateTime.class, LongToLocalDateTimeDeserializer.getINSTANCE());
     }
 }

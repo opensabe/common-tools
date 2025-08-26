@@ -21,13 +21,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static java.util.Collections.emptyMap;
-
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.core.ConfigurationNotFoundException;
 import io.github.resilience4j.core.registry.RegistryEventConsumer;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * @author maheng

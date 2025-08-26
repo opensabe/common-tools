@@ -40,7 +40,6 @@ public class FeignRequestCircuitBreakerExtractor implements CircuitBreakerExtrac
         //目前这个改动主要用于从feignClient 的proxy实体中获取其contextId 而不是从FeignClient的接口中的declaredMethod中获取contextId，原因是
         //需要预热的FeignClient的extends的预热接口的方法没有@FeignClient 这样会报错annotation is null, contextId cannot been found 详情参考FeignPreheatingBase
         FeignClient annotation = requestTemplate.feignTarget().type().getAnnotation(FeignClient.class);
-//		FeignClient annotation = requestTemplate.methodMetadata().method().getDeclaringClass().getAnnotation(FeignClient.class);
         //和 Retry 保持一致，使用 contextId，而不是微服务名称
         String contextId = annotation.contextId();
         CircuitBreaker circuitBreaker;

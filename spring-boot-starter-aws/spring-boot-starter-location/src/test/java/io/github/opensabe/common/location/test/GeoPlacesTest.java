@@ -19,12 +19,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import io.github.opensabe.common.location.service.GeocodeService;
 import io.github.opensabe.common.location.test.common.GeoPlacesBaseTest;
 import lombok.extern.log4j.Log4j2;
 import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author changhongwei

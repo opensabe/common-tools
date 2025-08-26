@@ -38,15 +38,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ThreadPoolBulkheadCustomizedDecorator implements ThreadPoolBulkHeadDecorator {
 
-    private static final VarHandle executorService;
-    private static final VarHandle config;
+    private static final VarHandle EXECUTOR_SERVICE;
+    private static final VarHandle CONFIG;
 
     static {
         try {
             //初始化句柄
-            executorService = MethodHandles.privateLookupIn(FixedThreadPoolBulkhead.class, MethodHandles.lookup())
+            EXECUTOR_SERVICE = MethodHandles.privateLookupIn(FixedThreadPoolBulkhead.class, MethodHandles.lookup())
                     .findVarHandle(FixedThreadPoolBulkhead.class, "executorService", ThreadPoolExecutor.class);
-            config = MethodHandles.privateLookupIn(FixedThreadPoolBulkhead.class, MethodHandles.lookup())
+            CONFIG = MethodHandles.privateLookupIn(FixedThreadPoolBulkhead.class, MethodHandles.lookup())
                     .findVarHandle(FixedThreadPoolBulkhead.class, "config", ThreadPoolBulkheadConfig.class);
 
         } catch (Throwable e) {
@@ -63,9 +63,9 @@ public class ThreadPoolBulkheadCustomizedDecorator implements ThreadPoolBulkHead
     @SneakyThrows
     @Override
     public ThreadPoolBulkhead decorate(ThreadPoolBulkhead threadPoolBulkhead) {
-        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executorService.get(threadPoolBulkhead);
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) EXECUTOR_SERVICE.get(threadPoolBulkhead);
         threadPoolExecutor.shutdownNow();
-        ThreadPoolBulkheadConfig threadPoolBulkheadConfig = (ThreadPoolBulkheadConfig) config.get(threadPoolBulkhead);
+        ThreadPoolBulkheadConfig threadPoolBulkheadConfig = (ThreadPoolBulkheadConfig) CONFIG.get(threadPoolBulkhead);
         String name = "ThreadPoolBulkheadCustomized-" + threadPoolBulkhead.getName();
 
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(name + "-%d")

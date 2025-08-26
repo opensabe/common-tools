@@ -38,13 +38,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import static org.mockito.Mockito.when;
-
 import feign.RetryableException;
 import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
+
+import static org.mockito.Mockito.when;
 
 
 @ActiveProfiles("circuitbreaker")

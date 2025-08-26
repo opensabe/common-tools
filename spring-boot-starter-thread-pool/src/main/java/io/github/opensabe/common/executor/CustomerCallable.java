@@ -16,6 +16,7 @@
 package io.github.opensabe.common.executor;
 
 import java.util.concurrent.Callable;
+
 import io.github.opensabe.common.executor.jfr.ThreadTaskJFREvent;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;

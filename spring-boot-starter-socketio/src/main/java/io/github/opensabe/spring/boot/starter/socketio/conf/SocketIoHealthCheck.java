@@ -16,6 +16,7 @@
 package io.github.opensabe.spring.boot.starter.socketio.conf;
 
 import java.util.concurrent.TimeUnit;
+
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

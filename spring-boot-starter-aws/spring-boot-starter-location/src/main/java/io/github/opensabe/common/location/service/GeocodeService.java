@@ -16,6 +16,7 @@
 package io.github.opensabe.common.location.service;
 
 import java.util.List;
+
 import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
 
 /**

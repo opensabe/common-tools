@@ -21,10 +21,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.slock.SLock;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author heng.ma

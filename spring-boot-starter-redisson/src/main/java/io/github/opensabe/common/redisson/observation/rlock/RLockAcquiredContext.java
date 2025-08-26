@@ -16,6 +16,7 @@
 package io.github.opensabe.common.redisson.observation.rlock;
 
 import java.util.concurrent.TimeUnit;
+
 import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;

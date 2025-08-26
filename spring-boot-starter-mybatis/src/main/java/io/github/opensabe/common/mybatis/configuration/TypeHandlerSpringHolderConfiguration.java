@@ -18,6 +18,7 @@ package io.github.opensabe.common.mybatis.configuration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
 import io.github.opensabe.common.idgenerator.service.UniqueID;
 import io.github.opensabe.common.typehandler.OBSService;
 import io.github.opensabe.common.typehandler.OBSTypeEnum;

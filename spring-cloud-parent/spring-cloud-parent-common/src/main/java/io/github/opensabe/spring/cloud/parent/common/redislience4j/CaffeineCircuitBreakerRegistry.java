@@ -21,13 +21,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static java.util.Collections.emptyMap;
-
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.ConfigurationNotFoundException;
 import io.github.resilience4j.core.registry.RegistryEventConsumer;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * @author maheng

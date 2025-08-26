@@ -78,7 +78,7 @@ public class ThreadPoolFactory implements BeanFactoryAware {
      * @param size
      */
     private static void validThreadPoolSize(int size) {
-        assert size <= MAX_THREAD_SIZE_INCLUSIVE && ((size & (size - 1)) == 0);
+        assert size <= MAX_THREAD_SIZE_INCLUSIVE && (size & (size - 1)) == 0;
     }
 
     private static ThreadFactory getThreadFactory(String threadNamePrefix) {

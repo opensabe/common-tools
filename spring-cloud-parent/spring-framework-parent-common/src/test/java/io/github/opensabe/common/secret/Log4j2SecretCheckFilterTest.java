@@ -29,11 +29,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 
+import io.github.opensabe.common.utils.SpringUtil;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
-
-import io.github.opensabe.common.utils.SpringUtil;
 
 @DisplayName("Log4j2密钥检查过滤器测试")
 class Log4j2SecretCheckFilterTest {

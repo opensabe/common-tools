@@ -17,6 +17,7 @@ package io.github.opensabe.common.buffer;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

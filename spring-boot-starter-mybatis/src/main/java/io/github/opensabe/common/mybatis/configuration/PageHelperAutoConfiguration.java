@@ -25,10 +25,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static io.github.opensabe.common.mybatis.configuration.PageHelperProperties.PAGEHELPER_PREFIX;
-
 import io.github.opensabe.common.mybatis.interceptor.DataSourceSwitchInterceptor;
 import jakarta.annotation.PostConstruct;
+
+import static io.github.opensabe.common.mybatis.configuration.PageHelperProperties.PAGEHELPER_PREFIX;
 
 /**
  * 配置分页插件

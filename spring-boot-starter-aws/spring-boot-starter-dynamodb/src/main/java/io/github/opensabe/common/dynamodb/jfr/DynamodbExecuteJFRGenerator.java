@@ -16,6 +16,7 @@
 package io.github.opensabe.common.dynamodb.jfr;
 
 import java.util.Objects;
+
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteContext;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.micrometer.tracing.TraceContext;

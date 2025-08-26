@@ -16,6 +16,7 @@
 package io.github.opensabe.common.redisson.aop;
 
 import java.lang.reflect.Method;
+
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 
 public abstract class AbstractRedissonProperties implements RedissonNameResolver {

@@ -16,6 +16,7 @@
 package io.github.opensabe.spring.boot.starter.socketio.tracing.jfr;
 
 import java.util.Objects;
+
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.EventEnum;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.observation.SocketIOExecuteContext;

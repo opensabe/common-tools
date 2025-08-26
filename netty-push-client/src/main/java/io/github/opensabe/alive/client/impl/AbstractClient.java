@@ -17,6 +17,7 @@ package io.github.opensabe.alive.client.impl;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import io.github.opensabe.alive.client.Client;
 import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.ResponseFuture;

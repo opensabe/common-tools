@@ -24,8 +24,6 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.lang3.StringUtils;
 
-import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
-
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.s3.observation.S3OperationContext;
 import io.github.opensabe.common.s3.observation.S3OperationConvention;
@@ -38,6 +36,8 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
 
 @Log4j2
 public record S3ClientWrapper(S3Client s3Client, String folderName, String bucketName,

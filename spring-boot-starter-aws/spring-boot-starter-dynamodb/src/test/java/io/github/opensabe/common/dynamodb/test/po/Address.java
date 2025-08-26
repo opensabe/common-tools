@@ -16,6 +16,7 @@
 package io.github.opensabe.common.dynamodb.test.po;
 
 import java.util.Objects;
+
 import lombok.EqualsAndHashCode;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 

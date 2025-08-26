@@ -16,6 +16,7 @@
 package io.github.opensabe.common.utils;
 
 import java.security.MessageDigest;
+
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

@@ -17,13 +17,13 @@ package io.github.opensabe.milvus.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import static io.milvus.common.clientenum.ConsistencyLevelEnum.STRONG;
-
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
 import lombok.Getter;
 import lombok.Setter;
+
+import static io.milvus.common.clientenum.ConsistencyLevelEnum.STRONG;
 
 @Getter
 @Setter

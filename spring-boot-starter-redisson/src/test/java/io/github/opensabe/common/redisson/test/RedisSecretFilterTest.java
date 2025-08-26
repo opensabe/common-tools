@@ -26,11 +26,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Import(RedisSecretFilterTest.TestConfig.class)
 public class RedisSecretFilterTest extends BaseRedissonTest {

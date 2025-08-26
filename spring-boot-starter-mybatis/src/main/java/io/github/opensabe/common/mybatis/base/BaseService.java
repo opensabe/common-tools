@@ -30,8 +30,6 @@ import org.springframework.util.ReflectionUtils;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 
-import static java.lang.String.format;
-
 import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Table;
@@ -40,6 +38,8 @@ import tk.mybatis.mapper.mapperhelper.EntityHelper;
 import tk.mybatis.mapper.weekend.Fn;
 import tk.mybatis.mapper.weekend.Weekend;
 import tk.mybatis.mapper.weekend.reflection.Reflections;
+
+import static java.lang.String.format;
 
 /**
  * baseService,实现大部分的单表操作

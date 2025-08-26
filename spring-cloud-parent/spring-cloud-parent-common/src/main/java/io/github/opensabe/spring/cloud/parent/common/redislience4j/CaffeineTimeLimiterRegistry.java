@@ -21,13 +21,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static java.util.Collections.emptyMap;
-
 import io.github.resilience4j.core.ConfigurationNotFoundException;
 import io.github.resilience4j.core.registry.RegistryEventConsumer;
 import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
+
+import static java.util.Collections.emptyMap;
 
 public class CaffeineTimeLimiterRegistry extends CaffeineResilienceRegistry<TimeLimiter, TimeLimiterConfig> implements TimeLimiterRegistry {
 

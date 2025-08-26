@@ -16,6 +16,7 @@
 package io.github.opensabe.common.alive.client.message;
 
 import java.util.concurrent.atomic.AtomicInteger;
+
 import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 import io.micrometer.core.instrument.util.StringUtils;
 

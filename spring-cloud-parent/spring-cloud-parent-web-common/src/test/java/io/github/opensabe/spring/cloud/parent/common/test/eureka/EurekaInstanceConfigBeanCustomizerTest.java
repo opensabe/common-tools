@@ -25,12 +25,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.context.annotation.Bean;
 
+import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanCustomizer;
+import lombok.extern.log4j.Log4j2;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanCustomizer;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * EurekaInstanceConfigBeanCustomizer 集成测试

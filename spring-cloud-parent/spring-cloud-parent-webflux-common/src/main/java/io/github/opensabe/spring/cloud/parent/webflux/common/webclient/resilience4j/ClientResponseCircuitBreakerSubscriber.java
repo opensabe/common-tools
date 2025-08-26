@@ -28,14 +28,14 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.UnknownHttpStatusCodeException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import static java.util.Objects.requireNonNull;
-
 import io.github.opensabe.common.utils.AlarmUtil;
 import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfigurationProperties;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.reactor.AbstractSubscriber;
 import lombok.extern.log4j.Log4j2;
 import reactor.core.CoreSubscriber;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * 基于官方的 CircuitBreakerOperator 针对 CircuitBreakerSubscriber 改造，基于 ClientResponse 的 http status code

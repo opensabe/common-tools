@@ -26,8 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import io.github.opensabe.common.redisson.annotation.slock.FairLock;
 import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
 import io.github.opensabe.common.redisson.annotation.slock.SLock;
@@ -40,6 +38,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Import(SLockTest.Config.class)
 public class SLockTest extends BaseRedissonTest {

@@ -17,6 +17,7 @@ package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
 import java.util.List;
 import java.util.Map;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

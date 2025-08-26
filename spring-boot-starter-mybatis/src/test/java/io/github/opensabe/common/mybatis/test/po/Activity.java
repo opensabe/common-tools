@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
 import io.github.opensabe.common.mybatis.types.JSONTypeHandler;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;

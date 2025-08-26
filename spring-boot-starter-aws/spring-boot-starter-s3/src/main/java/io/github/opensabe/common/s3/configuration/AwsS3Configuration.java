@@ -26,8 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create;
-
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.s3.jfr.S3OperationObservationToJFRGenerator;
@@ -42,6 +40,8 @@ import lombok.extern.log4j.Log4j2;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
+
+import static software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)

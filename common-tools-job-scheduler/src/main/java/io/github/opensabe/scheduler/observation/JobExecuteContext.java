@@ -16,6 +16,7 @@
 package io.github.opensabe.scheduler.observation;
 
 import java.util.Objects;
+
 import io.github.opensabe.common.utils.BeanUtils;
 import io.github.opensabe.scheduler.conf.JobStatus;
 import io.github.opensabe.scheduler.job.SchedulerJob;
