@@ -139,7 +139,7 @@ public class JobExecutor implements Runnable {
                     long endTime = System.currentTimeMillis();
                     long time = endTime - starTime;
                     //次数大于 10，大于最大时间的两倍，并且大于 60s
-                    if (distributionSummary.count() > 10 && (time > distributionSummary.max() * 2) && time > 60000) {
+                    if (distributionSummary.count() > 10 && time > distributionSummary.max() * 2 && time > 60000) {
                         log.fatal("{} execute out. time used = {}ms, recent mean elapsed time is {}ms", schedulerJob.getJobName(), time, distributionSummary.mean());
                     } else {
                         log.info("{} execute out. time used = {}ms", schedulerJob.getJobName(), time);

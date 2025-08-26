@@ -33,7 +33,7 @@ public enum JobExecuteObservationDocumentation implements ObservationDocumentati
         }
     };
 
-    public enum JOB_EXECUTE_TAG implements KeyName {
+    public enum JobExecuteTag implements KeyName {
         JOB_EXECUTE_STATUS {
             @Override
             public String asString() {

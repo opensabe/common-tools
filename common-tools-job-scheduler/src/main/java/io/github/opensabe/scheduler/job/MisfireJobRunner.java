@@ -48,11 +48,11 @@ public class MisfireJobRunner extends Thread {
         boolean isJobDone = false;
         while (!isJobDone) {
             if (schedulerJob.getStatus() == JobStatus.FINISHED || schedulerJob.getStatus() == JobStatus.SUCCESS) {
-                RLock _lock = redissonClient.getLock(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_KEY + ":" + schedulerJob.getJobId());
-                boolean _isLocked = false;
+                RLock lock = redissonClient.getLock(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_KEY + ":" + schedulerJob.getJobId());
+                boolean isLocked = false;
                 try {
-                    _isLocked = _lock.tryLock(0L, TimeUnit.SECONDS);
-                    if (_isLocked) {
+                    isLocked = lock.tryLock(0L, TimeUnit.SECONDS);
+                    if (isLocked) {
                         log.info("Misfire job {} get lock", schedulerJob.getJobName());
                         if (!isProcessing()) {
                             try {
@@ -101,8 +101,8 @@ public class MisfireJobRunner extends Thread {
                 } catch (Throwable e) {
                     log.error("Misfire job {} processing exception ", schedulerJob.getJobName(), e);
                 } finally {
-                    if (_isLocked) {
-                        _lock.unlock();
+                    if (isLocked) {
+                        lock.unlock();
                     }
                 }
             }

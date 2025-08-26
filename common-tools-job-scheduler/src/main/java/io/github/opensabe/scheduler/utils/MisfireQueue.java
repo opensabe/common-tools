@@ -22,18 +22,18 @@ import io.github.opensabe.scheduler.job.SchedulerJob;
 
 public class MisfireQueue {
 
-    private static final Queue<SchedulerJob> queue = new ConcurrentLinkedDeque<>();
+    private static final Queue<SchedulerJob> QUEUE = new ConcurrentLinkedDeque<>();
 
     public static void enqueue(SchedulerJob job) {
-        queue.add(job);
+        QUEUE.add(job);
     }
 
     public static SchedulerJob nextJob() {
-        return queue.poll();
+        return QUEUE.poll();
     }
 
     public static boolean isEmpty() {
-        return queue.isEmpty();
+        return QUEUE.isEmpty();
     }
 
 }
