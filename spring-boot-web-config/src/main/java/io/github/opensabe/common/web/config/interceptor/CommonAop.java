@@ -66,7 +66,7 @@ public class CommonAop {
 
     private Object aroundHTTPMethod(ProceedingJoinPoint pjp) throws Throwable {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
-        String className = pjp.getTarget().toString();//获取被拦截的类
+        String className = pjp.getTarget().toString(); // 获取被拦截的类
         Method method = signature.getMethod(); //获取被拦截的方法
         String methodName = method.getName(); //获取被拦截的方法名
         String name = className + "." + methodName;

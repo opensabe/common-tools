@@ -62,7 +62,7 @@ public class S3SyncFileService extends BucketS3FileService {
         S3OperationContext s3OperationContext = new S3OperationContext(key, "putObject");
         s3OperationContext.setFileSize(file.length());
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -90,7 +90,7 @@ public class S3SyncFileService extends BucketS3FileService {
         S3OperationContext s3OperationContext = new S3OperationContext(key, "putObject");
         s3OperationContext.setFileSize(source.length);
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -116,7 +116,7 @@ public class S3SyncFileService extends BucketS3FileService {
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "putObject");
         s3OperationContext.setFileSize(source.length);
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -139,7 +139,7 @@ public class S3SyncFileService extends BucketS3FileService {
     public byte[] getObject(String key, String bucket) {
         S3OperationContext s3OperationContext = new S3OperationContext(key, "getObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -166,7 +166,7 @@ public class S3SyncFileService extends BucketS3FileService {
     public List<String> listObjects(String basePath, String bucket) {
         S3OperationContext s3OperationContext = new S3OperationContext(basePath, "listObjects");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -193,7 +193,7 @@ public class S3SyncFileService extends BucketS3FileService {
     public List<String> listObjectsByPrefix(String prefix, String bucket) {
         S3OperationContext s3OperationContext = new S3OperationContext(prefix, "listObjects");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -219,7 +219,7 @@ public class S3SyncFileService extends BucketS3FileService {
     public void deleteObject(String key, String bucket) {
         S3OperationContext s3OperationContext = new S3OperationContext(key, "deleteObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -246,11 +246,11 @@ public class S3SyncFileService extends BucketS3FileService {
     }
 
 
-    //	public static void main(String[] args) {
-//		System.out.println("aaa.png".matches(".*\\.(png|jpg)"));
-//		System.out.println("aaa.jpg".matches(".*\\.(png|jpg)"));
-//		System.out.println("aaa.xl".matches(".*\\.(png|jpg)"));
-//	}
+    //    public static void main(String[] args) {
+//        System.out.println("aaa.png".matches(".*\\.(png|jpg)"));
+//        System.out.println("aaa.jpg".matches(".*\\.(png|jpg)"));
+//        System.out.println("aaa.xl".matches(".*\\.(png|jpg)"));
+//    }
     public String contentType(String fileName) {
         if (fileName.endsWith(".html")) return "text/html";
         var arr = fileName.split("\\.");

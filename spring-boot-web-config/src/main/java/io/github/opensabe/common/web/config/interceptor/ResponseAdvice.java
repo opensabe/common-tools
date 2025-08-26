@@ -54,7 +54,7 @@ import lombok.extern.log4j.Log4j2;
 @RestControllerAdvice
 @Log4j2
 public class ResponseAdvice implements ResponseBodyAdvice<Object> {
-    private final static Map HASH_MAP = new HashMap();
+    private static final Map HASH_MAP = new HashMap();
     @Value("${debug:false}")
     private boolean debugOpen;
 

@@ -30,7 +30,7 @@ public enum SocketIOExecuteDocumentation implements ObservationDocumentation, Ob
     SOCKET_EXECUTE_CONNECT {
         @Override
         public ObservationConvention getConvention() {
-            return SocketIOExecuteObservationConnectConvention.DEFAULT;
+            return SocketIOExecuteObservationConnectConvention.defaultConvention;
         }
 
         @Override
@@ -48,7 +48,7 @@ public enum SocketIOExecuteDocumentation implements ObservationDocumentation, Ob
     SOCKET_EXECUTE_DISCONNECT {
         @Override
         public ObservationConvention getConvention() {
-            return SocketIOExecuteObservationConnectConvention.DEFAULT;
+            return SocketIOExecuteObservationConnectConvention.defaultConvention;
         }
 
         @Override
@@ -65,7 +65,7 @@ public enum SocketIOExecuteDocumentation implements ObservationDocumentation, Ob
     SOCKET_EXECUTE_ON_EVENT {
         @Override
         public ObservationConvention getConvention() {
-            return SocketIOExecuteObservationConvention.DEFAULT;
+            return SocketIOExecuteObservationConvention.defaultConvention;
         }
 
         @Override
@@ -78,11 +78,11 @@ public enum SocketIOExecuteDocumentation implements ObservationDocumentation, Ob
             return SocketIOExecuteObservationConvention.class;
         }
     };
-    private static final Map<String, SocketIOExecuteDocumentation> map = Map.of(OnConnect.class.getName(), SOCKET_EXECUTE_CONNECT,
+    private static final Map<String, SocketIOExecuteDocumentation> MAP = Map.of(OnConnect.class.getName(), SOCKET_EXECUTE_CONNECT,
             OnDisconnect.class.getName(), SOCKET_EXECUTE_DISCONNECT, OnEvent.class.getName(), SOCKET_EXECUTE_ON_EVENT);
 
     public static SocketIOExecuteDocumentation get(String name) {
-        return map.get(name);
+        return MAP.get(name);
     }
 
 }

@@ -25,18 +25,18 @@ public class MessageConsumeObservationConvention implements ObservationConventio
     @Override
     public KeyValues getLowCardinalityKeyValues(MessageConsumeContext context) {
         return KeyValues.of(
-                RocketMQObservationDocumentation.MESSAGE_CONSUME_TAG.TOPIC.withValue(context.getTopic()),
-                RocketMQObservationDocumentation.MESSAGE_CONSUME_TAG.SUCCESSFUL.withValue(String.valueOf(context.getSuccessful()))
+                RocketMQObservationDocumentation.MessageConsumeTag.TOPIC.withValue(context.getTopic()),
+                RocketMQObservationDocumentation.MessageConsumeTag.SUCCESSFUL.withValue(String.valueOf(context.getSuccessful()))
         );
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(MessageConsumeContext context) {
         return KeyValues.of(
-                RocketMQObservationDocumentation.MESSAGE_CONSUME_TAG.ORIGIN_TRACE_ID.withValue(context.getOriginTraceId()),
-                RocketMQObservationDocumentation.MESSAGE_CONSUME_TAG.TOPIC.withValue(context.getTopic()),
-                RocketMQObservationDocumentation.MESSAGE_CONSUME_TAG.SUCCESSFUL.withValue(String.valueOf(context.getSuccessful())),
-                RocketMQObservationDocumentation.MESSAGE_CONSUME_TAG.THROWABLE.withValue(context.getThrowable() == null ? "" : context.getThrowable().getMessage())
+                RocketMQObservationDocumentation.MessageConsumeTag.ORIGIN_TRACE_ID.withValue(context.getOriginTraceId()),
+                RocketMQObservationDocumentation.MessageConsumeTag.TOPIC.withValue(context.getTopic()),
+                RocketMQObservationDocumentation.MessageConsumeTag.SUCCESSFUL.withValue(String.valueOf(context.getSuccessful())),
+                RocketMQObservationDocumentation.MessageConsumeTag.THROWABLE.withValue(context.getThrowable() == null ? "" : context.getThrowable().getMessage())
         );
     }
 

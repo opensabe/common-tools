@@ -34,7 +34,7 @@ public enum ElasticSearchClientObservationDocumentation implements ObservationDo
     },
     ;
 
-    public enum CLIENT_REQUEST_TAG implements KeyName {
+    public enum ClientRequestTag implements KeyName {
         URI {
             @Override
             public String asString() {

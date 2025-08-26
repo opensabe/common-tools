@@ -30,22 +30,22 @@ public class RRateLimiterAcquireConvention implements ObservationConvention<RRat
     @Override
     public KeyValues getLowCardinalityKeyValues(RRateLimiterAcquireContext context) {
         return KeyValues.of(
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.ACQUIRE_SUCCESSFULLY.withValue(String.valueOf(context.isRateLimiterAcquiredSuccessfully())),
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.PERMITS.withValue(String.valueOf(context.getPermits())),
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.TIME_OUT.withValue(String.valueOf(context.getTimeout())),
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.TIME_UNIT.withValue(String.valueOf(context.getTimeUnit()))
+                RRateLimiterObservationDocumentation.AcquireTag.ACQUIRE_SUCCESSFULLY.withValue(String.valueOf(context.isRateLimiterAcquiredSuccessfully())),
+                RRateLimiterObservationDocumentation.AcquireTag.PERMITS.withValue(String.valueOf(context.getPermits())),
+                RRateLimiterObservationDocumentation.AcquireTag.TIME_OUT.withValue(String.valueOf(context.getTimeout())),
+                RRateLimiterObservationDocumentation.AcquireTag.TIME_UNIT.withValue(String.valueOf(context.getTimeUnit()))
         );
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(RRateLimiterAcquireContext context) {
         return KeyValues.of(
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.ACQUIRE_SUCCESSFULLY.withValue(String.valueOf(context.isRateLimiterAcquiredSuccessfully())),
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.RATE_LIMITER_NAME.withValue(context.getRateLimiterName()),
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.THREAD_NAME.withValue(context.getThreadName()),
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.PERMITS.withValue(String.valueOf(context.getPermits())),
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.TIME_OUT.withValue(String.valueOf(context.getTimeout())),
-                RRateLimiterObservationDocumentation.ACQUIRE_TAG.TIME_UNIT.withValue(String.valueOf(context.getTimeUnit()))
+                RRateLimiterObservationDocumentation.AcquireTag.ACQUIRE_SUCCESSFULLY.withValue(String.valueOf(context.isRateLimiterAcquiredSuccessfully())),
+                RRateLimiterObservationDocumentation.AcquireTag.RATE_LIMITER_NAME.withValue(context.getRateLimiterName()),
+                RRateLimiterObservationDocumentation.AcquireTag.THREAD_NAME.withValue(context.getThreadName()),
+                RRateLimiterObservationDocumentation.AcquireTag.PERMITS.withValue(String.valueOf(context.getPermits())),
+                RRateLimiterObservationDocumentation.AcquireTag.TIME_OUT.withValue(String.valueOf(context.getTimeout())),
+                RRateLimiterObservationDocumentation.AcquireTag.TIME_UNIT.withValue(String.valueOf(context.getTimeUnit()))
         );
     }
 }

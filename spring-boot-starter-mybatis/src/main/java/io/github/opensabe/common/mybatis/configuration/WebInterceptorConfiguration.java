@@ -116,7 +116,7 @@ public class WebInterceptorConfiguration {
             private CoreSubscriber<T> delegate;
             private Context context;
 
-            public WrappedSubscriber(CoreSubscriber<T> delegate, Context context) {
+            WrappedSubscriber(CoreSubscriber<T> delegate, Context context) {
                 this.delegate = delegate;
                 this.context = context;
             }
@@ -157,7 +157,7 @@ public class WebInterceptorConfiguration {
              * @param source the object on which the event initially occurred or with
              *               which the event is associated (never {@code null})
              */
-            public OperatorEvent(Object source) {
+            OperatorEvent(Object source) {
                 super(source);
             }
         }

@@ -49,7 +49,7 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
     protected Cache<String, MappedStatement> msCountMap = null;
     private volatile Dialect dialect;
     private String countSuffix = "_COUNT";
-    private String default_dialect_class = "com.github.pagehelper.PageHelper";
+    private String defaultDialectClass = "com.github.pagehelper.PageHelper";
 
 
     private static String getDefaultOperId() {
@@ -80,7 +80,7 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
      */
     private void checkDialectExists() {
         if (dialect == null) {
-            synchronized (default_dialect_class) {
+            synchronized (defaultDialectClass) {
                 if (dialect == null) {
                     setProperties(new Properties());
                 }
@@ -92,17 +92,17 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
      * Set the countryCode and R/W attribute (according to whether SQL contains
      * mode=readonly) for datasource lookup
      */
-//	private void configureDataSourceContext(BoundSql boundSql) {
-//		OperIdUtil operIdUtil = applicationContext.getBean(OperIdUtil.class);
-//		DynamicRoutingDataSource
-//				.setDataSourceCountryCode(operIdUtil.getCurrentOperCode());
-//		if (boundSql != null
-//				&& StringUtils.containsIgnoreCase(boundSql.getSql().replace(" ", ""), "/*#mode=readonly*/")) {
-//			DynamicRoutingDataSource.setDataSourceRW("read");
-//		} else if (StringUtils.isBlank(DynamicRoutingDataSource.getDataSourceRW())){
-//			DynamicRoutingDataSource.setDataSourceRW("write");
-//		}
-//	}
+//    private void configureDataSourceContext(BoundSql boundSql) {
+//        OperIdUtil operIdUtil = applicationContext.getBean(OperIdUtil.class);
+//        DynamicRoutingDataSource
+//                .setDataSourceCountryCode(operIdUtil.getCurrentOperCode());
+//        if (boundSql != null
+//                && StringUtils.containsIgnoreCase(boundSql.getSql().replace(" ", ""), "/*#mode=readonly*/")) {
+//            DynamicRoutingDataSource.setDataSourceRW("read");
+//        } else if (StringUtils.isBlank(DynamicRoutingDataSource.getDataSourceRW())){
+//            DynamicRoutingDataSource.setDataSourceRW("write");
+//        }
+//    }
     public abstract void configureDataSourceContext(BoundSql boundSql);
 
     @SuppressWarnings("rawtypes")
@@ -199,7 +199,7 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
         msCountMap = CacheFactory.createCache(properties.getProperty("msCountCache"), "ms", properties);
         String dialectClass = properties.getProperty("dialect");
         if (StringUtil.isEmpty(dialectClass)) {
-            dialectClass = default_dialect_class;
+            dialectClass = defaultDialectClass;
         }
         try {
             Class<?> aClass = Class.forName(dialectClass);

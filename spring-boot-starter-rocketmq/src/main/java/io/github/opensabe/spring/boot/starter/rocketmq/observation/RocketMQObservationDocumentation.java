@@ -44,7 +44,7 @@ public enum RocketMQObservationDocumentation implements ObservationDocumentation
         }
     };
 
-    public enum MESSAGE_PRODUCE_TAG implements KeyName {
+    public enum MessageProduceTag implements KeyName {
         TOPIC {
             @Override
             public String asString() {
@@ -72,7 +72,7 @@ public enum RocketMQObservationDocumentation implements ObservationDocumentation
         ;
     }
 
-    public enum MESSAGE_CONSUME_TAG implements KeyName {
+    public enum MessageConsumeTag implements KeyName {
         ORIGIN_TRACE_ID {
             @Override
             public String asString() {

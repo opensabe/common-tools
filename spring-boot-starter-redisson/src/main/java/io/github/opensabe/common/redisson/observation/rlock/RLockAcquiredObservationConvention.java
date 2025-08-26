@@ -31,18 +31,18 @@ public class RLockAcquiredObservationConvention implements ObservationConvention
     @Override
     public KeyValues getLowCardinalityKeyValues(RLockAcquiredContext context) {
         return KeyValues.of(
-                RLockObservationDocumentation.LOCK_ACQUIRE_TAG.LOCK_TYPE.withValue(context.getLockClass().getSimpleName()),
-                RLockObservationDocumentation.LOCK_ACQUIRE_TAG.LOCK_ACQUIRED_SUCCESSFULLY.withValue(String.valueOf(context.isLockAcquiredSuccessfully()))
+                RLockObservationDocumentation.LockAcquireTag.LOCK_TYPE.withValue(context.getLockClass().getSimpleName()),
+                RLockObservationDocumentation.LockAcquireTag.LOCK_ACQUIRED_SUCCESSFULLY.withValue(String.valueOf(context.isLockAcquiredSuccessfully()))
         );
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(RLockAcquiredContext context) {
         return KeyValues.of(
-                RLockObservationDocumentation.LOCK_ACQUIRE_TAG.LOCK_NAME.withValue(context.getLockName()),
-                RLockObservationDocumentation.LOCK_ACQUIRE_TAG.THREAD_NAME.withValue(context.getThreadName()),
-                RLockObservationDocumentation.LOCK_ACQUIRE_TAG.LOCK_TYPE.withValue(context.getLockClass().getSimpleName()),
-                RLockObservationDocumentation.LOCK_ACQUIRE_TAG.LOCK_ACQUIRED_SUCCESSFULLY.withValue(String.valueOf(context.isLockAcquiredSuccessfully()))
+                RLockObservationDocumentation.LockAcquireTag.LOCK_NAME.withValue(context.getLockName()),
+                RLockObservationDocumentation.LockAcquireTag.THREAD_NAME.withValue(context.getThreadName()),
+                RLockObservationDocumentation.LockAcquireTag.LOCK_TYPE.withValue(context.getLockClass().getSimpleName()),
+                RLockObservationDocumentation.LockAcquireTag.LOCK_ACQUIRED_SUCCESSFULLY.withValue(String.valueOf(context.isLockAcquiredSuccessfully()))
         );
     }
 }

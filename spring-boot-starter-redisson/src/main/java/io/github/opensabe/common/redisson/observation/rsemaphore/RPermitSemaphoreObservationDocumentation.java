@@ -56,7 +56,7 @@ public enum RPermitSemaphoreObservationDocumentation implements ObservationDocum
     },
     ;
 
-    public enum SEMAPHORE_ACQUIRE_TAG implements KeyName {
+    public enum SemaphoreAcquireTag implements KeyName {
         SEMAPHORE_NAME {
             @Override
             public String asString() {
@@ -102,7 +102,7 @@ public enum RPermitSemaphoreObservationDocumentation implements ObservationDocum
         ;
     }
 
-    public enum SEMAPHORE_RELEASE_TAG implements KeyName {
+    public enum SemaphoreReleaseTag implements KeyName {
         SEMAPHORE_NAME {
             @Override
             public String asString() {
@@ -130,7 +130,7 @@ public enum RPermitSemaphoreObservationDocumentation implements ObservationDocum
         ;
     }
 
-    public enum PERMIT_MODIFIED_TAG implements KeyName {
+    public enum PermitModifiedTag implements KeyName {
         SEMAPHORE_NAME {
             @Override
             public String asString() {

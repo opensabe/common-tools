@@ -30,26 +30,26 @@ public class RRateLimiterSetRateConvention implements ObservationConvention<RRat
     @Override
     public KeyValues getLowCardinalityKeyValues(RRateLimiterSetRateContext context) {
         return KeyValues.of(
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE_TYPE.withValue(context.getMode().name()),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE.withValue(String.valueOf(context.getRate())),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE_INTERVAL.withValue(String.valueOf(context.getRateInterval())),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE_INTERVAL_UNIT.withValue(context.getRateIntervalUnit().name()),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.SET_RATE_SUCCESSFULLY.withValue(String.valueOf(context.isSetRateSuccessfully())),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.KEEP_ALIVE.withValue(String.valueOf(context.getKeepAlive()))
+                RRateLimiterObservationDocumentation.SetRateTag.RATE_TYPE.withValue(context.getMode().name()),
+                RRateLimiterObservationDocumentation.SetRateTag.RATE.withValue(String.valueOf(context.getRate())),
+                RRateLimiterObservationDocumentation.SetRateTag.RATE_INTERVAL.withValue(String.valueOf(context.getRateInterval())),
+                RRateLimiterObservationDocumentation.SetRateTag.RATE_INTERVAL_UNIT.withValue(context.getRateIntervalUnit().name()),
+                RRateLimiterObservationDocumentation.SetRateTag.SET_RATE_SUCCESSFULLY.withValue(String.valueOf(context.isSetRateSuccessfully())),
+                RRateLimiterObservationDocumentation.SetRateTag.KEEP_ALIVE.withValue(String.valueOf(context.getKeepAlive()))
         );
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(RRateLimiterSetRateContext context) {
         return KeyValues.of(
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE_LIMITER_NAME.withValue(context.getRateLimiterName()),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.THREAD_NAME.withValue(context.getThreadName()),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE_TYPE.withValue(context.getMode().name()),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE.withValue(String.valueOf(context.getRate())),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE_INTERVAL.withValue(String.valueOf(context.getRateInterval())),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.RATE_INTERVAL_UNIT.withValue(context.getRateIntervalUnit().name()),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.SET_RATE_SUCCESSFULLY.withValue(String.valueOf(context.isSetRateSuccessfully())),
-                RRateLimiterObservationDocumentation.SET_RATE_TAG.KEEP_ALIVE.withValue(String.valueOf(context.getKeepAlive()))
+                RRateLimiterObservationDocumentation.SetRateTag.RATE_LIMITER_NAME.withValue(context.getRateLimiterName()),
+                RRateLimiterObservationDocumentation.SetRateTag.THREAD_NAME.withValue(context.getThreadName()),
+                RRateLimiterObservationDocumentation.SetRateTag.RATE_TYPE.withValue(context.getMode().name()),
+                RRateLimiterObservationDocumentation.SetRateTag.RATE.withValue(String.valueOf(context.getRate())),
+                RRateLimiterObservationDocumentation.SetRateTag.RATE_INTERVAL.withValue(String.valueOf(context.getRateInterval())),
+                RRateLimiterObservationDocumentation.SetRateTag.RATE_INTERVAL_UNIT.withValue(context.getRateIntervalUnit().name()),
+                RRateLimiterObservationDocumentation.SetRateTag.SET_RATE_SUCCESSFULLY.withValue(String.valueOf(context.isSetRateSuccessfully())),
+                RRateLimiterObservationDocumentation.SetRateTag.KEEP_ALIVE.withValue(String.valueOf(context.getKeepAlive()))
         );
     }
 }

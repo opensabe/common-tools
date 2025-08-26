@@ -30,8 +30,8 @@ import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
  */
 public abstract class ExtraNameProperties extends AbstractRedissonProperties {
 
-    private static final SpelExpressionParser parser = new SpelExpressionParser();
-    private static final ParserContext context = new TemplateParserContext();
+    private static final SpelExpressionParser PARSER = new SpelExpressionParser();
+    private static final ParserContext CONTEXT = new TemplateParserContext();
     private final int parameterIndex;
     private final String expression;
 
@@ -54,7 +54,7 @@ public abstract class ExtraNameProperties extends AbstractRedissonProperties {
         if (parameterIndex != -1) {
             StringBuilder lockName = new StringBuilder();
             if (StringUtils.isNotBlank(expression)) {
-                lockName.append(prefix).append(parser.parseExpression(expression, context).getValue(args[parameterIndex]));
+                lockName.append(prefix).append(PARSER.parseExpression(expression, CONTEXT).getValue(args[parameterIndex]));
             } else {
                 lockName.append(prefix).append(args[parameterIndex]);
             }

@@ -23,18 +23,18 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AESTypeHandler extends CryptTypeHandler {
 
-    private static ThreadLocal<String> KEY_HOLDER = new ThreadLocal<String>();
+    private static ThreadLocal<String> keyHolder = new ThreadLocal<String>();
 
     public static String getKey() {
-        return KEY_HOLDER.get();
+        return keyHolder.get();
     }
 
     public static void setKey(String key) {
-        KEY_HOLDER.set(key);
+        keyHolder.set(key);
     }
 
     public static void clearKey() {
-        KEY_HOLDER.remove();
+        keyHolder.remove();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class AESTypeHandler extends CryptTypeHandler {
         var key = getKey();
         if (StringUtils.hasText(key)) {
             try {
-                return AESUtil.Encrypt(origin, key);
+                return AESUtil.encryptIv(origin, key);
             } catch (Throwable e) {
                 log.error(e);
             } finally {
@@ -57,7 +57,7 @@ public class AESTypeHandler extends CryptTypeHandler {
         var key = getKey();
         if (StringUtils.hasText(key)) {
             try {
-                return AESUtil.Decrypt(origin, key);
+                return AESUtil.decryptIv(origin, key);
             } catch (Throwable e) {
                 log.error(e);
             } finally {

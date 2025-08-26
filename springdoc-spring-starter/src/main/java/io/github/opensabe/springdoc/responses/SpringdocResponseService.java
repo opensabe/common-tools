@@ -123,7 +123,7 @@ public class SpringdocResponseService extends GenericResponseService {
                 case "schemaProperties" -> new SchemaProperty[]{
                         createSchemaProperty("bizCode", errorCode.code() + "", "int"),
                         createSchemaProperty("message", errorCode.message(), ""),
-                        createSchemaProperty("data", String.valueOf(errorCode.data()), "")
+                        createSchemaProperty("data", String.valueOf(errorCode.data()), ""),
                 };
                 case "schema", "_if", "_then", "_else", "additionalPropertiesSchema", "contentSchema",
                      "propertyNames" -> useless.schema();

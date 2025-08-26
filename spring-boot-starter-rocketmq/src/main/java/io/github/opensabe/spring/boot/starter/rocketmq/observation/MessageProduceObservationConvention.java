@@ -25,18 +25,18 @@ public class MessageProduceObservationConvention implements ObservationConventio
     @Override
     public KeyValues getLowCardinalityKeyValues(MessageProduceContext context) {
         return KeyValues.of(
-                RocketMQObservationDocumentation.MESSAGE_PRODUCE_TAG.SEND_RESULT.withValue(context.getSendResult()),
-                RocketMQObservationDocumentation.MESSAGE_PRODUCE_TAG.TOPIC.withValue(context.getTopic())
+                RocketMQObservationDocumentation.MessageProduceTag.SEND_RESULT.withValue(context.getSendResult()),
+                RocketMQObservationDocumentation.MessageProduceTag.TOPIC.withValue(context.getTopic())
         );
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(MessageProduceContext context) {
         return KeyValues.of(
-                RocketMQObservationDocumentation.MESSAGE_PRODUCE_TAG.SEND_RESULT.withValue(context.getSendResult()),
-                RocketMQObservationDocumentation.MESSAGE_PRODUCE_TAG.MSG_LENGTH.withValue(String.valueOf(context.getMsgLength())),
-                RocketMQObservationDocumentation.MESSAGE_PRODUCE_TAG.TOPIC.withValue(context.getTopic()),
-                RocketMQObservationDocumentation.MESSAGE_PRODUCE_TAG.THROWABLE.withValue(context.getThrowable() == null ? "" : context.getThrowable().getMessage())
+                RocketMQObservationDocumentation.MessageProduceTag.SEND_RESULT.withValue(context.getSendResult()),
+                RocketMQObservationDocumentation.MessageProduceTag.MSG_LENGTH.withValue(String.valueOf(context.getMsgLength())),
+                RocketMQObservationDocumentation.MessageProduceTag.TOPIC.withValue(context.getTopic()),
+                RocketMQObservationDocumentation.MessageProduceTag.THROWABLE.withValue(context.getThrowable() == null ? "" : context.getThrowable().getMessage())
         );
     }
 

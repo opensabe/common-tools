@@ -35,15 +35,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RevoFastJsonHttpMessageConverter extends FastJsonHttpMessageConverter {
 
-    private final static ThreadLocal<byte[]> bytesLocal = new ThreadLocal<byte[]>();
+    private static final ThreadLocal<byte[]> BYTES_LOCAL = new ThreadLocal<byte[]>();
 
     private static byte[] allocateBytes(int length) {
-        byte[] chars = bytesLocal.get();
+        byte[] chars = BYTES_LOCAL.get();
 
         if (chars == null) {
             if (length <= 1024 * 64) {
                 chars = new byte[1024 * 64];
-                bytesLocal.set(chars);
+                BYTES_LOCAL.set(chars);
             } else {
                 chars = new byte[length];
             }
@@ -91,7 +91,7 @@ public class RevoFastJsonHttpMessageConverter extends FastJsonHttpMessageConvert
             }
 
             bytes = allocateBytes(1024 * 64);
-            for (; ; ) {
+            for (;;) {
                 int readCount = in.read(bytes, offset, bytes.length - offset);
                 if (readCount == -1) {
                     break;

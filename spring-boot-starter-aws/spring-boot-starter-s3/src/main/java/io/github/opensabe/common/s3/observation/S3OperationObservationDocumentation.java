@@ -33,7 +33,7 @@ public enum S3OperationObservationDocumentation implements ObservationDocumentat
         }
     };
 
-    public enum S3_File_OPERATE_TAG implements KeyName {
+    public enum S3FileOperateTag implements KeyName {
         FILE_NAME {
             @Override
             public String asString() {

@@ -173,5 +173,5 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         return 10;
     }
 
-    abstract protected void onBaseMessage(BaseMessage<T> baseMessage);
+    protected abstract void onBaseMessage(BaseMessage<T> baseMessage);
 }

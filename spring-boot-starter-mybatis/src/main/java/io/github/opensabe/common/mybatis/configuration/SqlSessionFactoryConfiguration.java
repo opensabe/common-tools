@@ -217,9 +217,9 @@ public class SqlSessionFactoryConfiguration
         //为了添加Observation,我们自己指定configuration,而设置了configuration就不能设置configLocation
         //自定义的Configuration重写了MapperRegistry,注册Mapper时生成我们自己的代理类，在代理类上添加Observation
         factory.setConfiguration(new io.github.opensabe.common.mybatis.plugins.Configuration());
-//		if (StringUtils.hasText(properties.getConfigLocation())) {
-//			factory.setConfigLocation(resourceLoader.getResource(properties.getConfigLocation()));
-//		}
+//        if (StringUtils.hasText(properties.getConfigLocation())) {
+//            factory.setConfigLocation(resourceLoader.getResource(properties.getConfigLocation()));
+//        }
         Properties configurationProperties = properties.getConfigurationProperties();
         if (configurationProperties != null) {
             factory.setConfigurationProperties(configurationProperties);

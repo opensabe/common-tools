@@ -253,7 +253,7 @@ public @interface RedissonLock {
             }
         };
 
-        private final static Map<Integer, LockType> map = new ConcurrentHashMap<>(3);
+        private static final Map<Integer, LockType> MAP = new ConcurrentHashMap<>(3);
         private final int value;
 
         LockType(int value) {
@@ -261,7 +261,7 @@ public @interface RedissonLock {
         }
 
         public static LockType lockType(int value) {
-            return map.computeIfAbsent(value, k -> Arrays.stream(values()).filter(e -> Objects.equals(e.value, value))
+            return MAP.computeIfAbsent(value, k -> Arrays.stream(values()).filter(e -> Objects.equals(e.value, value))
                     .findFirst()
                     .orElseThrow());
         }

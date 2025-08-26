@@ -49,11 +49,11 @@ public class LuaLimitCache {
                     "    return current\n" +
                     "end";
 
-    private static final DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+    private static final DefaultRedisScript<Long> REDIS_SCRIPT = new DefaultRedisScript<>();
 
     static {
-        redisScript.setScriptText(LUA_SCRIPT);
-        redisScript.setResultType(Long.class);
+        REDIS_SCRIPT.setScriptText(LUA_SCRIPT);
+        REDIS_SCRIPT.setResultType(Long.class);
     }
 
     private final StringRedisTemplate redisTemplate;
@@ -82,7 +82,7 @@ public class LuaLimitCache {
             Supplier<Long> loader
     ) {
         long current = redisTemplate.execute(
-                redisScript,
+                REDIS_SCRIPT,
                 Collections.singletonList(key),
                 String.valueOf(limit), String.valueOf(increment), String.valueOf(expire)
         );
@@ -92,7 +92,7 @@ public class LuaLimitCache {
             lock.lock();
             try {
                 current = redisTemplate.execute(
-                        redisScript,
+                        REDIS_SCRIPT,
                         Collections.singletonList(key),
                         String.valueOf(limit), String.valueOf(increment), String.valueOf(expire)
                 );
@@ -100,7 +100,7 @@ public class LuaLimitCache {
                 if (current == SHOULD_LOAD) {
                     redisTemplate.opsForValue().set(key, String.valueOf(loader.get()), Duration.ofSeconds(expire));
                     current = redisTemplate.execute(
-                            redisScript,
+                            REDIS_SCRIPT,
                             Collections.singletonList(key),
                             String.valueOf(limit), String.valueOf(increment), String.valueOf(expire)
                     );

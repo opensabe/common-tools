@@ -117,7 +117,7 @@ public class RedissonScheduledListener {
         private volatile boolean isLeader;
         private volatile boolean isStopped = false;
 
-        public ExecutorWrapper(RedissonClient redissonClient, UnifiedObservationFactory unifiedObservationFactory,
+        ExecutorWrapper(RedissonClient redissonClient, UnifiedObservationFactory unifiedObservationFactory,
                                ScheduledService runnable,
                                String name, long initialDelay,
                                long fixedDelay, boolean stopOnceShutdown, MeterRegistry meterRegistry) {
@@ -171,7 +171,7 @@ public class RedissonScheduledListener {
 //                        method.invoke(bean);
                         runnable.run();
                         long elapsed = System.currentTimeMillis() - start;
-                        if (distributionSummary.count() > 10 && (elapsed > distributionSummary.max() * 2) && elapsed > 60000) {
+                        if (distributionSummary.count() > 10 && elapsed > distributionSummary.max() * 2 && elapsed > 60000) {
                             log.fatal("RedissonScheduledBeanPostProcessor task: {} end in {} ms, recent mean elapsed time is {}ms", name, elapsed, distributionSummary.mean());
                         } else {
                             if (log.isDebugEnabled()) {

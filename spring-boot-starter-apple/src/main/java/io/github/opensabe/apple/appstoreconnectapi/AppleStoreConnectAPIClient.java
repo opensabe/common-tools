@@ -81,7 +81,7 @@ public class AppleStoreConnectAPIClient {
         if (body != null) {
             RequestBody requestBody = RequestBody.create(objectMapper.writeValueAsString(body), JSON);
             requestBuilder.method(method, requestBody);
-        } else if (method.equals("POST")) {
+        } else if ("POST".equals(method)) {
             requestBuilder.method(method, RequestBody.create("", null));
         } else {
             requestBuilder.method(method, null);

@@ -46,12 +46,12 @@ public class NamespaceExtend extends Namespace {
 
     @Override
     public void onDisconnect(SocketIOClient client) {
-        SpringUtil.getBean(ObservationService.class).observation(client, SocketIOExecuteDocumentation.SOCKET_EXECUTE_DISCONNECT, null, OnDisconnect.class.getName(), (t) -> super.onDisconnect(t));
+        SpringUtil.getBean(ObservationService.class).observation(client, SocketIOExecuteDocumentation.SOCKET_EXECUTE_DISCONNECT, null, OnDisconnect.class.getName(), t -> super.onDisconnect(t));
     }
 
     @Override
     public void onConnect(SocketIOClient client) {
-        SpringUtil.getBean(ObservationService.class).observation(client, SocketIOExecuteDocumentation.SOCKET_EXECUTE_CONNECT, null, OnConnect.class.getName(), (t) -> super.onConnect(t));
+        SpringUtil.getBean(ObservationService.class).observation(client, SocketIOExecuteDocumentation.SOCKET_EXECUTE_CONNECT, null, OnConnect.class.getName(), t -> super.onConnect(t));
     }
 
 

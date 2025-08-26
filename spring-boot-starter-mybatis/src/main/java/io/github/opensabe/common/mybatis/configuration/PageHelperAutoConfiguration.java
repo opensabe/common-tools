@@ -60,10 +60,10 @@ public class PageHelperAutoConfiguration {
     @PostConstruct
     public void addPageInterceptor() {
         if (dataSourceSwitchInterceptor != null) {
-            Properties _properties = new Properties();
-            _properties.putAll(pageHelperProperties());
-            _properties.putAll(properties.getProperties());
-            dataSourceSwitchInterceptor.setProperties(_properties);
+            Properties pageHelperProps = new Properties();
+            pageHelperProps.putAll(pageHelperProperties());
+            pageHelperProps.putAll(properties.getProperties());
+            dataSourceSwitchInterceptor.setProperties(pageHelperProps);
             for (SqlSessionFactory sqlSessionFactory : sqlSessionFactories) {
                 if (!containsInterceptor(sqlSessionFactory.getConfiguration(), dataSourceSwitchInterceptor)) {
                     sqlSessionFactory.getConfiguration().addInterceptor(dataSourceSwitchInterceptor);

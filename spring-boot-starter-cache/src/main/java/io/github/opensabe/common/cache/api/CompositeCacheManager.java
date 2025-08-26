@@ -102,21 +102,18 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
         Set<String> set = new HashSet<>();
         for (CacheManager cacheManager : cacheManagers) {
             Collection<String> settings;
-            {
-                switch (cacheManager) {
-                    case ExpireCacheManager expireCacheManager -> settings = expireCacheManager.settings(cacheName);
-                    case CaffeineCacheManager caffeineCacheManager -> {
-                        Object o = caffeineCacheBuilder.get(caffeineCacheManager);
-                        settings = List.of(o.toString());
-                    }
-                    case RedisCacheManager redisCacheManager -> {
-                        RedisCacheConfiguration configuration = redisCacheManager.getCacheConfigurations().get(cacheName);
-                        Duration duration = configuration.getTtlFunction().getTimeToLive(Object.class, null);
-                        String keyPrefix = configuration.getKeyPrefix().compute(cacheName);
-                        settings = List.of(keyPrefix, duration.toString());
-                    }
-                    default -> settings = Collections.emptyList();
-                }
+            if (cacheManager instanceof ExpireCacheManager expireCacheManager) {
+                settings = expireCacheManager.settings(cacheName);
+            } else if (cacheManager instanceof CaffeineCacheManager caffeineCacheManager) {
+                Object o = caffeineCacheBuilder.get(caffeineCacheManager);
+                settings = List.of(o.toString());
+            } else if (cacheManager instanceof RedisCacheManager redisCacheManager) {
+                RedisCacheConfiguration configuration = redisCacheManager.getCacheConfigurations().get(cacheName);
+                Duration duration = configuration.getTtlFunction().getTimeToLive(Object.class, null);
+                String keyPrefix = configuration.getKeyPrefix().compute(cacheName);
+                settings = List.of(keyPrefix, duration.toString());
+            } else {
+                settings = Collections.emptyList();
             }
             set.addAll(settings);
         }

@@ -31,18 +31,18 @@ import io.github.opensabe.common.utils.SpringUtil;
  */
 public class TypeHandlerSpringHolderConfiguration {
 
-    private final static Map<OBSTypeEnum, OBSService> obsServices = new HashMap<>();
+    private static final Map<OBSTypeEnum, OBSService> OBS_SERVICES = new HashMap<>();
     private static UniqueID uniqueID;
 
     public static OBSService getService(OBSTypeEnum type) {
-        if (obsServices.containsKey(type)) {
-            return obsServices.get(type);
+        if (OBS_SERVICES.containsKey(type)) {
+            return OBS_SERVICES.get(type);
         }
         var service = SpringUtil.getApplicationContext().getBeanProvider(OBSService.class)
                 .stream().filter(s -> Objects.equals(type, s.type()))
                 .findFirst()
                 .orElse(null);
-        obsServices.put(type, service);
+        OBS_SERVICES.put(type, service);
         return service;
     }
 

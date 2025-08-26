@@ -31,12 +31,12 @@ public class AESUtil {
     /**
      * AES加密（默认IV）
      */
-    public static String Encrypt(String plain, String key) throws Exception {
+    public static String encryptIv(String plain, String key) throws Exception {
         if (key == null) {
-            System.out.print("Key为空null");
+            log.error("key is null");
             return null;
         } else if (key.length() != 16) {
-            System.out.print("Key长度不是16位");
+            log.error("key length is not 16");
             return null;
         } else {
             byte[] raw = key.getBytes();
@@ -52,13 +52,13 @@ public class AESUtil {
     /**
      * AES解密（默认IV）
      */
-    public static String Decrypt(String plain, String key) throws Exception {
+    public static String decryptIv(String plain, String key) throws Exception {
         try {
             if (key == null) {
-                log.error("Key为空null");
+                log.error("key is null");
                 return null;
             } else if (key.length() != 16) {
-                log.error("Key长度不是16位");
+                log.error("key length is not 16");
                 return null;
             } else {
                 byte[] raw = key.getBytes("ASCII");
@@ -73,12 +73,12 @@ public class AESUtil {
                     String originalString = new String(original);
                     return originalString;
                 } catch (Throwable var9) {
-                    log.error("解密异常，key：" + key, var9);
+                    log.error("decrypt error，key：" + key, var9);
                     return null;
                 }
             }
         } catch (Throwable var10) {
-            log.error("解密异常，plain=" + plain + ",key=" + key, var10);
+            log.error("decrypt error，plain=" + plain + ",key=" + key, var10);
             return null;
         }
     }

@@ -26,14 +26,14 @@ import com.google.common.cache.CacheBuilder;
 public class CommonProvider<T> {
     private static final int CACHE_SIZE = 2 << 16;
 
-    private static final Cache<String, String> camelToUnderScoreCache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).build();
-    private static final Cache<String, String> underScoreToCamelCache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).build();
-    private static final ThreadLocal<StringBuilder> stringBuilderThreadLocal = ThreadLocal.withInitial(() -> new StringBuilder());
-    private static final ThreadLocal<CommonProvider> commonProviderThreadLocal = ThreadLocal.withInitial(() -> new CommonProvider<>());
+    private static final Cache<String, String> CAMEL_TO_UNDER_SCORE_CACHE = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).build();
+    private static final Cache<String, String> UNDER_SCORE_TO_CAMEL_CACHE = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).build();
+    private static final ThreadLocal<StringBuilder> STRING_BUILDER_THREAD_LOCAL = ThreadLocal.withInitial(() -> new StringBuilder());
+    private static final ThreadLocal<CommonProvider> COMMON_PROVIDER_THREAD_LOCAL = ThreadLocal.withInitial(() -> new CommonProvider<>());
 
     public static String camelToUnderScore(String name) {
         try {
-            return camelToUnderScoreCache.get(name, () -> CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+            return CAMEL_TO_UNDER_SCORE_CACHE.get(name, () -> CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
         } catch (ExecutionException e) {
             return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
         }
@@ -41,14 +41,14 @@ public class CommonProvider<T> {
 
     public static String underScoreToCamel(String name) {
         try {
-            return underScoreToCamelCache.get(name, () -> CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name));
+            return UNDER_SCORE_TO_CAMEL_CACHE.get(name, () -> CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name));
         } catch (ExecutionException e) {
             return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name);
         }
     }
 
     public static String getFieldsFromStrCollection(Collection<String> strings) {
-        StringBuilder stringBuilder = stringBuilderThreadLocal.get();
+        StringBuilder stringBuilder = STRING_BUILDER_THREAD_LOCAL.get();
         stringBuilder.setLength(0);
         strings.forEach(string -> {
             stringBuilder.append(string).append(",");
@@ -61,7 +61,7 @@ public class CommonProvider<T> {
         if (objects.isEmpty()) {
             return "('')";
         }
-        StringBuilder stringBuilder = stringBuilderThreadLocal.get();
+        StringBuilder stringBuilder = STRING_BUILDER_THREAD_LOCAL.get();
         stringBuilder.setLength(0);
         stringBuilder.append("(");
         objects.forEach(string -> {
@@ -73,6 +73,6 @@ public class CommonProvider<T> {
     }
 
     public static <T> CommonProvider<T> common() {
-        return commonProviderThreadLocal.get();
+        return COMMON_PROVIDER_THREAD_LOCAL.get();
     }
 }

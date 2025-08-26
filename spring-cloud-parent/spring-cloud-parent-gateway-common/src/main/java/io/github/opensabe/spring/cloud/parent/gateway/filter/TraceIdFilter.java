@@ -49,7 +49,6 @@ public class TraceIdFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        ;
         return Mono.deferContextual(contextView -> {
             //获取当前的 observation 是参考代码：ServerHttpObservationFilter 的 doFilterInternal 方法
             //在上面的代码是 context.put(ObservationThreadLocalAccessor.KEY, observation)

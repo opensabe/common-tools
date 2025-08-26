@@ -56,7 +56,7 @@ public enum RLockObservationDocumentation implements ObservationDocumentation {
     },
     ;
 
-    public enum LOCK_ACQUIRE_TAG implements KeyName {
+    public enum LockAcquireTag implements KeyName {
         LOCK_NAME {
             @Override
             public String asString() {
@@ -84,7 +84,7 @@ public enum RLockObservationDocumentation implements ObservationDocumentation {
         ;
     }
 
-    public enum LOCK_RELEASE_TAG implements KeyName {
+    public enum LockReleaseTag implements KeyName {
         LOCK_NAME {
             @Override
             public String asString() {

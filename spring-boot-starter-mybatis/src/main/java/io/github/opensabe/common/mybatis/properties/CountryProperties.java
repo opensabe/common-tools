@@ -30,7 +30,7 @@ import static io.github.opensabe.common.mybatis.properties.CountryProperties.PRE
 @Setter
 public class CountryProperties {
 
-    public final static String PREFIX = "country";
+    public static final String PREFIX = "country";
 
     /**
      * key: operId

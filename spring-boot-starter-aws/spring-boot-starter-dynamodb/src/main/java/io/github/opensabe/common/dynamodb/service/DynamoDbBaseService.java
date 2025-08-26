@@ -98,11 +98,11 @@ public abstract class DynamoDbBaseService<T> {
         } catch (IllegalArgumentException e) {
             //query查询必须包含partition key，所以只通过 sort key查询时得用scan
             TableSchema<T> schema = table.tableSchema();
-            String _key = schema.tableMetadata().indexSortKey(TableMetadata.primaryIndexName()).orElseThrow();
-            AttributeValue value = schema.attributeValue(item, _key);
+            String sortKey = schema.tableMetadata().indexSortKey(TableMetadata.primaryIndexName()).orElseThrow();
+            AttributeValue value = schema.attributeValue(item, sortKey);
             return table.scan(b -> b.filterExpression(Expression.builder()
                     .expression("#sortKey = :sortKey")
-                    .putExpressionName("#sortKey", _key)
+                    .putExpressionName("#sortKey", sortKey)
                     .putExpressionValue(":sortKey", value).build())).items().stream().toList();
         }
         return table.query(QueryConditional.keyEqualTo(key)).items().stream().toList();

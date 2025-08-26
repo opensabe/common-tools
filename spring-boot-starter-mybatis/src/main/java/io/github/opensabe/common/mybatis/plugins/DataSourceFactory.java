@@ -150,11 +150,11 @@ public class DataSourceFactory {
         dataSource.init();
         return dataSource;
 
-//		AtomikosDataSourceBean atomikosDataSourceBean = new AtomikosDataSourceBean();
-//		atomikosDataSourceBean.setXaDataSource(dataSource);
-//		atomikosDataSourceBean.setBeanName(properties.getName());
-//		atomikosDataSourceBean.afterPropertiesSet();
-//		return atomikosDataSourceBean;
+//        AtomikosDataSourceBean atomikosDataSourceBean = new AtomikosDataSourceBean();
+//        atomikosDataSourceBean.setXaDataSource(dataSource);
+//        atomikosDataSourceBean.setBeanName(properties.getName());
+//        atomikosDataSourceBean.afterPropertiesSet();
+//        return atomikosDataSourceBean;
     }
 
     public static DynamicRoutingDataSource createDynamicRoutingDataSource(String defaultClusterName,

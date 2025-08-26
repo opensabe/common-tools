@@ -35,10 +35,10 @@ public class ElasticSearchClientConvention implements ObservationConvention<Elas
     @Override
     public KeyValues getHighCardinalityKeyValues(ElasticSearchClientObservationContext context) {
         return KeyValues.of(
-                ElasticSearchClientObservationDocumentation.CLIENT_REQUEST_TAG.URI.withValue(context.getUri()),
-                ElasticSearchClientObservationDocumentation.CLIENT_REQUEST_TAG.PARAMS.withValue(context.getParams()),
-                ElasticSearchClientObservationDocumentation.CLIENT_REQUEST_TAG.RESPONSE.withValue(context.getResponse()),
-                ElasticSearchClientObservationDocumentation.CLIENT_REQUEST_TAG.THROWABLE.withValue(context.getThrowable() != null ? context.getThrowable().getMessage() : "")
+                ElasticSearchClientObservationDocumentation.ClientRequestTag.URI.withValue(context.getUri()),
+                ElasticSearchClientObservationDocumentation.ClientRequestTag.PARAMS.withValue(context.getParams()),
+                ElasticSearchClientObservationDocumentation.ClientRequestTag.RESPONSE.withValue(context.getResponse()),
+                ElasticSearchClientObservationDocumentation.ClientRequestTag.THROWABLE.withValue(context.getThrowable() != null ? context.getThrowable().getMessage() : "")
         );
     }
 }

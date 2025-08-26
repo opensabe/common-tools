@@ -127,7 +127,7 @@ public class CacheUtils {
         T data;
         long expire;
 
-        public CacheObject(T data, long second) {
+        CacheObject(T data, long second) {
             this.data = data;
             this.expire = TimeUnit.SECONDS.toNanos(second);
         }

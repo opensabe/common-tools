@@ -42,7 +42,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MultiRedisLettuceConnectionFactory
         implements InitializingBean, DisposableBean, RedisConnectionFactory, ReactiveRedisConnectionFactory {
-    private static final ThreadLocal<String> currentRedis = new ThreadLocal<>();
+    private static final ThreadLocal<String> CURRENT_REDIS = new ThreadLocal<>();
     private final Map<String, List<LettuceConnectionFactory>> connectionFactoryMap;
     private final Map<String, AtomicInteger> positionMap;
 
@@ -55,7 +55,7 @@ public class MultiRedisLettuceConnectionFactory
         if (!connectionFactoryMap.containsKey(currentRedis)) {
             throw new RedissonClientException("invalid currentRedis: " + currentRedis + ", it does not exists in configuration");
         }
-        MultiRedisLettuceConnectionFactory.currentRedis.set(currentRedis);
+        MultiRedisLettuceConnectionFactory.CURRENT_REDIS.set(currentRedis);
     }
 
     @Override
@@ -69,9 +69,9 @@ public class MultiRedisLettuceConnectionFactory
     }
 
     private LettuceConnectionFactory currentLettuceConnectionFactory() {
-        String currentRedis = MultiRedisLettuceConnectionFactory.currentRedis.get();
+        String currentRedis = MultiRedisLettuceConnectionFactory.CURRENT_REDIS.get();
         if (StringUtils.isNotBlank(currentRedis)) {
-            MultiRedisLettuceConnectionFactory.currentRedis.remove();
+            MultiRedisLettuceConnectionFactory.CURRENT_REDIS.remove();
         } else {
             currentRedis = MultiRedisProperties.DEFAULT;
         }

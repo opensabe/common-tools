@@ -45,7 +45,7 @@ public enum RRateLimiterObservationDocumentation implements ObservationDocumenta
     },
     ;
 
-    public enum SET_RATE_TAG implements KeyName {
+    public enum SetRateTag implements KeyName {
         RATE_LIMITER_NAME {
             @Override
             public String asString() {
@@ -96,7 +96,7 @@ public enum RRateLimiterObservationDocumentation implements ObservationDocumenta
         };
     }
 
-    public enum ACQUIRE_TAG implements KeyName {
+    public enum AcquireTag implements KeyName {
         RATE_LIMITER_NAME {
             @Override
             public String asString() {

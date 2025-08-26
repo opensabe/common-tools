@@ -34,7 +34,7 @@ public enum RExpirableObservationDocumentation implements ObservationDocumentati
     },
     ;
 
-    public enum EXPIRE_TAG implements KeyName {
+    public enum ExpireTag implements KeyName {
         RATE_LIMITER_NAME {
             @Override
             public String asString() {

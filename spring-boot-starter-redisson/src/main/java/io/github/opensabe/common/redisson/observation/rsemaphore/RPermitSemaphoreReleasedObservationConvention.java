@@ -30,17 +30,17 @@ public class RPermitSemaphoreReleasedObservationConvention implements Observatio
     @Override
     public KeyValues getLowCardinalityKeyValues(RPermitSemaphoreReleasedContext context) {
         return KeyValues.of(
-                RPermitSemaphoreObservationDocumentation.SEMAPHORE_RELEASE_TAG.SEMAPHORE_RELEASED_SUCCESSFULLY.withValue(String.valueOf(context.isPermitReleasedSuccessfully()))
+                RPermitSemaphoreObservationDocumentation.SemaphoreReleaseTag.SEMAPHORE_RELEASED_SUCCESSFULLY.withValue(String.valueOf(context.isPermitReleasedSuccessfully()))
         );
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(RPermitSemaphoreReleasedContext context) {
         return KeyValues.of(
-                RPermitSemaphoreObservationDocumentation.SEMAPHORE_RELEASE_TAG.SEMAPHORE_RELEASED_SUCCESSFULLY.withValue(String.valueOf(context.isPermitReleasedSuccessfully())),
-                RPermitSemaphoreObservationDocumentation.SEMAPHORE_RELEASE_TAG.SEMAPHORE_NAME.withValue(context.getSemaphoreName()),
-                RPermitSemaphoreObservationDocumentation.SEMAPHORE_RELEASE_TAG.THREAD_NAME.withValue(context.getThreadName()),
-                RPermitSemaphoreObservationDocumentation.SEMAPHORE_RELEASE_TAG.PERMIT_ID.withValue(String.valueOf(context.getPermitId()))
+                RPermitSemaphoreObservationDocumentation.SemaphoreReleaseTag.SEMAPHORE_RELEASED_SUCCESSFULLY.withValue(String.valueOf(context.isPermitReleasedSuccessfully())),
+                RPermitSemaphoreObservationDocumentation.SemaphoreReleaseTag.SEMAPHORE_NAME.withValue(context.getSemaphoreName()),
+                RPermitSemaphoreObservationDocumentation.SemaphoreReleaseTag.THREAD_NAME.withValue(context.getThreadName()),
+                RPermitSemaphoreObservationDocumentation.SemaphoreReleaseTag.PERMIT_ID.withValue(String.valueOf(context.getPermitId()))
         );
     }
 }

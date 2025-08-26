@@ -54,9 +54,9 @@ public class DateTimeModelConverter implements ModelConverter {
             schema.setDefault(System.currentTimeMillis());
             Optional.ofNullable(AnnotationsUtils.mergeSchemaAnnotations(type.getCtxAnnotations(), javaType))
                     .map(resolvedSchemaOrArrayAnnotation ->
-                            resolvedSchemaOrArrayAnnotation instanceof io.swagger.v3.oas.annotations.media.ArraySchema arr ?
-                                    arr.schema() :
-                                    (io.swagger.v3.oas.annotations.media.Schema) resolvedSchemaOrArrayAnnotation
+                            resolvedSchemaOrArrayAnnotation instanceof io.swagger.v3.oas.annotations.media.ArraySchema arr
+                                    ? arr.schema()
+                                    : (io.swagger.v3.oas.annotations.media.Schema) resolvedSchemaOrArrayAnnotation
                     ).map(io.swagger.v3.oas.annotations.media.Schema::description)
                     .ifPresent(schema::setDescription);
             return schema;

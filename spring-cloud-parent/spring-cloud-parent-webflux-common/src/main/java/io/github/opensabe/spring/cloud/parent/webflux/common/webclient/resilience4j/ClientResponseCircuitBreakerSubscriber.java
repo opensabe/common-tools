@@ -45,14 +45,14 @@ import static java.util.Objects.requireNonNull;
 @Log4j2
 public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<ClientResponse> {
     private static final byte[] EMPTY = new byte[0];
-    private static final Class<?> aClass;
-    private static final Method request;
+    private static final Class<?> A_CLASS;
+    private static final Method REQUEST;
 
     static {
         try {
-            aClass = Class.forName("org.springframework.web.reactive.function.client.DefaultClientResponse");
-            request = ReflectionUtils.findMethod(aClass, "request");
-            request.setAccessible(true);
+            A_CLASS = Class.forName("org.springframework.web.reactive.function.client.DefaultClientResponse");
+            REQUEST = ReflectionUtils.findMethod(A_CLASS, "request");
+            REQUEST.setAccessible(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -87,7 +87,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
                 int rawStatusCode = clientResponse.statusCode().value();
                 HttpStatus httpStatus = HttpStatus.resolve(rawStatusCode);
                 try {
-                    HttpRequest httpRequest = (HttpRequest) request.invoke(clientResponse);
+                    HttpRequest httpRequest = (HttpRequest) REQUEST.invoke(clientResponse);
                     //判断方法是否为 GET，以及是否在可重试路径配置中，从而得出是否可以重试
                     if (httpRequest.getMethod() != HttpMethod.GET && !webClientProperties.retryablePathsMatch(httpRequest.getURI().getPath())) {
                         if (Objects.equals(httpStatus, HttpStatus.SERVICE_UNAVAILABLE)) {

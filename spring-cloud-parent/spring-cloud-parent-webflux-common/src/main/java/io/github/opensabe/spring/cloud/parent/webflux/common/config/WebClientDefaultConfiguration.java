@@ -198,6 +198,20 @@ public class WebClientDefaultConfiguration {
 
         Retry finalRetry = retry;
         String finalServiceName = serviceName;
+        WebClient.Builder builder = getBuilder(lbFunction, circuitBreakerRegistry, unifiedObservationFactory, httpClient, finalRetry, finalServiceName, webClientProperties, baseUrl);
+        //使用 observationWebClientCustomizer 定制化 builder，这样可以在链路自动添加 Observation 并且可以从 Context 获取
+        observationWebClientCustomizer.customize(builder);
+        return builder.build();
+    }
+
+    private static WebClient.Builder getBuilder(
+            CustomizedReactorLoadBalancerExchangeFilterFunction lbFunction,
+            CircuitBreakerRegistry circuitBreakerRegistry,
+            UnifiedObservationFactory unifiedObservationFactory,
+            HttpClient httpClient, Retry finalRetry,
+            String finalServiceName,
+            WebClientConfigurationProperties.WebClientProperties webClientProperties, String baseUrl
+    ) {
         WebClient.Builder builder = WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
@@ -260,8 +274,6 @@ public class WebClientDefaultConfiguration {
                                 return exchangeFunction.exchange(clientRequest).transform(ClientResponseCircuitBreakerOperator.of(circuitBreaker, serviceInstance, webClientProperties));
                             });
                 }).baseUrl(baseUrl);
-        //使用 observationWebClientCustomizer 定制化 builder，这样可以在链路自动添加 Observation 并且可以从 Context 获取
-        observationWebClientCustomizer.customize(builder);
-        return builder.build();
+        return builder;
     }
 }

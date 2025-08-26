@@ -71,7 +71,7 @@ public class AwsS3Configuration {
         }
         //proxy 配置
 //        if(StringUtils.isNotBlank(s3Properties.getEndpoint())) {
-//        	builder.httpClient(ApacheHttpClient.builder()
+//            builder.httpClient(ApacheHttpClient.builder()
 //                    .proxyConfiguration(ProxyConfiguration.builder()
 //                            .endpoint(URI.create(s3Properties.getEndpoint()))
 //                            .build())

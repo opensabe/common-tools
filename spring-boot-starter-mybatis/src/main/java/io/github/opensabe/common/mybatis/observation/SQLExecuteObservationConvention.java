@@ -26,11 +26,11 @@ import io.micrometer.observation.ObservationConvention;
  */
 public class SQLExecuteObservationConvention implements ObservationConvention<SQLExecuteContext> {
 
-    public static SQLExecuteObservationConvention DEFAULT = new SQLExecuteObservationConvention();
+    public static final SQLExecuteObservationConvention DEFAULT = new SQLExecuteObservationConvention();
 
-    private final String TAG_METHOD = "method";
-    private final String TAG_SUCCESS = "success";
-    private final String TAG_TRANSACTION_ID = "transactionId";
+    private final String tagMethod = "method";
+    private final String tagSuccess = "success";
+    private final String tagTransactionId = "transactionId";
 
     @Override
     public boolean supportsContext(Observation.Context context) {
@@ -39,13 +39,13 @@ public class SQLExecuteObservationConvention implements ObservationConvention<SQ
 
     @Override
     public KeyValues getLowCardinalityKeyValues(SQLExecuteContext context) {
-        return KeyValues.of(TAG_METHOD, context.getMethod());
+        return KeyValues.of(tagMethod, context.getMethod());
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(SQLExecuteContext context) {
-        return KeyValues.of(TAG_METHOD, context.getMethod())
-                .and(TAG_SUCCESS, context.isSuccess() + "")
-                .and(TAG_TRANSACTION_ID, context.getTransactionName());
+        return KeyValues.of(tagMethod, context.getMethod())
+                .and(tagSuccess, context.isSuccess() + "")
+                .and(tagTransactionId, context.getTransactionName());
     }
 }

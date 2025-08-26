@@ -42,8 +42,8 @@ public class RedissonPubSubStoreMessageListener<T> implements MessageListener<Pu
         try {
             if (msg instanceof DispatchMessage) {
                 boolean match =
-                        StringUtils.isBlank(socketIoServerProperties.getHealthCheckPacketName()) ||
-                                StringUtils.equalsIgnoreCase(((DispatchMessage) msg).getPacket().getName(), socketIoServerProperties.getHealthCheckPacketName());
+                        StringUtils.isBlank(socketIoServerProperties.getHealthCheckPacketName())
+                                || StringUtils.equalsIgnoreCase(((DispatchMessage) msg).getPacket().getName(), socketIoServerProperties.getHealthCheckPacketName());
                 if (match) {
                     SocketIoHealthCheck.lastDispatchMessage = System.currentTimeMillis();
                 }

@@ -20,9 +20,9 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
 public class SocketIOExecuteObservationConvention implements ObservationConvention<SocketIOExecuteContext> {
-    public static SocketIOExecuteObservationConvention DEFAULT = new SocketIOExecuteObservationConvention();
+    public static SocketIOExecuteObservationConvention defaultConvention = new SocketIOExecuteObservationConvention();
 
-    private final String TAG_SESSION_ID = "sessionId";
+    private final String tagSessionId = "sessionId";
 
     @Override
     public boolean supportsContext(Observation.Context context) {
@@ -36,7 +36,7 @@ public class SocketIOExecuteObservationConvention implements ObservationConventi
 
     @Override
     public KeyValues getHighCardinalityKeyValues(SocketIOExecuteContext context) {
-        return KeyValues.of(TAG_SESSION_ID, context.getSessionId());
+        return KeyValues.of(tagSessionId, context.getSessionId());
 
     }
 }

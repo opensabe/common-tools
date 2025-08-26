@@ -36,7 +36,7 @@ public enum LocationDocumentation implements ObservationDocumentation {
         }
     };
 
-    public enum LOCATION_TAG implements KeyName {
+    public enum LocationTag implements KeyName {
         METHOD_NAME {
             @Override
             public String asString() {

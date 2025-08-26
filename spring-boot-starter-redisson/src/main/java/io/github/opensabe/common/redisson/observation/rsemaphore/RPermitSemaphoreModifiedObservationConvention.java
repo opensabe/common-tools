@@ -30,17 +30,17 @@ public class RPermitSemaphoreModifiedObservationConvention implements Observatio
     @Override
     public KeyValues getLowCardinalityKeyValues(RPermitSemaphoreModifiedContext context) {
         return KeyValues.of(
-                RPermitSemaphoreObservationDocumentation.PERMIT_MODIFIED_TAG.MODIFIED_SUCCESSFULLY.withValue(String.valueOf(context.isModifiedSuccessfully()))
+                RPermitSemaphoreObservationDocumentation.PermitModifiedTag.MODIFIED_SUCCESSFULLY.withValue(String.valueOf(context.isModifiedSuccessfully()))
         );
     }
 
     @Override
     public KeyValues getHighCardinalityKeyValues(RPermitSemaphoreModifiedContext context) {
         return KeyValues.of(
-                RPermitSemaphoreObservationDocumentation.PERMIT_MODIFIED_TAG.MODIFIED_SUCCESSFULLY.withValue(String.valueOf(context.isModifiedSuccessfully())),
-                RPermitSemaphoreObservationDocumentation.PERMIT_MODIFIED_TAG.SEMAPHORE_NAME.withValue(context.getSemaphoreName()),
-                RPermitSemaphoreObservationDocumentation.PERMIT_MODIFIED_TAG.THREAD_NAME.withValue(context.getThreadName()),
-                RPermitSemaphoreObservationDocumentation.PERMIT_MODIFIED_TAG.MODIFIED.withValue(context.getModified())
+                RPermitSemaphoreObservationDocumentation.PermitModifiedTag.MODIFIED_SUCCESSFULLY.withValue(String.valueOf(context.isModifiedSuccessfully())),
+                RPermitSemaphoreObservationDocumentation.PermitModifiedTag.SEMAPHORE_NAME.withValue(context.getSemaphoreName()),
+                RPermitSemaphoreObservationDocumentation.PermitModifiedTag.THREAD_NAME.withValue(context.getThreadName()),
+                RPermitSemaphoreObservationDocumentation.PermitModifiedTag.MODIFIED.withValue(context.getModified())
         );
     }
 }

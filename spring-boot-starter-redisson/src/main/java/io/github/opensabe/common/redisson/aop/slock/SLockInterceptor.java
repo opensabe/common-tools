@@ -128,7 +128,7 @@ public class SLockInterceptor implements MethodInterceptor {
     static class MLock extends RedissonMultiLock {
         private final List<RLock> locks;
 
-        public MLock(RLock... locks) {
+        MLock(RLock... locks) {
             super(locks);
             this.locks = Arrays.asList(locks);
         }
@@ -163,7 +163,7 @@ public class SLockInterceptor implements MethodInterceptor {
 
             int failedLocksLimit = failedLocksLimit();
             List<RLock> acquiredLocks = new ArrayList<>(locks.size());
-            for (ListIterator<RLock> iterator = locks.listIterator(); iterator.hasNext(); ) {
+            for (ListIterator<RLock> iterator = locks.listIterator(); iterator.hasNext();) {
                 RLock lock = iterator.next();
                 boolean lockAcquired;
                 try {

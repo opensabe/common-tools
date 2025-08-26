@@ -108,7 +108,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
 
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "getObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -142,7 +142,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "getObject");
         s3OperationContext.setFileSize(bytes.length);
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -167,7 +167,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
     public InputStream download(String fileName) {
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "getObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -201,7 +201,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
 
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "headObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -229,7 +229,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
     public void copy(String sourceFileName, String destinationFileName) {
         S3OperationContext s3OperationContext = new S3OperationContext(sourceFileName + "_" + destinationFileName, "copyObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {

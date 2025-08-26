@@ -22,7 +22,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 
 public class NodeManagerInitializeListener implements ApplicationListener<ApplicationStartedEvent>, Ordered {
-    public final static int ORDER = Ordered.HIGHEST_PRECEDENCE;
+    public static final int ORDER = Ordered.HIGHEST_PRECEDENCE;
 
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 

@@ -47,7 +47,7 @@ public class ConnectionObservationFilter extends FilterAdapter {
     /**
      * 缓存等待锁的线程数量
      */
-    private Cache<String, Integer> WAIT_THREAD_COUNT_CACHE = Caffeine.newBuilder()
+    private Cache<String, Integer> waitThreadCountCache = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofSeconds(1))
             .build();
 
@@ -96,7 +96,7 @@ public class ConnectionObservationFilter extends FilterAdapter {
             DruidPooledConnection result = super.dataSource_getConnection(chain, dataSource, maxWaitMillis);
             context.setActiveCount(dataSource.getDataSourceStat().getConnections().size());
             context.setConnectedTime(result.getConnectedTimeMillis());
-            context.setWaitThread(WAIT_THREAD_COUNT_CACHE.get("c", key -> dataSource.getLockQueueLength()));
+            context.setWaitThread(waitThreadCountCache.get("c", key -> dataSource.getLockQueueLength()));
             return result;
         } catch (Throwable e) {
             context.setSuccess(false);
