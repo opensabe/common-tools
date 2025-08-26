@@ -222,9 +222,9 @@ public abstract class BatchBufferedQueue<E extends BufferedElement> {
             int finalI = i;
             executorServices[i].submit(() -> {
                 Thread thread = Thread.currentThread();
-                while (!thread.isInterrupted() &&
+                while (!thread.isInterrupted()
                         //如果在优雅关闭，则结束
-                        !threadPoolFactoryGracefulShutDownHandler.isShuttingDown()) {
+                        && !threadPoolFactoryGracefulShutDownHandler.isShuttingDown()) {
                     try {
                         List<E> batch = Lists.newArrayList();
                         long start = System.currentTimeMillis();

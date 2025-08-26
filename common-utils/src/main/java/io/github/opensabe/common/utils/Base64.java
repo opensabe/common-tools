@@ -18,7 +18,6 @@ package io.github.opensabe.common.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -232,7 +231,7 @@ public class Base64 {
     private static boolean isValidBase64Byte(byte b) {
         if (b == '=') {
             return true;
-        } else if ((b < 0) || (b >= 128)) {
+        } else if (b < 0 || b >= 128) {
             return false;
         } else if (DECODING_TABLE[b] == -1) {
             return false;

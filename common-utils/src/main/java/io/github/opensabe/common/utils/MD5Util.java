@@ -26,7 +26,7 @@ public class MD5Util {
     // 随机密码的assic码做salt
     private static final byte[] SALT = {0x42, 0x49, 0x70, 0x55, 0x78, 0x4D, 0x4E, 0x6F, 0x6F, 0x54, 0x78, 0x52};
 
-    public final static String md5(String s) {
+    public static String md5(String s) {
         try {
             // 获得MD5摘要算法的 MessageDigest 对象
             MessageDigest mdInst = MessageDigest.getInstance("MD5");
@@ -51,7 +51,7 @@ public class MD5Util {
         }
     }
 
-    public final static String md5WithoutSalt(String s) {
+    public static String md5WithoutSalt(String s) {
         try {
             // 获得MD5摘要算法的 MessageDigest 对象
             MessageDigest mdInst = MessageDigest.getInstance("MD5");
