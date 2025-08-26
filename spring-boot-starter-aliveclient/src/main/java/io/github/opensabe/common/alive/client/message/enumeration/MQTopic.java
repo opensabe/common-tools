@@ -21,7 +21,7 @@ public enum MQTopic {
 
     private String topic;
 
-    private MQTopic(final String topic) {
+    MQTopic(final String topic) {
         this.topic = topic;
     }
 

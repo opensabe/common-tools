@@ -63,7 +63,7 @@ import io.netty.handler.timeout.IdleStateHandler;
  */
 public class MultiConnClientImpl extends AbstractClient implements AliveServerListListener {
 
-    private static final int DEFAULT_CONNECTION_NUM = 1;//每个节点默认连接数
+    private static final int DEFAULT_CONNECTION_NUM = 1; // 每个节点默认连接数
     private Logger logger = LoggerFactory.getLogger(MultiConnClientImpl.class);
     private Bootstrap bootstrap;
     private AliveServerList aliveServerList;

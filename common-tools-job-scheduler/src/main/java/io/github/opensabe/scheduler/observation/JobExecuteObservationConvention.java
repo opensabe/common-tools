@@ -29,7 +29,7 @@ public class JobExecuteObservationConvention implements ObservationConvention<Jo
 
     @Override
     public KeyValues getHighCardinalityKeyValues(JobExecuteContext context) {
-        return KeyValues.of(JobExecuteObservationDocumentation.JOB_EXECUTE_TAG.JOB_EXECUTE_STATUS.withValue(context.getJobName() + "-" + context.getStatus().name()));
+        return KeyValues.of(JobExecuteObservationDocumentation.JobExecuteTag.JOB_EXECUTE_STATUS.withValue(context.getJobName() + "-" + context.getStatus().name()));
     }
 
 }

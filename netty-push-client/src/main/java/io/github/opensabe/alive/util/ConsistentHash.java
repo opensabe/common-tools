@@ -35,7 +35,7 @@ public class ConsistentHash<T> {
     /**
      * 圈大小
      */
-    private static final int circleSize = 188833;
+    private static final int CIRCLE_SIZE = 188833;
     /**
      * 虚节点数量
      */
@@ -45,7 +45,7 @@ public class ConsistentHash<T> {
      */
     private volatile TreeMap<Integer, List<T>> circle = new TreeMap<>();
 
-    //	private static final int circleSize = 18;
+    //    private static final int circleSize = 18;
 
     /**
      * @param numberOfReplicas 虚节点数
@@ -208,7 +208,7 @@ public class ConsistentHash<T> {
             md = MessageDigest.getInstance("MD5");
             byte[] bytes = md.digest(o.toString().getBytes());
             int hashCode = hashCode(bytes);
-            return hashCode % circleSize;
+            return hashCode % CIRCLE_SIZE;
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

@@ -29,7 +29,7 @@ public interface ResponseFuture {
      * @throws InterruptedException          打断时抛出
      * @throws AliveClientExecutionException 执行过程中出现异常抛出
      */
-    public Response get() throws InterruptedException, AliveClientExecutionException;
+    Response get() throws InterruptedException, AliveClientExecutionException;
 
     /**
      * 获取响应结果，可以指定超时时间
@@ -41,7 +41,7 @@ public interface ResponseFuture {
      * @throws AliveClientExecutionException 执行过程中出现异常抛出
      * @throws AliveClientTimeoutException   执行超时抛出
      */
-    public Response get(long timeout, TimeUnit unit)
+    Response get(long timeout, TimeUnit unit)
             throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException;
 
     /**
@@ -50,7 +50,7 @@ public interface ResponseFuture {
      * @return Response
      * @throws AliveClientExecutionException 执行过程中出现异常抛出
      */
-    public Response getUninterruptibly() throws AliveClientExecutionException;
+    Response getUninterruptibly() throws AliveClientExecutionException;
 
     /**
      * 获取响应结果，可以指定超时时间，忽略打断异常，直到结果返回
@@ -58,9 +58,10 @@ public interface ResponseFuture {
      * @param timeout 超时时间
      * @param unit    时间单位
      * @return Response
+     * @throws InterruptedException          打断时抛出
      * @throws AliveClientExecutionException 执行过程中出现异常抛出
      * @throws AliveClientTimeoutException   执行超时抛出
      */
-    public Response getUninterruptibly(long timeout, TimeUnit unit) throws AliveClientExecutionException, AliveClientTimeoutException;
+    Response getUninterruptibly(long timeout, TimeUnit unit) throws AliveClientExecutionException, AliveClientTimeoutException;
 
 }

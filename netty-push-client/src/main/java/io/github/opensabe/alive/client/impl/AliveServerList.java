@@ -34,11 +34,11 @@ import org.slf4j.LoggerFactory;
 
 public class AliveServerList implements Watcher {
 
-    private static InetSocketAddress[] EMPTY_SERVER_LIST = new InetSocketAddress[]{};
+    private static InetSocketAddress[] emptyServerList = new InetSocketAddress[]{};
 
     private static Logger logger = LoggerFactory.getLogger(AliveServerList.class);
 
-    private volatile InetSocketAddress[] serverList = EMPTY_SERVER_LIST;
+    private volatile InetSocketAddress[] serverList = emptyServerList;
 
     private AliveServerListListener listener;
 

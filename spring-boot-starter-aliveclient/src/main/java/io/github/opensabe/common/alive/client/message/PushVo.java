@@ -22,7 +22,7 @@ import io.micrometer.core.instrument.util.StringUtils;
 
 public class PushVo {
 
-    private static final ThreadLocal<AtomicInteger> requestIdThreadLocal = ThreadLocal.withInitial(() -> new AtomicInteger());
+    private static final ThreadLocal<AtomicInteger> REQUEST_ID_THREAD_LOCAL = ThreadLocal.withInitial(() -> new AtomicInteger());
 
     public final String topic;
     public final String deviceId;
@@ -59,10 +59,10 @@ public class PushVo {
     }
 
     public static int generateRequestId() {
-        if (requestIdThreadLocal.get().intValue() < 0) {
-            requestIdThreadLocal.remove();
+        if (REQUEST_ID_THREAD_LOCAL.get().intValue() < 0) {
+            REQUEST_ID_THREAD_LOCAL.remove();
         }
-        return requestIdThreadLocal.get().incrementAndGet();
+        return REQUEST_ID_THREAD_LOCAL.get().incrementAndGet();
     }
 
     public int getRequestId() {

@@ -25,13 +25,13 @@ public class ClientConstants {
     /**
      * zk调用失败重试次数，默认3
      */
-    public static int ZK_RETRY_MAX = 3;
-    public static int ZK_TIMEOUT = 1000;
-    public static String ZK_PATH = "/nettypush_clientServer/host";
-    public static long DEFAULT_TIMEOUT = 5000L;
+    public static final int ZK_RETRY_MAX = 3;
+    public static final int ZK_TIMEOUT = 1000;
+    public static final String ZK_PATH = "/nettypush_clientServer/host";
+    public static final long DEFAULT_TIMEOUT = 5000L;
     /**
      * zk调用失败重试等待时间，默认100ms
      */
-    public static int ZK_RETRY_INTERVAL = 500;
+    public static final int ZK_RETRY_INTERVAL = 500;
 
 }
