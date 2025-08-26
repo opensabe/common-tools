@@ -27,7 +27,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class SingleElasticSearchIntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
-    public static ElasticsearchContainer ES = new ElasticsearchContainer("elasticsearch:7.17.8")
+    public static final ElasticsearchContainer ES = new ElasticsearchContainer("elasticsearch:7.17.8")
             .withEnv("discovery.type", "single-node")
             .withEnv("xpack.security.enabled", "false")
             .withEnv("xpack.security.http.ssl.enabled", "false");

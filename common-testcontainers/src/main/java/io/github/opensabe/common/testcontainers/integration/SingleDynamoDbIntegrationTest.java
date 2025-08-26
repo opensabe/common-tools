@@ -27,23 +27,23 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class SingleDynamoDbIntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
-    public static CustomizedDynamoDBContainer DYNAMO_DB = new CustomizedDynamoDBContainer();
+    public static CustomizedDynamoDBContainer dynamoDb = new CustomizedDynamoDBContainer();
 
     public static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("aws_access_key_id", () -> "fake");
         registry.add("aws_secret_access_key", () -> "fake");
         registry.add("aws_env", () -> "test");
-        registry.add("dynamolLocalUrl", () -> "http://localhost:" + DYNAMO_DB.getDynamoDBPort());
+        registry.add("dynamolLocalUrl", () -> "http://localhost:" + dynamoDb.getDynamoDBPort());
         registry.add("defaultOperId", () -> 0);
     }
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         //由于单元测试并发执行，这个只能启动一次，所以加锁
-        if (!DYNAMO_DB.isRunning()) {
+        if (!dynamoDb.isRunning()) {
             synchronized (SingleDynamoDbIntegrationTest.class) {
-                if (!DYNAMO_DB.isRunning()) {
-                    DYNAMO_DB.start();
+                if (!dynamoDb.isRunning()) {
+                    dynamoDb.start();
                 }
             }
         }
@@ -51,6 +51,6 @@ public class SingleDynamoDbIntegrationTest implements BeforeAllCallback, Extensi
 
     @Override
     public void close() throws Throwable {
-        DYNAMO_DB.stop();
+        dynamoDb.stop();
     }
 }

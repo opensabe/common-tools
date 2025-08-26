@@ -30,7 +30,7 @@ public class SingleHttpBinMicroServiceIntegrationTest implements BeforeAllCallba
     public static final String HTTP_BIN_SERVICE_NAME = "httpbin";
     public static final String HTTP_BIN_SERVICE_ZONE = "test";
     public static final String HTTP_BIN_SERVICE_INSTANCE_ID = "test-httpbin-1";
-    public static CustomizedHttpBinContainer HTTP_BIN = new CustomizedHttpBinContainer();
+    public static final CustomizedHttpBinContainer HTTP_BIN = new CustomizedHttpBinContainer();
 
     public static void setProperties(DynamicPropertyRegistry registry) {
         registry.add(

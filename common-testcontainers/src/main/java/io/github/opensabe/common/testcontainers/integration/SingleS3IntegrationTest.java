@@ -27,7 +27,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class SingleS3IntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
-    public static CustomizedS3Container AWS_S3 = new CustomizedS3Container();
+    public static final CustomizedS3Container AWS_S3 = new CustomizedS3Container();
 
     public static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("aws.s3.enabled", () -> true);

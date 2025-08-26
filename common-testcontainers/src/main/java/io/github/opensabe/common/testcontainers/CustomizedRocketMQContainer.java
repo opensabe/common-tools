@@ -28,7 +28,7 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
     public static final int NAMESRV_PORT = 9876;
     public static final int BROKER_PORT = 10911;
     // READ and WRITE
-    private static final int defaultBrokerPermission = 6;
+    private static final int DEFAULT_BROKER_PERMISSION = 6;
 
     public CustomizedRocketMQContainer() {
         super("dyrnq/rocketmq:5.3.2");
@@ -51,7 +51,7 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
         updateBrokerConfigCommands.add(updateBrokerConfig("brokerIP1", getHost()));
         // Make the changes take effect immediately.
         updateBrokerConfigCommands.add(updateBrokerConfig("listenPort", getMappedPort(BROKER_PORT)));
-        updateBrokerConfigCommands.add(updateBrokerConfig("brokerPermission", defaultBrokerPermission));
+        updateBrokerConfigCommands.add(updateBrokerConfig("brokerPermission", DEFAULT_BROKER_PERMISSION));
         updateBrokerConfigCommands.add(updateBrokerConfig("namesrvAddr", "localhost:" + NAMESRV_PORT));
 
         final String command = String.join(" && ", updateBrokerConfigCommands);
