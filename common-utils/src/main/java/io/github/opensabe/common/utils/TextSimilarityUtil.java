@@ -54,10 +54,10 @@ public class TextSimilarityUtil {
             for (int j = 1; j < targetLength + 1; j++) {
                 int cost = source.charAt(i - 1) == target.charAt(j - 1) ? 0 : 1;
                 dist[i][j] = Math.min(Math.min(dist[i - 1][j] + 1, dist[i][j - 1] + 1), dist[i - 1][j - 1] + cost);
-                if (i > 1 &&
-                        j > 1 &&
-                        source.charAt(i - 1) == target.charAt(j - 2) &&
-                        source.charAt(i - 2) == target.charAt(j - 1)) {
+                if (i > 1
+                        && j > 1
+                        && source.charAt(i - 1) == target.charAt(j - 2)
+                        && source.charAt(i - 2) == target.charAt(j - 1)) {
                     dist[i][j] = Math.min(dist[i][j], dist[i - 2][j - 2] + cost);
                 }
             }
@@ -94,10 +94,7 @@ public class TextSimilarityUtil {
             //Double ratio = new JaroWinklerSimilarity().apply(str1, str2);
 
             log.debug("the similarity of between {} and {} is {}", str1, str2, ratio);
-            if (ratio < strSimilarity)
-                return false;
-            else
-                return true;
+            return ratio >= strSimilarity;
         }
     }
 }

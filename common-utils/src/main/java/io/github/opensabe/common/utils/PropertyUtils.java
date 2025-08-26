@@ -30,34 +30,34 @@ import org.apache.commons.logging.LogFactory;
  * 榛樿鍔犺浇config.properties
  */
 public class PropertyUtils {
-    private static final String config = "config.properties";
+    private static final String CONFIG = "config.properties";
     private static Log log = LogFactory.getLog(PropertyUtils.class);
-    private static Map<String, String> config_map = new HashMap<String, String>();
+    private static Map<String, String> configMap = new HashMap<String, String>();
 
     static {
-        load(config);
+        load(CONFIG);
     }
 
     public static String getProperty(String key) {
         if (StringUtils.isBlank(key)) {
             return null;
         }
-        return config_map.get(key);
+        return configMap.get(key);
     }
 
     public static String getProperty(String key, String defaultValue) {
         if (StringUtils.isEmpty(key)) {
             return (StringUtils.isEmpty(defaultValue) ? null : defaultValue);
         }
-        return (StringUtils.isEmpty(config_map.get(key)) ? defaultValue : config_map.get(key));
+        return (StringUtils.isEmpty(configMap.get(key)) ? defaultValue : configMap.get(key));
     }
 
     public static int getPropertyIntValue(String key, int defaultValue) {
         if (StringUtils.isEmpty(key)) {
             return defaultValue;
         }
-        return (StringUtils.isEmpty(config_map.get(key)) || !isInt(config_map.get(key))) ? defaultValue : Integer
-                .parseInt(config_map.get(key));
+        return (StringUtils.isEmpty(configMap.get(key)) || !isInt(configMap.get(key))) ? defaultValue : Integer
+                .parseInt(configMap.get(key));
     }
 
     private static boolean isInt(String n) {
@@ -77,9 +77,9 @@ public class PropertyUtils {
             if (is != null) {
                 p.load(is);
             }
-            if (config.equals(name)) {
+            if (CONFIG.equals(name)) {
                 for (Map.Entry e : p.entrySet()) {
-                    config_map.put((String) e.getKey(), (String) e.getValue());
+                    configMap.put((String) e.getKey(), (String) e.getValue());
                 }
             }
 

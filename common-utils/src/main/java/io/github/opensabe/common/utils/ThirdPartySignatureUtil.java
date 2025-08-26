@@ -25,7 +25,7 @@ import io.github.opensabe.common.utils.json.JsonUtil;
 
 public class ThirdPartySignatureUtil {
 
-    private static final char split = '|';
+    private static final char SPLIT = '|';
 
     private static String generateRequestBody(Object requestBody) {
         if (Objects.isNull(requestBody)) {
@@ -47,18 +47,18 @@ public class ThirdPartySignatureUtil {
     public static String generateSignature(String hashKey, String method, Object requestBody) {
         String result = generateRequestBody(requestBody);
         if (StringUtils.isEmpty(result)) {
-            result = hashKey + split + method + split;
+            result = hashKey + SPLIT + method + SPLIT;
         } else {
-            result = hashKey + split + method + split + result;
+            result = hashKey + SPLIT + method + SPLIT + result;
         }
         return MD5Util.md5WithoutSalt(result);
     }
 
     public static String generateThirdPartySignature(String hashKey, String method, String requestBody) {
         if (StringUtils.isEmpty(requestBody)) {
-            requestBody = hashKey + split + method + split;
+            requestBody = hashKey + SPLIT + method + SPLIT;
         } else {
-            requestBody = hashKey + split + method + split + requestBody;
+            requestBody = hashKey + SPLIT + method + SPLIT + requestBody;
         }
         return MD5Util.md5WithoutSalt(requestBody);
     }

@@ -27,7 +27,7 @@ import java.util.Random;
  *
  */
 public class RandomUtil {
-    public final static int maxBallNums = 100;
+    public static final int MAX_BALL_NUMS = 100;
 
     private RandomUtil() {
     }
@@ -64,7 +64,7 @@ public class RandomUtil {
      */
     public static String generateRandomCodeString(int maxValue, boolean autoCompleteZero, int length,
                                                   boolean duplicateEnable) {
-        if (length > maxBallNums || length < 0)
+        if (length > MAX_BALL_NUMS || length < 0)
             return "";
         List<String> rBallList = new ArrayList<String>();
         String selectedBall;
@@ -89,7 +89,7 @@ public class RandomUtil {
      */
     public static String generateRandomCodeString(int maxValue, boolean autoCompleteZero, int length,
                                                   boolean duplicateEnable, boolean containsZero) {
-        if (length > maxBallNums || length < 0)
+        if (length > MAX_BALL_NUMS || length < 0)
             return "";
         List<String> rBallList = new ArrayList<String>();
         String selectedBall;
@@ -124,7 +124,7 @@ public class RandomUtil {
      */
     public static String generateRandomCodeStrOfSSC(int maxValue, boolean autoCompleteZero, int length,
                                                     boolean duplicateEnable) {
-        if (length > maxBallNums || length < 0)
+        if (length > MAX_BALL_NUMS || length < 0)
             return "";
         List<String> rBallList = new ArrayList<String>();
         String selectedBall;
@@ -149,11 +149,11 @@ public class RandomUtil {
 
     public static String generateRandomCodeStrOfDXDS(int maxValue, boolean autoCompleteZero, int length,
                                                      boolean duplicateEnable) {
-        if (length > maxBallNums || length < 0)
+        if (length > MAX_BALL_NUMS || length < 0)
             return "";
         List<String> rBallList = new ArrayList<String>();
         String selectedBall;
-        String[] DXDS =
+        String[] dxds =
                 {"2", "1", "5", "4"};
         for (int i = 0; i < length; i++) {
             selectedBall = generateRandomCode(maxValue, autoCompleteZero);
@@ -164,7 +164,7 @@ public class RandomUtil {
             if (!duplicateEnable && rBallList.contains(selectedBall)) {
                 i--;
             } else {
-                rBallList.add(DXDS[Integer.parseInt(selectedBall) - 1]);
+                rBallList.add(dxds[Integer.parseInt(selectedBall) - 1]);
             }
         }
         Collections.sort(rBallList);
@@ -208,16 +208,5 @@ public class RandomUtil {
         }
         int rand = random.nextInt(100);
         return rand < probability;
-    }
-
-    public static void main(String[] args) {
-		/*int x = getRandomBetween(2, 1);
-		System.out.println(x);*/
-        Random random = new Random();
-        for (int i = 0; i < 10; i++) {
-            boolean result = hitByProbability(20, random);
-            System.out.println(result);
-        }
-
     }
 }

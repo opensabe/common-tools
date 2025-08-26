@@ -104,9 +104,9 @@ public abstract class ByteBuddyBeanCopier<S, T> implements BeanCopier<S, T> {
         }
         // Ignore generic types in assignable check if either ResolvableType has unresolvable generics.
         return
-                (sourceResolvableType.hasUnresolvableGenerics() || targetResolvableType.hasUnresolvableGenerics() ?
-                        ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType()) :
-                        targetResolvableType.isAssignableFrom(sourceResolvableType));
+                (sourceResolvableType.hasUnresolvableGenerics() || targetResolvableType.hasUnresolvableGenerics()
+                        ? ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType())
+                        : targetResolvableType.isAssignableFrom(sourceResolvableType));
     }
 
 

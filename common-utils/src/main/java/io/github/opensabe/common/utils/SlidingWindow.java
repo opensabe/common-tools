@@ -43,27 +43,6 @@ public class SlidingWindow {
         init();
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        SlidingWindow window = new SlidingWindow(5, Time.SECONDS);
-        long start = System.currentTimeMillis();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    window.await(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(Thread.currentThread().getId() + "在" + (System.currentTimeMillis() - start) + "ms 获取到了");
-            }
-        };
-
-        while (true) {
-            new Thread(runnable).start();
-            TimeUnit.MILLISECONDS.sleep(500);
-        }
-    }
-
     /**
      * 初始化
      */
@@ -126,7 +105,7 @@ public class SlidingWindow {
         }
     }
 
-    public static enum Time {
+    public enum Time {
         MILLISECONDS(1),
         SECONDS(1000),
         MINUTES(SECONDS.getMillis() * 60),

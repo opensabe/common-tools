@@ -37,11 +37,11 @@ public class Base36 {
 
     static final int[] INVERTED_ALPHABET_WIHTOUT_IO;
 
-    static final String initStr = "00000000000000000000000000000000000000000000000000000000000000000000";
+    static final String INIT_STR = "00000000000000000000000000000000000000000000000000000000000000000000";
 
-    static final String initStrWithoutIO = "22222222222222222222222222222222222222222222222222222222222222222222";
-    static final BigInteger jinzhi = new BigInteger("36");
-    static final BigInteger jinzhiWithoutIO = new BigInteger("31");
+    static final String INIT_STR_WITHOUT_IO = "22222222222222222222222222222222222222222222222222222222222222222222";
+    static final BigInteger JINZHI = new BigInteger("36");
+    static final BigInteger JINZHI_WITHOUT_IO = new BigInteger("31");
 
     static {
         INVERTED_ALPHABET = new int[128];
@@ -49,17 +49,17 @@ public class Base36 {
             INVERTED_ALPHABET[i] = -1;
         }
         for (int i = 'A'; i <= 'Z'; i++) {
-            INVERTED_ALPHABET[i] = (i - 'A' + 10);
+            INVERTED_ALPHABET[i] = i - 'A' + 10;
         }
         for (int i = '0'; i <= '9'; i++) {
-            INVERTED_ALPHABET[i] = (i - '0');
+            INVERTED_ALPHABET[i] = i - '0';
         }
         //test inverted_alphabet mapping....
-        //		for(int i = 0; i < 128; i ++){
-        //			int k = INVERTED_ALPHABET[i];
-        //			if(k == -1) continue;
-        //			System.out.println(ALPHABET[k] + ":" + (char)i);
-        //		}
+        //        for(int i = 0; i < 128; i ++){
+        //            int k = INVERTED_ALPHABET[i];
+        //            if(k == -1) continue;
+        //            System.out.println(ALPHABET[k] + ":" + (char)i);
+        //        }
     }
 
     static {
@@ -71,11 +71,11 @@ public class Base36 {
             INVERTED_ALPHABET_WIHTOUT_IO[ALPHABET_WITHOUT_IO[i]] = i;
         }
         //test inverted_alphabet mapping....
-        //		for(int i = 0; i < 128; i ++){
-        //			int k = INVERTED_ALPHABET[i];
-        //			if(k == -1) continue;
-        //			System.out.println(ALPHABET[k] + ":" + (char)i);
-        //		}
+        //        for(int i = 0; i < 128; i ++){
+        //            int k = INVERTED_ALPHABET[i];
+        //            if(k == -1) continue;
+        //            System.out.println(ALPHABET[k] + ":" + (char)i);
+        //        }
     }
 
     public static String encode(String hexStr) {
@@ -84,8 +84,8 @@ public class Base36 {
         BigInteger d = bi;
         BigInteger m = BigInteger.ZERO;
         while (!BigInteger.ZERO.equals(d)) {
-            m = d.mod(Base36.jinzhi);
-            d = d.divide(Base36.jinzhi);
+            m = d.mod(Base36.JINZHI);
+            d = d.divide(Base36.JINZHI);
             sb.insert(0, (char) ALPHABET[m.intValue()]);
             //System.out.println("+" + (char) ALPHABET[m.intValue()]);
         }
@@ -98,8 +98,8 @@ public class Base36 {
         BigInteger d = bi;
         BigInteger m = BigInteger.ZERO;
         while (!BigInteger.ZERO.equals(d)) {
-            m = d.mod(Base36.jinzhiWithoutIO);
-            d = d.divide(Base36.jinzhiWithoutIO);
+            m = d.mod(Base36.JINZHI_WITHOUT_IO);
+            d = d.divide(Base36.JINZHI_WITHOUT_IO);
             sb.insert(0, (char) ALPHABET_WITHOUT_IO[m.intValue()]);
             //System.out.println("+" + (char) ALPHABET[m.intValue()]);
         }
@@ -122,9 +122,9 @@ public class Base36 {
         }
         if (length > str.length()) {
             if (withoutIO) {
-                str = initStrWithoutIO.concat(str);
+                str = INIT_STR_WITHOUT_IO.concat(str);
             } else {
-                str = initStr.concat(str);
+                str = INIT_STR.concat(str);
             }
             str = str.substring(str.length() - length);
         } else {
@@ -143,7 +143,7 @@ public class Base36 {
         for (int i = 0; i < base36Str.length(); i++) {
             char c = chars[i];
             int n = INVERTED_ALPHABET[c];
-            bi = bi.multiply(jinzhi).add(new BigInteger("" + n));
+            bi = bi.multiply(JINZHI).add(new BigInteger("" + n));
         }
         return bi.toString(16);
     }
@@ -158,7 +158,7 @@ public class Base36 {
         for (int i = 0; i < base31Str.length(); i++) {
             char c = chars[i];
             int n = INVERTED_ALPHABET_WIHTOUT_IO[c];
-            bi = bi.multiply(jinzhiWithoutIO).add(new BigInteger("" + n));
+            bi = bi.multiply(JINZHI_WITHOUT_IO).add(new BigInteger("" + n));
         }
         return bi.toString(16);
     }
@@ -174,7 +174,7 @@ public class Base36 {
     }
 
     private static boolean isValidBase36Char(char c) {
-        if ((c < 0) || (c >= 128)) {
+        if (c < 0 || c >= 128) {
             return false;
         } else if (INVERTED_ALPHABET[c] == -1) {
             return false;
@@ -193,7 +193,7 @@ public class Base36 {
     }
 
     private static boolean isValidBase31Char(char c) {
-        if ((c < 0) || (c >= 128)) {
+        if (c < 0 || c >= 128) {
             return false;
         } else if (INVERTED_ALPHABET_WIHTOUT_IO[c] == -1) {
             return false;

@@ -31,7 +31,7 @@ import io.github.opensabe.mapstruct.core.MapperRepository;
  */
 public class BeanUtils {
     private static final Cache<String, BeanCopier<?, ?>> CACHE = Caffeine.newBuilder().build();
-    private static final MapperRepository mapperRepository = MapperRepository.getInstance();
+    private static final MapperRepository MAPPER_REPOSITORY = MapperRepository.getInstance();
 
     @SuppressWarnings({"unchecked, rawtypes"})
     public static void copyProperties(Object source, Object target) {
@@ -56,7 +56,7 @@ public class BeanUtils {
      */
     @SuppressWarnings("unchecked")
     public static <S, T> T transform(S source, Class<T> target) {
-        return mapperRepository.getMapper((Class<S>) source.getClass(), target).map(source);
+        return MAPPER_REPOSITORY.getMapper((Class<S>) source.getClass(), target).map(source);
     }
 
     /**
@@ -73,7 +73,7 @@ public class BeanUtils {
      * @throws io.github.opensabe.mapstruct.core.MapperNotFoundException if target class not contains annotation of {@link io.github.opensabe.mapstruct.core.Binding}
      */
     public static <T> T fromMap(Map<String, Object> map, Class<T> target) {
-        return mapperRepository.getMapMapper(target).fromMap(map);
+        return MAPPER_REPOSITORY.getMapMapper(target).fromMap(map);
     }
 
 }
