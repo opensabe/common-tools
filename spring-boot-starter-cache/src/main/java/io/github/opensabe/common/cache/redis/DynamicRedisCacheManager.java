@@ -1,0 +1,137 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.opensabe.common.cache.redis;
+
+import java.time.Duration;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+
+import org.springframework.cache.Cache;
+import org.springframework.cache.transaction.TransactionAwareCacheDecorator;
+import org.springframework.data.redis.cache.RedisCache;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+
+import io.github.opensabe.common.cache.api.CompositedCache;
+import io.github.opensabe.common.cache.api.ExpireCacheManager;
+import lombok.extern.log4j.Log4j2;
+
+/**
+ * @author heng.ma
+ */
+@Log4j2
+public class DynamicRedisCacheManager extends RedisCacheManager implements ExpireCacheManager {
+
+    private final Map<String, Map<Duration, Cache>> map;
+
+    private Function<RedisCacheConfiguration, RedisCacheConfiguration> onRedisCacheConfiguration;
+
+    public DynamicRedisCacheManager(RedisConnectionFactory connectionFactory,
+                                    RedisCacheConfiguration defaultCacheConfiguration,
+                                    Map<String, RedisCacheConfiguration> configurations) {
+        super(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory), defaultCacheConfiguration, configurations);
+        this.map = new ConcurrentHashMap<>();
+        this.onRedisCacheConfiguration = Function.identity();
+    }
+
+
+    @Override
+    public Cache getCache(String name, Duration ttl) {
+        return map.computeIfAbsent(name, k -> new ConcurrentHashMap<>()).computeIfAbsent(ttl, k -> {
+            RedisCacheConfiguration configuration = getCacheConfigurations().get(name);
+            if (configuration == null) {
+                configuration = getDefaultCacheConfiguration();
+            }
+            configuration = onRedisCacheConfiguration.apply(configuration.entryTtl(ttl));
+            return super.decorateCache(new RCache(name, getCacheWriter(), configuration));
+        });
+    }
+
+    /**
+     *
+     * 因为redis是分布式缓存，相同的key只需要删除一次，为了避免重复操作，返回任意一个cache实例即可
+     *
+     * @see CompositedCache
+     */
+    @Override
+    public Cache getCache(String name) {
+        Map<Duration, Cache> caches = map.get(name);
+        if (caches != null) {
+            return new CompositedCache(name, caches.values().stream().limit(1).toList());
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<String> settings(String name) {
+        //后续完善
+        return List.of();
+    }
+
+    @Override
+    public Collection<String> getCacheNames() {
+        Set<String> set = new HashSet<>();
+        set.addAll(getInitialCacheConfiguration().keySet());
+        set.addAll(map.keySet());
+        return set;
+    }
+
+    @Override
+    protected Collection<RedisCache> loadCaches() {
+        return map.values()
+                .stream()
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .map(c -> isTransactionAware() ? ((TransactionAwareCacheDecorator) c).getTargetCache() : c)
+                .map(c -> (RedisCache) c)
+                .toList();
+    }
+
+    public DynamicRedisCacheManager onRedisCacheConfiguration(Function<RedisCacheConfiguration, RedisCacheConfiguration> onRedisCacheConfiguration) {
+        this.onRedisCacheConfiguration = this.onRedisCacheConfiguration.andThen(onRedisCacheConfiguration);
+        return this;
+    }
+
+    public static class RCache extends RedisCache {
+
+        private RCache(String name, RedisCacheWriter cacheWriter, RedisCacheConfiguration cacheConfiguration) {
+            super(name, cacheWriter, cacheConfiguration);
+        }
+
+        /**
+         * Override to log the key.
+         *
+         * @param key will never be {@literal null}.
+         * @return 最终发到redis的key
+         */
+        @Override
+        protected String createCacheKey(Object key) {
+            String cacheKey = super.createCacheKey(key);
+            if (log.isDebugEnabled()) {
+                log.debug("Spring cache redis key: {}", cacheKey);
+            }
+            return cacheKey;
+        }
+    }
+
+}

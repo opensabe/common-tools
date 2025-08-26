@@ -1,23 +1,38 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.node.manager;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class NodeManager {
-    @Getter
-    private volatile int nodeId = -1;
     //private RestTemplate restTemplate = createRestTemplate();
     public static final String PATH = "/actuator/" + NodeInfoActuator.PATH;
+    private final RedissonClient redissonClient;
 
 //    private RestTemplate createRestTemplate() {
 //        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
@@ -26,12 +41,12 @@ public class NodeManager {
 //        httpRequestFactory.setReadTimeout(2500);
 //        return new RestTemplate(httpRequestFactory);
 //    }
-
-    private final RedissonClient redissonClient;
     private final StringRedisTemplate redisTemplate;
     private final String serviceId;
     private final String instanceId;
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+    @Getter
+    private volatile int nodeId = -1;
 
     public NodeManager(
             RedissonClient redissonClient,
@@ -51,7 +66,7 @@ public class NodeManager {
     }
 
     private String getKey(int nodeId) {
-        return "spring:node:manager:"  + serviceId + ":" + nodeId;
+        return "spring:node:manager:" + serviceId + ":" + nodeId;
     }
 
     /**
@@ -116,7 +131,7 @@ public class NodeManager {
         private String message;
         private int data;
     }
-    
+
 //    public static void main(String args[]) {
 //        byte[] symbol = "0⃣1⃣2⃣".getBytes();
 //        String code = "";

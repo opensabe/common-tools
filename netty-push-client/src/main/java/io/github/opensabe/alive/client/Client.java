@@ -1,3 +1,18 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.alive.client;
 
 import java.util.concurrent.TimeUnit;
@@ -18,8 +33,8 @@ public interface Client {
      * @param queryVo 消息
      * @return Response 还在缓存返回SUCESS 不在缓存返回FAIL
      * @throws AliveClientExecutionException 等待过程中发现异常返回
-     * @throws InterruptedException 等待过程中被打断抛出
-     * @throws AliveClientException 请求是发生异常直接抛出
+     * @throws InterruptedException          等待过程中被打断抛出
+     * @throws AliveClientException          请求是发生异常直接抛出
      */
     Response query(QueryVo queryVo) throws AliveClientExecutionException, InterruptedException, AliveClientException;
 
@@ -28,15 +43,15 @@ public interface Client {
      *
      * @param queryVo 消息
      * @param timeout 超时时间
-     * @param unit 时间单位
+     * @param unit    时间单位
      * @return Response 还在缓存返回SUCESS 不在缓存返回FAIL
-     * @throws AliveClientTimeoutException 等待超时抛出
+     * @throws AliveClientTimeoutException   等待超时抛出
      * @throws AliveClientExecutionException 等待过程中发现异常返回
-     * @throws InterruptedException 等待过程中被打断抛出
-     * @throws AliveClientException 请求是发生异常直接抛出
+     * @throws InterruptedException          等待过程中被打断抛出
+     * @throws AliveClientException          请求是发生异常直接抛出
      */
     Response query(QueryVo queryVo, long timeout, TimeUnit unit)
-        throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException;
+            throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException;
 
     /**
      * 同步请求查询对应设备的相关主题是否还在缓存
@@ -50,7 +65,7 @@ public interface Client {
     /**
      * 异步请求
      *
-     * @param queryVo 消息
+     * @param queryVo  消息
      * @param callback 回调函数,任务完成后调用
      * @return int requestId
      * @throws AliveClientException 请求是发生异常直接抛出
@@ -63,29 +78,29 @@ public interface Client {
      *
      * @param messageVo 消息
      * @return Response
-     * @throws AliveClientTimeoutException 等待超时抛出
+     * @throws AliveClientTimeoutException   等待超时抛出
      * @throws AliveClientExecutionException 等待过程中发现异常返回
-     * @throws InterruptedException 等待过程中被打断抛出
-     * @throws AliveClientException 请求是发生异常直接抛出
+     * @throws InterruptedException          等待过程中被打断抛出
+     * @throws AliveClientException          请求是发生异常直接抛出
      */
     Response push(MessageVo messageVo)
-        throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException;
+            throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException;
 
 
     /**
      * 同步请求，带超时时间
      *
      * @param messageVo 消息
-     * @param timeout 超时时间
-     * @param unit 时间单位
+     * @param timeout   超时时间
+     * @param unit      时间单位
      * @return Response
-     * @throws AliveClientTimeoutException 等待超时抛出
+     * @throws AliveClientTimeoutException   等待超时抛出
      * @throws AliveClientExecutionException 等待过程中发现异常返回
-     * @throws InterruptedException 等待过程中被打断抛出
-     * @throws AliveClientException 请求是发生异常直接抛出
+     * @throws InterruptedException          等待过程中被打断抛出
+     * @throws AliveClientException          请求是发生异常直接抛出
      */
     Response push(MessageVo messageVo, long timeout, TimeUnit unit)
-        throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException;
+            throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException;
 
     /**
      * 异步请求
@@ -100,7 +115,7 @@ public interface Client {
      * 异步请求
      *
      * @param messageVo 消息
-     * @param callback 回调函数,任务完成后调用
+     * @param callback  回调函数,任务完成后调用
      * @return int requestId
      * @throws AliveClientException 请求是发生异常直接抛出
      */

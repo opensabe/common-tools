@@ -1,35 +1,76 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.config;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.aop.*;
-import io.github.opensabe.common.redisson.jfr.*;
-import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
-import io.micrometer.core.instrument.MeterRegistry;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.aop.lock.RedissonLockAdvisor;
+import io.github.opensabe.common.redisson.aop.lock.RedissonLockCachedPointcut;
+import io.github.opensabe.common.redisson.aop.lock.RedissonLockInterceptor;
+import io.github.opensabe.common.redisson.aop.ratelimiter.RedissonRateLimiterAdvisor;
+import io.github.opensabe.common.redisson.aop.ratelimiter.RedissonRateLimiterCachedPointcut;
+import io.github.opensabe.common.redisson.aop.ratelimiter.RedissonRateLimiterInterceptor;
+import io.github.opensabe.common.redisson.aop.scheduled.RedissonScheduledBeanPostProcessor;
+import io.github.opensabe.common.redisson.aop.scheduled.RedissonScheduledListener;
+import io.github.opensabe.common.redisson.aop.semaphore.RedissonSemaphoreAdvisor;
+import io.github.opensabe.common.redisson.aop.semaphore.RedissonSemaphoreCachedPointcut;
+import io.github.opensabe.common.redisson.aop.semaphore.RedissonSemaphoreInterceptor;
+import io.github.opensabe.common.redisson.aop.slock.SLockAdvisor;
+import io.github.opensabe.common.redisson.aop.slock.SLockInterceptor;
+import io.github.opensabe.common.redisson.aop.slock.SLockPointcut;
+import io.github.opensabe.common.redisson.jfr.RExpirableExpireObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RLockAcquiredObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RLockForceReleaseObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RLockReleasedObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreAcquiredObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreModifiedObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreReleasedObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RRateLimiterAcquireObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RRateLimiterSetRateObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
+import io.micrometer.core.instrument.MeterRegistry;
+
 @Configuration(proxyBeanMethods = false)
 public class RedissonAnnotationConfiguration {
 
     @Bean
-    public RedissonLockCachedPointcut redissonLockCachedPointcut() {
-        return new RedissonLockCachedPointcut();
+    public MethodArgumentsExpressEvaluator methodArgumentsExpressEvaluator(BeanFactory beanFactory) {
+        return new MethodArgumentsExpressEvaluator(beanFactory);
+    }
+
+    @Bean
+    public RedissonLockCachedPointcut redissonLockCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
+        return new RedissonLockCachedPointcut(evaluator);
     }
 
     @Bean
     public RedissonLockInterceptor redissonLockInterceptor(
             RedissonClient redissonClient,
-            RedissonLockCachedPointcut redissonLockCachedPointcut,
-            UnifiedObservationFactory unifiedObservationFactory
+            RedissonLockCachedPointcut redissonLockCachedPointcut
     ) {
-        return new RedissonLockInterceptor(redissonClient, redissonLockCachedPointcut, unifiedObservationFactory);
+        return new RedissonLockInterceptor(redissonClient, redissonLockCachedPointcut);
     }
 
     @Bean
-    public RedissonLockAdvisor redissonLockAdvisor(RedissonLockCachedPointcut redissonLockCachedPointcut, RedissonLockInterceptor redissonLockInterceptor, RedissonAopConfiguration redissonAopConfiguration) {
+    public RedissonLockAdvisor redissonLockAdvisor(RedissonLockCachedPointcut redissonLockCachedPointcut, RedissonLockInterceptor redissonLockInterceptor, RedissonAopOrderProperties redissonAopConfiguration) {
         var advisor = new RedissonLockAdvisor(redissonLockCachedPointcut);
         advisor.setAdvice(redissonLockInterceptor);
         advisor.setOrder(redissonAopConfiguration.getOrder());
@@ -37,19 +78,19 @@ public class RedissonAnnotationConfiguration {
     }
 
     @Bean
-    public SLockPointcut sLockPointcut () {
-        return new SLockPointcut();
+    public SLockPointcut sLockPointcut(MethodArgumentsExpressEvaluator evaluator) {
+        return new SLockPointcut(evaluator);
     }
 
 
     @Bean
-    public SLockInterceptor sLockInterceptor (BeanFactory beanFactory, RedissonClient redissonClient, SLockPointcut pointcut) {
-        MethodArgumentsExpressEvaluator evaluator = new MethodArgumentsExpressEvaluator(beanFactory);
-        return new SLockInterceptor(redissonClient, evaluator, pointcut);
+    public SLockInterceptor sLockInterceptor(RedissonClient redissonClient, SLockPointcut pointcut) {
+
+        return new SLockInterceptor(redissonClient, pointcut);
     }
 
     @Bean
-    public SLockAdvisor sLockAdvisor (SLockPointcut pointcut, SLockInterceptor interceptor, RedissonAopConfiguration configuration) {
+    public SLockAdvisor sLockAdvisor(SLockPointcut pointcut, SLockInterceptor interceptor, RedissonAopOrderProperties configuration) {
         SLockAdvisor advisor = new SLockAdvisor(pointcut);
         advisor.setAdvice(interceptor);
         advisor.setOrder(configuration.getOrder());
@@ -57,17 +98,17 @@ public class RedissonAnnotationConfiguration {
     }
 
     @Bean
-    public RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut() {
-        return new RedissonRateLimiterCachedPointcut();
+    public RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
+        return new RedissonRateLimiterCachedPointcut(evaluator);
     }
 
     @Bean
-    public RedissonRateLimiterInterceptor redissonRateLimiterInterceptor(RedissonClient redissonClient, RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut, UnifiedObservationFactory unifiedObservationFactory) {
-        return new RedissonRateLimiterInterceptor(redissonClient, redissonRateLimiterCachedPointcut, unifiedObservationFactory);
+    public RedissonRateLimiterInterceptor redissonRateLimiterInterceptor(RedissonClient redissonClient, RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut) {
+        return new RedissonRateLimiterInterceptor(redissonClient, redissonRateLimiterCachedPointcut);
     }
 
     @Bean
-    public RedissonRateLimiterAdvisor redissonRateLimiterAdvisor(RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut, RedissonRateLimiterInterceptor redissonRateLimiterInterceptor, RedissonAopConfiguration redissonAopConfiguration) {
+    public RedissonRateLimiterAdvisor redissonRateLimiterAdvisor(RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut, RedissonRateLimiterInterceptor redissonRateLimiterInterceptor, RedissonAopOrderProperties redissonAopConfiguration) {
         var advisor = new RedissonRateLimiterAdvisor(redissonRateLimiterCachedPointcut);
         advisor.setAdvice(redissonRateLimiterInterceptor);
         advisor.setOrder(redissonAopConfiguration.getOrder());
@@ -75,17 +116,17 @@ public class RedissonAnnotationConfiguration {
     }
 
     @Bean
-    public RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut() {
-        return new RedissonSemaphoreCachedPointcut();
+    public RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
+        return new RedissonSemaphoreCachedPointcut(evaluator);
     }
 
     @Bean
-    public RedissonSemaphoreInterceptor redissonSemaphoreInterceptor(RedissonClient redissonClient, RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut, UnifiedObservationFactory unifiedObservationFactory) {
-        return new RedissonSemaphoreInterceptor(redissonClient, redissonSemaphoreCachedPointcut, unifiedObservationFactory);
+    public RedissonSemaphoreInterceptor redissonSemaphoreInterceptor(RedissonClient redissonClient, RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut) {
+        return new RedissonSemaphoreInterceptor(redissonClient, redissonSemaphoreCachedPointcut);
     }
 
     @Bean
-    public RedissonSemaphoreAdvisor redissonSemaphoreAdvisor(RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut, RedissonSemaphoreInterceptor redissonSemaphoreInterceptor, RedissonAopConfiguration redissonAopConfiguration) {
+    public RedissonSemaphoreAdvisor redissonSemaphoreAdvisor(RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut, RedissonSemaphoreInterceptor redissonSemaphoreInterceptor, RedissonAopOrderProperties redissonAopConfiguration) {
         var advisor = new RedissonSemaphoreAdvisor(redissonSemaphoreCachedPointcut);
         advisor.setAdvice(redissonSemaphoreInterceptor);
         advisor.setOrder(redissonAopConfiguration.getOrder());
@@ -95,7 +136,7 @@ public class RedissonAnnotationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RedissonScheduledBeanPostProcessor redissonScheduledBeanPostProcessor(RedissonProperties redissonProperties) {
+    public RedissonScheduledBeanPostProcessor redissonScheduledBeanPostProcessor(RedissonScheduleProperties redissonProperties) {
         return new RedissonScheduledBeanPostProcessor(redissonProperties);
     }
 

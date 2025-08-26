@@ -1,8 +1,24 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.mybatis.base;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.mapping.MappedStatement;
+
 import tk.mybatis.mapper.annotation.RegisterMapper;
 import tk.mybatis.mapper.mapperhelper.MapperHelper;
 import tk.mybatis.mapper.mapperhelper.MapperTemplate;
@@ -24,7 +40,7 @@ public interface UpdateLimitMapper<T> {
         }
 
 
-        public String updateByExampleSelectiveLimit (MappedStatement ms) {
+        public String updateByExampleSelectiveLimit(MappedStatement ms) {
             Class<?> entityClass = getEntityClass(ms);
             StringBuilder sql = new StringBuilder();
             if (isCheckExampleEntityClass()) {
@@ -41,7 +57,7 @@ public interface UpdateLimitMapper<T> {
             return sql.toString();
         }
 
-        public String updateByExampleLimit (MappedStatement ms) {
+        public String updateByExampleLimit(MappedStatement ms) {
             Class<?> entityClass = getEntityClass(ms);
             StringBuilder sql = new StringBuilder();
             if (isCheckExampleEntityClass()) {

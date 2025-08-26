@@ -1,12 +1,28 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.mybatis.test;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.github.opensabe.common.mybatis.test.common.BaseMybatisTest;
 import io.github.opensabe.common.mybatis.test.manager.UserManager;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @Log4j2
@@ -20,17 +36,17 @@ public class TestObservation extends BaseMybatisTest {
 
     @Test
     @Transactional
-    void testMapperProxy () {
+    void testMapperProxy() {
         unifiedObservationFactory.getCurrentOrCreateEmptyObservation()
-                        .observe(() -> {
-                            log.info("test traceId out of proxy");
-                            userManager.queryMuiltple("111");
-                        });
+                .observe(() -> {
+                    log.info("test traceId out of proxy");
+                    userManager.queryMuiltple("111");
+                });
     }
 
     @Test
     @Transactional
-    void testTransaction () {
+    void testTransaction() {
         unifiedObservationFactory.getCurrentOrCreateEmptyObservation()
                 .observe(() -> {
                     log.info("test traceId out of proxy");

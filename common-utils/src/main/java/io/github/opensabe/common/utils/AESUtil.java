@@ -1,15 +1,29 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.utils;
 
-import org.apache.commons.codec.binary.Base64;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * AES 加密工具类
@@ -36,6 +50,7 @@ public class AESUtil {
     public static String encrypt(String content, String key) throws Exception {
         return encrypt(content, key, DEFAULT_CIPHER_ALGORITHM);
     }
+
     public static String encryptNodeJS(String content, String key) throws Exception {
         return encrypt(content, key, "AES/ECB/PKCS5Padding");
     }
@@ -52,11 +67,11 @@ public class AESUtil {
         return Base64.encodeBase64String(byteMerger(ivBytes, encrypted));
     }
 
-    public static byte[] byteMerger(byte[] byte_1, byte[] byte_2) {
-        byte[] byte_3 = new byte[byte_1.length + byte_2.length];
-        System.arraycopy(byte_1, 0, byte_3, 0, byte_1.length);
-        System.arraycopy(byte_2, 0, byte_3, byte_1.length, byte_2.length);
-        return byte_3;
+    public static byte[] byteMerger(byte[] byte1, byte[] byte2) {
+        byte[] byte3 = new byte[byte1.length + byte2.length];
+        System.arraycopy(byte1, 0, byte3, 0, byte1.length);
+        System.arraycopy(byte2, 0, byte3, byte1.length, byte2.length);
+        return byte3;
     }
 
     /**
@@ -82,17 +97,18 @@ public class AESUtil {
     public static String decryptNodeJS(String base64Encrypted, String key) throws Exception {
         return decrypt(base64Encrypted, key, "AES/ECB/PKCS5Padding");
     }
+
     public static String decrypt(String base64Encrypted, String key) throws Exception {
         return decrypt(base64Encrypted, key, DEFAULT_CIPHER_ALGORITHM);
     }
 
-        /**
-         * 对密钥进行处理
-         *
-         * @param seed
-         * @return
-         * @throws Exception
-         */
+    /**
+     * 对密钥进行处理
+     *
+     * @param seed
+     * @return
+     * @throws Exception
+     */
     public static byte[] getRawKey(byte[] seed) throws Exception {
         KeyGenerator kgen = KeyGenerator.getInstance(KEY_ALGORITHM);
         //for android

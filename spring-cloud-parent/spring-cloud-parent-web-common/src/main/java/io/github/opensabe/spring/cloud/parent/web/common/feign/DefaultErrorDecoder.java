@@ -1,11 +1,27 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.web.common.feign;
 
-import io.github.opensabe.spring.cloud.parent.web.common.misc.SpecialHttpStatus;
+import org.springframework.http.HttpStatus;
+
 import feign.Response;
 import feign.RetryableException;
 import feign.codec.ErrorDecoder;
+import io.github.opensabe.spring.cloud.parent.web.common.misc.SpecialHttpStatus;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 
 import static feign.FeignException.errorStatus;
 
@@ -23,7 +39,8 @@ public class DefaultErrorDecoder implements ErrorDecoder {
         log.info("{} response: {}-{}, should retry: {}", methodKey, response.status(), response.reason(), shouldThrowRetryable);
         //对于查询请求以及可以重试的响应码的异常，进行重试，即抛出可重试异常 RetryableException
         if (shouldThrowRetryable) {
-                throw new RetryableException(response.status(), response.reason(), response.request().httpMethod(), null, response.request());
+            Long retry = null;
+            throw new RetryableException(response.status(), response.reason(), response.request().httpMethod(), retry, response.request());
         } else {
             throw errorStatus(methodKey, response);
         }

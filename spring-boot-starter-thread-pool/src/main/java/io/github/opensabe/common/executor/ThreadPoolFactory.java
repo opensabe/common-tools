@@ -1,21 +1,52 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.executor;
 
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import lombok.extern.log4j.Log4j2;
+import java.lang.ref.WeakReference;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 
-import java.lang.ref.WeakReference;
-import java.util.Set;
-import java.util.concurrent.*;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SuppressFBWarnings("EI_EXPOSE_REP")
 public class ThreadPoolFactory implements BeanFactoryAware {
+
+    //最大大小
+    static final int MAX_CAP = 0x7fff;
+    //每个线程池大小不超过1024
+    private static final int MAX_THREAD_SIZE_INCLUSIVE = 2 << 10;
+    private final Set<WeakReference<ExecutorService>> allExecutors = Sets.newConcurrentHashSet();
+    private UnifiedObservationFactory unifiedObservationFactory;
 
     public static boolean isCompleted(ExecutorService executorService) {
         if (executorService instanceof ThreadPoolExecutor) {
@@ -41,10 +72,23 @@ public class ThreadPoolFactory implements BeanFactoryAware {
         return true;
     }
 
-    private final Set<WeakReference<ExecutorService>> allExecutors = Sets.newConcurrentHashSet();
+    /**
+     * 验证大小一定是2的n次方并且小于等于1024
+     *
+     * @param size
+     */
+    private static void validThreadPoolSize(int size) {
+        assert size <= MAX_THREAD_SIZE_INCLUSIVE && (size & (size - 1)) == 0;
+    }
 
-    private UnifiedObservationFactory unifiedObservationFactory;
-
+    private static ThreadFactory getThreadFactory(String threadNamePrefix) {
+        if (!threadNamePrefix.contains("%d")) {
+            threadNamePrefix = threadNamePrefix + "-%d";
+        }
+        return new ThreadFactoryBuilder().setNameFormat(threadNamePrefix)
+                .setUncaughtExceptionHandler(new ThreadUnCaughtExceptionHandler())
+                .build();
+    }
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -53,20 +97,6 @@ public class ThreadPoolFactory implements BeanFactoryAware {
 
     public Set<WeakReference<ExecutorService>> getAllExecutors() {
         return allExecutors;
-    }
-
-    //每个线程池大小不超过1024
-    private static final int MAX_THREAD_SIZE_INCLUSIVE = 2 << 10;
-    //最大大小
-    static final int MAX_CAP = 0x7fff;
-
-    /**
-     * 验证大小一定是2的n次方并且小于等于1024
-     *
-     * @param size
-     */
-    private static void validThreadPoolSize(int size) {
-        assert size <= MAX_THREAD_SIZE_INCLUSIVE && ((size & (size - 1)) == 0);
     }
 
     /**
@@ -84,15 +114,6 @@ public class ThreadPoolFactory implements BeanFactoryAware {
                         build,
                         new ThreadPoolExecutor.AbortPolicy()
                 ), unifiedObservationFactory);
-    }
-
-    private static ThreadFactory getThreadFactory(String threadNamePrefix) {
-        if (!threadNamePrefix.contains("%d")) {
-            threadNamePrefix = threadNamePrefix + "-%d";
-        }
-        return new ThreadFactoryBuilder().setNameFormat(threadNamePrefix)
-                .setUncaughtExceptionHandler(new ThreadUnCaughtExceptionHandler())
-                .build();
     }
 
     /**
@@ -138,7 +159,7 @@ public class ThreadPoolFactory implements BeanFactoryAware {
         return new JFRThreadPoolExecutor(threadPoolExecutor, unifiedObservationFactory);
     }
 
-    public void addWeakReference (ExecutorService executorService) {
+    public void addWeakReference(ExecutorService executorService) {
         this.allExecutors.add(new WeakReference<>(executorService));
     }
 

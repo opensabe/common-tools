@@ -1,10 +1,23 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.test;
 
-import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterAll;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
@@ -18,15 +31,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.containers.GenericContainer;
-import reactor.core.Disposable;
-import reactor.core.publisher.Mono;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
 
+@Testcontainers
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = {
         //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
@@ -45,41 +55,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MultiRedisTest {
 
 
-    @EnableAutoConfiguration
-    @Configuration
-    public static class App {
-    }
-
-    @ClassRule
+    @Container
     static GenericContainer redis1 = new FixedHostPortGenericContainer("redis")
-            .withFixedExposedPort(6378,6379)
+            .withFixedExposedPort(6378, 6379)
             .withExposedPorts(6379)
             .withCommand("redis-server");
-    @ClassRule
+    @Container
     static GenericContainer redis2 = new FixedHostPortGenericContainer("redis")
-            .withFixedExposedPort(6380,6379)
+            .withFixedExposedPort(6380, 6379)
             .withExposedPorts(6379)
             .withCommand("redis-server");
-
-
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
     private ReactiveStringRedisTemplate reactiveRedisTemplate;
     @Autowired
     private MultiRedisLettuceConnectionFactory multiRedisLettuceConnectionFactory;
-
-    @BeforeAll
-    static void setup () {
-        redis1.start();
-        redis2.start();
-    }
-
-    @AfterAll
-    static void destroy () {
-        redis1.stop();
-        redis2.stop();
-    }
 
     private void testMulti(String suffix) {
         redisTemplate.opsForValue().set("testDefault" + suffix, "testDefault");
@@ -120,5 +111,10 @@ public class MultiRedisTest {
             thread[i].join();
         }
         Assertions.assertTrue(result.get());
+    }
+
+    @EnableAutoConfiguration
+    @Configuration
+    public static class App {
     }
 }

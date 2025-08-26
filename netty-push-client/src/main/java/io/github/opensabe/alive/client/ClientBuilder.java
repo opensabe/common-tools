@@ -1,11 +1,26 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.alive.client;
 
-import io.github.opensabe.alive.client.impl.MultiConnClientImpl;
-import io.github.opensabe.alive.client.task.ZkTasker;
+import org.apache.commons.lang3.StringUtils;
 
 import io.github.opensabe.alive.client.impl.ClientConstants;
 import io.github.opensabe.alive.client.impl.ClientImpl;
-import org.apache.commons.lang3.StringUtils;
+import io.github.opensabe.alive.client.impl.MultiConnClientImpl;
+import io.github.opensabe.alive.client.task.ZkTasker;
 
 public class ClientBuilder {
 
@@ -177,12 +192,12 @@ public class ClientBuilder {
         if (clientNum <= 1) {
             //每个节点 一个连接
             return new ClientImpl(productCode, authToken, zkString, zkPath, zkRetryInterval, zkRetryMax, zkMaxDelay, connectTimeout,
-                authTimeout, heartTimeout, heartInterval, zkTasker);
+                    authTimeout, heartTimeout, heartInterval, zkTasker);
         } else {
             //每个节点  多个连接
             return new MultiConnClientImpl(productCode, authToken, clientNum, zkString, zkPath, zkRetryInterval, zkRetryMax, zkMaxDelay,
-                connectTimeout,
-                authTimeout, heartTimeout, heartInterval, zkTasker);
+                    connectTimeout,
+                    authTimeout, heartTimeout, heartInterval, zkTasker);
         }
     }
 

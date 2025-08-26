@@ -1,8 +1,25 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
-import lombok.extern.log4j.Log4j2;
+import java.lang.management.ManagementFactory;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -14,15 +31,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 //需要在引入了 prometheus 并且 actuator 暴露了 prometheus 端口的情况下才加载
 @ConditionalOnEnabledMetricsExport("prometheus")
 public class Log4j2Configuration {
+    public static final String GAUGE_NAME_SUFFIX = "_logger_ring_buffer_remaining_capacity";
+
     @Autowired
     private ObjectProvider<PrometheusMeterRegistry> meterRegistry;
     //只初始化一次
@@ -46,8 +65,7 @@ public class Log4j2Configuration {
                     //针对 RootLogger，它的 cfgName 是空字符串，为了显示好看，我们在 prometheus 中将它命名为 root
                     String cfgName = StringUtils.isBlank(k) ? "" : k;
                     String gaugeName = StringUtils.isBlank(k) ? "root" : k;
-                    Gauge.builder(gaugeName + "_logger_ring_buffer_remaining_capacity", () ->
-                    {
+                    Gauge.builder(gaugeName + GAUGE_NAME_SUFFIX, () -> {
                         try {
                             return (Number) ManagementFactory.getPlatformMBeanServer()
                                     .getAttribute(new ObjectName(

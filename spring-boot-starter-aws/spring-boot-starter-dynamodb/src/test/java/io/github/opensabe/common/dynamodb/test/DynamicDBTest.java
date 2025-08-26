@@ -1,6 +1,30 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.dynamodb.test;
 
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
 import com.alibaba.fastjson.JSON;
+
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteContext;
 import io.github.opensabe.common.dynamodb.test.common.DynamicdbStarter;
 import io.github.opensabe.common.dynamodb.test.common.EightDataTypesManager;
@@ -12,16 +36,8 @@ import io.github.opensabe.common.utils.json.JsonUtil;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
-
-import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,22 +51,6 @@ public class DynamicDBTest extends DynamicdbStarter {
     private DynamoDbOBService dynamoDbOBService;
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
-
-
-    @Configuration(proxyBeanMethods = false)
-    public static class LogContentHandler implements ObservationHandler<DynamodbExecuteContext> {
-
-        @Override
-        public void onStop(DynamodbExecuteContext context) {
-            System.out.println(context);
-        }
-
-        @Override
-        public boolean supportsContext(Observation.Context context) {
-            return context instanceof DynamodbExecuteContext;
-        }
-    }
-
 
     @Test
     void testEightDataTypesPo() {
@@ -104,7 +104,7 @@ public class DynamicDBTest extends DynamicdbStarter {
     }
 
     @Test
-    void testUpdate () {
+    void testUpdate() {
         EightDataTypesPo save = save("333");
         Assertions.assertEquals(222, save.getOrder());
         Assertions.assertEquals(111, save.getNum1());
@@ -121,10 +121,11 @@ public class DynamicDBTest extends DynamicdbStarter {
     }
 
     @Test
-    void testDelete () {
+    void testDelete() {
         EightDataTypesPo save = save("333");
         Assertions.assertEquals(222, save.getOrder());
-        Assertions.assertEquals(111, save.getNum1());;
+        Assertions.assertEquals(111, save.getNum1());
+        ;
 
         eightDataTypesManager.deleteByKey(save);
 
@@ -134,7 +135,7 @@ public class DynamicDBTest extends DynamicdbStarter {
     }
 
     @Test
-    void testQueryList () {
+    void testQueryList() {
         save("444");
         List<EightDataTypesPo> pos = eightDataTypesManager.selectList(QueryConditional.sortGreaterThanOrEqualTo(Key.builder()
                 .partitionValue("444").sortValue(111).build()));
@@ -145,5 +146,19 @@ public class DynamicDBTest extends DynamicdbStarter {
         List<EightDataTypesPo> pos2 = eightDataTypesManager.selectList(QueryConditional.sortGreaterThanOrEqualTo(Key.builder()
                 .partitionValue("555").sortValue(111).build()));
         assertEquals(0, pos2.size());
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    public static class LogContentHandler implements ObservationHandler<DynamodbExecuteContext> {
+
+        @Override
+        public void onStop(DynamodbExecuteContext context) {
+            System.out.println(context);
+        }
+
+        @Override
+        public boolean supportsContext(Observation.Context context) {
+            return context instanceof DynamodbExecuteContext;
+        }
     }
 }

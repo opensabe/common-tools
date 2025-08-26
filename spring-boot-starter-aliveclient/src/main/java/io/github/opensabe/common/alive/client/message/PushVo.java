@@ -1,13 +1,28 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.alive.client.message;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 import io.micrometer.core.instrument.util.StringUtils;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class PushVo {
 
-    private static final ThreadLocal<AtomicInteger> requestIdThreadLocal = ThreadLocal.withInitial(()-> new AtomicInteger());
+    private static final ThreadLocal<AtomicInteger> REQUEST_ID_THREAD_LOCAL = ThreadLocal.withInitial(() -> new AtomicInteger());
 
     public final String topic;
     public final String deviceId;
@@ -43,19 +58,19 @@ public class PushVo {
         this.requestId = requestId;
     }
 
+    public static int generateRequestId() {
+        if (REQUEST_ID_THREAD_LOCAL.get().intValue() < 0) {
+            REQUEST_ID_THREAD_LOCAL.remove();
+        }
+        return REQUEST_ID_THREAD_LOCAL.get().incrementAndGet();
+    }
+
     public int getRequestId() {
         return this.requestId;
     }
 
     public void setRequestId(int requestId) {
         this.requestId = requestId;
-    }
-
-    public static int generateRequestId() {
-        if(requestIdThreadLocal.get().intValue() < 0){
-            requestIdThreadLocal.remove();
-        }
-        return requestIdThreadLocal.get().incrementAndGet();
     }
 
 }

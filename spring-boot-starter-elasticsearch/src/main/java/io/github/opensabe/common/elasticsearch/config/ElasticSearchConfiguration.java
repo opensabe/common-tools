@@ -1,26 +1,29 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.elasticsearch.config;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.collect.Lists;
-import io.github.opensabe.common.elasticsearch.jfr.ElasticSearchClientObservationToJFRGenerator;
-import io.github.opensabe.common.elasticsearch.observation.ElasticSearchClientConvention;
-import io.github.opensabe.common.elasticsearch.observation.ElasticSearchClientObservationContext;
-import io.github.opensabe.common.elasticsearch.observation.ElasticSearchClientObservationDocumentation;
-import io.github.opensabe.common.elasticsearch.script.ScriptedSearcher;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.secret.FilterSecretStringResult;
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.micrometer.observation.Observation;
-import lombok.extern.log4j.Log4j2;
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.RequestLine;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.RestClient;
@@ -33,24 +36,25 @@ import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestCli
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.collect.Lists;
+
+import io.github.opensabe.common.elasticsearch.jfr.ElasticSearchClientObservationToJFRGenerator;
+import io.github.opensabe.common.elasticsearch.observation.ElasticSearchClientConvention;
+import io.github.opensabe.common.elasticsearch.observation.ElasticSearchClientObservationContext;
+import io.github.opensabe.common.elasticsearch.observation.ElasticSearchClientObservationDocumentation;
+import io.github.opensabe.common.elasticsearch.script.ScriptedSearcher;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.secret.FilterSecretStringResult;
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.micrometer.observation.Observation;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore(ElasticsearchRestClientAutoConfiguration.class)
 public class ElasticSearchConfiguration implements DisposableBean {
-    @Autowired
-    private ElasticSearchProperties properties;
-    @Autowired
-    private GlobalSecretManager globalSecretManager;
-    @Autowired
-    private UnifiedObservationFactory unifiedObservationFactory;
-
-    private RestHighLevelClient restHighLevelClient;
-
     private static final Cache<Long, Observation> CACHE = Caffeine.newBuilder()
             .weakKeys()
             .weakValues()
@@ -65,6 +69,13 @@ public class ElasticSearchConfiguration implements DisposableBean {
             })
             .build();
     private static final AtomicLong COUNTER = new AtomicLong(0);
+    @Autowired
+    private ElasticSearchProperties properties;
+    @Autowired
+    private GlobalSecretManager globalSecretManager;
+    @Autowired
+    private UnifiedObservationFactory unifiedObservationFactory;
+    private RestHighLevelClient restHighLevelClient;
 
     @Bean
     public ElasticSearchClientObservationToJFRGenerator elasticSearchClientObservationToJFRGenerator() {
@@ -73,7 +84,7 @@ public class ElasticSearchConfiguration implements DisposableBean {
 
 
     @Bean
-    public RestClientBuilder restClientBuilder () {
+    public RestClientBuilder restClientBuilder() {
         System.setProperty("es.set.netty.runtime.available.processors", "false");
         List<HttpHost> httpHosts = Lists.newArrayList();
         for (String s : properties.getAddresses().split(",")) {
@@ -135,9 +146,10 @@ public class ElasticSearchConfiguration implements DisposableBean {
     }
 
     @Bean
-    public RestClient restClient (RestClientBuilder restClientBuilder) {
+    public RestClient restClient(RestClientBuilder restClientBuilder) {
         return restClientBuilder.build();
     }
+
     @Bean
     public RestHighLevelClient getRestHighLevelClient(RestClientBuilder restClientBuilder) {
         restHighLevelClient = new RestHighLevelClient(restClientBuilder);

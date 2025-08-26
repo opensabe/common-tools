@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE module PUBLIC
+        "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+
+    <module name="Translation"/>
+
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+
+    <module name="SuppressWarningsFilter" />
+
+    <module name="TreeWalker">
+        <module name="SuppressWarningsHolder" />
+
+        <!-- Checks for Naming Conventions.                  -->
+        <!-- See http://checkstyle.sf.net/config_naming.html -->
+        <module name="ConstantName">
+            <property name="format" value="^log(ger)?|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
+        </module>
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName"/>
+        <module name="MemberName"/>
+        <module name="MethodName"/>
+        <module name="PackageName"/>
+        <module name="ParameterName"/>
+        <module name="StaticVariableName"/>
+        <module name="TypeName"/>
+
+        <!-- Checks for imports                              -->
+        <!-- See http://checkstyle.sf.net/config_import.html -->
+        <module name="AvoidStarImport"/>
+        <module name="IllegalImport"/>
+        <module name="RedundantImport"/>
+        <module name="UnusedImports"/>
+        <module name="ImportOrder">
+            <property name="groups" value="java,javax,org,com"/>
+            <property name="ordered" value="true"/>
+            <property name="separated" value="true"/>
+            <property name="caseSensitive" value="true"/>
+            <!-- 支持静态导入排序 -->
+            <property name="option" value="bottom"/>
+            <property name="sortStaticImportsAlphabetically" value="true"/>
+        </module>
+
+        <module name="MethodLength"/>
+
+        <!-- Checks for whitespace                               -->
+        <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+        <module name="EmptyForIteratorPad"/>
+        <module name="MethodParamPad"/>
+        <module name="OperatorWrap">
+           <property name="tokens" value="QUESTION, COLON, EQUAL, NOT_EQUAL, DIV, MINUS, STAR, MOD, SR, BSR, GE, GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, TYPE_EXTENSION_AND, LITERAL_INSTANCEOF"/>
+        </module>
+        <module name="ParenPad"/>
+        <module name="TypecastParenPad"/>
+        <module name="WhitespaceAfter"/>
+
+        <!-- Modifier Checks                                    -->
+        <!-- See http://checkstyle.sf.net/config_modifiers.html -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+
+        <!-- Checks for blocks. You know, those {}'s         -->
+        <!-- See http://checkstyle.sf.net/config_blocks.html -->
+        <module name="AvoidNestedBlocks">
+            <property name="allowInSwitchCase" value="true"/>
+        </module>
+        <module name="EmptyBlock"/>
+        <module name="LeftCurly"/>
+        <module name="NeedBraces">
+            <property name="tokens" value=" LITERAL_DO,LITERAL_FOR,LITERAL_WHILE"/>
+        </module>
+        <module name="RightCurly"/>
+
+
+        <!-- Checks for common coding problems               -->
+        <!-- See http://checkstyle.sf.net/config_coding.html -->
+        <module name="ArrayTrailingComma"/>
+        <module name="CovariantEquals"/>
+        <!-- MY FAVOURITE -->
+        <module name="EmptyStatement"/>
+        <module name="EqualsHashCode"/>
+        <module name="EqualsAvoidNull"/>
+        <!--module name="HiddenField"/-->
+        <module name="IllegalInstantiation"/>
+        <!--module name="IllegalThrows"/-->
+        <module name="InnerAssignment"/>
+        <module name="MultipleVariableDeclarations"/>
+        <!--module name="MagicNumber"/-->
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+        <module name="StringLiteralEquality"/>
+        <module name="NestedForDepth">
+           <property name="max" value="2"/>
+        </module>
+        <module name="NestedIfDepth">
+           <property name="max" value="5"/>
+        </module>
+        <module name="NestedTryDepth">
+           <property name="max" value="2"/>
+        </module>
+        <module name="NoClone"/>
+        <module name="NoFinalizer"/>
+        <module name="OneStatementPerLine"/>
+        <module name="FallThrough"/>
+        <module name="UnnecessaryParentheses">
+             <property name="tokens" value="IDENT"/>
+             <property name="tokens" value="NUM_DOUBLE"/>
+             <property name="tokens" value="NUM_FLOAT"/>
+             <property name="tokens" value="NUM_INT"/>
+             <property name="tokens" value="NUM_LONG"/>
+             <property name="tokens" value="STRING_LITERAL"/>
+             <property name="tokens" value="LITERAL_NULL"/>
+             <property name="tokens" value="LITERAL_FALSE"/>
+             <property name="tokens" value="LITERAL_TRUE"/>
+             <property name="tokens" value="ASSIGN"/>
+             <property name="tokens" value="BAND_ASSIGN"/>
+             <property name="tokens" value="BOR_ASSIGN"/>
+             <property name="tokens" value="BSR_ASSIGN"/>
+             <property name="tokens" value="BXOR_ASSIGN"/>
+             <property name="tokens" value="DIV_ASSIGN"/>
+             <property name="tokens" value="MINUS_ASSIGN"/>
+             <property name="tokens" value="MOD_ASSIGN"/>
+             <property name="tokens" value="PLUS_ASSIGN"/>
+             <property name="tokens" value="SL_ASSIGN"/>
+             <property name="tokens" value="SR_ASSIGN"/>
+             <property name="tokens" value="STAR_ASSIGN"/>
+             <property name="tokens" value="LAMBDA"/>
+             <property name="tokens" value="TEXT_BLOCK_LITERAL_BEGIN"/>
+             <property name="tokens" value="LOR"/>
+             <property name="tokens" value="LITERAL_INSTANCEOF"/>
+             <property name="tokens" value="GT"/>
+             <property name="tokens" value="LT"/>
+             <property name="tokens" value="GE"/>
+             <property name="tokens" value="LE"/>
+             <property name="tokens" value="EQUAL"/>
+             <property name="tokens" value="NOT_EQUAL"/>
+             <property name="tokens" value="UNARY_MINUS"/>
+             <property name="tokens" value="UNARY_PLUS"/>
+             <property name="tokens" value="INC"/>
+             <property name="tokens" value="DEC"/>
+             <property name="tokens" value="LNOT"/>
+             <property name="tokens" value="BNOT"/>
+             <property name="tokens" value="POST_INC"/>
+             <property name="tokens" value="POST_DEC"/>
+        </module>
+
+        <!-- Miscellaneous other checks.                   -->
+        <!-- See http://checkstyle.sf.net/config_misc.html -->
+        <module name="ArrayTypeStyle"/>
+        <module name="Regexp">
+            <property name="format" value="System\.exit"/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="\.printStacktrace"/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="UpperEll"/>
+    </module>
+</module>

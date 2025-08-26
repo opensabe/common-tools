@@ -1,4 +1,28 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.common.config;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineBulkheadRegistry;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineCircuitBreakerRegistry;
@@ -6,7 +30,12 @@ import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineRateL
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineRetryRegistry;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineThreadPoolBulkheadRegistry;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CaffeineTimeLimiterRegistry;
-import io.github.resilience4j.bulkhead.*;
+import io.github.resilience4j.bulkhead.Bulkhead;
+import io.github.resilience4j.bulkhead.BulkheadConfig;
+import io.github.resilience4j.bulkhead.BulkheadRegistry;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
 import io.github.resilience4j.bulkhead.event.BulkheadEvent;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -44,25 +73,19 @@ import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import io.github.resilience4j.timelimiter.event.TimeLimiterEvent;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
 /**
  * 自己创建resilience4j相关组件的registry，代替InMemoryXXX
+ *
  * @author maheng
  */
 public class Resilience4jConfiguration {
 
     /**
      * Retry
+     *
      * @author maheng
      */
     @Configuration(proxyBeanMethods = false)
@@ -92,6 +115,7 @@ public class Resilience4jConfiguration {
                     .onEntryAdded(event -> registerEventConsumer(eventConsumerRegistry, event.getAddedEntry(), properties))
                     .onEntryReplaced(event -> registerEventConsumer(eventConsumerRegistry, event.getNewEntry(), properties));
         }
+
         private void registerEventConsumer(EventConsumerRegistry<RetryEvent> eventConsumerRegistry,
                                            Retry retry, RetryConfigurationProperties retryConfigurationProperties) {
             int eventConsumerBufferSize = Optional
@@ -101,6 +125,7 @@ public class Resilience4jConfiguration {
             retry.getEventPublisher().onEvent(
                     eventConsumerRegistry.createEventConsumer(retry.getName(), eventConsumerBufferSize));
         }
+
         private RetryRegistry createRetryRegistry(
                 RetryConfigurationProperties retryConfigurationProperties,
                 RegistryEventConsumer<Retry> retryRegistryEventConsumer,
@@ -118,6 +143,7 @@ public class Resilience4jConfiguration {
 
     /**
      * 断路器
+     *
      * @author maheng
      */
     @Configuration(proxyBeanMethods = false)
@@ -139,13 +165,15 @@ public class Resilience4jConfiguration {
             initCircuitBreakerRegistry(circuitBreakerProperties, circuitBreakerRegistry, compositeCircuitBreakerCustomizer);
             return circuitBreakerRegistry;
         }
+
         private void registerEventConsumer(CircuitBreakerConfigurationProperties circuitBreakerProperties,
-                                   CircuitBreakerRegistry circuitBreakerRegistry,
-                                   EventConsumerRegistry<CircuitBreakerEvent> eventConsumerRegistry) {
+                                           CircuitBreakerRegistry circuitBreakerRegistry,
+                                           EventConsumerRegistry<CircuitBreakerEvent> eventConsumerRegistry) {
             circuitBreakerRegistry.getEventPublisher()
                     .onEntryAdded(event -> registerEventConsumer(circuitBreakerProperties, eventConsumerRegistry, event.getAddedEntry()))
-                    .onEntryReplaced(event -> registerEventConsumer(circuitBreakerProperties,eventConsumerRegistry, event.getNewEntry()));
+                    .onEntryReplaced(event -> registerEventConsumer(circuitBreakerProperties, eventConsumerRegistry, event.getNewEntry()));
         }
+
         private void registerEventConsumer(
                 CircuitBreakerConfigurationProperties circuitBreakerProperties,
                 EventConsumerRegistry<CircuitBreakerEvent> eventConsumerRegistry,
@@ -157,6 +185,7 @@ public class Resilience4jConfiguration {
             circuitBreaker.getEventPublisher().onEvent(eventConsumerRegistry
                     .createEventConsumer(circuitBreaker.getName(), eventConsumerBufferSize));
         }
+
         private CircuitBreakerRegistry createCircuitBreakerRegistry(
                 CircuitBreakerConfigurationProperties circuitBreakerProperties,
                 RegistryEventConsumer<CircuitBreaker> circuitBreakerRegistryEventConsumer,
@@ -170,6 +199,7 @@ public class Resilience4jConfiguration {
 
             return new CaffeineCircuitBreakerRegistry(configs, circuitBreakerRegistryEventConsumer, Map.copyOf(circuitBreakerProperties.getTags()));
         }
+
         private void initCircuitBreakerRegistry(
                 CircuitBreakerConfigurationProperties circuitBreakerProperties,
                 CircuitBreakerRegistry circuitBreakerRegistry,
@@ -185,6 +215,7 @@ public class Resilience4jConfiguration {
 
     /**
      * 实例隔离
+     *
      * @author maheng
      */
     @Configuration(proxyBeanMethods = false)
@@ -218,6 +249,7 @@ public class Resilience4jConfiguration {
                                     compositeBulkheadCustomizer, entry.getKey())));
             return new CaffeineBulkheadRegistry(configs, bulkheadRegistryEventConsumer, Map.copyOf(bulkheadConfigurationProperties.getTags()));
         }
+
         private void registerEventConsumer(BulkheadRegistry bulkheadRegistry,
                                            EventConsumerRegistry<BulkheadEvent> eventConsumerRegistry,
                                            BulkheadConfigurationProperties properties) {
@@ -239,6 +271,7 @@ public class Resilience4jConfiguration {
 
     /**
      * 线程隔离
+     *
      * @author maheng
      */
     @Configuration(proxyBeanMethods = false)
@@ -260,6 +293,7 @@ public class Resilience4jConfiguration {
                             .createThreadPoolBulkheadConfig(name, compositeThreadPoolBulkheadCustomizer)));
             return bulkheadRegistry;
         }
+
         private ThreadPoolBulkheadRegistry createBulkheadRegistry(
                 CommonThreadPoolBulkheadConfigurationProperties threadPoolBulkheadConfigurationProperties,
                 RegistryEventConsumer<ThreadPoolBulkhead> threadPoolBulkheadRegistryEventConsumer,
@@ -304,6 +338,7 @@ public class Resilience4jConfiguration {
 
     /**
      * 限流器，不常用，一般使用redisson限流器
+     *
      * @author maheng
      */
     @Configuration(proxyBeanMethods = false)
@@ -326,6 +361,7 @@ public class Resilience4jConfiguration {
             );
             return rateLimiterRegistry;
         }
+
         private RateLimiterRegistry createRateLimiterRegistry(
                 RateLimiterConfigurationProperties rateLimiterConfigurationProperties,
                 RegistryEventConsumer<RateLimiter> rateLimiterRegistryEventConsumer,
@@ -339,6 +375,7 @@ public class Resilience4jConfiguration {
             return new CaffeineRateLimiterRegistry(configs, rateLimiterRegistryEventConsumer,
                     Map.copyOf(rateLimiterConfigurationProperties.getTags()));
         }
+
         private void registerEventConsumer(RateLimiterRegistry rateLimiterRegistry,
                                            EventConsumerRegistry<RateLimiterEvent> eventConsumerRegistry,
                                            RateLimiterConfigurationProperties properties) {
@@ -365,6 +402,7 @@ public class Resilience4jConfiguration {
 
     /**
      * 限时
+     *
      * @author maheng
      */
     @Configuration(proxyBeanMethods = false)
@@ -384,6 +422,7 @@ public class Resilience4jConfiguration {
             initTimeLimiterRegistry(timeLimiterRegistry, timeLimiterConfigurationProperties, compositeTimeLimiterCustomizer);
             return timeLimiterRegistry;
         }
+
         private TimeLimiterRegistry createTimeLimiterRegistry(
                 TimeLimiterConfigurationProperties timeLimiterConfigurationProperties,
                 RegistryEventConsumer<TimeLimiter> timeLimiterRegistryEventConsumer,
@@ -400,7 +439,7 @@ public class Resilience4jConfiguration {
         /**
          * Initializes the TimeLimiter registry.
          *
-         * @param timeLimiterRegistry The time limiter registry.
+         * @param timeLimiterRegistry            The time limiter registry.
          * @param compositeTimeLimiterCustomizer The Composite time limiter customizer
          */
         private void initTimeLimiterRegistry(
@@ -414,23 +453,24 @@ public class Resilience4jConfiguration {
                                     .createTimeLimiterConfig(name, properties, compositeTimeLimiterCustomizer))
             );
         }
+
         /**
          * Registers the post creation consumer function that registers the consumer events to the timeLimiters.
          *
          * @param timeLimiterRegistry   The timeLimiter registry.
          * @param eventConsumerRegistry The event consumer registry.
-         * @param properties timeLimiter configuration properties
+         * @param properties            timeLimiter configuration properties
          */
         private void registerEventConsumer(TimeLimiterRegistry timeLimiterRegistry,
-                                                  EventConsumerRegistry<TimeLimiterEvent> eventConsumerRegistry,
-                                                  TimeLimiterConfigurationProperties properties) {
+                                           EventConsumerRegistry<TimeLimiterEvent> eventConsumerRegistry,
+                                           TimeLimiterConfigurationProperties properties) {
             timeLimiterRegistry.getEventPublisher()
                     .onEntryAdded(event -> registerEventConsumer(eventConsumerRegistry, event.getAddedEntry(), properties))
                     .onEntryReplaced(event -> registerEventConsumer(eventConsumerRegistry, event.getNewEntry(), properties));
         }
 
         private void registerEventConsumer(EventConsumerRegistry<TimeLimiterEvent> eventConsumerRegistry, TimeLimiter timeLimiter,
-                                                  TimeLimiterConfigurationProperties timeLimiterConfigurationProperties) {
+                                           TimeLimiterConfigurationProperties timeLimiterConfigurationProperties) {
             int eventConsumerBufferSize = Optional.ofNullable(timeLimiterConfigurationProperties.getInstanceProperties(timeLimiter.getName()))
                     .map(CommonTimeLimiterConfigurationProperties.InstanceProperties::getEventConsumerBufferSize)
                     .orElse(100);

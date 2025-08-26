@@ -1,14 +1,19 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.s3.service;
-
-import io.github.opensabe.common.s3.observation.S3OperationContext;
-import io.github.opensabe.common.s3.observation.S3OperationConvention;
-import io.github.opensabe.common.s3.observation.S3OperationObservationDocumentation;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,6 +21,21 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import org.apache.commons.lang3.StringUtils;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.s3.observation.S3OperationContext;
+import io.github.opensabe.common.s3.observation.S3OperationConvention;
+import io.github.opensabe.common.s3.observation.S3OperationObservationDocumentation;
+import io.micrometer.observation.Observation;
+import lombok.extern.log4j.Log4j2;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
 
@@ -88,7 +108,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
 
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "getObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -122,7 +142,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "getObject");
         s3OperationContext.setFileSize(bytes.length);
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -147,7 +167,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
     public InputStream download(String fileName) {
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "getObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -181,7 +201,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
 
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "headObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {
@@ -209,7 +229,7 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
     public void copy(String sourceFileName, String destinationFileName) {
         S3OperationContext s3OperationContext = new S3OperationContext(sourceFileName + "_" + destinationFileName, "copyObject");
         Observation observation = S3OperationObservationDocumentation.S3_OPERATION.observation(
-                null, S3OperationConvention.DEFAULT,
+                null, S3OperationConvention.defaultConvention,
                 () -> s3OperationContext, unifiedObservationFactory.getObservationRegistry()
         ).start();
         try {

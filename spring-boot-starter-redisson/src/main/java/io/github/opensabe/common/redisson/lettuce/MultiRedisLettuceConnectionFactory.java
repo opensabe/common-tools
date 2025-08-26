@@ -1,8 +1,27 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.lettuce;
 
-import io.github.opensabe.common.redisson.config.MultiRedisProperties;
-import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
-import lombok.extern.log4j.Log4j2;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -16,19 +35,16 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisSentinelConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
+import io.github.opensabe.common.redisson.config.MultiRedisProperties;
+import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class MultiRedisLettuceConnectionFactory
         implements InitializingBean, DisposableBean, RedisConnectionFactory, ReactiveRedisConnectionFactory {
+    private static final ThreadLocal<String> CURRENT_REDIS = new ThreadLocal<>();
     private final Map<String, List<LettuceConnectionFactory>> connectionFactoryMap;
     private final Map<String, AtomicInteger> positionMap;
-    private static final ThreadLocal<String> currentRedis = new ThreadLocal<>();
 
     public MultiRedisLettuceConnectionFactory(Map<String, List<LettuceConnectionFactory>> connectionFactoryMap) {
         this.connectionFactoryMap = connectionFactoryMap;
@@ -39,23 +55,23 @@ public class MultiRedisLettuceConnectionFactory
         if (!connectionFactoryMap.containsKey(currentRedis)) {
             throw new RedissonClientException("invalid currentRedis: " + currentRedis + ", it does not exists in configuration");
         }
-        MultiRedisLettuceConnectionFactory.currentRedis.set(currentRedis);
+        MultiRedisLettuceConnectionFactory.CURRENT_REDIS.set(currentRedis);
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         connectionFactoryMap.values().stream().flatMap(Collection::stream).forEach(LettuceConnectionFactory::destroy);
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         connectionFactoryMap.values().stream().flatMap(Collection::stream).forEach(LettuceConnectionFactory::afterPropertiesSet);
     }
 
     private LettuceConnectionFactory currentLettuceConnectionFactory() {
-        String currentRedis = MultiRedisLettuceConnectionFactory.currentRedis.get();
+        String currentRedis = MultiRedisLettuceConnectionFactory.CURRENT_REDIS.get();
         if (StringUtils.isNotBlank(currentRedis)) {
-            MultiRedisLettuceConnectionFactory.currentRedis.remove();
+            MultiRedisLettuceConnectionFactory.CURRENT_REDIS.remove();
         } else {
             currentRedis = MultiRedisProperties.DEFAULT;
         }

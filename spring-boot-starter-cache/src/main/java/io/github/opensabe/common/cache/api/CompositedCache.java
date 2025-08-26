@@ -1,0 +1,88 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.opensabe.common.cache.api;
+
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
+import org.springframework.cache.Cache;
+
+/**
+ * 仅支持删除的缓存，如果遇到 <code>@CacheEvict</code>,不会指定
+ * <code>@Expire</code>,此时CacheManager只会调用
+ * <br>
+ * <code>getCache(cacheName)</code>,因此，要返回该Cache去支持evict操作。
+ * <p>
+ * <b>
+ * 因为ExpireCacheManager都是动态创建缓存的，而evict操作仅需要当前已经存在的缓存，
+ * 因此ExpireCacheManager在返回该缓存时，只需要添加当前已经创建的cache即可。
+ * </b>
+ * </p>
+ *
+ * @author heng.ma
+ * @see org.springframework.cache.CacheManager#getCache(String)
+ */
+public class CompositedCache implements Cache {
+
+    private final String name;
+    private final Collection<Cache> list;
+
+    public CompositedCache(String name, Collection<Cache> list) {
+        this.name = name;
+        this.list = list;
+    }
+
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Object getNativeCache() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ValueWrapper get(Object key) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T get(Object key, Class<T> type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T get(Object key, Callable<T> valueLoader) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void put(Object key, Object value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void evict(Object key) {
+        list.forEach(cache -> cache.evict(key));
+    }
+
+    @Override
+    public void clear() {
+        list.forEach(Cache::clear);
+    }
+}

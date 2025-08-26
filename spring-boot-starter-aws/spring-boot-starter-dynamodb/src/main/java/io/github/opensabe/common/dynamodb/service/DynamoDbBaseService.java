@@ -1,11 +1,25 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.dynamodb.service;
 
-import cn.hutool.core.bean.BeanDesc;
-import cn.hutool.core.bean.BeanUtil;
-import io.github.opensabe.common.dynamodb.annotation.HashKeyName;
-import io.github.opensabe.common.dynamodb.annotation.RangeKeyName;
-import io.github.opensabe.common.dynamodb.annotation.TableName;
-import lombok.extern.log4j.Log4j2;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -13,7 +27,22 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.data.util.TypeInformation;
-import software.amazon.awssdk.enhanced.dynamodb.*;
+
+import cn.hutool.core.bean.BeanDesc;
+import cn.hutool.core.bean.BeanUtil;
+import io.github.opensabe.common.dynamodb.annotation.HashKeyName;
+import io.github.opensabe.common.dynamodb.annotation.RangeKeyName;
+import io.github.opensabe.common.dynamodb.annotation.TableName;
+import lombok.extern.log4j.Log4j2;
+import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
+import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableMetadata;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.BeanAttributeGetter;
 import software.amazon.awssdk.enhanced.dynamodb.internal.mapper.BeanAttributeSetter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttribute;
@@ -21,11 +50,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 
 @Log4j2
 public abstract class DynamoDbBaseService<T> {
@@ -39,18 +63,18 @@ public abstract class DynamoDbBaseService<T> {
         this.table = client.table(environment.resolvePlaceholders(table(type)), tableSchema(type));
     }
 
-    protected String table (Class<T> type) {
+    protected String table(Class<T> type) {
         TableName tableName = AnnotatedElementUtils.findMergedAnnotation(type, TableName.class);
         if (Objects.nonNull(tableName)) {
             return tableName.name();
         }
-        throw new IllegalStateException ("no table name assignment "+ this.getClass().getName());
+        throw new IllegalStateException("no table name assignment " + this.getClass().getName());
     }
 
-    protected TableSchema<T> tableSchema (Class<T> type) {
+    protected TableSchema<T> tableSchema(Class<T> type) {
         try {
             return TableSchema.fromClass(type);
-        }catch (Throwable e) {
+        } catch (Throwable e) {
             return customerSchema(type);
         }
     }
@@ -74,12 +98,12 @@ public abstract class DynamoDbBaseService<T> {
         } catch (IllegalArgumentException e) {
             //query查询必须包含partition key，所以只通过 sort key查询时得用scan
             TableSchema<T> schema = table.tableSchema();
-            String _key = schema.tableMetadata().indexSortKey(TableMetadata.primaryIndexName()).orElseThrow();
-            AttributeValue value = schema.attributeValue(item, _key);
+            String sortKey = schema.tableMetadata().indexSortKey(TableMetadata.primaryIndexName()).orElseThrow();
+            AttributeValue value = schema.attributeValue(item, sortKey);
             return table.scan(b -> b.filterExpression(Expression.builder()
-                            .expression("#sortKey = :sortKey")
-                            .putExpressionName("#sortKey", _key)
-                            .putExpressionValue(":sortKey", value).build())).items().stream().toList();
+                    .expression("#sortKey = :sortKey")
+                    .putExpressionName("#sortKey", sortKey)
+                    .putExpressionValue(":sortKey", value).build())).items().stream().toList();
         }
         return table.query(QueryConditional.keyEqualTo(key)).items().stream().toList();
     }
@@ -93,12 +117,12 @@ public abstract class DynamoDbBaseService<T> {
     }
 
 
-    public void deleteByKey (T item) {
+    public void deleteByKey(T item) {
         table.deleteItem(table.keyFrom(item));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private TableSchema<T> customerSchema (Class<T> type) {
+    private TableSchema<T> customerSchema(Class<T> type) {
         BeanDesc desc = BeanUtil.getBeanDesc(type);
 
         StaticAttribute[] attributes = desc.getProps().stream().map(prop -> {

@@ -5,16 +5,15 @@
 	<parent>
 		<groupId>io.github.opensabe-tech</groupId>
 		<artifactId>aws-bom</artifactId>
-		<version>1.0.9.1-SNAPSHOT</version>
+		<version>2.0.0-SNAPSHOT</version>
+		<relativePath>../../spring-boot-starter-aws/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>spring-boot-starter-location</artifactId>
-	<version>1.0.9.1-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 	<packaging>jar</packaging>
 	<properties>
-		<common-utils.version>1.0.9.1-SNAPSHOT</common-utils.version>
 	</properties>
 
 	<dependencies>
@@ -27,7 +26,6 @@
 		<dependency>
 			<groupId>io.github.opensabe-tech</groupId>
 			<artifactId>common-utils</artifactId>
-			<version>${common-utils.version}</version>
 		</dependency>
 
 		<!--aws sdk-->

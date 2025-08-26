@@ -1,15 +1,30 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
-import feign.Request;
-import feign.RetryableException;
-import feign.httpclient.ApacheHttpClient;
-import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
-import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.micrometer.observation.Observation;
-import io.micrometer.observation.ObservationRegistry;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,21 +33,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+import feign.Request;
+import feign.RetryableException;
+import feign.httpclient.ApacheHttpClient;
+import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -58,37 +78,6 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
     static final int TEST_SERVICE_3_THREAD_POOL_SIZE = 1;
 
     static final String THREAD_ID_HEADER = "Threadid";
-
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
-    @FeignClient(name = TEST_SERVICE_1, contextId = CONTEXT_ID_1)
-    static interface TestService1Client {
-        @GetMapping("/anything")
-        HttpBinAnythingResponse anything();
-    }
-
-    @FeignClient(name = TEST_SERVICE_2, contextId = CONTEXT_ID_2)
-    static interface TestService2Client {
-        @GetMapping("/anything")
-        HttpBinAnythingResponse anything();
-    }
-
-    @FeignClient(name = TEST_SERVICE_3, contextId = CONTEXT_ID_3)
-    static interface TestService3Client {
-        @GetMapping("/anything")
-        HttpBinAnythingResponse anything();
-        @GetMapping("/delay/1")
-        HttpBinAnythingResponse delay();
-    }
-
-    @FeignClient(name = TEST_SERVICE_4, contextId = CONTEXT_ID_4)
-    static interface TestService4Client {
-        @GetMapping("/anything")
-        HttpBinAnythingResponse anything();
-    }
-
     @Autowired
     private CircuitBreakerRegistry circuitBreakerRegistry;
     @Autowired
@@ -103,20 +92,18 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
     private TestService4Client testService4Client;
     @Autowired
     private ObservationRegistry observationRegistry;
-
-    @MockBean(name = "service1")
+    @MockitoBean(name = "service1")
     private ServiceInstance serviceInstance1;
-    @MockBean(name = "service2")
+    @MockitoBean(name = "service2")
     private ServiceInstance serviceInstance2;
-    @MockBean(name = "service3")
+    @MockitoBean(name = "service3")
     private ServiceInstance serviceInstance3;
-    @MockBean(name = "service4")
+    @MockitoBean(name = "service4")
     private ServiceInstance serviceInstance4;
-    @MockBean
+    @MockitoBean
     private SimpleDiscoveryClient discoveryClient;
-    @SpyBean
+    @MockitoSpyBean
     private ApacheHttpClient apacheHttpClient;
-
 
     @BeforeEach
     void setup() throws IOException {
@@ -170,6 +157,7 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
 
     /**
      * 测试一个服务的线程池已满，但是其他服务不受影响
+     *
      * @throws InterruptedException
      */
     @Test
@@ -201,11 +189,12 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
             threads[i].join();
         }
 
-        Assertions.assertTrue( threadIsFull.get() && passed.get());
+        Assertions.assertTrue(threadIsFull.get() && passed.get());
     }
 
     /**
      * 测试不同微服务的线程不一样
+     *
      * @throws InterruptedException
      */
     @Test
@@ -235,7 +224,7 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
         for (int i = 0; i < 100; i++) {
             threads[i].join();
         }
-        Assertions.assertTrue( passed.get());
+        Assertions.assertTrue(passed.get());
     }
 
     /**
@@ -254,20 +243,51 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
         Set<ThreadPoolBulkhead> threadPoolBulkheads = threadPoolBulkheadRegistry.getAllBulkheads();
         Set<String> collect = threadPoolBulkheads.stream().map(ThreadPoolBulkhead::getName)
                 .filter(name -> name.contains(CONTEXT_ID_1) || name.contains(CONTEXT_ID_2) || name.contains(CONTEXT_ID_3) || name.contains(CONTEXT_ID_4)).collect(Collectors.toSet());
-        Assertions.assertTrue( collect.size() == 4);
+        Assertions.assertTrue(collect.size() == 4);
 
         threadPoolBulkheads.forEach(threadPoolBulkhead -> {
             if (threadPoolBulkhead.getName().contains(CONTEXT_ID_1)) {
-                Assertions.assertTrue( threadPoolBulkhead.getBulkheadConfig().getCoreThreadPoolSize() == DEFAULT_THREAD_POOL_SIZE);
-                Assertions.assertTrue( threadPoolBulkhead.getBulkheadConfig().getMaxThreadPoolSize() == DEFAULT_THREAD_POOL_SIZE);
+                Assertions.assertTrue(threadPoolBulkhead.getBulkheadConfig().getCoreThreadPoolSize() == DEFAULT_THREAD_POOL_SIZE);
+                Assertions.assertTrue(threadPoolBulkhead.getBulkheadConfig().getMaxThreadPoolSize() == DEFAULT_THREAD_POOL_SIZE);
             } else if (threadPoolBulkhead.getName().contains(CONTEXT_ID_2)) {
-                Assertions.assertTrue( threadPoolBulkhead.getBulkheadConfig().getCoreThreadPoolSize() == TEST_SERVICE_2_THREAD_POOL_SIZE);
-                Assertions.assertTrue( threadPoolBulkhead.getBulkheadConfig().getMaxThreadPoolSize() == TEST_SERVICE_2_THREAD_POOL_SIZE);
+                Assertions.assertTrue(threadPoolBulkhead.getBulkheadConfig().getCoreThreadPoolSize() == TEST_SERVICE_2_THREAD_POOL_SIZE);
+                Assertions.assertTrue(threadPoolBulkhead.getBulkheadConfig().getMaxThreadPoolSize() == TEST_SERVICE_2_THREAD_POOL_SIZE);
             } else if (threadPoolBulkhead.getName().contains(CONTEXT_ID_3)) {
-                Assertions.assertTrue( threadPoolBulkhead.getBulkheadConfig().getCoreThreadPoolSize() == TEST_SERVICE_3_THREAD_POOL_SIZE);
-                Assertions.assertTrue( threadPoolBulkhead.getBulkheadConfig().getMaxThreadPoolSize() == TEST_SERVICE_3_THREAD_POOL_SIZE);
-                Assertions.assertTrue( threadPoolBulkhead.getBulkheadConfig().getQueueCapacity() == TEST_SERVICE_3_THREAD_POOL_SIZE);
+                Assertions.assertTrue(threadPoolBulkhead.getBulkheadConfig().getCoreThreadPoolSize() == TEST_SERVICE_3_THREAD_POOL_SIZE);
+                Assertions.assertTrue(threadPoolBulkhead.getBulkheadConfig().getMaxThreadPoolSize() == TEST_SERVICE_3_THREAD_POOL_SIZE);
+                Assertions.assertTrue(threadPoolBulkhead.getBulkheadConfig().getQueueCapacity() == TEST_SERVICE_3_THREAD_POOL_SIZE);
             }
         });
+    }
+    @FeignClient(name = TEST_SERVICE_1, contextId = CONTEXT_ID_1)
+    static interface TestService1Client {
+        @GetMapping("/anything")
+        HttpBinAnythingResponse anything();
+    }
+
+
+    @FeignClient(name = TEST_SERVICE_2, contextId = CONTEXT_ID_2)
+    static interface TestService2Client {
+        @GetMapping("/anything")
+        HttpBinAnythingResponse anything();
+    }
+
+    @FeignClient(name = TEST_SERVICE_3, contextId = CONTEXT_ID_3)
+    static interface TestService3Client {
+        @GetMapping("/anything")
+        HttpBinAnythingResponse anything();
+
+        @GetMapping("/delay/1")
+        HttpBinAnythingResponse delay();
+    }
+
+    @FeignClient(name = TEST_SERVICE_4, contextId = CONTEXT_ID_4)
+    static interface TestService4Client {
+        @GetMapping("/anything")
+        HttpBinAnythingResponse anything();
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 }

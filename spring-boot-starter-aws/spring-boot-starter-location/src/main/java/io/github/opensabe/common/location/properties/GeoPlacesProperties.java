@@ -1,30 +1,46 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.location.properties;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = GeoPlacesProperties.PREFIX)
 public class GeoPlacesProperties {
-	
-	public static final String PREFIX = "aws.location";
 
-	private Boolean enabled = true;
+    public static final String PREFIX = "aws.location";
 
-	/**
-	 * access_key
-	 */
-	private String accessKey;
+    private Boolean enabled = true;
 
-	/**
-	 * secret_key
-	 */
-	private String secretKey;
-	/**
-	 * 处于的 region
-	 */
-	private String region;
+    /**
+     * access_key
+     */
+    private String accessKey;
+
+    /**
+     * secret_key
+     */
+    private String secretKey;
+    /**
+     * 处于的 region
+     */
+    private String region;
 
 }

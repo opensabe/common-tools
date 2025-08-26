@@ -1,21 +1,34 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.observation.rsemaphore;
 
-import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.redisson.api.RFuture;
 import org.redisson.api.RPermitExpirableSemaphore;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
+import io.micrometer.observation.Observation;
 
-public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implements RPermitExpirableSemaphore {
-    private final RPermitExpirableSemaphore delegate;
+public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable<RPermitExpirableSemaphore> implements RPermitExpirableSemaphore {
 
     public ObservedRPermitExpirableSemaphore(RPermitExpirableSemaphore delegate, UnifiedObservationFactory unifiedObservationFactory) {
         super(delegate, unifiedObservationFactory);
-        this.delegate = delegate;
     }
 
     @Override
@@ -25,7 +38,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
 
     @Override
     public boolean copy(String destination, int database) {
-        return delegate.copy(destination,database);
+        return delegate.copy(destination, database);
     }
 
     @Override
@@ -35,7 +48,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
 
     @Override
     public boolean copyAndReplace(String destination, int database) {
-        return delegate.copyAndReplace(destination,database);
+        return delegate.copyAndReplace(destination, database);
     }
 
     @Override
@@ -56,14 +69,6 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     @Override
     public RFuture<Boolean> copyAndReplaceAsync(String destination, int database) {
         return delegate.copyAndReplaceAsync(destination, database);
-    }
-
-    interface PermitSemaphoreAcquire {
-        String run();
-    }
-
-    interface PermitsSemaphoreAcquire {
-        List<String> run();
     }
 
     private String observeAcquiringPermitSemaphore(boolean tryAcquire, long waitTime, long leaseTime, TimeUnit unit, PermitSemaphoreAcquire permitSemaphoreAcquire) {
@@ -105,7 +110,6 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
             observation.stop();
         }
     }
-
 
     @Override
     public String acquire() throws InterruptedException {
@@ -355,6 +359,11 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     }
 
     @Override
+    public void setPermits(int permits) {
+        delegate.setPermits(permits);
+    }
+
+    @Override
     public int acquiredPermits() {
         return delegate.acquiredPermits();
     }
@@ -378,11 +387,6 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
         } finally {
             observation.stop();
         }
-    }
-
-    @Override
-    public void setPermits(int permits) {
-        delegate.setPermits(permits);
     }
 
     @Override
@@ -427,6 +431,11 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     }
 
     @Override
+    public long getLeaseTime(String permitId) {
+        return delegate.getLeaseTime(permitId);
+    }
+
+    @Override
     public RFuture<String> acquireAsync() {
         return delegate.acquireAsync();
     }
@@ -443,7 +452,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
 
     @Override
     public RFuture<List<String>> acquireAsync(int permits, long leaseTime, TimeUnit unit) {
-        return delegate.acquireAsync(permits,leaseTime,unit);
+        return delegate.acquireAsync(permits, leaseTime, unit);
     }
 
     @Override
@@ -468,7 +477,7 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
 
     @Override
     public RFuture<List<String>> tryAcquireAsync(int permits, long waitTime, long leaseTime, TimeUnit unit) {
-        return delegate.tryAcquireAsync(permits,waitTime,leaseTime,unit);
+        return delegate.tryAcquireAsync(permits, waitTime, leaseTime, unit);
     }
 
     @Override
@@ -524,5 +533,18 @@ public class ObservedRPermitExpirableSemaphore extends ObservedRExpirable implem
     @Override
     public RFuture<Boolean> updateLeaseTimeAsync(String permitId, long leaseTime, TimeUnit unit) {
         return delegate.updateLeaseTimeAsync(permitId, leaseTime, unit);
+    }
+
+    @Override
+    public RFuture<Long> getLeaseTimeAsync(String permitId) {
+        return delegate.getLeaseTimeAsync(permitId);
+    }
+
+    interface PermitSemaphoreAcquire {
+        String run();
+    }
+
+    interface PermitsSemaphoreAcquire {
+        List<String> run();
     }
 }

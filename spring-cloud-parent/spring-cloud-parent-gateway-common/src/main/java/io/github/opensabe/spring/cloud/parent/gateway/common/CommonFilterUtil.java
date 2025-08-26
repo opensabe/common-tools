@@ -1,8 +1,22 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.gateway.common;
 
-import com.google.common.base.Charsets;
-import io.github.opensabe.base.vo.BaseRsp;
-import io.github.opensabe.common.utils.json.JsonUtil;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -11,6 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.AntPathMatcher;
+
+import io.github.opensabe.base.vo.BaseRsp;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import reactor.core.publisher.Mono;
 
 public class CommonFilterUtil {
@@ -47,7 +64,7 @@ public class CommonFilterUtil {
         //例如这里使用请求的 body 作为输入的 dataBuffer，读取完了必须释放
         // 因为参与后续 Filter 的已经不是原始的 dataBuffer，无法释放了
         DataBufferUtils.release(dataBuffer);
-        return new String(content, Charsets.UTF_8);
+        return new String(content, StandardCharsets.UTF_8);
     }
 
     public static Mono<Void> errorResponse(ServerHttpResponse response, HttpStatus httpStatus, BaseRsp baseRsp, DataBufferFactory dataBufferFactory) {
@@ -60,7 +77,8 @@ public class CommonFilterUtil {
                 )
         ));
     }
+
     public static Mono<Void> errorResponse(ServerHttpResponse response, HttpStatus httpStatus, BaseRsp baseRsp) {
-        return errorResponse(response,httpStatus,baseRsp,response.bufferFactory());
+        return errorResponse(response, httpStatus, baseRsp, response.bufferFactory());
     }
 }

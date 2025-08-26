@@ -1,4 +1,32 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.paypal.service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 
 import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.common.utils.json.JsonUtil;
@@ -9,19 +37,11 @@ import io.github.opensabe.paypal.dto.PayPalPlanDetailResponseDTO;
 import io.github.opensabe.paypal.dto.PayPalPlanResponseDTO;
 import io.github.opensabe.spring.cloud.parent.common.handler.FrontendException;
 import lombok.extern.log4j.Log4j2;
-import okhttp3.*;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import okhttp3.Call;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * PayPal 通用service
@@ -31,31 +51,25 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class PayPalService {
 
-    private final StringRedisTemplate redisTemplate;
-    private final PayPalProperties properties;
     /**
      * 获取token的uri
      */
     public static final String PAYPAL_TOKEN_URI = "/oauth2/token";
-
     /**
      * 获取plans的uri
      * 目前写死1页20条，生产环境也够用了
      */
     public static final String PAYPAL_PLANS_URI = "/billing/plans";
-
     /**
      * 获取plans 详情的 的uri
      */
     public static final String PAYPAL_PLANS_DETAIL_URI = "/billing/plans/";
-
     /**
      * PayPal token 缓存key
      */
     public static final String PAYPAL_TOKEN_REDIS_KEY = "patron:paypal:token";
-
-
-
+    private final StringRedisTemplate redisTemplate;
+    private final PayPalProperties properties;
     private final OkHttpClient okHttpClient;
 
     @Autowired
@@ -104,6 +118,7 @@ public class PayPalService {
 
     /**
      * 获取PayPal API token
+     *
      * @param url          PayPal请求地址
      * @param clientId     clientId
      * @param clientSecret clientSecret

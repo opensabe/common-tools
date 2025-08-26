@@ -1,7 +1,22 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.web.config.interceptor;
 
-import io.github.opensabe.common.utils.json.JsonUtil;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,7 +26,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Method;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 该切面类主要是用来记录http相关接口的请求以及相应数据
@@ -21,10 +37,10 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 public class CommonAop {
-    
+
     @Value(value = "${log.http-request.max-length:200000000}")
     private Integer maxLengthForlogRequest;
-    
+
     public CommonAop() {
     }
 
@@ -50,7 +66,7 @@ public class CommonAop {
 
     private Object aroundHTTPMethod(ProceedingJoinPoint pjp) throws Throwable {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
-        String className = pjp.getTarget().toString();//获取被拦截的类
+        String className = pjp.getTarget().toString(); // 获取被拦截的类
         Method method = signature.getMethod(); //获取被拦截的方法
         String methodName = method.getName(); //获取被拦截的方法名
         String name = className + "." + methodName;

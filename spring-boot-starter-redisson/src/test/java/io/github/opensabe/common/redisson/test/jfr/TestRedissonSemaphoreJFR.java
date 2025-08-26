@@ -1,65 +1,52 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.test.jfr;
-
-import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
-import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
-import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import io.micrometer.tracing.TraceContext;
-import jdk.jfr.consumer.RecordedEvent;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.moditect.jfrunit.JfrEventTest;
-import org.moditect.jfrunit.JfrEvents;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.moditect.jfrunit.JfrEvents;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
+import io.micrometer.observation.Observation;
+import io.micrometer.tracing.TraceContext;
+import jdk.jfr.consumer.RecordedEvent;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @Import(TestRedissonSemaphoreJFR.Config.class)
 //JFR 测试最好在本地做
 @Disabled
 public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
-    public JfrEvents jfrEvents = new JfrEvents();
-
     private static final int THREAD_COUNT = 10;
-
-    public static class Config {
-        @Bean
-        public TestRedissonSemaphoreBean testRedissonSemaphoreBean() {
-            return new TestRedissonSemaphoreBean();
-        }
-    }
-
-    public static class TestRedissonSemaphoreBean {
-        @RedissonSemaphore(
-                name = "TestRedissonSemaphoreJFR-testTryAcquire",
-                type = RedissonSemaphore.Type.TRY,
-                totalPermits = 1,
-                waitTime = 50,
-                timeUnit = TimeUnit.MILLISECONDS
-
-        )
-        public void testTryAcquire() throws InterruptedException {
-            TimeUnit.MILLISECONDS.sleep(100);
-        }
-    }
-
+    public JfrEvents jfrEvents = new JfrEvents();
     @Autowired
     private TestRedissonSemaphoreBean testRedissonSemaphoreBean;
     @Autowired
@@ -67,7 +54,7 @@ public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
 
     @Test
     public void testTryAcquire() throws InterruptedException {
-        Thread []threads = new Thread[THREAD_COUNT];
+        Thread[] threads = new Thread[THREAD_COUNT];
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         for (int i = 0; i < THREAD_COUNT; i++) {
             threads[i] = new Thread(() -> {
@@ -123,7 +110,7 @@ public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
         }
         assertEquals(THREAD_COUNT, rPermitSemaphoreAcquiredJFREvents.stream().map(recordedEvent -> recordedEvent.getString("spanId")).distinct().count());
 
-        List<String> acquired = rPermitSemaphoreAcquiredJFREvents.stream().map(recordedEvent ->recordedEvent.getString("permitId")).filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> acquired = rPermitSemaphoreAcquiredJFREvents.stream().map(recordedEvent -> recordedEvent.getString("permitId")).filter(Objects::nonNull).collect(Collectors.toList());
 
         assertEquals(acquired.size(), rPermitSemaphoreReleasedJFREvents.size());
         for (RecordedEvent recordedEvent : rPermitSemaphoreReleasedJFREvents) {
@@ -134,5 +121,26 @@ public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
         }
         assertEquals(acquired.size(), rPermitSemaphoreReleasedJFREvents.stream().map(recordedEvent -> recordedEvent.getString("spanId")).distinct().count());
 
+    }
+
+    public static class Config {
+        @Bean
+        public TestRedissonSemaphoreBean testRedissonSemaphoreBean() {
+            return new TestRedissonSemaphoreBean();
+        }
+    }
+
+    public static class TestRedissonSemaphoreBean {
+        @RedissonSemaphore(
+                name = "TestRedissonSemaphoreJFR-testTryAcquire",
+                type = RedissonSemaphore.Type.TRY,
+                totalPermits = 1,
+                waitTime = 50,
+                timeUnit = TimeUnit.MILLISECONDS
+
+        )
+        public void testTryAcquire() throws InterruptedException {
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
     }
 }

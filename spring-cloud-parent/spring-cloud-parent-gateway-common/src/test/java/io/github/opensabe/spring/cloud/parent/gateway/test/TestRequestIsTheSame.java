@@ -1,5 +1,42 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.gateway.test;
 
+import java.time.Duration;
+import java.util.Map;
+
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.DefaultResponse;
+import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+import io.github.opensabe.base.vo.BaseRsp;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
 import io.github.opensabe.spring.cloud.parent.gateway.filter.CommonLogFilter;
@@ -10,28 +47,8 @@ import io.github.opensabe.spring.cloud.parent.gateway.filter.RetryGatewayFilter;
 import io.github.opensabe.spring.cloud.parent.gateway.filter.TraceIdFilter;
 import io.github.opensabe.spring.cloud.parent.gateway.filter.TracedReactiveLoadBalancerClientFilter;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.cloud.client.DefaultServiceInstance;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.DefaultRequest;
-import org.springframework.cloud.client.loadbalancer.DefaultResponse;
-import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
-import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
-import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -44,12 +61,12 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         webEnvironment = RANDOM_PORT,
         properties = {
                 "eureka.client.enabled=false",
-                "spring.cloud.gateway.httpclient.connect-timeout=500",
-                "spring.cloud.gateway.httpclient.response-timeout=2000",
-                "spring.cloud.gateway.routes[0].id=testService",
-                "spring.cloud.gateway.routes[0].uri=lb://testService",
-                "spring.cloud.gateway.routes[0].predicates[0]=Path=/httpbin/**",
-                "spring.cloud.gateway.routes[0].filters[0]=StripPrefix=1",
+                "spring.cloud.gateway.server.webflux.httpclient.connect-timeout=500",
+                "spring.cloud.gateway.server.webflux.httpclient.response-timeout=2000",
+                "spring.cloud.gateway.server.webflux.routes[0].id=testService",
+                "spring.cloud.gateway.server.webflux.routes[0].uri=lb://testService",
+                "spring.cloud.gateway.server.webflux.routes[0].predicates[0]=Path=/httpbin/**",
+                "spring.cloud.gateway.server.webflux.routes[0].filters[0]=StripPrefix=1",
                 "resilience4j.circuitbreaker.configs.default.failureRateThreshold=50",
                 "resilience4j.circuitbreaker.configs.default.slidingWindowType=TIME_BASED",
                 "resilience4j.circuitbreaker.configs.default.slidingWindowSize=5",
@@ -59,21 +76,20 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         classes = TestRequestIsTheSame.MockConfig.class
 )
 public class TestRequestIsTheSame extends CommonMicroServiceTest {
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
     private final String serviceId = "testService";
-
-    @SpyBean
+    @LocalServerPort
+    protected int port = 0;
+    //不同的测试方法的类对象不是同一个对象，会重新生成，保证互相没有影响
+    ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
+    ServiceInstance zone1Instance2 = new DefaultServiceInstance("instance2", serviceId, CONNECT_TIMEOUT_HOST, CONNECT_TIMEOUT_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
+    TracedCircuitBreakerRoundRobinLoadBalancer loadBalancerClientFactoryInstance = spy(TracedCircuitBreakerRoundRobinLoadBalancer.class);
+    ServiceInstanceListSupplier serviceInstanceListSupplier = spy(ServiceInstanceListSupplier.class);
+    @MockitoSpyBean
     private LoadBalancerClientFactory loadBalancerClientFactory;
     @Autowired
     private CircuitBreakerRegistry circuitBreakerRegistry;
     @Autowired
     private CircuitBreakerExtractor circuitBreakerExtractor;
-    @LocalServerPort
-    protected int port = 0;
-
     @Autowired
     private CommonLogFilter commonLogFilter;
     @Autowired
@@ -88,19 +104,10 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
     private TracedReactiveLoadBalancerClientFilter reactiveLoadBalancerClientFilter;
     @Autowired
     private TraceIdFilter traceIdFilter;
-
     @Autowired
     private WebTestClient webClient;
-
-    private Integer idx = 0;
+    private int idx = 0;
     private DefaultRequest[] requests;
-
-    //不同的测试方法的类对象不是同一个对象，会重新生成，保证互相没有影响
-    ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
-    ServiceInstance zone1Instance2 = new DefaultServiceInstance("instance2", serviceId, CONNECT_TIMEOUT_HOST, CONNECT_TIMEOUT_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
-
-    TracedCircuitBreakerRoundRobinLoadBalancer loadBalancerClientFactoryInstance = spy(TracedCircuitBreakerRoundRobinLoadBalancer.class);
-    ServiceInstanceListSupplier serviceInstanceListSupplier = spy(ServiceInstanceListSupplier.class);
 
     @BeforeEach
     void setup() {
@@ -122,12 +129,18 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
         when(loadBalancerClientFactoryInstance.choose(any())).thenAnswer(req -> {
             updateRequest(req.getArgument(0));
             return serviceInstanceListSupplier.get().next().flatMap((serviceInstances) -> {
-                ServiceInstance serviceInstance = (ServiceInstance) serviceInstances.get(1);
+                ServiceInstance serviceInstance = serviceInstances.get(1);
                 return Mono.just(new DefaultResponse(serviceInstance));
             });
         });
 
-        webClient.get().uri("/httpbin/status/500").exchange().expectStatus().is5xxServerError();
+        //2025年03月13日10:07:13，spring boot 3.4.3开始，网关也受ControllerAdvice影响，因此这里会是200
+
+        webClient.get().uri("/httpbin/status/500").exchange().expectBody(BaseRsp.class)
+                .consumeWith(r -> {
+                    assertTrue(r.getStatus().is2xxSuccessful());
+                    assertTrue(r.getResponseBody().getInnerMsg().contains("Connection refused"));
+                });
         //必须用 == 验证是同一个对象
         assertTrue(requests[0] == requests[1]);
         assertTrue(requests[2] == requests[1]);
@@ -136,5 +149,9 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
     private void updateRequest(DefaultRequest request) {
         System.out.println(request);
         requests[idx++] = request;
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 }

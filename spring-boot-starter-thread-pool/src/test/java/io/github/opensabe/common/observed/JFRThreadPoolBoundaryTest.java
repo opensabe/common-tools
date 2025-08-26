@@ -1,14 +1,37 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.observed;
 
-import io.github.opensabe.common.executor.ThreadPoolFactory;
-import io.github.opensabe.common.executor.scheduler.ThreadPoolStatScheduler;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import io.micrometer.tracing.TraceContext;
-import jdk.jfr.consumer.RecordedEvent;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
@@ -18,19 +41,12 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import io.github.opensabe.common.executor.ThreadPoolFactory;
+import io.github.opensabe.common.executor.scheduler.ThreadPoolStatScheduler;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.micrometer.observation.Observation;
+import io.micrometer.tracing.TraceContext;
+import jdk.jfr.consumer.RecordedEvent;
 
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
@@ -44,16 +60,13 @@ import static org.junit.Assert.assertTrue;
 })
 //JFR 测试最好在本地做
 @Disabled
+@DisplayName("JFR线程池边界测试")
 public class JFRThreadPoolBoundaryTest {
-    Logger logger = LogManager.getLogger(JFRThreadPoolBoundaryTest.class);
     private static final String threadNamePrefix = "threadPoolStat";
-    
     private static final String JFR_EVENT_NAME = ".ThreadTaskJFREvent";
-
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
+    private static final long UNIT = 500L;
+    public JfrEvents jfrEvents = new JfrEvents();
+    Logger logger = LogManager.getLogger(JFRThreadPoolBoundaryTest.class);
     @Autowired
     ThreadPoolFactory threadPoolFactory;
     @Autowired
@@ -61,11 +74,12 @@ public class JFRThreadPoolBoundaryTest {
     @Autowired
     UnifiedObservationFactory unifiedObservationFactory;
 
-    public JfrEvents jfrEvents = new JfrEvents();
-
-    private static final long UNIT = 500L;
+    private static int roundHalfUp(double value) {
+        return BigDecimal.valueOf(value).setScale(0, RoundingMode.HALF_UP).intValue();
+    }
 
     @Test
+    @DisplayName("测试正常Callable任务 - 验证JFR事件记录和链路追踪")
     public void testNormal() {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testNormal";
@@ -163,6 +177,7 @@ public class JFRThreadPoolBoundaryTest {
      * JFR 值测试 duration runnable
      */
     @Test
+    @DisplayName("测试Runnable任务持续时间 - 验证JFR事件记录")
     public void testDurationRunnable() throws InterruptedException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testDurationRunnable";
@@ -206,13 +221,16 @@ public class JFRThreadPoolBoundaryTest {
             });
         });
 
+        executorService.awaitTermination(UNIT * 10, TimeUnit.MILLISECONDS);
+
         //等待事件全部采集到
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
                 .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
+        ;
         assertEquals(3, events.size());
 
         Map<String, Long> mapDuration = new HashMap();
@@ -248,6 +266,7 @@ public class JFRThreadPoolBoundaryTest {
      * 测试3  JFR 值测试  exception  callable duration
      */
     @Test
+    @DisplayName("测试Callable任务异常处理 - 验证JFR事件记录")
     public void testCallableDurationException() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testCallableDurationException";
@@ -309,7 +328,8 @@ public class JFRThreadPoolBoundaryTest {
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
                 .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
+        ;
         assertEquals(3, events.size());
 
         Map<String, Long> mapDuration = new HashMap();
@@ -346,6 +366,7 @@ public class JFRThreadPoolBoundaryTest {
      * 线程池 线程执行任务1时会异常退出(线程一退出)，执行任务2时创建新线程
      */
     @Test
+    @DisplayName("测试Runnable任务异常处理 - 验证JFR事件记录")
     public void testRunnableDurationException() throws InterruptedException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testRunnableDurationException";
@@ -379,7 +400,8 @@ public class JFRThreadPoolBoundaryTest {
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
                 .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
+        ;
         assertEquals(2, events.size());
 
         Map<String, Long> mapDuration = new HashMap();
@@ -415,6 +437,7 @@ public class JFRThreadPoolBoundaryTest {
      * 测试5  JFR 值测试  throwable  callable duration
      */
     @Test
+    @DisplayName("测试Callable任务异常处理 - 验证JFR事件记录")
     public void testCallableDurationThrowable() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testCallableDurationThrowable";
@@ -476,7 +499,8 @@ public class JFRThreadPoolBoundaryTest {
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
                 .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
+        ;
         assertEquals(3, events.size());
 
         Map<String, Long> mapDuration = new HashMap();
@@ -512,6 +536,7 @@ public class JFRThreadPoolBoundaryTest {
      * 测试6  JFR 值测试  throwable  runnable duration
      */
     @Test
+    @DisplayName("测试Runnable任务异常处理 - 验证JFR事件记录")
     public void testRunnableDurationThrowable() throws InterruptedException, ExecutionException {
         jfrEvents.reset();
         String threadPrefix = threadNamePrefix + "testRunnableDurationThrowable";
@@ -543,13 +568,15 @@ public class JFRThreadPoolBoundaryTest {
             logger.info("task2 down...");
         });
 
+        executorService.awaitTermination(UNIT * 10, TimeUnit.MILLISECONDS);
         //等待事件全部采集到
         jfrEvents.awaitEvents();
         List<RecordedEvent> events = jfrEvents.events()
                 .filter(e -> e.getEventType().getName().contains(JFR_EVENT_NAME))
                 .filter(e -> e.getThread().getJavaName().contains(threadPrefix))
                 .sorted(Comparator.comparing(s -> s.getThread().getJavaName()))
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
+        ;
         assertEquals(2, events.size());
 
         Map<String, Long> mapDuration = new HashMap();
@@ -580,8 +607,8 @@ public class JFRThreadPoolBoundaryTest {
         );
 
     }
-    
-    private static int roundHalfUp(double value) {
-        return BigDecimal.valueOf(value).setScale(0, RoundingMode.HALF_UP).intValue();
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 }

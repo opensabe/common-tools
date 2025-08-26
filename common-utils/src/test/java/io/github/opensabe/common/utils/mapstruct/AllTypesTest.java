@@ -1,12 +1,19 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.utils.mapstruct;
-
-import io.github.opensabe.common.utils.mapstruct.vo.Types;
-import io.github.opensabe.common.utils.mapstruct.vo.TypesDto;
-import io.github.opensabe.mapstruct.core.CommonCopyMapper;
-import io.github.opensabe.mapstruct.core.FromMapMapper;
-import io.github.opensabe.mapstruct.core.MapperRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,10 +23,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import io.github.opensabe.common.utils.mapstruct.vo.Types;
+import io.github.opensabe.common.utils.mapstruct.vo.TypesDto;
+import io.github.opensabe.mapstruct.core.CommonCopyMapper;
+import io.github.opensabe.mapstruct.core.FromMapMapper;
+import io.github.opensabe.mapstruct.core.MapperRepository;
+
+@DisplayName("MapStruct所有类型映射测试")
 public class AllTypesTest {
 
     @Test
-    void testToRecord () {
+    @DisplayName("测试类到Record的映射 - 验证所有数据类型转换")
+    void testToRecord() {
         var m = System.currentTimeMillis();
         var allTypes = new Types();
         allTypes.setName("tom");
@@ -65,7 +84,8 @@ public class AllTypesTest {
 
 
     @Test
-    void testToClass () {
+    @DisplayName("测试Record到类的映射 - 验证所有数据类型转换")
+    void testToClass() {
         var m = System.currentTimeMillis();
         var record = new TypesDto("tom", 40, 28,
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(m), ZoneId.systemDefault()), Instant.ofEpochMilli(m), new Date(m),
@@ -94,7 +114,8 @@ public class AllTypesTest {
     }
 
     @Test
-    void testFromMap () {
+    @DisplayName("测试Map到类的映射 - 验证所有数据类型转换")
+    void testFromMap() {
         var m = System.currentTimeMillis();
         Map<String, Object> map = new HashMap<>();
         map.put("name", "tom");

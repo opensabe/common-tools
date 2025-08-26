@@ -1,5 +1,29 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.scheduler.job;
 
+import java.time.Duration;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.scheduler.conf.Commander;
 import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
 import io.github.opensabe.scheduler.listener.JobFinishedListener;
@@ -10,19 +34,11 @@ import io.github.opensabe.scheduler.observation.JobExecuteContext;
 import io.github.opensabe.scheduler.observation.JobExecuteObservationConvention;
 import io.github.opensabe.scheduler.observation.JobExecuteObservationDocumentation;
 import io.github.opensabe.scheduler.server.SchedulerServer;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.observation.Observation;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import java.time.Duration;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 
 @Log4j2
@@ -123,7 +139,7 @@ public class JobExecutor implements Runnable {
                     long endTime = System.currentTimeMillis();
                     long time = endTime - starTime;
                     //次数大于 10，大于最大时间的两倍，并且大于 60s
-                    if (distributionSummary.count() > 10 && (time > distributionSummary.max() * 2) && time > 60000) {
+                    if (distributionSummary.count() > 10 && time > distributionSummary.max() * 2 && time > 60000) {
                         log.fatal("{} execute out. time used = {}ms, recent mean elapsed time is {}ms", schedulerJob.getJobName(), time, distributionSummary.mean());
                     } else {
                         log.info("{} execute out. time used = {}ms", schedulerJob.getJobName(), time);

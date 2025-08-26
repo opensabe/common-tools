@@ -1,11 +1,19 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.mybatis.types;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.type.BaseTypeHandler;
-import org.apache.ibatis.type.JdbcType;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -13,11 +21,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.type.BaseTypeHandler;
+import org.apache.ibatis.type.JdbcType;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
- *  pojo里不支持泛型，如果遇到泛型需要用子类包一层，如果泛型类型为基本类型，则直接用：
- *
- *  支持 List&lt;Integer> 但是不支持 List&lt;DisplaySetting> 需要写一个子类
- *  <pre class="code">
+ * pojo里不支持泛型，如果遇到泛型需要用子类包一层，如果泛型类型为基本类型，则直接用：
+ * <p>
+ * 支持 List&lt;Integer> 但是不支持 List&lt;DisplaySetting> 需要写一个子类
+ * <pre class="code">
  *      public class Displays extends ArrayList&lt;DisplaySetting> {
  *
  *      }
@@ -60,6 +76,7 @@ public class JSONTypeHandler extends BaseTypeHandler<Object> {
 
     private final Class<?> type;
     private final ObjectMapper objectMapper;
+
     public JSONTypeHandler(Class<?> type) {
         this.type = type;
         this.objectMapper = new ObjectMapper();
@@ -71,10 +88,9 @@ public class JSONTypeHandler extends BaseTypeHandler<Object> {
     public void setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType) throws SQLException {
         if (parameter == null) {
             ps.setString(i, null);
-        }
-        else if (parameter instanceof String) {
+        } else if (parameter instanceof String) {
             ps.setString(i, (String) parameter);
-        }else {
+        } else {
             ps.setString(i, toString(parameter));
         }
     }
@@ -94,7 +110,7 @@ public class JSONTypeHandler extends BaseTypeHandler<Object> {
         return toJavaBean(cs.getString(columnIndex));
     }
 
-    protected Object toJavaBean (String content) {
+    protected Object toJavaBean(String content) {
         if (StringUtils.isBlank(content)) {
             return null;
         }
@@ -102,13 +118,13 @@ public class JSONTypeHandler extends BaseTypeHandler<Object> {
             return content;
         }
         try {
-            return objectMapper.readValue(content,type);
+            return objectMapper.readValue(content, type);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected String toString (Object object) {
+    protected String toString(Object object) {
         if (Objects.isNull(object)) {
             return null;
         }

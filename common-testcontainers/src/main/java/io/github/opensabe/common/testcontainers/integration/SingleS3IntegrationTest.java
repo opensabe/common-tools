@@ -1,17 +1,41 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.testcontainers.integration;
 
-import io.github.opensabe.common.testcontainers.CustomizedS3Container;
-import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
+
+import io.github.opensabe.common.testcontainers.CustomizedS3Container;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 注意使用这个类的单元测试，用的是同一个 S3，不同单元测试注意隔离不同的 key
  */
 @Log4j2
 public class SingleS3IntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
-    public static CustomizedS3Container AWS_S3 = new CustomizedS3Container();
+    public static final CustomizedS3Container AWS_S3 = new CustomizedS3Container();
+
+    public static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("aws.s3.enabled", () -> true);
+        registry.add("aws.s3.accessKeyId", () -> "fake");
+        registry.add("aws.s3.accessKey", () -> "fake");
+        registry.add("aws.s3.region", () -> "us-east-1");
+        registry.add("awsS3LocalUrl", () -> "http://s3.localhost.localstack.cloud:" + AWS_S3.getS3Port());
+    }
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
@@ -23,14 +47,6 @@ public class SingleS3IntegrationTest implements BeforeAllCallback, ExtensionCont
                 }
             }
         }
-    }
-
-    public static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("aws.s3.enabled", () -> true);
-        registry.add("aws.s3.accessKeyId", () -> "fake");
-        registry.add("aws.s3.accessKey", () -> "fake");
-        registry.add("aws.s3.region", () -> "us-east-1");
-        registry.add("awsS3LocalUrl", () -> "http://s3.localhost.localstack.cloud:" + AWS_S3.getS3Port());
     }
 
     @Override

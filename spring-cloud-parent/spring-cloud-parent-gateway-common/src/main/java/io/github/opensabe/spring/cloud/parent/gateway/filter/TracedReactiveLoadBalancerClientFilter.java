@@ -1,13 +1,25 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.gateway.filter;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.RemovalCause;
-import io.github.opensabe.spring.cloud.parent.common.CommonConstant;
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
-import io.github.opensabe.spring.cloud.parent.webflux.common.TracedPublisherFactory;
-import io.micrometer.observation.Observation;
-import lombok.extern.log4j.Log4j2;
+import java.net.URI;
+import java.time.Duration;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -31,12 +43,17 @@ import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBal
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.time.Duration;
-import java.util.Map;
-import java.util.Set;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
+
+import io.github.opensabe.spring.cloud.parent.common.CommonConstant;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
+import io.github.opensabe.spring.cloud.parent.webflux.common.TracedPublisherFactory;
+import io.micrometer.observation.Observation;
+import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
 
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_LOADBALANCER_RESPONSE_ATTR;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR;
@@ -46,6 +63,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.a
 /**
  * 默认的 ReactiveLoadBalancerClientFilter 里面可能会有 span 缺失，所以这里修正下
  * 并且加入了对于 socketio 的端口识别，路径必须包含 socket.io
+ *
  * @see TraceIdFilter
  * @see AbstractTracedFilter
  * @see org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter
@@ -56,17 +74,6 @@ public class TracedReactiveLoadBalancerClientFilter extends ReactiveLoadBalancer
     private final LoadBalancerClientFactory clientFactory;
 
     private final GatewayLoadBalancerProperties properties;
-
-
-    public TracedReactiveLoadBalancerClientFilter(
-            LoadBalancerClientFactory clientFactory,
-            GatewayLoadBalancerProperties properties
-    ) {
-        super(clientFactory, properties);
-        this.clientFactory = clientFactory;
-        this.properties = properties;
-    }
-
     /**
      * 不能使用并发不安全的 WeakHashMap
      * 需要使用 weakKeys，因为这里不确定何时 Request 会结束，需要保证不影响 Request 的垃圾回收
@@ -87,9 +94,17 @@ public class TracedReactiveLoadBalancerClientFilter extends ReactiveLoadBalancer
                         }
                     })
                     .build();
-
     @Autowired
     private TracedPublisherFactory tracedPublisherFactory;
+
+    public TracedReactiveLoadBalancerClientFilter(
+            LoadBalancerClientFactory clientFactory,
+            GatewayLoadBalancerProperties properties
+    ) {
+        super(clientFactory, properties);
+        this.clientFactory = clientFactory;
+        this.properties = properties;
+    }
 
     //为了有 traceId
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -189,6 +204,7 @@ public class TracedReactiveLoadBalancerClientFilter extends ReactiveLoadBalancer
 
     /**
      * 覆盖重写 URI 的方法，因为里面可能会有 SOCKET.IO 的路径，需要替换下
+     *
      * @param serviceInstance
      * @param original
      * @return

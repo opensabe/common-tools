@@ -1,13 +1,26 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.paypal.utils;
+
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
 
@@ -25,33 +38,23 @@ public class CacheUtils {
     public static final Cache<String, CacheObject<?>> CAFFEINE = Caffeine.newBuilder()
             .expireAfter(new Expiry<String, CacheObject<?>>() {
                 @Override
-                public long expireAfterCreate(@NonNull String key, @NonNull CacheObject<?> value, long currentTime) {
+                public long expireAfterCreate(String key, CacheObject<?> value, long currentTime) {
                     return value.expire;
                 }
 
                 @Override
-                public long expireAfterUpdate(@NonNull String key, @NonNull CacheObject<?> value, long currentTime, @NonNegative long currentDuration) {
+                public long expireAfterUpdate(String key, CacheObject<?> value, long currentTime, long currentDuration) {
                     return value.expire;
                 }
 
                 @Override
-                public long expireAfterRead(@NonNull String key, @NonNull CacheObject<?> value, long currentTime, @NonNegative long currentDuration) {
+                public long expireAfterRead(String key, CacheObject<?> value, long currentTime, long currentDuration) {
                     return value.expire;
                 }
             })
             .initialCapacity(100)
             .maximumSize(1024)
             .build();
-
-    private static class CacheObject<T> {
-        T data;
-        long expire;
-
-        public CacheObject(T data, long second) {
-            this.data = data;
-            this.expire = TimeUnit.SECONDS.toNanos(second);
-        }
-    }
 
     public static <T> void set(String key, T value, long expire) {
         CacheObject<T> cacheObject = new CacheObject<>(value, expire);
@@ -118,6 +121,16 @@ public class CacheUtils {
         System.out.println(b);
         System.out.println(c);
         System.out.println("-----------------");
+    }
+
+    private static class CacheObject<T> {
+        T data;
+        long expire;
+
+        CacheObject(T data, long second) {
+            this.data = data;
+            this.expire = TimeUnit.SECONDS.toNanos(second);
+        }
     }
 
 }

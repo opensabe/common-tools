@@ -1,9 +1,30 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.buffer;
 
 //等 https://github.com/abel533/Mapper/releases/tag/5.0.0-rc2 发布，更新 tk mybatis 之后就可以去掉 javax 的依赖和注解
+
 import jakarta.persistence.Transient;
 
 public abstract class BufferedElement {
+    private final BufferedElementJFREvent bufferedElementJFREvent;
+    @Transient
+    private String traceId;
+    @Transient
+    private String spanId;
     protected BufferedElement() {
         bufferedElementJFREvent = new BufferedElementJFREvent();
         bufferedElementJFREvent.begin();
@@ -11,25 +32,17 @@ public abstract class BufferedElement {
 
     /**
      * 用于负载均衡的 key
-     * @return
      */
     public abstract String hashKey();
-
-    @Transient
-    @javax.persistence.Transient
-    private String traceId;
-    @Transient
-    @javax.persistence.Transient
-    private String spanId;
-
-    private final BufferedElementJFREvent bufferedElementJFREvent;
 
     public String traceId() {
         return traceId;
     }
+
     public String spanId() {
         return spanId;
     }
+
     public void setSubmitInfo(String traceId, String spanId) {
         this.traceId = traceId;
         this.bufferedElementJFREvent.setSubmitTraceId(traceId);

@@ -1,61 +1,54 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.cache.config;
 
-import io.github.opensabe.common.cache.utils.CacheHelper;
-import jakarta.annotation.PostConstruct;
-import lombok.Data;
+import java.util.List;
+
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(prefix = "caches")
 public class CachesProperties {
 
     private List<CustomCacheProperties> custom;
     private boolean enabled = true;
-    @PostConstruct
-    public void initCacheNamesPrefix(){
-        if(!CollectionUtils.isEmpty(custom)){
-            custom.forEach(customList -> customList.setCacheNames(
-                    customList.getCacheNames().stream()
-                    .map(cacheName -> CacheHelper.CACHE_NAME_PREFIX + cacheName)
-                    .collect(Collectors.toList())
-            ));
-        }
-    }
 
-    public static class CustomCacheProperties extends CacheProperties{
+    @Getter
+    @Setter
+    public static class CustomCacheProperties extends CacheProperties {
 
         private String cacheDesc;
 
-        public String getCacheDesc() {
-            return this.cacheDesc;
-        }
 
-        public void setCacheDesc(String cacheDesc) {
-            this.cacheDesc = cacheDesc;
-        }
-
-        public Object getCacheSetting(){
-            switch (getType()) {
-                case CAFFEINE:
-                    return getCaffeine();
-                case COUCHBASE:
-                    return getCouchbase();
+        public Object getCacheSetting() {
+            return switch (getType()) {
+                case CAFFEINE -> getCaffeine();
+                case COUCHBASE -> getCouchbase();
 //                case EHCACHE:
 //                    return getEhcache();
-                case INFINISPAN:
-                    return getInfinispan();
-                case JCACHE:
-                    return getJcache();
-                case REDIS:
-                    return getRedis();
-                default:
-                    return null;
-            }
+                case INFINISPAN -> getInfinispan();
+                case JCACHE -> getJcache();
+                case REDIS -> getRedis();
+                default -> null;
+            };
         }
     }
 }

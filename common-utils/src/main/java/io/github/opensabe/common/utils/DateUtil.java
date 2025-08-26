@@ -1,14 +1,34 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.utils;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -16,10 +36,7 @@ import java.util.*;
  *
  * @author zhaogang
  */
-public class DateUtil
-
-{
-    private static Log log = LogFactory.getLog(DateUtil.class);
+public class DateUtil {
     /**
      * 默认的日期格式
      */
@@ -48,38 +65,33 @@ public class DateUtil
     public static final int FMT_DATE_MMDD_HHMM = 8;
     public static final int FMT_DATE_MMMDDD = 9;
     public static final int FMT_DATE_YYYYMMDDHHMM_NEW = 10;
-    public static final int FMT_DATE_YYYY年MM月DD日 = 11;
+//    public static final int FMT_DATE_YYYY年MM月DD日 = 11;
     public static final int FMT_DATE_YYYYMMDDHHMMSS = 12;
     public static final int FMT_DATE_YYMMDD = 13;
     public static final int FMT_DATE_YYMMDDHH = 14;
     public static final int FMT_DATE_MMDD_HHMM_CH = 15;
-
     /**
      * @add by wangmeng 添加日期转换格式MMdd
      */
-    public static final int FMT_DATE_MMdd = 16;
-
+//    public static final int FMT_DATE_MMdd = 16;
     /**
      * @add by 李闯 添加日期转换格式2012年5月10日11点52分
      */
-    public static final int FMT_DATE_YYYY年MM月DD日HH时SS分 = 17;
+//    public static final int FMT_DATE_YYYY年MM月DD日HH时SS分 = 17;
     public static final int FMT_DATE_MMDD_HHMMSS = 18;
-
     public static final int FMT_DATE_YYYYMMDD_DOT = 19; //add by luming 2013.09.04
     public static final int FMT_DATE_MMDD_HH_CH = 20;
-
     /**
      * 静态常量值 用于获取 某一个日期的 年 月 日 时 分 秒 标识
      **/
-    public static final int GET_TIME_OF_YEAR = 100;// 获得 日期的年份
-    public static final int GET_TIME_OF_MONTH = 200;// 获得 日期的月份
-    public static final int GET_TIME_OF_DAY = 300;// 获取 日期的天
-    public static final int GET_TIME_IF_HOUR = 400;// 获取日期的小时
+    public static final int GET_TIME_OF_YEAR = 100; // 获得 日期的年份
+    public static final int GET_TIME_OF_MONTH = 200; // 获得 日期的月份
+    public static final int GET_TIME_OF_DAY = 300; // 获取 日期的天
+    public static final int GET_TIME_IF_HOUR = 400; // 获取日期的小时
     public static final int GET_TIME_OF_MINUTE = 500;
     public static final int GET_TIME_OF_SECOND = 600;
-
-
     public static String[] formatTab;
+    private static Log log = LogFactory.getLog(DateUtil.class);
 
     static {
         formatTab = new String[21];
@@ -96,7 +108,6 @@ public class DateUtil
         formatTab[FMT_DATE_YYYYMMDDHHMMSS] = "yyyyMMddHHmmss";
         formatTab[FMT_DATE_YYMMDD] = "yyMMdd";
         formatTab[FMT_DATE_YYMMDDHH] = "yyyyMMddHH";
-        formatTab[FMT_DATE_MMdd] = "MMdd";
     }
 
     /**
@@ -182,9 +193,6 @@ public class DateUtil
                 break;
             case FMT_DATE_MMDD:
                 fmtDate.applyPattern("MM-dd");
-                break;
-            case FMT_DATE_MMdd:
-                fmtDate.applyPattern("MMdd");
                 break;
             case FMT_DATE_YYYYMMDDHHMM:
                 fmtDate.applyPattern("yyyy-MM-dd HH:mm");
@@ -398,7 +406,7 @@ public class DateUtil
 
     @SuppressWarnings("deprecation")
     public static Date transToQueryDate(Date date) {
-        Calendar c = new GregorianCalendar();// 新建日期对象
+        Calendar c = new GregorianCalendar(); // 新建日期对象
         c.set(date.getYear() + 1900, date.getMonth(), date.getDate(), 0, 0, 0);
         return c.getTime();
     }
@@ -467,26 +475,6 @@ public class DateUtil
      */
     public static int getDiffDays(Timestamp from, Timestamp to) {
         return (int) (getDiffMinutes(from, to) / 1440);
-    }
-
-    public static void main(String[] args) throws Exception {
-        // Calendar c=new GregorianCalendar();//新建日期对象
-        // int year=c.get(Calendar.YEAR);//获取年份
-        // int month=c.get(Calendar.MONTH);//获取月份
-        // int day=c.get(Calendar.DATE);//获取日期
-        // int minute=c.get(Calendar.MINUTE);//分
-        // int hour=c.get(Calendar.HOUR);//小时
-        // int second=c.get(Calendar.SECOND);//秒
-        /*	Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2014-02-28 23:45:00");
-
-			System.out.println(ifInCriticalTime(date, 15, 15));*/
-        //		System.out.println(formatStr2Str("20140227234500", DateUtil.DATE_FORMAT_YYYYMMDDHHMMSS,
-        //				DateUtil.DATE_FORMAT_YYYYMMDDHH));
-        System.out.println(transferDateFormat(new Date(), DateUtil.DATE_FORMAT_YYYYMMDD_HHMM));
-        Timestamp lastOnePartTime = DateUtil.getCurrentTimestamp();
-        Timestamp startTime = DateUtil.getIntervalTimestampByDays(lastOnePartTime, -1);
-        System.out.println(lastOnePartTime);
-        System.out.println(startTime);
     }
 
     public static boolean isBetween(Date date, Date start, Date end) {
@@ -634,11 +622,7 @@ public class DateUtil
      * else: return true;
      */
     public static boolean compareDate(Date firstDate, Date nextDate) {
-        if (firstDate.before(nextDate)) {
-            return true;
-        } else {
-            return false;
-        }
+        return firstDate.before(nextDate);
     }
 
     /**
@@ -778,21 +762,6 @@ public class DateUtil
         return weekMap;
     }
 
-    public static String getDisplayStartTime(Timestamp starttime) {//显示格式  02-10 周五09:00
-        Map<Integer, String> result = initWeekMap();
-        Date d = new Date(starttime.getTime());
-        String date = DateUtil.formatDate(d, DateUtil.FMT_DATE_MMdd);
-        String time = DateUtil.formatDate(d, DateUtil.FMT_DATE_HHMM);
-        Calendar c1 = Calendar.getInstance();
-        c1.setTime(d);
-        String week = result.get((c1.get(Calendar.DAY_OF_WEEK)));
-        StringBuffer sb = new StringBuffer();
-        sb.append(date.substring(0, 2)).append("-").append(date.subSequence(2, 4)).append(" ").append(week).append(" ")
-                .append(time);
-
-        return sb.toString();
-    }
-
     //获取这个周一的日期
     public static String getMonday(Timestamp current) {
         Calendar c = Calendar.getInstance();
@@ -838,13 +807,13 @@ public class DateUtil
     public static String convertToDateString(String dateString) {
         if (StringUtils.isBlank(dateString) || dateString.length() != 6)
             return "";
-        StringBuffer Buffer = new StringBuffer("20");
-        Buffer.append(dateString.subSequence(0, 2));
-        Buffer.append("-");
-        Buffer.append(dateString.subSequence(2, 4));
-        Buffer.append("-");
-        Buffer.append(dateString.subSequence(4, 6));
-        return Buffer.toString();
+        StringBuffer buffer = new StringBuffer("20");
+        buffer.append(dateString.subSequence(0, 2));
+        buffer.append("-");
+        buffer.append(dateString.subSequence(2, 4));
+        buffer.append("-");
+        buffer.append(dateString.subSequence(4, 6));
+        return buffer.toString();
     }
 
     /**
@@ -857,20 +826,6 @@ public class DateUtil
         cal.set(Calendar.MILLISECOND, 0);
         cal.set(Calendar.SECOND, 0);
         return new Timestamp(cal.getTimeInMillis());
-    }
-
-    //几天几小时几秒
-    public static String getRestTimeDesc(long seconds) {
-        long restDay = 0;
-        long restHour = 0;
-        long restMinute = 0;
-        long second = 0;
-        restDay = (seconds / (24 * 3600));
-        restHour = (seconds - restDay * 24 * 3600) / 3600;
-        restMinute = (seconds - restDay * 24 * 3600 - restHour * 3600) / 60;
-        second = (second - (second / 60)) * 60;
-        return restDay + "day(s)" + restHour + "hour(s)" + restMinute + "minute(s)" + second + "second(s)";
-
     }
 
     /**
@@ -921,7 +876,7 @@ public class DateUtil
     public static String getCouponDisplayExpireDate(Timestamp expireTime, boolean needModify) {
         //如果优惠券过期时间在当前时间20年后，则过期时间显示为“永久有效” added by mwlv
         Timestamp tmp = DateUtil.getCurrentTimestamp();
-        tmp.setTime(System.currentTimeMillis()+20*365*24*3600*1000L);
+        tmp.setTime(System.currentTimeMillis() + 20 * 365 * 24 * 3600 * 1000L);
         if (tmp.before(expireTime)) {
             return "forever valid";
         }
@@ -1018,9 +973,9 @@ public class DateUtil
     public static boolean ifInterTimeRange(final String start, final String end) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
-            Date startTime = sdf.parse(start);//开始时间
-            Date endTime = sdf.parse(end); //结束时间
-            Date nowTime = new Date();//当前系统时间
+            Date startTime = sdf.parse(start); //开始时间
+            Date endTime = sdf.parse(end);  //结束时间
+            Date nowTime = new Date(); //当前系统时间
             boolean tag = nowTime.after(startTime) && nowTime.before(endTime);
             //log.info("xlzhu tag is " + tag);
             return tag;

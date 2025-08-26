@@ -1,22 +1,56 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.dynamodb.service;
+
+import java.util.Objects;
+import java.util.function.Consumer;
 
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteContext;
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteDocumentation;
 import io.github.opensabe.common.dynamodb.observation.DynamodbExecuteObservationConvention;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
-import software.amazon.awssdk.enhanced.dynamodb.*;
-import software.amazon.awssdk.enhanced.dynamodb.model.*;
-
-import java.util.Objects;
-import java.util.function.Consumer;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClientExtension;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.DeleteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.DeleteItemEnhancedResponse;
+import software.amazon.awssdk.enhanced.dynamodb.model.DescribeTableEnhancedResponse;
+import software.amazon.awssdk.enhanced.dynamodb.model.GetItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.GetItemEnhancedResponse;
+import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedResponse;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedResponse;
 
 /**
  * @author heng.ma
  */
-public class ObservedTable <T> implements DynamoDbTable<T> {
+public class ObservedTable<T> implements DynamoDbTable<T> {
     private final DynamoDbTable<T> delegate;
     private final UnifiedObservationFactory unifiedObservationFactory;
+
     public ObservedTable(DynamoDbTable<T> delegate, UnifiedObservationFactory unifiedObservationFactory) {
         this.delegate = delegate;
         this.unifiedObservationFactory = unifiedObservationFactory;
@@ -68,7 +102,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#deleteItem", request.key());
         key.sortKeyValue().ifPresent(v -> context.setRangeKey(v.s()));
         Observation observation = DynamodbExecuteDocumentation.DELETE_ITEM.observation(null,
-                DynamodbExecuteObservationConvention.DEFAULT, () -> context, unifiedObservationFactory.getObservationRegistry());
+                DynamodbExecuteObservationConvention.defaultConvention, () -> context, unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.deleteItem(request));
     }
 
@@ -93,7 +127,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     public DeleteItemEnhancedResponse<T> deleteItemWithResponse(DeleteItemEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#deleteItemWithResponse", request.key());
         Observation observation = DynamodbExecuteDocumentation.DELETE_ITEM.observation(null,
-                DynamodbExecuteObservationConvention.DEFAULT, () -> context,
+                DynamodbExecuteObservationConvention.defaultConvention, () -> context,
                 unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.deleteItemWithResponse(request));
     }
@@ -109,7 +143,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     public T getItem(GetItemEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#getItem", request.key());
         Observation observation = DynamodbExecuteDocumentation.SELECT.observation(null,
-                DynamodbExecuteObservationConvention.DEFAULT, () -> context,
+                DynamodbExecuteObservationConvention.defaultConvention, () -> context,
                 unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.getItem(request));
     }
@@ -135,7 +169,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     public GetItemEnhancedResponse<T> getItemWithResponse(GetItemEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#getItemWithResponse", request.key());
         Observation observation = DynamodbExecuteDocumentation.SELECT.observation(null,
-                DynamodbExecuteObservationConvention.DEFAULT, () -> context,
+                DynamodbExecuteObservationConvention.defaultConvention, () -> context,
                 unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.getItemWithResponse(request));
     }
@@ -151,7 +185,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     public PageIterable<T> query(QueryEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#query");
         Observation observation = DynamodbExecuteDocumentation.SELECT.observation(null,
-                DynamodbExecuteObservationConvention.DEFAULT, () -> context,
+                DynamodbExecuteObservationConvention.defaultConvention, () -> context,
                 unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.query(request.toBuilder().queryConditional(new QueryConditionalWrapper(request.queryConditional(), context::setExpression)).build()));
     }
@@ -172,7 +206,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     public void putItem(PutItemEnhancedRequest<T> request) {
         Key key = keyFrom(request.item());
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#putItem", key);
-        Observation observation = DynamodbExecuteDocumentation.PUT_ITEM.observation(null, DynamodbExecuteObservationConvention.DEFAULT, () -> context, unifiedObservationFactory.getObservationRegistry());
+        Observation observation = DynamodbExecuteDocumentation.PUT_ITEM.observation(null, DynamodbExecuteObservationConvention.defaultConvention, () -> context, unifiedObservationFactory.getObservationRegistry());
         observation.observe(() -> delegate.putItem(request));
     }
 
@@ -192,7 +226,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     public PutItemEnhancedResponse<T> putItemWithResponse(PutItemEnhancedRequest<T> request) {
         Key key = keyFrom(request.item());
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#putItemWithResponse", key);
-        Observation observation = DynamodbExecuteDocumentation.PUT_ITEM.observation(null, DynamodbExecuteObservationConvention.DEFAULT, () -> context, unifiedObservationFactory.getObservationRegistry());
+        Observation observation = DynamodbExecuteDocumentation.PUT_ITEM.observation(null, DynamodbExecuteObservationConvention.defaultConvention, () -> context, unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.putItemWithResponse(request));
     }
 
@@ -210,7 +244,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
         if (Objects.nonNull(expression)) {
             context.setExpression(expression);
         }
-        Observation observation = DynamodbExecuteDocumentation.SELECT.observation(null, DynamodbExecuteObservationConvention.DEFAULT, () -> context, unifiedObservationFactory.getObservationRegistry());
+        Observation observation = DynamodbExecuteDocumentation.SELECT.observation(null, DynamodbExecuteObservationConvention.defaultConvention, () -> context, unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.scan(request));
     }
 
@@ -224,7 +258,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     @Override
     public PageIterable<T> scan() {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#scan()");
-        Observation observation = DynamodbExecuteDocumentation.SELECT.observation(null, DynamodbExecuteObservationConvention.DEFAULT, () -> context, unifiedObservationFactory.getObservationRegistry());
+        Observation observation = DynamodbExecuteDocumentation.SELECT.observation(null, DynamodbExecuteObservationConvention.defaultConvention, () -> context, unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.scan());
     }
 
@@ -232,7 +266,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     public T updateItem(UpdateItemEnhancedRequest<T> request) {
         Key key = keyFrom(request.item());
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#updateItem", key);
-        Observation observation = DynamodbExecuteDocumentation.UPDATE_ITEM.observation(null, DynamodbExecuteObservationConvention.DEFAULT, () -> context, unifiedObservationFactory.getObservationRegistry());
+        Observation observation = DynamodbExecuteDocumentation.UPDATE_ITEM.observation(null, DynamodbExecuteObservationConvention.defaultConvention, () -> context, unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.updateItem(request));
     }
 
@@ -251,7 +285,7 @@ public class ObservedTable <T> implements DynamoDbTable<T> {
     @Override
     public UpdateItemEnhancedResponse<T> updateItemWithResponse(UpdateItemEnhancedRequest<T> request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#updateItemWithResponse", keyFrom(request.item()));
-        Observation observation = DynamodbExecuteDocumentation.UPDATE_ITEM.observation(null, DynamodbExecuteObservationConvention.DEFAULT, () -> context, unifiedObservationFactory.getObservationRegistry());
+        Observation observation = DynamodbExecuteDocumentation.UPDATE_ITEM.observation(null, DynamodbExecuteObservationConvention.defaultConvention, () -> context, unifiedObservationFactory.getObservationRegistry());
         return observation.observe(() -> delegate.updateItemWithResponse(request));
     }
 

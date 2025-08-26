@@ -1,7 +1,35 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.utils;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.logging.log4j.message.Message;
+import org.apache.logging.log4j.message.MessageFactory;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.micrometer.observation.Observation;
@@ -12,17 +40,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.message.Message;
-import org.apache.logging.log4j.message.MessageFactory;
-
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 目前 ops 报警，针对 app.log 仅收集 error 级别，聚合统计个数报警到 rd
@@ -35,54 +52,21 @@ import java.util.regex.Pattern;
 @Log4j2
 public class AlarmUtil {
 
-    @Log4j2
-    public static class AlarmLog {
-
-    }
-
-    @Log4j2
-    public static class AlarmTraceLog {
-
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class AlarmLogContent {
-        private Boolean unique;
-
-        private Set<String> group;
-
-        private String content;
-
-        private String template;
-
-        private String traceId;
-
-        private String spanId;
-
-        @Builder.Default
-        private LocalDateTime localDateTime = LocalDateTime.now();
-    }
-
     //实现一个近似于固定窗口（非滑动窗口）的报警，即报警第一次出现之后 Interval 时间内如果超过多少次就会报警，报警后清空
     private static final LoadingCache<Interval, LoadingCache<String, AtomicInteger>> ERROR_CACHE =
             Caffeine.newBuilder().build(k -> {
                 return Caffeine.newBuilder().expireAfterWrite(k.interval, k.timeUnit)
                         .build(s -> new AtomicInteger(0));
             });
-
-    @Data
-    @Builder
-    @AllArgsConstructor
-    private static final class Interval {
-        private final long interval;
-        private final TimeUnit timeUnit;
-    }
+    private static final Pattern UNIQUE_PATTERN = Pattern.compile("\\bUNIQUE\\b", Pattern.CASE_INSENSITIVE);
+    private static final Set<String> ALL_GROUPS = Set.of(
+            "pm", "op", "mk", "rd", "td", "ad", "pr"
+    );
+    private static final Pattern EXTRACT_GROUP_PATTERN = Pattern.compile("\\[(.*?)\\]");
 
     /**
      * 默认 5 分钟内超过 5 次就会报警
+     *
      * @param message
      * @param params
      */
@@ -158,8 +142,6 @@ public class AlarmUtil {
         AlarmLog.log.fatal(JsonUtil.toJSONString(alarmLogContent));
     }
 
-    private static final Pattern UNIQUE_PATTERN = Pattern.compile("\\bUNIQUE\\b", Pattern.CASE_INSENSITIVE);
-
     public static Boolean hasUnique(String searchString) {
         // 创建 Matcher 对象
         Matcher matcher = UNIQUE_PATTERN.matcher(searchString);
@@ -170,11 +152,6 @@ public class AlarmUtil {
             return Boolean.FALSE;
         }
     }
-
-    private static final Set<String> ALL_GROUPS = Set.of(
-            "pm", "op", "mk", "rd", "td", "ad", "pr"
-    );
-    private static final Pattern EXTRACT_GROUP_PATTERN = Pattern.compile("\\[(.*?)\\]");
 
     public static Set<String> extractGroup(String searchString) {
         // 创建 Matcher 对象
@@ -202,5 +179,44 @@ public class AlarmUtil {
             }
         }
         return values;
+    }
+
+    @Log4j2
+    public static class AlarmLog {
+
+    }
+
+    @Log4j2
+    public static class AlarmTraceLog {
+
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AlarmLogContent {
+        private Boolean unique;
+
+        private Set<String> group;
+
+        private String content;
+
+        private String template;
+
+        private String traceId;
+
+        private String spanId;
+
+        @Builder.Default
+        private LocalDateTime localDateTime = LocalDateTime.now();
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    private static final class Interval {
+        private final long interval;
+        private final TimeUnit timeUnit;
     }
 }

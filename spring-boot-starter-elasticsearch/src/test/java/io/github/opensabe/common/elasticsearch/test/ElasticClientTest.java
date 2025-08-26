@@ -1,10 +1,25 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.elasticsearch.test;
 
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.common.secret.SecretProvider;
-import io.github.opensabe.common.testcontainers.integration.SingleElasticSearchIntegrationTest;
-import io.github.opensabe.common.utils.json.JsonUtil;
-import lombok.extern.log4j.Log4j2;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -19,8 +34,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.xcontent.XContentType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +45,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.common.secret.SecretProvider;
+import io.github.opensabe.common.testcontainers.integration.SingleElasticSearchIntegrationTest;
+import io.github.opensabe.common.utils.json.JsonUtil;
+import lombok.extern.log4j.Log4j2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,26 +66,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 })
 @Log4j2
 @AutoConfigureObservability
+@DisplayName("Elasticsearch客户端测试")
 public class ElasticClientTest {
-    @SpringBootApplication
-    public static class Main {
-        @Bean
-        public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
-            return new TestSecretProvider(globalSecretManager);
-        }
-    }
+    private static final String INDEX = "test_index";
+    private static final String SECRET = "secretString";
+    @Autowired
+    private RestHighLevelClient restHighLevelClient;
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         SingleElasticSearchIntegrationTest.setProperties(registry);
     }
 
-    @Autowired
-    private RestHighLevelClient restHighLevelClient;
-
-    private static final String INDEX = "test_index";
-
     @Test
+    @DisplayName("测试Elasticsearch基本操作 - 索引创建、文档更新、搜索和敏感信息过滤")
     public void test() throws IOException, InterruptedException {
         GetIndexRequest getIndexRequest = new GetIndexRequest(INDEX);
         boolean exists = restHighLevelClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
@@ -142,7 +150,13 @@ public class ElasticClientTest {
         assertEquals("id1", hits[0].getSourceAsMap().get("id"));
     }
 
-    private static final String SECRET = "secretString";
+    @SpringBootApplication
+    public static class Main {
+        @Bean
+        public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
+            return new TestSecretProvider(globalSecretManager);
+        }
+    }
 
     public static class TestSecretProvider extends SecretProvider {
         protected TestSecretProvider(GlobalSecretManager globalSecretManager) {

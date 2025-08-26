@@ -1,7 +1,23 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.common.shutdown;
 
-import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
-import lombok.extern.log4j.Log4j2;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
@@ -15,8 +31,8 @@ import org.springframework.cloud.netflix.eureka.serviceregistry.EurekaAutoServic
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.Ordered;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 优雅关闭延迟缓冲，目的是：
@@ -29,11 +45,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 2. k8s 通过调用 `/actuator/shutdown` 关闭实例
  * 3. `/actuator/shutdown` 底层是通过调用 ConfigurableApplicationContext.close() 实现的关闭
  * 4. ConfigurableApplicationContext.close() 分为如下几步：
- *  1. publishEvent(new ContextClosedEvent(this)); EurekaAutoConfiguration 会在这一步将实例设置为 Down
- *  2. lifecycleProcessor.onClose();（SmartLifeCycle，Undertow 的 GracefulShutDown 在这一步优雅关闭实例，所有新请求回复 503）
- *  3. destroyBeans(); （调用 Disposable Bean 的 destroy）
- *  4. closeBeanFactory();
- *  5. onClose();
+ * 1. publishEvent(new ContextClosedEvent(this)); EurekaAutoConfiguration 会在这一步将实例设置为 Down
+ * 2. lifecycleProcessor.onClose();（SmartLifeCycle，Undertow 的 GracefulShutDown 在这一步优雅关闭实例，所有新请求回复 503）
+ * 3. destroyBeans(); （调用 Disposable Bean 的 destroy）
+ * 4. closeBeanFactory();
+ * 5. onClose();
  * 5. 我们通过监听 ContextClosedEvent，同时顺序在 EurekaAutoConfiguration 之后，sleep 当前实例过期时间 + 各种缓存预留时间
  */
 @Log4j2

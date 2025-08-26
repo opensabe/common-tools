@@ -1,10 +1,24 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.s3.typehandler;
 
-import cn.hutool.core.codec.Hashids;
-import com.fasterxml.jackson.core.type.TypeReference;
-import io.github.opensabe.common.s3.properties.S3Properties;
-import io.github.opensabe.common.s3.service.FileService;
-import io.github.opensabe.common.utils.json.JsonUtil;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.convert.PropertyValueConverter;
@@ -13,9 +27,12 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.http.MediaType;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import cn.hutool.core.codec.Hashids;
+import io.github.opensabe.common.s3.properties.S3Properties;
+import io.github.opensabe.common.s3.service.FileService;
+import io.github.opensabe.common.utils.json.JsonUtil;
 
 /**
  * @author heng.ma
@@ -27,6 +44,7 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
     private final String fileName;
 
     private final Hashids hashids;
+
     public S3JsonConverter(FileService service, S3Properties properties) {
         this.service = service;
         this.hashids = Hashids.create("swdfffqssasd".toCharArray());
@@ -55,25 +73,21 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
         return key;
     }
 
-    private String getFileName (PersistentProperty property) {
+    private String getFileName(PersistentProperty property) {
 
         return fileName.formatted(property.getOwner().getType().getSimpleName(),
                 property.getName(),
-                hashids.encode(System.nanoTime(), Thread.currentThread().getId()));
+                hashids.encode(System.nanoTime(), Thread.currentThread().threadId()));
     }
 
     private static class JacksonParameterizedTypeTypeReference<T> extends TypeReference<T> {
         private final ParameterizedType type;
 
-        public static <T> JacksonParameterizedTypeTypeReference<T> fromTypeInformation(TypeInformation<T> typeInformation) {
-            return new JacksonParameterizedTypeTypeReference<>(typeInformation);
-        }
-
         JacksonParameterizedTypeTypeReference(final TypeInformation<T> information) {
             final List<TypeInformation<?>> arguments = information.getTypeArguments();
             this.type = new ParameterizedType() {
                 public Type @NotNull [] getActualTypeArguments() {
-                    return arguments.stream().map(TypeInformation::getType).toArray(Type[]::new);
+                    return arguments.stream().map(t -> t.toTypeDescriptor().getResolvableType().getType()).toArray(Type[]::new);
                 }
 
                 public @NotNull Type getRawType() {
@@ -84,6 +98,10 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
                     return null;
                 }
             };
+        }
+
+        public static <T> JacksonParameterizedTypeTypeReference<T> fromTypeInformation(TypeInformation<T> typeInformation) {
+            return new JacksonParameterizedTypeTypeReference<>(typeInformation);
         }
 
         public Type getType() {

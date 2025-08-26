@@ -1,4 +1,32 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.alive.client.impl;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.github.opensabe.alive.client.ResponseFuture;
 import io.github.opensabe.alive.client.callback.CallbackManager;
@@ -24,18 +52,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClientImpl extends AbstractClient implements AliveServerListListener {
 
@@ -52,10 +68,11 @@ public class ClientImpl extends AbstractClient implements AliveServerListListene
     private volatile Map<InetSocketAddress, ClientConnection> clientConnectionMap = new HashMap<InetSocketAddress, ClientConnection>();
 
     private long heartInterval;
+    private AtomicInteger loopCount = new AtomicInteger(0);
 
     public ClientImpl(int productCode, String authToken,
-        String zkString, String zkPath, int zkRetryInterval, int zkRetryMax, int zkMaxDelay,
-        long connectTimeout, long authTimeout, long heartTimeout, long heartInterval, ZkTasker zkTasker) {
+                      String zkString, String zkPath, int zkRetryInterval, int zkRetryMax, int zkMaxDelay,
+                      long connectTimeout, long authTimeout, long heartTimeout, long heartInterval, ZkTasker zkTasker) {
 
         super(productCode, authToken, connectTimeout, authTimeout);
 
@@ -74,7 +91,7 @@ public class ClientImpl extends AbstractClient implements AliveServerListListene
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast("IdleStateHandler",
-                    new IdleStateHandler(ClientImpl.this.heartInterval * 2, ClientImpl.this.heartInterval, 0L, TimeUnit.MILLISECONDS));
+                        new IdleStateHandler(ClientImpl.this.heartInterval * 2, ClientImpl.this.heartInterval, 0L, TimeUnit.MILLISECONDS));
                 ch.pipeline().addLast("Int32FrameEncoder", new Int32FrameEncoder());
                 ch.pipeline().addLast("ProtoBufEncoder", new ProtoBufEncoder());
                 ch.pipeline().addLast("Int32FrameDecoder", new Int32FrameDecoder());
@@ -187,8 +204,6 @@ public class ClientImpl extends AbstractClient implements AliveServerListListene
         this.clientConnectionList = newClientConnectionList;
         this.clientConnectionMap = newClientConnectionMap;
     }
-
-    private AtomicInteger loopCount = new AtomicInteger(0);
 
     private ClientConnection getConnection() {
         List<ClientConnection> connList = clientConnectionList;

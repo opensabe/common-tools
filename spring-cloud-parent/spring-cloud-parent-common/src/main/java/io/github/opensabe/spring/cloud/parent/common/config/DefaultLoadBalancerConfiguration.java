@@ -1,11 +1,20 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.LastOrNotEmptyServiceInstanceListSupplier;
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.SameZoneOnlyServiceInstanceListSupplier;
-import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
-import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
@@ -14,13 +23,24 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
-import org.springframework.cloud.loadbalancer.core.*;
+import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.LastOrNotEmptyServiceInstanceListSupplier;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.SameZoneOnlyServiceInstanceListSupplier;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
+import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 
 @Configuration(proxyBeanMethods = false)
 public class DefaultLoadBalancerConfiguration {
@@ -77,7 +97,7 @@ public class DefaultLoadBalancerConfiguration {
         //然后通过我们自定义的 SameZoneOnlyServiceInstanceListSupplier 进行筛选
         //然后后通过 CachingServiceInstanceListSupplier 将结果缓存起来
         //最后通过 LastOrNotEmptyServiceInstanceListSupplier 避免 Eureka 重启丢失所有实例
-        return  new LastOrNotEmptyServiceInstanceListSupplier(
+        return new LastOrNotEmptyServiceInstanceListSupplier(
                 //使用框架内置的 CachingServiceInstanceListSupplier 开启服务实例缓存，缓存需要在最外层，即缓存经过前面所有的 Supplier 筛选后的结果
                 new CachingServiceInstanceListSupplier(
                         //使用我们自定义的 SameZoneOnlyServiceInstanceListSupplier，只能返回同一个 zone 的服务实例

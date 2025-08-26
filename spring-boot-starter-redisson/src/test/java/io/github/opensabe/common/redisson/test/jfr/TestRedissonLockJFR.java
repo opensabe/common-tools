@@ -1,4 +1,34 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.test.jfr;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.moditect.jfrunit.JfrEventTest;
+import org.moditect.jfrunit.JfrEvents;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.annotation.RedissonLock;
@@ -7,85 +37,28 @@ import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.moditect.jfrunit.JfrEvents;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@JfrEventTest
 @Import(TestRedissonLockJFR.Config.class)
 @Execution(ExecutionMode.SAME_THREAD)
 //JFR 测试最好在本地做
 @Disabled
 public class TestRedissonLockJFR extends BaseRedissonTest {
-    static class TestBean {
-        @RedissonLock(
-                lockType = RedissonLock.BLOCK_LOCK
-        )
-        public void testBlockLock(@RedissonLockName(prefix = "TestRedissonLockJFR:testBlockLock:") String id) throws InterruptedException {
-            //threshold 100ms
-            TimeUnit.MILLISECONDS.sleep(100);
-        }
-        @RedissonLock(
-                lockType = RedissonLock.BLOCK_LOCK
-        )
-        public void testBlockLockException(@RedissonLockName(prefix = "TestRedissonLockJFR:testBlockLockException:") String id) throws InterruptedException {
-            //threshold 100ms
-            TimeUnit.MILLISECONDS.sleep(100);
-            throw new RuntimeException("test");
-        }
-        @RedissonLock(
-                lockType = RedissonLock.TRY_LOCK,
-                waitTime = 2000l,
-                timeUnit = TimeUnit.MILLISECONDS
-        )
-        public void testTryLock(@RedissonLockName(prefix = "TestRedissonLockJFR:testTryLock:") String id) throws InterruptedException {
-            //threshold 100ms
-            TimeUnit.MILLISECONDS.sleep(100);
-        }
-        @RedissonLock(
-                lockType = RedissonLock.TRY_LOCK,
-                waitTime = 10l,
-                timeUnit = TimeUnit.MILLISECONDS
-        )
-        public void testTryLockWaitTimeOut(@RedissonLockName(prefix = "TestRedissonLockJFR:testTryLockWaitTimeOut:") String id) throws InterruptedException {
-            //threshold 100ms
-            TimeUnit.MILLISECONDS.sleep(100);
-        }
-    }
-
-    public static class Config {
-        @Bean
-        public TestBean testBean() {
-            return new TestBean();
-        }
-    }
-
+    private static final int COUNT_OF_THREADS = 12;
+    public JfrEvents jfrEvents = new JfrEvents();
     @Autowired
     private TestBean testBean;
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
-    public JfrEvents jfrEvents = new JfrEvents();
-
-    private static final int COUNT_OF_THREADS = 12;
-
     @Test
     public void testBlockLockNormal() {
-        Thread [] threads = new Thread[COUNT_OF_THREADS];
+        Thread[] threads = new Thread[COUNT_OF_THREADS];
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         for (int i = 0; i < threads.length; i++) {
             int finalI = i % 3;
@@ -94,7 +67,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
                     try {
                         testBean.testBlockLock(String.valueOf(finalI));
                     } catch (Exception e) {
-                        //ignore
+                        e.printStackTrace();
                     }
                 });
             });
@@ -103,8 +76,8 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
         for (int i = 0; i < threads.length; i++) {
             try {
                 threads[i].join();
-            } catch (Exception e) {
-                //ignore
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         jfrEvents.awaitEvents();
@@ -146,7 +119,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
 
     @Test
     public void testBlockLockException() {
-        Thread [] threads = new Thread[COUNT_OF_THREADS];
+        Thread[] threads = new Thread[COUNT_OF_THREADS];
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         for (int i = 0; i < threads.length; i++) {
             int finalI = i % 3;
@@ -207,7 +180,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
 
     @Test
     public void testTryLockNormal() {
-        Thread [] threads = new Thread[COUNT_OF_THREADS];
+        Thread[] threads = new Thread[COUNT_OF_THREADS];
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         for (int i = 0; i < threads.length; i++) {
             int finalI = i % 3;
@@ -269,7 +242,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
 
     @Test
     public void testTryLockWaitTimeOut() {
-        Thread [] threads = new Thread[COUNT_OF_THREADS];
+        Thread[] threads = new Thread[COUNT_OF_THREADS];
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         for (int i = 0; i < threads.length; i++) {
             int finalI = i % 3;
@@ -329,5 +302,51 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
             assertNotEquals(recordedEvent.getString("spanId"), traceContext.spanId());
         }
         assertEquals(lockAcquiredSuccessfully.get(true).size(), rLockReleasedJFREvents.stream().map(recordedEvent -> recordedEvent.getString("spanId")).distinct().count());
+    }
+
+    static class TestBean {
+        @RedissonLock(
+                lockType = RedissonLock.BLOCK_LOCK
+        )
+        public void testBlockLock(@RedissonLockName(prefix = "TestRedissonLockJFR:testBlockLock:") String id) throws InterruptedException {
+            //threshold 100ms
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
+
+        @RedissonLock(
+                lockType = RedissonLock.BLOCK_LOCK
+        )
+        public void testBlockLockException(@RedissonLockName(prefix = "TestRedissonLockJFR:testBlockLockException:") String id) throws InterruptedException {
+            //threshold 100ms
+            TimeUnit.MILLISECONDS.sleep(100);
+            throw new RuntimeException("test");
+        }
+
+        @RedissonLock(
+                lockType = RedissonLock.TRY_LOCK,
+                waitTime = 2000l,
+                timeUnit = TimeUnit.MILLISECONDS
+        )
+        public void testTryLock(@RedissonLockName(prefix = "TestRedissonLockJFR:testTryLock:") String id) throws InterruptedException {
+            //threshold 100ms
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
+
+        @RedissonLock(
+                lockType = RedissonLock.TRY_LOCK,
+                waitTime = 10l,
+                timeUnit = TimeUnit.MILLISECONDS
+        )
+        public void testTryLockWaitTimeOut(@RedissonLockName(prefix = "TestRedissonLockJFR:testTryLockWaitTimeOut:") String id) throws InterruptedException {
+            //threshold 100ms
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
+    }
+
+    public static class Config {
+        @Bean
+        public TestBean testBean() {
+            return new TestBean();
+        }
     }
 }

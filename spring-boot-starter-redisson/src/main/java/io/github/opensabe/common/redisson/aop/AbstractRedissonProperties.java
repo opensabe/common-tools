@@ -1,19 +1,42 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.aop;
 
-public abstract class AbstractRedissonProperties {
+import java.lang.reflect.Method;
+
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
+
+public abstract class AbstractRedissonProperties implements RedissonNameResolver {
     public static final Object NONE = new Object();
 
-    private final int parameterIndex;
+    protected final String prefix;
 
-    protected AbstractRedissonProperties(int parameterIndex) {
-        this.parameterIndex = parameterIndex;
+    protected final String name;
+
+    protected final MethodArgumentsExpressEvaluator evaluator;
+
+    protected AbstractRedissonProperties(MethodArgumentsExpressEvaluator evaluator, String prefix, String name) {
+        this.evaluator = evaluator;
+        this.prefix = prefix;
+        this.name = name;
     }
 
-    /**
-     * 参数坐标
-     * @return
-     */
-    public int getParameterIndex() {
-       return this.parameterIndex;
+    @Override
+    public String resolve(Method method, Object target, Object[] args) {
+        return prefix + evaluator.resolve(method, target, args, name);
     }
+
 }

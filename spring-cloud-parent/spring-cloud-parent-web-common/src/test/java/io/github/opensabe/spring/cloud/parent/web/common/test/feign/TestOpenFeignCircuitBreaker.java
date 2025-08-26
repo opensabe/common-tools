@@ -1,10 +1,25 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 
-import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
-import feign.RetryableException;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.retry.RetryRegistry;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +38,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import feign.RetryableException;
+import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroServiceTest;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.RetryRegistry;
 
 import static org.mockito.Mockito.when;
 
@@ -40,44 +56,14 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
     static final String CONTEXT_ID_CIRCUITBREAKER = "testServiceCircuitbreakerClient";
     static final int TEST_SERVICE_CIRCUITBREAKER_FAILURE_RATE_THRESHOLD = 30;
     static final int TEST_SERVICE_CIRCUITBREAKER_MINIMUM_NUMBER_OF_CALLS = 10;
-
-    @SpringBootApplication
-    static class MockConfig {
-    }
-
-    @FeignClient(name = TEST_SERVICE_CIRCUITBREAKER, contextId = CONTEXT_ID_CIRCUITBREAKER)
-    static interface TestServiceCircuitbreakerClient {
-        @GetMapping("/anything")
-        HttpBinAnythingResponse anything();
-
-        @GetMapping("/status/200")
-        String testCircuitBreakerStatus200();
-
-        @GetMapping("/status/500")
-        String testCircuitBreakerStatus500();
-
-        @PostMapping("/status/500")
-        String testPostRetryStatus500();
-
-        @GetMapping("/delay/1")
-        String testGetDelayOneSecond();
-
-        @GetMapping("/delay/3")
-        String testGetDelayThreeSeconds();
-    }
-
     @Autowired
     CircuitBreakerRegistry circuitBreakerRegistry;
-
     @Autowired
     LoadBalancerClientFactory loadBalancerClientFactory;
-
     @Autowired
     RetryRegistry retryRegistry;
-
     @Autowired
     TestServiceCircuitbreakerClient testServiceCircuitbreakerClient;
-
     @MockBean
     SimpleDiscoveryClient discoveryClient;
     List<ServiceInstance> serviceInstances = List.of(new DefaultServiceInstance(
@@ -137,13 +123,13 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
             }
         });
         //断路器打开后，我们的请求会直接失败
-        Assertions.assertThrows(
+        Assertions.assertThrowsExactly(
                 RetryableException.class,
                 () -> testServiceCircuitbreakerClient.anything()
         );
         //等待断路器超时，断路器不会恢复
         TimeUnit.MILLISECONDS.sleep(2000);
-        Assertions.assertThrows(
+        Assertions.assertThrowsExactly(
                 RetryableException.class,
                 () -> testServiceCircuitbreakerClient.anything()
         );
@@ -169,7 +155,7 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
             }
         });
         //断路器打开后，我们的请求会直接失败
-        Assertions.assertThrows(
+        Assertions.assertThrowsExactly(
                 RetryableException.class,
                 () -> testServiceCircuitbreakerClient.testCircuitBreakerStatus200()
         );
@@ -196,7 +182,7 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
             }
         });
         //断路器打开后，我们的请求会直接失败
-        Assertions.assertThrows(
+        Assertions.assertThrowsExactly(
                 RetryableException.class,
                 () -> testServiceCircuitbreakerClient.testCircuitBreakerStatus200()
         );
@@ -214,6 +200,31 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
         //验证断路器关闭后，可以正常请求
         var result3 = testServiceCircuitbreakerClient.testCircuitBreakerStatus200();
         Assertions.assertNull(result3);
+    }
+
+    @FeignClient(name = TEST_SERVICE_CIRCUITBREAKER, contextId = CONTEXT_ID_CIRCUITBREAKER)
+    static interface TestServiceCircuitbreakerClient {
+        @GetMapping("/anything")
+        HttpBinAnythingResponse anything();
+
+        @GetMapping("/status/200")
+        String testCircuitBreakerStatus200();
+
+        @GetMapping("/status/500")
+        String testCircuitBreakerStatus500();
+
+        @PostMapping("/status/500")
+        String testPostRetryStatus500();
+
+        @GetMapping("/delay/1")
+        String testGetDelayOneSecond();
+
+        @GetMapping("/delay/3")
+        String testGetDelayThreeSeconds();
+    }
+
+    @SpringBootApplication
+    static class MockConfig {
     }
 
 }

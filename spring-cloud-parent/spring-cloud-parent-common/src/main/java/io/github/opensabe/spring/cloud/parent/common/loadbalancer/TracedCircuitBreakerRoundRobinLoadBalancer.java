@@ -1,4 +1,44 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.common.loadbalancer;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.DefaultResponse;
+import org.springframework.cloud.client.loadbalancer.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.RequestData;
+import org.springframework.cloud.client.loadbalancer.RequestDataContext;
+import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -7,6 +47,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.LeaseInfo;
+
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.utils.AlarmUtil;
 import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanAddNodeInfoCustomizer;
@@ -14,23 +55,14 @@ import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreake
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.micrometer.observation.Observation;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.*;
-import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
-import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
-import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
-import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 import reactor.core.publisher.Mono;
-
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 //一定必须是实现ReactorServiceInstanceLoadBalancer
 //而不是ReactorLoadBalancer<ServiceInstance>
@@ -40,18 +72,9 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor//仅仅为了单元测试
 public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
-    private ServiceInstanceListSupplier serviceInstanceListSupplier;
-    private RoundRobinLoadBalancer degradation;
-    private String serviceId;
-    private CircuitBreakerExtractor circuitBreakerExtractor;
-    private CircuitBreakerRegistry circuitBreakerRegistry;
-    private UnifiedObservationFactory unifiedObservationFactory;
-
     public static final String LOAD_BALANCE_KEY = "TracedCircuitBreakerRoundRobinLoadBalancer-load-balance-key";
     public static final String ROUND_ROBIN_KEY = "TracedCircuitBreakerRoundRobinLoadBalancer-round-robin-key";
-
     public static final String OBSERVATION_KEY = "TracedCircuitBreakerRoundRobinLoadBalancer-observation-key";
-
     private static final Map<String, AffinityLoadBalancer> LOAD_BALANCE_KEY_MAP = Map.of(
             LOAD_BALANCE_KEY, (serviceInstances, o) -> {
                 //必须先取余之后取绝对值，否则对于负最大值的绝对值还会返回负最大值
@@ -68,6 +91,39 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
                 return serviceInstance;
             }
     );
+    private static final long NEWLY_STARTUP_WEIGHT = 10;
+    private static final long HALF_OPEN_WEIGHT = 10;
+    //这里通过 RequestDataContext 来确定请求在负载均衡器的上下文
+    //需要注意，如果是重试请求，必须使用最初的 RequestDataContext，不能每次重试使用新的 RequestDataContext，否则负载均衡器的上下文也是新的
+    //这里使用了 Caffeine 的 weakKeys，如果 RequestDataContext 被回收了，那么对应的 RequestLoadBalancerContext 也会被回收
+    //所以，web 和 webflux 还有 gateway 包都加了单元测试验证这一点
+    private final Cache<RequestDataContext, RequestLoadBalancerContext> requestRequestDataContextMap =
+            Caffeine.newBuilder().weakKeys().weakValues().build();
+    //负载均衡次数
+    private final LoadingCache<String, AtomicLong> loadBalancedCount = Caffeine.newBuilder()
+            .expireAfterWrite(5, TimeUnit.SECONDS)
+            .build(k -> new AtomicLong(0));
+    private ServiceInstanceListSupplier serviceInstanceListSupplier;
+    private RoundRobinLoadBalancer degradation;
+    private String serviceId;
+    private CircuitBreakerExtractor circuitBreakerExtractor;
+    private CircuitBreakerRegistry circuitBreakerRegistry;
+    private UnifiedObservationFactory unifiedObservationFactory;
+
+    public TracedCircuitBreakerRoundRobinLoadBalancer(
+            ServiceInstanceListSupplier serviceInstanceListSupplier,
+            RoundRobinLoadBalancer degradation,
+            String serviceId,
+            CircuitBreakerExtractor circuitBreakerExtractor,
+            CircuitBreakerRegistry circuitBreakerRegistry,
+            UnifiedObservationFactory unifiedObservationFactory) {
+        this.serviceInstanceListSupplier = serviceInstanceListSupplier;
+        this.degradation = degradation;
+        this.serviceId = serviceId;
+        this.circuitBreakerExtractor = circuitBreakerExtractor;
+        this.circuitBreakerRegistry = circuitBreakerRegistry;
+        this.unifiedObservationFactory = unifiedObservationFactory;
+    }
 
     /**
      * 从 attributes 中提取出我们想要的，然后放入新的 attributes 中
@@ -96,44 +152,43 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         return result;
     }
 
-    //这里通过 RequestDataContext 来确定请求在负载均衡器的上下文
-    //需要注意，如果是重试请求，必须使用最初的 RequestDataContext，不能每次重试使用新的 RequestDataContext，否则负载均衡器的上下文也是新的
-    //这里使用了 Caffeine 的 weakKeys，如果 RequestDataContext 被回收了，那么对应的 RequestLoadBalancerContext 也会被回收
-    //所以，web 和 webflux 还有 gateway 包都加了单元测试验证这一点
-    private final Cache<RequestDataContext, RequestLoadBalancerContext> requestRequestDataContextMap =
-            Caffeine.newBuilder().weakKeys().weakValues().build();
-    //负载均衡次数
-    private final LoadingCache<String, AtomicLong> loadBalancedCount = Caffeine.newBuilder()
-            .expireAfterWrite(5, TimeUnit.SECONDS)
-            .build(k -> new AtomicLong(0));
-
-    @Data
-    @NoArgsConstructor
-    private static class RequestLoadBalancerContext {
-        //调用过的实例列表
-        private final Set<String> calledInstances = Sets.newHashSet();
-        //调用过的 Node 列表
-        private final Set<String> calledNodes = Sets.newHashSet();
-        //请求执行次数，第一次是 0，大于 0 代表是重试
-        private int count = 0;
-        //对于这个请求，日志级别是 DEBUG (detailLog = false) 或者 INFO (detailLog = true)
-        //%1 的概率是 INFO 级别输出，精简日志量
-        private final boolean detailLog = ThreadLocalRandom.current().nextInt(0, 100) < 10;
+    /**
+     * 获取要在 loadBalancedCount 添加的次数，某些情况下，要让实例增加的更多减少负载均衡次数：
+     * 1. 实例刚注册没多久，实例需要 JIT 编译以及加载一些类，所以不要把过多请求发过去导致请求堆积
+     * 2. 断路器处于 HALF_OPEN 状态，只能接受一定的请求，超过请求个数就还是相当于 OPEN，要限制请求个数
+     *
+     * @param serviceInstance
+     * @return
+     */
+    private static long getServiceInstanceCallWeightedIncrement(ServiceInstance serviceInstance, CircuitBreaker circuitBreaker) {
+        if (isNewlyStartup(serviceInstance)) {
+            log.info("TracedCircuitBreakerRoundRobinLoadBalancer-getServiceInstanceCallWeightedIncrement: instance {} is started up within 3 minutes, weight is {}", serviceInstance.getInstanceId(), NEWLY_STARTUP_WEIGHT);
+            return NEWLY_STARTUP_WEIGHT;
+        }
+        if (circuitBreaker != null && Objects.equals(circuitBreaker.getState(), CircuitBreaker.State.HALF_OPEN)) {
+            log.info("TracedCircuitBreakerRoundRobinLoadBalancer-getServiceInstanceCallWeightedIncrement: instance {} is HALF_OPEN, weight is {}", serviceInstance.getInstanceId(), HALF_OPEN_WEIGHT);
+            return HALF_OPEN_WEIGHT;
+        }
+        return 1L;
     }
 
-    public TracedCircuitBreakerRoundRobinLoadBalancer(
-            ServiceInstanceListSupplier serviceInstanceListSupplier,
-            RoundRobinLoadBalancer degradation,
-            String serviceId,
-            CircuitBreakerExtractor circuitBreakerExtractor,
-            CircuitBreakerRegistry circuitBreakerRegistry,
-            UnifiedObservationFactory unifiedObservationFactory) {
-        this.serviceInstanceListSupplier = serviceInstanceListSupplier;
-        this.degradation = degradation;
-        this.serviceId = serviceId;
-        this.circuitBreakerExtractor = circuitBreakerExtractor;
-        this.circuitBreakerRegistry = circuitBreakerRegistry;
-        this.unifiedObservationFactory = unifiedObservationFactory;
+    private static boolean isNewlyStartup(ServiceInstance serviceInstance) {
+        if (serviceInstance instanceof EurekaServiceInstance) {
+            EurekaServiceInstance eurekaServiceInstance = (EurekaServiceInstance) serviceInstance;
+            InstanceInfo instanceInfo = eurekaServiceInstance.getInstanceInfo();
+            if (instanceInfo != null) {
+                LeaseInfo leaseInfo = instanceInfo.getLeaseInfo();
+                if (leaseInfo != null) {
+                    long serviceUpTimestamp = leaseInfo.getServiceUpTimestamp();
+                    //实例启动 5 分钟内，
+                    if (serviceUpTimestamp > 0 && System.currentTimeMillis() - serviceUpTimestamp < 5 * 60 * 1000) {
+                        log.info("TracedCircuitBreakerRoundRobinLoadBalancer-isNewlyStartup: instance {} is started up within 5 minutes", serviceInstance.getInstanceId());
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -326,6 +381,19 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         return serviceInstance.getHost() + ":" + serviceInstance.getPort();
     }
 
+    @Data
+    @NoArgsConstructor
+    private static class RequestLoadBalancerContext {
+        //调用过的实例列表
+        private final Set<String> calledInstances = Sets.newHashSet();
+        //调用过的 Node 列表
+        private final Set<String> calledNodes = Sets.newHashSet();
+        //对于这个请求，日志级别是 DEBUG (detailLog = false) 或者 INFO (detailLog = true)
+        //%1 的概率是 INFO 级别输出，精简日志量
+        private final boolean detailLog = ThreadLocalRandom.current().nextInt(0, 100) < 10;
+        //请求执行次数，第一次是 0，大于 0 代表是重试
+        private int count = 0;
+    }
 
     @Data
     @Builder
@@ -341,47 +409,4 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         private long recentLoadBalancedCount;
         private int numberOfBufferedCalls;
     }
-
-    /**
-     * 获取要在 loadBalancedCount 添加的次数，某些情况下，要让实例增加的更多减少负载均衡次数：
-     * 1. 实例刚注册没多久，实例需要 JIT 编译以及加载一些类，所以不要把过多请求发过去导致请求堆积
-     * 2. 断路器处于 HALF_OPEN 状态，只能接受一定的请求，超过请求个数就还是相当于 OPEN，要限制请求个数
-     *
-     * @param serviceInstance
-     * @return
-     */
-    private static long getServiceInstanceCallWeightedIncrement(ServiceInstance serviceInstance, CircuitBreaker circuitBreaker) {
-        if (isNewlyStartup(serviceInstance)) {
-            log.info("TracedCircuitBreakerRoundRobinLoadBalancer-getServiceInstanceCallWeightedIncrement: instance {} is started up within 3 minutes, weight is {}", serviceInstance.getInstanceId(), NEWLY_STARTUP_WEIGHT);
-            return NEWLY_STARTUP_WEIGHT;
-        }
-        if (circuitBreaker != null && Objects.equals(circuitBreaker.getState(), CircuitBreaker.State.HALF_OPEN)) {
-            log.info("TracedCircuitBreakerRoundRobinLoadBalancer-getServiceInstanceCallWeightedIncrement: instance {} is HALF_OPEN, weight is {}", serviceInstance.getInstanceId(), HALF_OPEN_WEIGHT);
-            return HALF_OPEN_WEIGHT;
-        }
-        return 1L;
-    }
-
-    private static boolean isNewlyStartup(ServiceInstance serviceInstance) {
-        if (serviceInstance instanceof EurekaServiceInstance) {
-            EurekaServiceInstance eurekaServiceInstance = (EurekaServiceInstance) serviceInstance;
-            InstanceInfo instanceInfo = eurekaServiceInstance.getInstanceInfo();
-            if (instanceInfo != null) {
-                LeaseInfo leaseInfo = instanceInfo.getLeaseInfo();
-                if (leaseInfo != null) {
-                    long serviceUpTimestamp = leaseInfo.getServiceUpTimestamp();
-                    //实例启动 5 分钟内，
-                    if (serviceUpTimestamp > 0 && System.currentTimeMillis() - serviceUpTimestamp < 5 * 60 * 1000) {
-                        log.info("TracedCircuitBreakerRoundRobinLoadBalancer-isNewlyStartup: instance {} is started up within 5 minutes", serviceInstance.getInstanceId());
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private static final long NEWLY_STARTUP_WEIGHT = 10;
-
-    private static final long HALF_OPEN_WEIGHT = 10;
 }

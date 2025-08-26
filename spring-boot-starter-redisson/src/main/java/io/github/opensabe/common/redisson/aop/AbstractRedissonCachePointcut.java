@@ -1,90 +1,62 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.aop;
 
-import io.github.opensabe.common.redisson.annotation.RedissonLock;
-import io.github.opensabe.common.redisson.annotation.RedissonLockName;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ClassUtils;
-import org.springframework.aop.support.StaticMethodMatcherPointcut;
-
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nullable;
+
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.lang.NonNull;
+
+import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
+import lombok.extern.log4j.Log4j2;
+
 @Log4j2
-public abstract class AbstractRedissonCachePointcut<RedissonProp extends AbstractRedissonProperties> extends StaticMethodMatcherPointcut {
+public abstract class AbstractRedissonCachePointcut<T extends AbstractRedissonProperties> extends StaticMethodMatcherPointcut {
+    protected final MethodArgumentsExpressEvaluator evaluator;
     /**
      * Key 为方法全限定名称 + 参数，value 为对应的 Redisson 锁注解以及锁名称
      */
-    private final Map<String, Object> cache = new ConcurrentHashMap<>();
+    private final Map<Method, Object> cache = new ConcurrentHashMap<>();
 
-    /**
-     * 判断该方法，或者父类（包含接口）中是否加锁，并缓存起来
-     *
-     * @param method
-     * @param targetClass
-     * @return
-     */
+    protected AbstractRedissonCachePointcut(MethodArgumentsExpressEvaluator evaluator) {
+        this.evaluator = evaluator;
+    }
+
+
     @Override
-    public boolean matches(Method method, Class<?> targetClass) {
-        String key = key(method, targetClass);
-        return cache.computeIfAbsent(key, k -> {
-            RedissonProp redissonProp = computeRedissonProperties(method, targetClass);
-            if (redissonProp != null) {
-                return redissonProp;
-            }
-            List<Class<?>> allSuperclasses = ClassUtils.getAllSuperclasses(targetClass);
-            Optional<RedissonProp> optional = fromClasses(allSuperclasses, method);
-            if (optional.isEmpty()) {
-                allSuperclasses = ClassUtils.getAllInterfaces(targetClass);
-                optional = fromClasses(allSuperclasses, method);
-            }
-            if (optional.isPresent()) {
-                return optional.get();
+    public boolean matches(@NonNull Method method, @NonNull Class<?> targetClass) {
+        return cache.computeIfAbsent(method, k -> {
+            T properties = findProperties(method, targetClass);
+            if (Objects.nonNull(properties)) {
+                return properties;
             }
             return AbstractRedissonProperties.NONE;
         }) != AbstractRedissonProperties.NONE;
     }
 
-    public RedissonProp getRedissonProperties(Method method, Class<?> targetClass) {
-        Object o = cache.get(key(method, targetClass));
-        return (RedissonProp) o;
+    @SuppressWarnings("unchecked")
+    public T getRedissonProperties(Method method, @SuppressWarnings("unused") Class<?> targetClass) {
+        return (T) cache.get(method);
     }
 
-    private String key(Method method, Class<?> targetClass) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(targetClass.getName()).append("#").append(method.getName()).append("(");
-        Parameter[] parameters = method.getParameters();
-        if (parameters != null && parameters.length > 0) {
-            Arrays.stream(parameters).map(parameter -> parameter.getType().getName()).forEach(stringBuilder::append);
-        }
-        stringBuilder.append(")");
-        return stringBuilder.toString();
-    }
-
-    /**
-     * 从所有的父类方法中找到 {@link RedissonLock}
-     *
-     * @param list   所有的父类或接口
-     * @param method 加锁的方法
-     * @return {@link RedissonLock} {@link RedissonLockName} 以及{@link RedissonLockName} 所对应的参数下标
-     */
-    private Optional<RedissonProp> fromClasses(List<Class<?>> list, Method method) {
-        return list.stream()
-                .map(i -> {
-                    try {
-                        return computeRedissonProperties(i.getMethod(method.getName(), method.getParameterTypes()), i);
-                    } catch (NoSuchMethodException e) {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .findFirst();
-    }
-
-    protected abstract RedissonProp computeRedissonProperties(Method method, Class<?> clazz);
+    @Nullable
+    protected abstract T findProperties(Method method, Class<?> targetClass);
 }

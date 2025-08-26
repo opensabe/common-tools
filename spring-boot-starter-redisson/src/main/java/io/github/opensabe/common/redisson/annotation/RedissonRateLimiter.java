@@ -1,7 +1,19 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.annotation;
-
-import org.redisson.api.RateIntervalUnit;
-import org.redisson.api.RateType;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,8 +21,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+
+import org.redisson.api.RateType;
 
 @Documented
 @Inherited
@@ -19,12 +32,17 @@ import java.util.concurrent.TimeUnit;
         {ElementType.METHOD, ElementType.TYPE}
 )
 public @interface RedissonRateLimiter {
+    String DEFAULT_PREFIX = "redisson:rateLimiter:";
+
     /**
      * 可以通过 RedissonRateLimiterName 指定限流器名称
      * 对于不通过参数指定名称的，可以使用这个方法指定
      * 如果 RedissonRateLimiterName 为空，这个 name 也是默认的 空字符串，则限流器不生效
      */
     String name() default "";
+
+
+    String prefix() default DEFAULT_PREFIX;
 
     /**
      * 每次限流器获取的量
@@ -39,33 +57,29 @@ public @interface RedissonRateLimiter {
 
     /**
      * @see RateType
-     * @return
      */
     RateType rateType();
 
     /**
      * 时间区间
-     * @return
      */
     long rateInterval();
 
     /**
      * 在 rateInterval 内，最多有多少个 permits
-     * @return
      */
     long rate();
 
     /**
      * 时间区间单位
-     * @return
      */
-    RateIntervalUnit rateIntervalUnit();
+    TimeUnit rateIntervalUnit();
 
     /**
      * 令牌存活时间,keepAliveTimeUnit()
-     * @return
      */
     long keepAlive() default 0L;
+
     /**
      * 时间单位
      */
@@ -90,7 +104,6 @@ public @interface RedissonRateLimiter {
         /**
          * 获取不到就抛异常
          */
-        TRY,
-        ;
+        TRY
     }
 }

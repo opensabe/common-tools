@@ -1,10 +1,24 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilience4j;
 
-import io.github.opensabe.common.utils.AlarmUtil;
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfigurationProperties;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.reactor.AbstractSubscriber;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -13,45 +27,44 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.UnknownHttpStatusCodeException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.CoreSubscriber;
 
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.github.opensabe.common.utils.AlarmUtil;
+import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfigurationProperties;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.reactor.AbstractSubscriber;
+import lombok.extern.log4j.Log4j2;
+import reactor.core.CoreSubscriber;
 
 import static java.util.Objects.requireNonNull;
 
 /**
  * 基于官方的 CircuitBreakerOperator 针对 CircuitBreakerSubscriber 改造，基于 ClientResponse 的 http status code
+ *
  * @see io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerSubscriber
  */
 @Log4j2
 public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<ClientResponse> {
-    private final CircuitBreaker circuitBreaker;
-    private final ServiceInstance serviceInstance;
-    private final WebClientConfigurationProperties.WebClientProperties webClientProperties;
-    private final long start;
-    private final boolean singleProducer;
-
-    private final AtomicBoolean successSignaled = new AtomicBoolean(false);
-    private final AtomicBoolean eventWasEmitted = new AtomicBoolean(false);
-
     private static final byte[] EMPTY = new byte[0];
-
-    private static final Class<?> aClass;
-    private static final Method request;
+    private static final Class<?> A_CLASS;
+    private static final Method REQUEST;
 
     static {
         try {
-            aClass = Class.forName("org.springframework.web.reactive.function.client.DefaultClientResponse");
-            request = ReflectionUtils.findMethod(aClass, "request");
-            request.setAccessible(true);
+            A_CLASS = Class.forName("org.springframework.web.reactive.function.client.DefaultClientResponse");
+            REQUEST = ReflectionUtils.findMethod(A_CLASS, "request");
+            REQUEST.setAccessible(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-
+    private final CircuitBreaker circuitBreaker;
+    private final ServiceInstance serviceInstance;
+    private final WebClientConfigurationProperties.WebClientProperties webClientProperties;
+    private final long start;
+    private final boolean singleProducer;
+    private final AtomicBoolean successSignaled = new AtomicBoolean(false);
+    private final AtomicBoolean eventWasEmitted = new AtomicBoolean(false);
 
 
     protected ClientResponseCircuitBreakerSubscriber(
@@ -74,7 +87,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
                 int rawStatusCode = clientResponse.statusCode().value();
                 HttpStatus httpStatus = HttpStatus.resolve(rawStatusCode);
                 try {
-                    HttpRequest httpRequest = (HttpRequest) request.invoke(clientResponse);
+                    HttpRequest httpRequest = (HttpRequest) REQUEST.invoke(clientResponse);
                     //判断方法是否为 GET，以及是否在可重试路径配置中，从而得出是否可以重试
                     if (httpRequest.getMethod() != HttpMethod.GET && !webClientProperties.retryablePathsMatch(httpRequest.getURI().getPath())) {
                         if (Objects.equals(httpStatus, HttpStatus.SERVICE_UNAVAILABLE)) {

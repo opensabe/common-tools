@@ -1,7 +1,30 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.location.test.jfr;
 
-import io.github.opensabe.common.location.jfr.LocationJFREvent;
-import io.github.opensabe.common.location.observation.LocationContext;
+import java.util.List;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.moditect.jfrunit.JfrEvents;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+
 import io.github.opensabe.common.location.service.GeocodeService;
 import io.github.opensabe.common.location.test.common.GeoPlacesBaseTest;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
@@ -9,26 +32,13 @@ import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import jdk.jfr.consumer.RecordedEvent;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.moditect.jfrunit.JfrEvents;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.testcontainers.shaded.org.yaml.snakeyaml.util.ArrayUtils;
 import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
 
-import java.lang.reflect.Array;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author changhongwei
@@ -39,19 +49,18 @@ import static org.junit.jupiter.api.Assertions.*;
 @Execution(ExecutionMode.SAME_THREAD)
 @Disabled
 @AutoConfigureObservability
+@DisplayName("地理位置JFR事件测试")
 public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
+    private final String address = "Samuel Asabia House 35 Marina,Lagos,Nigeria";
+    private final List<Double> position = List.of(11.196417, 5.605130);
+    public JfrEvents jfrEvents = new JfrEvents();
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
-
     @Autowired
     private GeocodeService geocodeService;
 
-    public JfrEvents jfrEvents = new JfrEvents();
-
-    private final String address = "Samuel Asabia House 35 Marina,Lagos,Nigeria";
-
-    private final List<Double> position = List.of(11.196417, 5.605130);
-//    @Test
+    //    @Test
+    @DisplayName("测试获取坐标功能 - 验证JFR事件记录")
     public void testGetCoordinates() {
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         observation.scoped(() -> {
@@ -78,7 +87,8 @@ public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
         }
     }
 
-//    @Test
+    //    @Test
+    @DisplayName("测试反向地理编码功能 - 验证JFR事件记录")
     public void testReverseGeocode() {
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         observation.scoped(() -> {

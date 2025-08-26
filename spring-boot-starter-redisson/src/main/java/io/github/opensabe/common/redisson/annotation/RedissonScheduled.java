@@ -1,13 +1,31 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(
-        {ElementType.METHOD}
-)
+@Target(ElementType.METHOD)
 public @interface RedissonScheduled {
     /**
      * 定时任务名称，如果为空则取方法名加类名称
@@ -16,15 +34,13 @@ public @interface RedissonScheduled {
 
     /**
      * 执行间隔
-     * @return
      */
     long fixedDelay() default 1000;
 
     /**
      * 初始延迟
-     * @return
      */
     long initialDelay() default 0;
-    
+
     boolean stopOnceShutdown() default false;
 }

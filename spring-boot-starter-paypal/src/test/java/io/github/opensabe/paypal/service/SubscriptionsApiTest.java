@@ -1,8 +1,24 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.paypal.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.log4j.Log4j2;
+import java.net.URI;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openapitools.client.ApiClient;
@@ -16,9 +32,10 @@ import org.openapitools.client.model.VerifyWebhookSignatureResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.net.URI;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.log4j.Log4j2;
 
 //todo 在 github action 里面加入 secret，之后通过环境变量读取
 @Disabled
@@ -39,7 +56,7 @@ public class SubscriptionsApiTest {
     }
 
     @Test
-    public void verifyTest() throws  ApiException, JsonProcessingException {
+    public void verifyTest() throws ApiException, JsonProcessingException {
         ApiClient apiClient = new ApiClient();
         ObjectMapper objectMapper = apiClient.getObjectMapper();
         String token = payPalService.getToken();

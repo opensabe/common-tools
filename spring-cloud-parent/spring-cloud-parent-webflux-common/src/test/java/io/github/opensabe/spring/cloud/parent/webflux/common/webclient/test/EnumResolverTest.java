@@ -1,9 +1,22 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.spring.cloud.parent.webflux.common.webclient.test;
 
-import io.github.opensabe.base.vo.IntValueEnum;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +31,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import io.github.opensabe.base.vo.IntValueEnum;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author heng.ma
@@ -37,33 +53,19 @@ import java.util.Map;
 )
 public class EnumResolverTest {
 
-    @SpringBootApplication
-    public static class App {
+    @Autowired
+    private TestRestTemplate testRestTemplate;
 
-        @Bean
-        public TestController controller () {
-            return new TestController();
-        }
+    @Test
+    void testParam() {
+        int type = testRestTemplate.getForObject("/test/param?type=2", int.class);
+        Assertions.assertEquals(2, type);
     }
 
-    @RestController
-    public static class TestController {
-
-        @GetMapping("test/param")
-        public Type test (Type type) {
-            return type;
-        }
-        @PostMapping("test/body")
-        public Type test (@RequestBody Param param) {
-            return param.type();
-        }
-
-
-
-    }
-
-    public record Param (Type type) {
-
+    @Test
+    void testBody() {
+        int type = testRestTemplate.postForObject("/test/body", Map.of("type", 1), int.class);
+        Assertions.assertEquals(1, type);
     }
 
     @Getter
@@ -72,29 +74,42 @@ public class EnumResolverTest {
 
         NORMAL(1),
 
-        HUM(2)
-
-        ;
+        HUM(2);
 
         private final Integer value;
+
         @Override
         public Integer getValue() {
             return value;
         }
     }
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
+    @SpringBootApplication
+    public static class App {
 
-    @Test
-    void testParam () {
-        int type = testRestTemplate.getForObject("/test/param?type=2", int.class);
-        Assertions.assertEquals(2, type);
+        @Bean
+        public TestController controller() {
+            return new TestController();
+        }
     }
 
-    @Test
-    void testBody () {
-        int type = testRestTemplate.postForObject("/test/body", Map.of("type", 1),int.class);
-        Assertions.assertEquals(1, type);
+    @RestController
+    public static class TestController {
+
+        @GetMapping("test/param")
+        public Type test(Type type) {
+            return type;
+        }
+
+        @PostMapping("test/body")
+        public Type test(@RequestBody Param param) {
+            return param.type();
+        }
+
+
+    }
+
+    public record Param(Type type) {
+
     }
 }

@@ -1,4 +1,27 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.alive.client.impl;
+
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 
 import io.github.opensabe.alive.client.Client;
 import io.github.opensabe.alive.client.Response;
@@ -15,13 +38,6 @@ import io.github.opensabe.alive.client.vo.QueryVo;
 import io.github.opensabe.alive.protobuf.Message;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.rocketmq.client.producer.SendCallback;
-import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
-
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.github.opensabe.alive.client.Response.SUCEESS;
 
@@ -32,7 +48,7 @@ public class MQClientImpl implements Client {
     private Integer productCode;
     private AtomicInteger requestId = new AtomicInteger(1);
 
-    public MQClientImpl(RocketMQTemplate producer,Integer productCode) {
+    public MQClientImpl(RocketMQTemplate producer, Integer productCode) {
         this.producer = producer;
         this.productCode = productCode;
     }
@@ -59,13 +75,13 @@ public class MQClientImpl implements Client {
 
     @Override
     public Response push(MessageVo messageVo) throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException {
-        producer.syncSend(getTopic(messageVo),build(messageVo));
+        producer.syncSend(getTopic(messageVo), build(messageVo));
         return SUCEESS;
     }
 
     @Override
     public Response push(MessageVo messageVo, long timeout, TimeUnit unit) throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException {
-        producer.syncSend(getTopic(messageVo),build(messageVo));
+        producer.syncSend(getTopic(messageVo), build(messageVo));
         return SUCEESS;
     }
 
@@ -115,15 +131,15 @@ public class MQClientImpl implements Client {
 
     }
 
-    private String getTopic (MessageVo message) {
+    private String getTopic(MessageVo message) {
         if (io.github.opensabe.alive.protobuf.Message.PushType.GROUP.equals(message.pushType)) {
             return MQTopic.BROAD_CAST.getTopic();
         }
         return MQTopic.SIMPLE.getTopic();
     }
 
-    private Message.Publish build (MessageVo messageVo) {
-        return  messageVo.buildPublush(messageVo.getRequestId()==0?requestId.incrementAndGet():messageVo.getRequestId(),
+    private Message.Publish build(MessageVo messageVo) {
+        return messageVo.buildPublush(messageVo.getRequestId() == 0 ? requestId.incrementAndGet() : messageVo.getRequestId(),
                 productCode);
     }
 }

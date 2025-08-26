@@ -7,22 +7,17 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.9.1-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-boot-starter-mybatis</artifactId>
-    <version>1.0.9.1-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
-        <common-utils.version>1.0.9.1-SNAPSHOT</common-utils.version>
-        <common-id-generator.version>1.0.9.1-SNAPSHOT</common-id-generator.version>
-        <spring-boot-starter-dynamodb.version>1.0.9.1-SNAPSHOT</spring-boot-starter-dynamodb.version>
-        <spring-boot-starter-s3.version>1.0.9.1-SNAPSHOT</spring-boot-starter-s3.version>
-        <tk.mybatis.springboot.starter.version>4.2.3</tk.mybatis.springboot.starter.version>
+        <tk.mybatis.springboot.starter.version>5.0.1</tk.mybatis.springboot.starter.version>
         <pagehelper.version>5.3.2</pagehelper.version>
         <druid.version>1.2.18</druid.version>
         <mybatis-spring-boot-starter.version>3.0.2</mybatis-spring-boot-starter.version>
@@ -33,7 +28,6 @@
         <dependency>
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>common-utils</artifactId>
-            <version>${common-utils.version}</version>
         </dependency>
 
         <!-- tk.mybatis依赖的spring-boot是2.x我们需要升级到3.x -->
@@ -57,6 +51,10 @@
                 <exclusion>
                     <groupId>com.zaxxer</groupId>
                     <artifactId>HikariCP</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -103,7 +101,6 @@
         <dependency>
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>common-id-generator</artifactId>
-            <version>${common-id-generator.version}</version>
             <optional>true</optional>
             <scope>provided</scope>
         </dependency>
@@ -112,14 +109,12 @@
         <dependency>
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>spring-boot-starter-s3</artifactId>
-            <version>${spring-boot-starter-s3.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>spring-boot-starter-dynamodb</artifactId>
-            <version>${spring-boot-starter-dynamodb.version}</version>
             <scope>test</scope>
         </dependency>
 

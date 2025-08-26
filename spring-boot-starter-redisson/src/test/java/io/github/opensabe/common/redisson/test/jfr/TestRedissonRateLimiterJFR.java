@@ -1,71 +1,54 @@
+/*
+ * Copyright 2025 opensabe-tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.opensabe.common.redisson.test.jfr;
-
-import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
-import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
-import io.github.opensabe.common.redisson.test.common.SingleRedisIntegrationTest;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.micrometer.observation.Observation;
-import io.micrometer.tracing.TraceContext;
-import jdk.jfr.consumer.RecordedEvent;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.moditect.jfrunit.JfrEventTest;
-import org.moditect.jfrunit.JfrEvents;
-import org.redisson.api.RateIntervalUnit;
-import org.redisson.api.RateType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.moditect.jfrunit.JfrEventTest;
+import org.moditect.jfrunit.JfrEvents;
+import org.redisson.api.RateType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
+import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
+import io.micrometer.observation.Observation;
+import io.micrometer.tracing.TraceContext;
+import jdk.jfr.consumer.RecordedEvent;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @Import(TestRedissonRateLimiterJFR.Config.class)
 //JFR 测试最好在本地做
 @Disabled
+@JfrEventTest
 public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     public JfrEvents jfrEvents = new JfrEvents();
-
-    public static class Config {
-        @Bean
-        public TestRedissonRateLimiterBean testRedissonRateLimiterBean() {
-            return new TestRedissonRateLimiterBean();
-        }
-    }
-
-    public static class TestRedissonRateLimiterBean {
-
-        @RedissonRateLimiter(
-                name = "TestRedissonRateLimiterJFR-testRateLimiterTryAcquireWithWait",
-                type = RedissonRateLimiter.Type.TRY,
-                waitTime = THREAD_COUNT / 2,
-                timeUnit = TimeUnit.SECONDS,
-                rate = 1,
-                rateInterval = 1,
-                rateType = RateType.OVERALL,
-                rateIntervalUnit = RateIntervalUnit.SECONDS
-        )
-        public void testRateLimiterTryAcquireWithWait() throws InterruptedException {
-            TimeUnit.MILLISECONDS.sleep(100);
-        }
-    }
-
     @Autowired
     private TestRedissonRateLimiterBean testRedissonRateLimiterBean;
     @Autowired
@@ -73,7 +56,7 @@ public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
 
     @Test
     public void testRateLimiterTryAcquireWithWait() throws InterruptedException {
-        Thread []threads = new Thread[THREAD_COUNT];
+        Thread[] threads = new Thread[THREAD_COUNT];
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         for (int i = 0; i < THREAD_COUNT; i++) {
             threads[i] = new Thread(() -> {
@@ -110,5 +93,29 @@ public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
         );
         assertEquals(2, acquireSuccessfully.size());
         assertEquals(THREAD_COUNT, recordedEvents.stream().map(recordedEvent -> recordedEvent.getString("spanId")).distinct().count());
+    }
+
+    public static class Config {
+        @Bean
+        public TestRedissonRateLimiterBean testRedissonRateLimiterBean() {
+            return new TestRedissonRateLimiterBean();
+        }
+    }
+
+    public static class TestRedissonRateLimiterBean {
+
+        @RedissonRateLimiter(
+                name = "TestRedissonRateLimiterJFR-testRateLimiterTryAcquireWithWait",
+                type = RedissonRateLimiter.Type.TRY,
+                waitTime = THREAD_COUNT / 2,
+                timeUnit = TimeUnit.SECONDS,
+                rate = 1,
+                rateInterval = 1,
+                rateType = RateType.OVERALL,
+                rateIntervalUnit = TimeUnit.SECONDS
+        )
+        public void testRateLimiterTryAcquireWithWait() throws InterruptedException {
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
     }
 }
