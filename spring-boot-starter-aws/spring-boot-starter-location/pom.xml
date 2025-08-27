@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.github.opensabe-tech</groupId>
 		<artifactId>aws-bom</artifactId>
-		<version>t2.0.0</version>
+		<version>2.0.0-alpha</version>
 		<relativePath>../../spring-boot-starter-aws/pom.xml</relativePath>
 	</parent>
 

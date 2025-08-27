@@ -37,7 +37,7 @@ public abstract class AbstractBaseOnNodeManagerInitializer implements Applicatio
             return;
         }
         //由于spring-cloud的org.springframework.cloud.context.restart.RestartListener导致同一个context触发多次
-        //我个人感觉 org.springframework.cloud.context.restart.RestartListener 这个在spring-boot2.0.0之后的spring-cloud版本是没有必要存在的
+        //我个人感觉 org.springframework.cloud.context.restart.RestartListener 这个在spring-boo2.0.0-alpha之后的spring-cloud版本是没有必要存在的
         //但是官方并没有正面回应，以防之后官方还拿这个做点事情，这里我们做个适配，参考我问的这个issue：https://github.com/spring-cloud/spring-cloud-commons/issues/693
         synchronized (INITIALIZED) {
             if (INITIALIZED.get()) {
