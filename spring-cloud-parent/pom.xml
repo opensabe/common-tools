@@ -29,6 +29,8 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <java.version>21</java.version>
+        
+        <opensabe.version>2.0.0-SNAPSHOT</opensabe.version>
 
         <disruptor.version>4.0.0</disruptor.version>
         <guava.version>33.4.8-jre</guava.version>
@@ -51,147 +53,147 @@
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-framework-parent-common</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-cloud-parent-common</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-cloud-parent-gateway-common</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-cloud-parent-web-common</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-cloud-parent-webflux-common</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-apple</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>common-id-generator</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>common-location</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>common-tools-job-scheduler</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>common-utils</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>alive-client</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>alive-protobuf</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-aliveclient</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-dynamodb</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-s3</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-cache</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-elasticsearch</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-google</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-milvus</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-mybatis</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-paypal</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-redisson</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-rocketmq</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-socketio</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-thread-pool</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-web-config</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-cloud-node-manager</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-cloud-starter-3rd-client</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>common-testcontainers</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
 
             <dependency>
@@ -235,7 +237,7 @@
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-location</artifactId>
-                <version>${project.version}</version>
+                <version>${opensabe.version}</version>
             </dependency>
 
         </dependencies>

@@ -35,7 +35,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Check license headers
-      run: mvn -B license:check
+      run: mvn -B  license:check -P maven-central
       
     - name: Build with Maven
-      run: mvn -B clean verify
+      run: mvn -B clean verify -P maven-central
