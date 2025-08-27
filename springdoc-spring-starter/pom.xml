@@ -11,6 +11,9 @@
     </parent>
 
     <artifactId>springdoc-spring-starter</artifactId>
+    <name>${project.artifactId}</name>
+    <description>${project.artifactId}</description>
+    <packaging>jar</packaging>
 
     <properties>
 
