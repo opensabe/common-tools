@@ -79,13 +79,7 @@ public class MultiRedisConnectionFactoryConfiguration implements BeanPostProcess
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         Class<?> configurationType = Class.forName(CONFIGURATION_CLASS_NAME);
         MethodHandles.Lookup configurationLookup = MethodHandles.privateLookupIn(configurationType, lookup);
-        this.configurationConstructor = configurationLookup.findConstructor(configurationType, MethodType.methodType(void.class,
-                RedisProperties.class,
-                ObjectProvider.class,
-                ObjectProvider.class,
-                ObjectProvider.class,
-                RedisConnectionDetails.class,
-                ObjectProvider.class));
+        this.configurationConstructor = configurationLookup.findConstructor(configurationType, MethodType.methodType(void.class, RedisProperties.class, ObjectProvider.class, ObjectProvider.class, ObjectProvider.class, RedisConnectionDetails.class));
 
         this.redisConnectionFactory = configurationLookup.findVirtual(configurationType, "redisConnectionFactory", MethodType.methodType(LettuceConnectionFactory.class, ObjectProvider.class, ObjectProvider.class, ClientResources.class));
         this.redisConnectionFactoryVirtual = configurationLookup.findVirtual(configurationType, "redisConnectionFactoryVirtualThreads", MethodType.methodType(LettuceConnectionFactory.class, ObjectProvider.class, ObjectProvider.class, ClientResources.class));
@@ -114,7 +108,6 @@ public class MultiRedisConnectionFactoryConfiguration implements BeanPostProcess
                                                                                  ObjectProvider<RedisStandaloneConfiguration> standaloneConfigurationProvider,
                                                                                  ObjectProvider<RedisSentinelConfiguration> sentinelConfigurationProvider,
                                                                                  ObjectProvider<RedisClusterConfiguration> clusterConfigurationProvider,
-                                                                                 ObjectProvider<SslBundles> sslBundles,
                                                                                  ObjectProvider<LettuceClientOptionsBuilderCustomizer> clientOptionsBuilderCustomizers) {
         log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactory initialization starts... {}", multiRedisProperties.toString());
         Map<String, List<LettuceConnectionFactory>> connectionFactoryMap = Maps.newHashMap();
@@ -123,7 +116,7 @@ public class MultiRedisConnectionFactoryConfiguration implements BeanPostProcess
             log.info("RedisCustomizedConfiguration-multiRedisLettuceConnectionFactory is initializing... {},{}", k, v.getHost());
             try {
                 Object property = propertyConstructor.invoke(v);
-                Object configuration = configurationConstructor.invoke(v, standaloneConfigurationProvider, sentinelConfigurationProvider, clusterConfigurationProvider, property, sslBundles);
+                Object configuration = configurationConstructor.invoke(v, standaloneConfigurationProvider, sentinelConfigurationProvider, clusterConfigurationProvider, property);
                 LettuceConnectionFactory lettuceConnectionFactory = (LettuceConnectionFactory) redisConnectionFactory.bindTo(configuration)
                         .invokeExact(builderCustomizers, clientOptionsBuilderCustomizers, clientResources);
                 lettuceConnectionFactory.setPipeliningFlushPolicy(LettuceConnection.PipeliningFlushPolicy.flushOnClose());
