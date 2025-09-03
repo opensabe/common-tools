@@ -36,6 +36,7 @@
         <guava.version>33.4.8-jre</guava.version>
         <hikaricp.version>6.3.0</hikaricp.version>
         <testcontaniers.version>1.21.1</testcontaniers.version>
+        <javafaker.version>1.0.2</javafaker.version>
         <spotbugs-annotations.version>4.9.3</spotbugs-annotations.version>
         <springdoc.version>2.8.8</springdoc.version>
         <common.io.version>2.19.0</common.io.version>
@@ -372,6 +373,13 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.github.javafaker/javafaker -->
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>${javafaker.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations -->
