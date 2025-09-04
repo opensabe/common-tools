@@ -84,7 +84,7 @@ public class ElasticSearchConfiguration implements DisposableBean {
 
 
     @Bean
-    public RestClientBuilder restClientBuilder() {
+    public RestClientBuilder restClientBuilderForElasticSearch() {
         System.setProperty("es.set.netty.runtime.available.processors", "false");
         List<HttpHost> httpHosts = Lists.newArrayList();
         for (String s : properties.getAddresses().split(",")) {
@@ -146,18 +146,18 @@ public class ElasticSearchConfiguration implements DisposableBean {
     }
 
     @Bean
-    public RestClient restClient(RestClientBuilder restClientBuilder) {
+    public RestClient restClientForElasticSearch(RestClientBuilder restClientBuilder) {
         return restClientBuilder.build();
     }
 
     @Bean
-    public RestHighLevelClient getRestHighLevelClient(RestClientBuilder restClientBuilder) {
+    public RestHighLevelClient getRestHighLevelClientForElasticSearch(RestClientBuilder restClientBuilder) {
         restHighLevelClient = new RestHighLevelClient(restClientBuilder);
         return restHighLevelClient;
     }
 
     @Bean
-    public ScriptedSearcher scriptedSearcher(RestHighLevelClient restHighLevelClient) {
+    public ScriptedSearcher scriptedSearcherForElasticSearch(RestHighLevelClient restHighLevelClient) {
         return new ScriptedSearcher(restHighLevelClient);
     }
 

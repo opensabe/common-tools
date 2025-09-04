@@ -158,6 +158,11 @@
             </dependency>
             <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
+                <artifactId>spring-boot-starter-youtobe</artifactId>
+                <version>${opensabe.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-redisson</artifactId>
                 <version>${opensabe.version}</version>
             </dependency>
