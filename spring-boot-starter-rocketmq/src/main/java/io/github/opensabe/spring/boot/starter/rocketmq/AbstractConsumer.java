@@ -85,20 +85,7 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         if ("v2".equals(ext.getProperty("CORE_VERSION"))) {
             BaseMessage<T> message = null;
             if (payload.trim().startsWith("{")) {
-                if (TypeUtils.isAssignable(String.class, type)) {
-                    BaseMessage<JsonNode> baseJsonNodeMessage = JsonUtil.parseObject(MQMessageUtil.decode(payload), new TypeReference<>() {});
-                    BaseMQMessage baseMQMessage = new BaseMQMessage();
-                    baseMQMessage.setTs(baseJsonNodeMessage.getTs());
-                    baseMQMessage.setSrc(baseJsonNodeMessage.getSrc());
-                    baseMQMessage.setTraceId(baseJsonNodeMessage.getTraceId());
-                    baseMQMessage.setSpanId(baseJsonNodeMessage.getSpanId());
-                    baseMQMessage.setAction(baseJsonNodeMessage.getAction());
-                    baseMQMessage.setData(baseJsonNodeMessage.getData().toString());
-                    message = (BaseMessage<T>) MQMessageUtil.decode(baseMQMessage);
-                    log.warn("AbstractMQConsumer-convert: v2 String type auto-fixed, you can use new AbstractConsumer<T> instead of AbstractMQConsumer(then parse the message yourself) to avoid this warning. message");
-                } else {
-                    message = JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
-                }
+                message = JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
             }
             if (Objects.isNull(message)) {
                 message = new BaseMessage<>();
