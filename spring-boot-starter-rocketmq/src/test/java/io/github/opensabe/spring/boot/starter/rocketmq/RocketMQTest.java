@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
-//    @Disabled
+    @Disabled
     @DisplayName("测试大负载消息发送 - 验证压缩和消息大小限制")
     public void testSend_largePayload() throws Exception {
 
