@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Objects;
@@ -34,8 +33,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.util.TypeUtils;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 
