@@ -43,19 +43,28 @@ public class MybatisConfiguration {
 
                 if (Objects.nonNull(configuration.getAutoMappingBehavior())) {
                     o.setAutoMappingBehavior(configuration.getAutoMappingBehavior());
-                } else {
+                }
+
+				o.setAutoMappingBehavior(configuration.getAutoMappingBehavior());
+
+                if (Objects.isNull(o.getAutoMappingBehavior())) {
                     o.setAutoMappingBehavior(AutoMappingBehavior.FULL);
                 }
 
+
                 if (Objects.nonNull(configuration.getAutoMappingUnknownColumnBehavior())) {
                     o.setAutoMappingUnknownColumnBehavior(configuration.getAutoMappingUnknownColumnBehavior());
-                } else  {
+                }
+
+                if (Objects.isNull(o.getAutoMappingUnknownColumnBehavior())) {
                     o.setAutoMappingUnknownColumnBehavior(AutoMappingUnknownColumnBehavior.NONE);
                 }
+
 
 				if (Objects.nonNull(configuration.getCacheEnabled())) {
 					o.setCacheEnabled(configuration.getCacheEnabled());
 				}
+
 
 				if (Objects.nonNull(configuration.getCallSettersOnNulls())) {
 					o.setCallSettersOnNulls(configuration.getCallSettersOnNulls());
@@ -84,78 +93,9 @@ public class MybatisConfiguration {
                     o.setSafeResultHandlerEnabled(configuration.getSafeResultHandlerEnabled());
                 }
 
-                // 补充的配置属性
-                if (Objects.nonNull(configuration.getMultipleResultSetsEnabled())) {
-                    o.setMultipleResultSetsEnabled(configuration.getMultipleResultSetsEnabled());
-                }
-                
-                if (Objects.nonNull(configuration.getUseGeneratedKeys())) {
-                    o.setUseGeneratedKeys(configuration.getUseGeneratedKeys());
-                }
-                
-                if (Objects.nonNull(configuration.getUseColumnLabel())) {
-                    o.setUseColumnLabel(configuration.getUseColumnLabel());
-                }
-                
-                if (Objects.nonNull(configuration.getUseActualParamName())) {
-                    o.setUseActualParamName(configuration.getUseActualParamName());
-                }
-                
-                if (Objects.nonNull(configuration.getReturnInstanceForEmptyRow())) {
-                    o.setReturnInstanceForEmptyRow(configuration.getReturnInstanceForEmptyRow());
-                }
-                
-                if (Objects.nonNull(configuration.getShrinkWhitespacesInSql())) {
-                    o.setShrinkWhitespacesInSql(configuration.getShrinkWhitespacesInSql());
-                }
-                
-                if (Objects.nonNull(configuration.getNullableOnForEach())) {
-                    o.setNullableOnForEach(configuration.getNullableOnForEach());
-                }
-                
-                if (Objects.nonNull(configuration.getArgNameBasedConstructorAutoMapping())) {
-                    o.setArgNameBasedConstructorAutoMapping(configuration.getArgNameBasedConstructorAutoMapping());
-                }
-                
-                if (Objects.nonNull(configuration.getLocalCacheScope())) {
-                    o.setLocalCacheScope(configuration.getLocalCacheScope());
-                }
-                
-                if (Objects.nonNull(configuration.getDefaultResultSetType())) {
-                    o.setDefaultResultSetType(configuration.getDefaultResultSetType());
-                }
-                
-                if (Objects.nonNull(configuration.getDefaultExecutorType())) {
-                    o.setDefaultExecutorType(configuration.getDefaultExecutorType());
-                }
-                
-                if (Objects.nonNull(configuration.getDefaultStatementTimeout())) {
-                    o.setDefaultStatementTimeout(configuration.getDefaultStatementTimeout());
-                }
-                
-                if (Objects.nonNull(configuration.getDefaultFetchSize())) {
-                    o.setDefaultFetchSize(configuration.getDefaultFetchSize());
-                }
-                
-                if (Objects.nonNull(configuration.getVfsImpl())) {
-                    o.setVfsImpl(configuration.getVfsImpl());
-                }
-                
-                if (Objects.nonNull(configuration.getDefaultSqlProviderType())) {
-                    o.setDefaultSqlProviderType(configuration.getDefaultSqlProviderType());
-                }
-                
-                if (Objects.nonNull(configuration.getConfigurationFactory())) {
-                    o.setConfigurationFactory(configuration.getConfigurationFactory());
-                }
-                
-                if (Objects.nonNull(configuration.getVariables())) {
-                    o.setVariables(configuration.getVariables());
-                }
-                
-                if (Objects.nonNull(configuration.getDatabaseId())) {
-                    o.setDatabaseId(configuration.getDatabaseId());
-                }
+
+
+
 
 			});
 		}

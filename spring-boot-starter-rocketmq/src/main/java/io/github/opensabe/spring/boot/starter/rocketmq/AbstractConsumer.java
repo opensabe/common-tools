@@ -69,7 +69,6 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         if ("v2".equals(ext.getProperty("CORE_VERSION"))) {
             BaseMessage<T> message = null;
             if (payload.trim().startsWith("{")) {
-                System.out.println(payload);
                 message = JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
             }
             if (Objects.isNull(message)) {
