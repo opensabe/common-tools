@@ -34,7 +34,6 @@ import org.springframework.data.util.TypeInformation;
 import org.springframework.util.TypeUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.entity.base.vo.BaseMessage;

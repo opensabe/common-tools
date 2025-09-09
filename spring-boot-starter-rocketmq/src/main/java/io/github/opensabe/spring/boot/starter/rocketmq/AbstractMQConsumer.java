@@ -15,12 +15,13 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
+import java.nio.charset.Charset;
+
+import org.apache.rocketmq.common.message.MessageExt;
+
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.entity.base.vo.BaseMessage;
 import io.github.opensabe.common.utils.json.JsonUtil;
-import org.apache.rocketmq.common.message.MessageExt;
-
-import java.nio.charset.Charset;
 
 public abstract class AbstractMQConsumer extends AbstractConsumer<String> {
 
