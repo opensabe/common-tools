@@ -15,6 +15,8 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -32,7 +34,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.util.TypeUtils;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.entity.base.vo.BaseMessage;
@@ -79,11 +84,24 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
 
         String payload = new String(ext.getBody(), Charset.defaultCharset());
 
+        Type type = this.typeReference.getType();
         if ("v2".equals(ext.getProperty("CORE_VERSION"))) {
             BaseMessage<T> message = null;
             if (payload.trim().startsWith("{")) {
-                System.out.println(payload);
-                message = JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
+                if (TypeUtils.isAssignable(String.class, type)) {
+                    BaseMessage<JsonNode> baseJsonNodeMessage = JsonUtil.parseObject(MQMessageUtil.decode(payload), new TypeReference<>() {});
+                    BaseMQMessage baseMQMessage = new BaseMQMessage();
+                    baseMQMessage.setTs(baseJsonNodeMessage.getTs());
+                    baseMQMessage.setSrc(baseJsonNodeMessage.getSrc());
+                    baseMQMessage.setTraceId(baseJsonNodeMessage.getTraceId());
+                    baseMQMessage.setSpanId(baseJsonNodeMessage.getSpanId());
+                    baseMQMessage.setAction(baseJsonNodeMessage.getAction());
+                    baseMQMessage.setData(baseJsonNodeMessage.getData().toString());
+                    message = (BaseMessage<T>) MQMessageUtil.decode(baseMQMessage);
+                    log.warn("AbstractMQConsumer-convert: v2 String type auto-fixed, you can use new AbstractConsumer<T> instead of AbstractMQConsumer(then parse the message yourself) to avoid this warning. message");
+                } else {
+                    message = JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
+                }
             }
             if (Objects.isNull(message)) {
                 message = new BaseMessage<>();
@@ -104,8 +122,7 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
             v1.setData(payload);
         }
 
-
-        if (TypeUtils.isAssignable(String.class, typeReference.getType())) {
+        if (TypeUtils.isAssignable(String.class, type)) {
             return (BaseMessage<T>) MQMessageUtil.decode(v1);
         }
         BaseMessage<T> message = new BaseMessage<>(JsonUtil.parseObject(MQMessageUtil.decode(v1.getData()), typeReference));

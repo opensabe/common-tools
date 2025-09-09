@@ -23,8 +23,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.junit.Assert;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +31,11 @@ import org.springframework.context.annotation.Import;
 
 import com.alibaba.fastjson.JSONException;
 
+import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.entity.base.vo.BaseMessage;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
+import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQTest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,12 +50,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class RocketMQTest extends BaseRocketMQTest {
 
     public static final List<String> SENT_MESSAGES = new ArrayList<>();
+    public static final List<String> SENT_LARGE_MESSAGES = new ArrayList<>();
     private static final CountDownLatch testSendLatch = new CountDownLatch(1);
+    private static final CountDownLatch testSendLatchOld = new CountDownLatch(1);
     private static final String testSendLatchString = testSendLatch.toString();
     private static final String SECRET = "secretString";
     private static volatile Long timestamp = System.currentTimeMillis();
     private static boolean hasInfo = false;
+    private static boolean hasInfoOld = false;
     private static CountDownLatch latch;
+    private static CountDownLatch latchOld;
+    private static CountDownLatch largeLatch;
+    private static CountDownLatch largeLatchOld;
     @Autowired
     private MQProducer mqProducer;
 
@@ -66,7 +72,9 @@ public class RocketMQTest extends BaseRocketMQTest {
                 //重试3次失败后，存入数据库靠定时任务继续重试
                 .persistence(true).build());
         testSendLatch.await(1, TimeUnit.MINUTES);
+        testSendLatchOld.await(1, TimeUnit.MINUTES);
         assertTrue(hasInfo);
+        assertTrue(hasInfoOld);
     }
 
     @Test
@@ -79,27 +87,32 @@ public class RocketMQTest extends BaseRocketMQTest {
     }
 
     @Test
-    @Disabled
+//    @Disabled
     @DisplayName("测试大负载消息发送 - 验证压缩和消息大小限制")
     public void testSend_largePayload() throws Exception {
 
-        SENT_MESSAGES.add("test_msg1" + generateLargeMessage(4 * 1024 * 1024 - 18)); // 4MB message);
-        SENT_MESSAGES.add("test_msg2" + generateLargeMessage(4 * 1024 * 1024 - 1025));
-        SENT_MESSAGES.add("test_msg3" + generateLargeMessage(5 * 1024 * 1024));
-        SENT_MESSAGES.add("test_msg4" + generateLargeMessage(4 * 1024 * 1024 - 500));
+        SENT_LARGE_MESSAGES.add("test_large_msg1" + generateLargeMessage(4 * 1024 * 1024 - 18)); // 4MB message);
+        SENT_LARGE_MESSAGES.add("test_large_msg2" + generateLargeMessage(4 * 1024 * 1024 - 1025));
+        SENT_LARGE_MESSAGES.add("test_large_msg3" + generateLargeMessage(5 * 1024 * 1024));
+        SENT_LARGE_MESSAGES.add("test_large_msg4" + generateLargeMessage(4 * 1024 * 1024 - 500));
 
-        latch = new CountDownLatch(SENT_MESSAGES.size());
+        largeLatch = new CountDownLatch(SENT_MESSAGES.size());
+        largeLatchOld = new CountDownLatch(SENT_MESSAGES.size());
 
-        SENT_MESSAGES.forEach(msg ->
+        SENT_LARGE_MESSAGES.forEach(msg ->
                 mqProducer.send(
                         "rocketmq-test-topic",
                         POJO.builder().text(msg).timestamp(timestamp).build(),
                         MQSendConfig.builder().isCompressEnabled(true).build())
         );
 
-        boolean isCompleted = latch.await(1, TimeUnit.MINUTES);
+        boolean isCompleted = largeLatch.await(1, TimeUnit.MINUTES);
 
-        Assert.assertTrue(isCompleted);
+        assertTrue(isCompleted);
+
+        isCompleted = largeLatchOld.await(1, TimeUnit.MINUTES);
+
+        assertTrue(isCompleted);
     }
 
     private String generateLargeMessage(int size) {
@@ -117,6 +130,11 @@ public class RocketMQTest extends BaseRocketMQTest {
         @Bean
         public TestConsumer testConsumer() {
             return new TestConsumer();
+        }
+
+        @Bean
+        public TestOldConsumer testOldConsumer() {
+            return new TestOldConsumer();
         }
 
         @Bean
@@ -153,8 +171,40 @@ public class RocketMQTest extends BaseRocketMQTest {
                 if (SENT_MESSAGES.contains(pojo.getText()) && latch != null) {
                     latch.countDown();
                 }
+
+                if (SENT_LARGE_MESSAGES.contains(pojo.getText()) && largeLatch != null) {
+                    largeLatch.countDown();
+                }
             } catch (JSONException ex) {
                 System.out.println("failed parse object: " + ex.getMessage() + ": " + baseMessage.getData());
+            }
+        }
+    }
+
+    @RocketMQMessageListener(
+            consumerGroup = "${spring.application.name}_rocketmq-test-topic-old",
+            topic = "rocketmq-test-topic"
+    )
+    public static class TestOldConsumer extends AbstractMQConsumer {
+
+        @Override
+        protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
+            try {
+                POJO pojo = JsonUtil.parseObject(baseMQMessage.getData(), POJO.class);
+                if (pojo.text.contains(testSendLatchString)) {
+                    hasInfoOld = pojo.text.contains("今天天气不错");
+                    testSendLatchOld.countDown();
+                }
+
+                if (SENT_MESSAGES.contains(pojo.getText()) && latchOld != null) {
+                    latchOld.countDown();
+                }
+
+                if (SENT_LARGE_MESSAGES.contains(pojo.getText()) && largeLatch != null) {
+                    largeLatchOld.countDown();
+                }
+            } catch (JSONException ex) {
+                System.out.println("failed parse object: " + ex.getMessage() + ": " + baseMQMessage.getData());
             }
         }
     }
