@@ -60,7 +60,8 @@ import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
         "eureka.client.enabled=false",
         "aws.s3.folderName=" + BaseMybatisTest.FOLDER_NAME,
         "aws.s3.defaultBucket=" + BaseMybatisTest.BUCKET_NAME,
-        "aws.s3.profile=test"
+        "aws.s3.profile=test",
+        "mybatis.configuration.map-underscore-to-camel-case=true"
 }, classes = BaseMybatisTest.App.class)
 public abstract class BaseMybatisTest {
     public static final String FOLDER_NAME = "testFolder/country";
