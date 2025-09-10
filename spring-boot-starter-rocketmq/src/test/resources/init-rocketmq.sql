@@ -9,7 +9,7 @@ CREATE TABLE if not exists `t_common_mq_fail_log`
     `body`        text,
     `send_config` varchar(245),
     `retry_num`   int,
-    `send_status` int,
+    `send_status` int default 0,
     `create_time` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `update_time` timestamp(3) NULL     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(3),
     PRIMARY KEY (`id`)

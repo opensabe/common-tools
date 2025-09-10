@@ -38,6 +38,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import io.github.opensabe.common.config.dal.db.dao.MqFailLogEntityMapper;
 import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import io.github.opensabe.common.testcontainers.integration.SingleWriteMySQLIntegrationTest;
@@ -64,6 +65,8 @@ public class MessageSaveTest {
     private SqlSessionFactory sqlSessionFactory;
     @Autowired
     private io.github.opensabe.spring.boot.starter.rocketmq.MQProducer producer;
+    @Autowired
+    private MqFailLogEntityMapper mqFailLogEntityMapper;
 
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
@@ -100,6 +103,14 @@ public class MessageSaveTest {
             Assertions.assertNotNull(entity);
             Assertions.assertEquals(topic, entity.getTopic());
         }
+
+        //验证定时任务 SQL
+        var list = mqFailLogEntityMapper.selectPendingMessages(1000);
+        Assertions.assertEquals(1, list.size());
+        var entity = list.get(0);
+        mqFailLogEntityMapper.updateStatusAndRetryNum(entity.getId(), MqFailLogEntity.STATUS_SUCCESS, entity.getRetryNum() + 1);
+        list = mqFailLogEntityMapper.selectPendingMessages(1000);
+        Assertions.assertEquals(0, list.size());
     }
 
     private MqFailLogEntity fromResultSet(ResultSet resultSet) throws SQLException {

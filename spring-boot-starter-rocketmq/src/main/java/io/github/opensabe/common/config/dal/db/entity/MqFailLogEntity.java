@@ -30,6 +30,9 @@ public class MqFailLogEntity {
 
     private Integer sendStatus;
 
+    public static final int STATUS_PENDING = 0;
+    public static final int STATUS_SUCCESS = 1;
+
     private String body;
 
     public String getId() {
