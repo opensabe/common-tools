@@ -7,12 +7,12 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>2.0.0-vu</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-boot-starter-cache</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-vu</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
