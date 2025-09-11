@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.boot.starter.rocketmq;
+package io.github.opensabe.spring.boot.starter.rocketmq.test.message;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -43,7 +43,6 @@ import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import io.github.opensabe.common.testcontainers.integration.SingleWriteMySQLIntegrationTest;
 import io.github.opensabe.common.utils.json.JsonUtil;
-import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQTest;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -54,8 +53,12 @@ import lombok.extern.log4j.Log4j2;
         SingleRedisIntegrationTest.class,
         SingleWriteMySQLIntegrationTest.class
 })
-@SpringBootTest(classes = BaseRocketMQTest.App.class)
-@Import(MessageSaveTest.Config.class)
+@SpringBootTest(
+        properties = {
+                "eureka.client.enabled=false",
+                "spring.application.name=rocketmq-save-message-test",
+        }, classes = MessageSaveTest.Config.class
+)
 @DisplayName("RocketMQ消息保存测试")
 public class MessageSaveTest {
 
@@ -125,6 +128,7 @@ public class MessageSaveTest {
         return entity;
     }
 
+    @SpringBootApplication
     public static class Config {
 
         @Bean

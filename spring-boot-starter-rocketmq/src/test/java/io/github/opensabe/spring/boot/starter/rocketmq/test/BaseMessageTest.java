@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.boot.starter.rocketmq;
+package io.github.opensabe.spring.boot.starter.rocketmq.test;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import io.github.opensabe.common.entity.base.vo.BaseMessage;
+import io.github.opensabe.spring.boot.starter.rocketmq.AbstractConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

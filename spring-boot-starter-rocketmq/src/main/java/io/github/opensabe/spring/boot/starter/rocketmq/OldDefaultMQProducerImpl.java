@@ -28,7 +28,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
-import io.github.opensabe.common.entity.base.vo.BaseMessage;
+import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.idgenerator.service.UniqueID;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.secret.FilterSecretStringResult;
@@ -43,8 +43,13 @@ import lombok.extern.log4j.Log4j2;
 
 import static io.github.opensabe.spring.boot.starter.rocketmq.MQMessageUtil.trimBodyForLog;
 
+/**
+ * 老版本的 MQProducerImpl
+ * 由于新版本的消费者兼容老版本以及新版本的消息格式，但是老版本的消费者不兼容新版本的消息格式
+ * 所以保留老版本的生产者为默认的，通过配置可以切换为新版本的生产者
+ */
 @Log4j2
-public class MQProducerImpl implements MQProducer {
+public class OldDefaultMQProducerImpl implements MQProducer {
     private final String srcName;
     private final UnifiedObservationFactory unifiedObservationFactory;
     private final RocketMQTemplate rocketMQTemplate;
@@ -54,7 +59,7 @@ public class MQProducerImpl implements MQProducer {
 
     private final GlobalSecretManager globalSecretManager;
 
-    public MQProducerImpl(String srcName, UnifiedObservationFactory unifiedObservationFactory, RocketMQTemplate rocketMQTemplate, MessagePersistent persistent, UniqueID uniqueID, GlobalSecretManager globalSecretManager) {
+    public OldDefaultMQProducerImpl(String srcName, UnifiedObservationFactory unifiedObservationFactory, RocketMQTemplate rocketMQTemplate, MessagePersistent persistent, UniqueID uniqueID, GlobalSecretManager globalSecretManager) {
         this.srcName = srcName;
         this.unifiedObservationFactory = unifiedObservationFactory;
         this.rocketMQTemplate = rocketMQTemplate;
@@ -171,32 +176,32 @@ public class MQProducerImpl implements MQProducer {
 
     private void handleSendResult(
             MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString,
-            String payload, MessageProduceContext messageProduceContext, Observation observation,
+            BaseMQMessage baseMQMessage, MessageProduceContext messageProduceContext, Observation observation,
             SendCallback sendCallback, SendResult sendResult
     ) {
         if (sendResult != null) {
             messageProduceContext.setSendResult(sendResult.getSendStatus().toString());
             if (Objects.equals(sendResult.getSendStatus(), SendStatus.SEND_OK)) {
-                log.info("MQProducerImpl-handleSendResult: success, result: {}", sendResult);
+                log.info("OldDefaultMQProducerImpl-handleSendResult: success, result: {}", sendResult);
                 if (sendCallback != null) {
                     try {
                         sendCallback.onSuccess(sendResult);
                     } catch (Throwable e) {
-                        log.error("MQProducerImpl-handleSendResult sendCallback onSuccess error: {}", e.getMessage(), e);
+                        log.error("OldDefaultMQProducerImpl-handleSendResult sendCallback onSuccess error: {}", e.getMessage(), e);
                     }
                 }
             } else {
-                log.fatal("MQProducerImpl-handleSendResult: failed, result: {}", sendResult);
+                log.fatal("OldDefaultMQProducerImpl-handleSendResult: failed, result: {}", sendResult);
                 SendMQException sendMQException = new SendMQException(sendResult);
                 messageProduceContext.setThrowable(sendMQException);
                 if (sendCallback != null) {
                     try {
                         sendCallback.onException(sendMQException);
                     } catch (Throwable e) {
-                        log.error("MQProducerImpl-handleSendResult sendCallback onException error: {}", e.getMessage(), e);
+                        log.error("OldDefaultMQProducerImpl-handleSendResult sendCallback onException error: {}", e.getMessage(), e);
                     }
                 }
-                failThenPersist(mqSendConfig, topic, hashKey, traceIdString, payload);
+                failThenPersist(mqSendConfig, topic, hashKey, traceIdString, baseMQMessage);
             }
         }
         observation.stop();
@@ -204,11 +209,11 @@ public class MQProducerImpl implements MQProducer {
 
     private void handleSendException(
             MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString,
-            String payload, MessageProduceContext messageProduceContext,
+            BaseMQMessage baseMQMessage, MessageProduceContext messageProduceContext,
             Observation observation, SendCallback sendCallback,
             Throwable throwable) {
-        log.fatal("MQProducerImpl-handleSendException: message = {}, topic = {}", payload, topic, throwable);
-        failThenPersist(mqSendConfig, topic, hashKey, traceIdString, payload);
+        log.fatal("OldDefaultMQProducerImpl-handleSendException: message = {}, topic = {}", baseMQMessage, topic, throwable);
+        failThenPersist(mqSendConfig, topic, hashKey, traceIdString, baseMQMessage);
         if (sendCallback != null) {
             sendCallback.onException(throwable);
         }
@@ -240,15 +245,15 @@ public class MQProducerImpl implements MQProducer {
         try {
             SendResult sendResult;
             log.info("Try send to MQ, topic: {}, hashKey: {}, isAsync: {}, data: {}", () -> topic, () -> hashKey, () -> isAsync, () -> trimBodyForLog(o.toString()));
-            BaseMessage<?> baseMQMessage;
-            if (o instanceof BaseMessage) {
-                baseMQMessage = (BaseMessage) o;
+            BaseMQMessage baseMQMessage;
+            if (o instanceof BaseMQMessage) {
+                baseMQMessage = (BaseMQMessage) o;
             } else {
-                baseMQMessage = new BaseMessage<>(o);
+                baseMQMessage = new BaseMQMessage();
+                baseMQMessage.setData(JsonUtil.toJSONString(o));
                 baseMQMessage.setAction("default");
             }
-            String payload = JsonUtil.toJSONString(baseMQMessage);
-            FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(payload);
+            FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(baseMQMessage.getData());
             if (filterSecretStringResult.isFoundSensitiveString()) {
                 throw new RuntimeException("Sensitive string found in MQ message");
             }
@@ -260,24 +265,20 @@ public class MQProducerImpl implements MQProducer {
 
             if (Optional.ofNullable(mqSendConfigFinal.getIsCompressEnabled()).orElse(false)) {
                 // compress the message if its size > 4MB
-                payload = MQMessageUtil.encode(payload);
+                MQMessageUtil.encode(baseMQMessage);
             }
 
-            messageProduceContext.setMsgLength(payload.length());
+            messageProduceContext.setMsgLength(StringUtils.isNotBlank(baseMQMessage.getData()) ? baseMQMessage.getData().length() : 0);
 
-            Message<String> message = MessageBuilder.withPayload(payload)
-                    .setHeader("KEYS", traceId)
-                    .setHeader("CORE_VERSION", "v2")
-                    .build();
-
-            final String body = payload;
+            final BaseMQMessage baseMQMessageFinal = baseMQMessage;
+            Message<?> message = MessageBuilder.withPayload(baseMQMessage).setHeader("KEYS", traceId).build();
 
             if (isAsync) {
                 SendCallback sendCallbackForAsync = new SendCallback() {
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         handleSendResult(
-                                mqSendConfigFinal, topic, hashKey, traceId, body,
+                                mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
                                 messageProduceContext, observation, sendCallback, sendResult
                         );
                     }
@@ -285,7 +286,7 @@ public class MQProducerImpl implements MQProducer {
                     @Override
                     public void onException(Throwable throwable) {
                         handleSendException(
-                                mqSendConfigFinal, topic, hashKey, traceId, body,
+                                mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
                                 messageProduceContext, observation, sendCallback, throwable
                         );
                     }
@@ -303,12 +304,12 @@ public class MQProducerImpl implements MQProducer {
                         sendResult = rocketMQTemplate.syncSend(topic, message);
                     }
                     handleSendResult(
-                            mqSendConfigFinal, topic, hashKey, traceId, body,
+                            mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
                             messageProduceContext, observation, sendCallback, sendResult
                     );
                 } catch (Throwable e) {
                     handleSendException(
-                            mqSendConfigFinal, topic, hashKey, traceId, body,
+                            mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
                             messageProduceContext, observation, sendCallback, e
                     );
                 }
@@ -334,12 +335,13 @@ public class MQProducerImpl implements MQProducer {
         String spanId = traceContext.spanId();
         observation.observe(() -> {
             try {
-                log.info("Try send to MQ, topic: {}, data: {}, transactionObj: {}", () -> trimBodyForLog(body.toString()), () -> trimBodyForLog(transactionObj.toString()));
-                BaseMessage<?> baseMQMessage;
-                if (body instanceof BaseMessage baseMessage) {
-                    baseMQMessage = baseMessage;
+                log.info("Try send to MQ, topic: {}, data: {}, transactionObj: {}", () -> topic, () -> trimBodyForLog(body.toString()), () -> trimBodyForLog(transactionObj.toString()));
+                BaseMQMessage baseMQMessage;
+                if (body instanceof BaseMQMessage) {
+                    baseMQMessage = (BaseMQMessage) body;
                 } else {
-                    baseMQMessage = new BaseMessage<>(body);
+                    baseMQMessage = new BaseMQMessage();
+                    baseMQMessage.setData(JsonUtil.toJSONString(body));
                     baseMQMessage.setAction("default");
                 }
                 baseMQMessage.setTraceId(traceId);
@@ -347,15 +349,11 @@ public class MQProducerImpl implements MQProducer {
                 baseMQMessage.setSrc(srcName);
                 baseMQMessage.setTs(System.currentTimeMillis());
 
-                String payload = JsonUtil.toJSONString(baseMQMessage);
+                messageProduceContext.setMsgLength(StringUtils.isNotBlank(baseMQMessage.getData()) ? baseMQMessage.getData().length() : 0);
 
-                messageProduceContext.setMsgLength(payload.length());
-
-                Message<String> message = MessageBuilder.withPayload(payload)
+                Message<?> message = MessageBuilder.withPayload(baseMQMessage)
                         .setHeader(MQLocalTransactionListener.MSG_HEADER_TRANSACTION_LISTENER, uniqueRocketMQLocalTransactionListener.name())
-                        .setHeader("KEYS", traceId)
-                        .setHeader("CORE_VERSION", "v2")
-                        .build();
+                        .setHeader("KEYS", traceId).build();
                 TransactionSendResult transactionSendResult = rocketMQTemplate.sendMessageInTransaction(topic, message, transactionObj);
                 messageProduceContext.setSendResult(transactionSendResult.getSendStatus().name());
             } catch (Throwable e) {
@@ -381,14 +379,15 @@ public class MQProducerImpl implements MQProducer {
                 sendResult = new SendResult();
             }
             sendResult.setSendStatus(SendStatus.SLAVE_NOT_AVAILABLE);
-            log.fatal("MQProducerImpl-retryMessage mq server unavailable : message = {}, topic = {}, traceIdString = {}", message, topic, traceIdString, e);
+            log.fatal("OldDefaultMQProducerImpl-retryMessage mq server unavailable : message = {}, topic = {}, traceIdString = {}", message, topic, traceIdString, e);
         }
 
         return sendResult;
     }
 
-    private void failThenPersist(MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString, String payload) {
-        if (Objects.nonNull(persistent) && Objects.nonNull(uniqueID) && mqSendConfig.getPersistence()) {
+    private void failThenPersist(MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString, BaseMQMessage baseMQMessage) {
+        if (mqSendConfig.getPersistence()) {
+            String baseMQMessageJson = JsonUtil.toJSONString(baseMQMessage);
             MqFailLogEntity mqFailLogEntity = new MqFailLogEntity();
             mqFailLogEntity.setId(uniqueID.getUniqueId("remq"));
             mqFailLogEntity.setTopic(topic);
@@ -396,9 +395,8 @@ public class MQProducerImpl implements MQProducer {
                 mqFailLogEntity.setHashKey(hashKey);
             }
             mqFailLogEntity.setTraceId(traceIdString);
-            mqFailLogEntity.setBody(payload);
+            mqFailLogEntity.setBody(baseMQMessageJson);
             mqFailLogEntity.setSendConfig(JsonUtil.toJSONString(mqSendConfig));
-            mqFailLogEntity.setSendStatus(MqFailLogEntity.STATUS_PENDING);
             mqFailLogEntity.setRetryNum(rocketMQTemplate.getProducer().getRetryTimesWhenSendFailed());
             persistent.persistentMessage(mqFailLogEntity);
         }

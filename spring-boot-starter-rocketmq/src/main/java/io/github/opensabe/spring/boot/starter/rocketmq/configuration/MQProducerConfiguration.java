@@ -21,8 +21,10 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,10 +36,12 @@ import io.github.opensabe.spring.boot.starter.rocketmq.MQLocalTransactionListene
 import io.github.opensabe.spring.boot.starter.rocketmq.MQProducer;
 import io.github.opensabe.spring.boot.starter.rocketmq.MQProducerImpl;
 import io.github.opensabe.spring.boot.starter.rocketmq.MessagePersistent;
+import io.github.opensabe.spring.boot.starter.rocketmq.OldDefaultMQProducerImpl;
 import io.github.opensabe.spring.boot.starter.rocketmq.RocketMQListenerContainerBeanPostProcessor;
 import io.github.opensabe.spring.boot.starter.rocketmq.UniqueRocketMQLocalTransactionListener;
 
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(RocketMQExtendProperties.class)
 public class MQProducerConfiguration {
 
     @Bean
@@ -49,6 +53,12 @@ public class MQProducerConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBooleanProperty(
+            prefix = "rocketmq.extend",
+            name = "use-new-producer",
+            havingValue = true,
+            matchIfMissing = false
+    )
     public MQProducer getMQProducer(
             @Value("${spring.application.name:unknown}")
             String srcName,
@@ -58,6 +68,37 @@ public class MQProducerConfiguration {
             @Autowired(required = false) UniqueID uniqueID,
             GlobalSecretManager globalSecretManager) {
         MQProducerImpl mqProducer = new MQProducerImpl(srcName, unifiedObservationFactory, rocketMQTemplate, persistent, uniqueID, globalSecretManager);
+        return mqProducer;
+    }
+
+    /**
+     * 旧版生产者, 兼容以前的版本，默认启用
+     *
+     * @param srcName
+     * @param unifiedObservationFactory
+     * @param rocketMQTemplate
+     * @param persistent
+     * @param uniqueID
+     * @param globalSecretManager
+     * @return
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBooleanProperty(
+            prefix = "rocketmq.extend",
+            name = "use-new-producer",
+            havingValue = false,
+            matchIfMissing = true
+    )
+    public MQProducer getOldDefaultMQProducer(
+            @Value("${spring.application.name:unknown}")
+            String srcName,
+            UnifiedObservationFactory unifiedObservationFactory,
+            RocketMQTemplate rocketMQTemplate,
+            @Autowired(required = false) MessagePersistent persistent,
+            @Autowired(required = false) UniqueID uniqueID,
+            GlobalSecretManager globalSecretManager) {
+        OldDefaultMQProducerImpl mqProducer = new OldDefaultMQProducerImpl(srcName, unifiedObservationFactory, rocketMQTemplate, persistent, uniqueID, globalSecretManager);
         return mqProducer;
     }
 

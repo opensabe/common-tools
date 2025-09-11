@@ -17,11 +17,11 @@ package io.github.opensabe.spring.boot.starter.rocketmq;
 
 import java.nio.charset.Charset;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.common.message.MessageExt;
 
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.entity.base.vo.BaseMessage;
-import io.github.opensabe.common.utils.json.JsonUtil;
 
 public abstract class AbstractMQConsumer extends AbstractConsumer<String> {
 
@@ -35,7 +35,8 @@ public abstract class AbstractMQConsumer extends AbstractConsumer<String> {
     @Override
     protected BaseMessage<String> convert(MessageExt ext) {
         String payload = new String(ext.getBody(), Charset.defaultCharset());
-
-        return JsonUtil.parseObject(MQMessageUtil.decode(payload), BaseMQMessage.class);
+        // 先进行解码
+        String decode = StringUtils.trim(MQMessageUtil.decode(payload));
+        return convertV1(decode);
     }
 }
