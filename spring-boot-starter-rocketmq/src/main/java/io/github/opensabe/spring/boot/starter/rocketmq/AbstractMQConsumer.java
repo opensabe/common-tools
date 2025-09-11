@@ -37,16 +37,8 @@ public abstract class AbstractMQConsumer extends AbstractConsumer<String> {
     @Override
     protected BaseMessage<String> convert(MessageExt ext) {
         String payload = new String(ext.getBody(), Charset.defaultCharset());
-        BaseMQMessage baseMQMessage = JsonUtil.parseObject(MQMessageUtil.decode(payload), BaseMQMessage.class);
-        if (Objects.isNull(baseMQMessage)) {
-            baseMQMessage = new BaseMQMessage();
-        }
-        //如果 data 为空，则说明消息没有经过包装，直接使用原始消息体
-        if (StringUtils.isBlank(baseMQMessage.getData())) {
-            // 兼容没有包装的消息
-            baseMQMessage.setData(payload);
-        }
-        baseMQMessage = MQMessageUtil.decode(baseMQMessage);
-        return baseMQMessage;
+        // 先进行解码
+        String decode = StringUtils.trim(MQMessageUtil.decode(payload));
+        return convertV1(decode);
     }
 }
