@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
-import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -31,9 +30,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 import org.springframework.data.util.TypeInformation;
-import org.springframework.util.TypeUtils;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.entity.base.vo.BaseMessage;

@@ -76,7 +76,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     @Override
     public void send(String topic, Object o, Long time) {
-        send(topic,o,null,false,time);
+        send(topic, o, null, false, time);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     @Override
     public void sendAsync(String topic, Object o, Long time) {
-        send(topic,o,null,true,time,null,null);
+        send(topic, o, null, true, time, null, null);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     @Override
     public void send(String topic, Object o, boolean isAsync, Long time) {
-        send(topic, o, null, isAsync,time);
+        send(topic, o, null, isAsync, time);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     @Override
     public void sendAsync(String topic, Object o, SendCallback sendCallback, Long time) {
-        send(topic, o, null, true,time, sendCallback, null);
+        send(topic, o, null, true, time, sendCallback, null);
     }
 
     @Override
@@ -136,7 +136,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     @Override
     public void send(String topic, Object o, String hashKey, Long time) {
-        send(topic, o, hashKey, false,time);
+        send(topic, o, hashKey, false, time);
     }
 
     @Override
@@ -151,7 +151,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     @Override
     public void sendAsync(String topic, Object o, String hashKey, SendCallback sendCallback, Long time) {
-        send(topic, o, hashKey, true,time, sendCallback, null);
+        send(topic, o, hashKey, true, time, sendCallback, null);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     @Override
     public void send(String topic, Object o, String hashKey, boolean isAsync, Long time) {
-        send(topic,o,hashKey,isAsync,time,null,null);
+        send(topic, o, hashKey, isAsync, time, null, null);
     }
 
     @Override
@@ -223,7 +223,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     @Override
     public void send(String topic, Object o, String hashKey, boolean isAsync, SendCallback sendCallback, MQSendConfig mqSendConfig) {
-        send(topic,o,hashKey,isAsync,null,sendCallback,mqSendConfig);
+        send(topic, o, hashKey, isAsync, null, sendCallback, mqSendConfig);
     }
 
     @Override
@@ -244,7 +244,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
         String spanId = traceContext.spanId();
         try {
             SendResult sendResult;
-            log.info("Try send to MQ, topic: {}, hashKey: {}, isAsync: {}, data: {}", () -> topic, () -> hashKey, () -> isAsync,  () -> trimBodyForLog(o.toString()));
+            log.info("Try send to MQ, topic: {}, hashKey: {}, isAsync: {}, data: {}", () -> topic, () -> hashKey, () -> isAsync, () -> trimBodyForLog(o.toString()));
             BaseMQMessage baseMQMessage;
             if (o instanceof BaseMQMessage) {
                 baseMQMessage = (BaseMQMessage) o;
@@ -305,7 +305,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
                     }
                     handleSendResult(
                             mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
-                            messageProduceContext,observation, sendCallback, sendResult
+                            messageProduceContext, observation, sendCallback, sendResult
                     );
                 } catch (Throwable e) {
                     handleSendException(
@@ -322,6 +322,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
         }
 
     }
+
     @Override
     public void sendWithInTransaction(String topic, Object body, Object transactionObj, UniqueRocketMQLocalTransactionListener uniqueRocketMQLocalTransactionListener) {
         MessageProduceContext messageProduceContext = new MessageProduceContext(topic);
