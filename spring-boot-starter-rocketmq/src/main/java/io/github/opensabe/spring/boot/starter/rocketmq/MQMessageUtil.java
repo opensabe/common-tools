@@ -73,4 +73,14 @@ public class MQMessageUtil {
         message.setData(decode(message.getData()));
         return message;
     }
+
+    public static String trimBodyForLog(String body) {
+        if (body == null) {
+            return null;
+        }
+        if (body.length() <= 5000) {
+            return body;
+        }
+        return body.substring(0, 1000) + "..." + body.substring(body.length() - 1000);
+    }
 }

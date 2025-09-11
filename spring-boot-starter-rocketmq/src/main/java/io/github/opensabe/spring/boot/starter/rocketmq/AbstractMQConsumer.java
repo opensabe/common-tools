@@ -16,7 +16,9 @@
 package io.github.opensabe.spring.boot.starter.rocketmq;
 
 import java.nio.charset.Charset;
+import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.common.message.MessageExt;
 
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
@@ -35,7 +37,16 @@ public abstract class AbstractMQConsumer extends AbstractConsumer<String> {
     @Override
     protected BaseMessage<String> convert(MessageExt ext) {
         String payload = new String(ext.getBody(), Charset.defaultCharset());
-
-        return JsonUtil.parseObject(MQMessageUtil.decode(payload), BaseMQMessage.class);
+        BaseMQMessage baseMQMessage = JsonUtil.parseObject(MQMessageUtil.decode(payload), BaseMQMessage.class);
+        if (Objects.isNull(baseMQMessage)) {
+            baseMQMessage = new BaseMQMessage();
+        }
+        //如果 data 为空，则说明消息没有经过包装，直接使用原始消息体
+        if (StringUtils.isBlank(baseMQMessage.getData())) {
+            // 兼容没有包装的消息
+            baseMQMessage.setData(payload);
+        }
+        baseMQMessage = MQMessageUtil.decode(baseMQMessage);
+        return baseMQMessage;
     }
 }

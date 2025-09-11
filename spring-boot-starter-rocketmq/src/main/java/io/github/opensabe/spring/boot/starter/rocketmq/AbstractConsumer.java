@@ -47,6 +47,8 @@ import io.micrometer.observation.Observation;
 import jakarta.annotation.Nonnull;
 import lombok.extern.log4j.Log4j2;
 
+import static io.github.opensabe.spring.boot.starter.rocketmq.MQMessageUtil.trimBodyForLog;
+
 @Log4j2
 public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt>, ApplicationListener<ApplicationReadyEvent>, InitializingBean, ConsumerAdjust {
     //用来阻断消费，防止微服务 ApplicationContext 还没启动完全就开始消费
@@ -77,37 +79,26 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
 
     @SuppressWarnings("unchecked")
     protected BaseMessage<T> convert(MessageExt ext) {
-
         String payload = new String(ext.getBody(), Charset.defaultCharset());
-
-        Type type = this.typeReference.getType();
+        // 先进行解码
+        String decode = StringUtils.trim(MQMessageUtil.decode(payload));
         if ("v2".equals(ext.getProperty("CORE_VERSION"))) {
             BaseMessage<T> message = null;
-            if (payload.trim().startsWith("{")) {
-                message = JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference.baseMessageType());
+            //如果是 json 对象，尝试解析为 BaseMessage
+            if (StringUtils.startsWith(decode, "{")) {
+                message = JsonUtil.parseObject(decode, typeReference.baseMessageType());
             }
+            //如果不以 { 开头，可能是数组。如果解析出来的 message 为空，或者 message.data 为空。
+            //这些都尝试直接解析为 T，填入 message.data
             if (Objects.isNull(message)) {
                 message = new BaseMessage<>();
             }
             if (Objects.isNull(message.getData())) {
-                message.setData(JsonUtil.parseObject(MQMessageUtil.decode(payload), typeReference));
+                message.setData(JsonUtil.parseObject(decode, typeReference));
             }
             return message;
         }
-        BaseMQMessage v1 = JsonUtil.parseObject(payload, new TypeReference<>() {
-        });
-
-        if (Objects.isNull(v1)) {
-            v1 = new BaseMQMessage();
-        }
-
-        if (StringUtils.isEmpty(v1.getData())) {
-            v1.setData(payload);
-        }
-
-        if (TypeUtils.isAssignable(String.class, type)) {
-            return (BaseMessage<T>) MQMessageUtil.decode(v1);
-        }
+        BaseMQMessage v1 = JsonUtil.parseObject(decode, BaseMQMessage.class);
         BaseMessage<T> message = new BaseMessage<>(JsonUtil.parseObject(MQMessageUtil.decode(v1.getData()), typeReference));
         message.setTs(v1.getTs());
         message.setSrc(v1.getSrc());
@@ -140,9 +131,9 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
 
         observation.observe(() -> {
             if (StringUtils.isEmpty(message.getTraceId())) {
-                log.info("AbstractMQConsumer-onMessage: topic: {} -> message: {}", topic, new String(ext.getBody()));
+                log.info("AbstractMQConsumer-onMessage: topic: {} -> message: {}", topic, trimBodyForLog(new String(ext.getBody())));
             } else {
-                log.info("AbstractMQConsumer-onMessage: topic: initial trace id {}, topic: {} -> message: {}", message.getTraceId(), topic, new String(ext.getBody()));
+                log.info("AbstractMQConsumer-onMessage: topic: initial trace id {}, topic: {} -> message: {}", message.getTraceId(), topic, trimBodyForLog(new String(ext.getBody())));
             }
             try {
                 onBaseMessage(message);
