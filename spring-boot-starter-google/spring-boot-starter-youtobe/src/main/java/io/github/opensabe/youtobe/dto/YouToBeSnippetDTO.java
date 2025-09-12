@@ -68,7 +68,7 @@ public class YouToBeSnippetDTO {
      * 图片资源
      * 起初是YouToBeSnippetThumbnailDTO，直接改成String，因为返回的是个JSON
      */
-    private String thumbnails;
+    private Object thumbnails;
 
     /**
      * video的tags，是个字符串数组
