@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<Configuration packages="io.github.opensabe">
     <Properties>
         <Property name="springAppName">pactolus-patron</Property>
         <Property name="LOG_ROOT">log</Property>
         <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
         <Property name="logFormat">
             %d{${LOG_DATEFORMAT_PATTERN}} ${LOG_LEVEL_PATTERN} [${springAppName},%X{traceId},%X{spanId}] [${sys:PID}] [%t][%C:%L]: %m%n
         </Property>

@@ -110,3 +110,11 @@ rocketmq 消费者保留了老的方式（通过继承 `AbstractMQConsumer` 的�
        use-new-producer: true
    ```
 4. 之后，所有微服务都可以使用新的生产者生产 v2 版本
+
+# log4j2 配置增加 plugins 扫描配置
+其实之前的版本就应该加，但是凑巧扫描到了，这次升级没扫描到，所以需要手动加上
+```xml
+<Configuration packages="io.github.opensabe">
+    ...
+</Configuration>
+```

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
+<Configuration packages="io.github.opensabe">
     <Appenders>
         <CustomAppender name="CustomAppender">
             <Filters>
