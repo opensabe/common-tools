@@ -58,4 +58,4 @@
             <appender-ref ref="memory"/>
         </AsyncLogger>
     </loggers>
-</configuration>
+</Configuration>
