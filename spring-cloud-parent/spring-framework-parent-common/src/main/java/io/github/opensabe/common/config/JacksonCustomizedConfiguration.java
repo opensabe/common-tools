@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 
 import io.github.opensabe.common.jackson.TimestampModule;
 
@@ -35,5 +36,14 @@ public class JacksonCustomizedConfiguration {
     @Bean
     public Module timstampModule() {
         return new TimestampModule();
+    }
+
+    /**
+     * BlackbirdModule 可以通过预编译序列化反序列化字节码提升序列化和反序列化的性能
+     * @return
+     */
+    @Bean
+    public Module blackbirdModule() {
+        return new BlackbirdModule();
     }
 }

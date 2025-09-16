@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.common.utils.json;
 
+import lombok.extern.log4j.Log4j2;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -42,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * JsonUtil 工具类的测试类
  * 测试各种场景下的 JSON 序列化和反序列化功能
  */
+@Log4j2
 @DisplayName("JSON工具类测试")
 class JsonUtilTest {
 
@@ -223,6 +225,7 @@ class JsonUtilTest {
         // 测试日期时间序列化和反序列化
         DateTimeObject dateTimeObject = new DateTimeObject(LocalDateTime.now());
         String json = JsonUtil.toJSONString(dateTimeObject);
+        log.info("Serialized DateTimeObject: {}", json);
         DateTimeObject parsed = JsonUtil.parseObject(json, DateTimeObject.class);
         assertNotNull(parsed.getDateTime());
     }
