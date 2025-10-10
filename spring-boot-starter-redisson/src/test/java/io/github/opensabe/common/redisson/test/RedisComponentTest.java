@@ -12,7 +12,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -86,8 +85,9 @@ public class RedisComponentTest extends BaseRedissonTest {
         @GetMapping("/test")
         public String test() {
             Observation observation = SpringUtil.getBean(UnifiedObservationFactory.class).getCurrentObservation();
-            log.info("----------------run------------------"+observation);
-            return "test";
+            Assertions.assertNotNull(observation);
+            log.info("----------------run------------------");
+            return UnifiedObservationFactory.getTraceContext(observation).traceId();
         }
     }
 
@@ -124,6 +124,6 @@ public class RedisComponentTest extends BaseRedissonTest {
     void testObservation () {
         ResponseEntity<String> entity = restTemplate.getForEntity("/test", String.class);
         System.out.println(entity);
-        Assertions.assertEquals("test", entity.getBody());
+        Assertions.assertNotNull(entity.getBody());
     }
 }
