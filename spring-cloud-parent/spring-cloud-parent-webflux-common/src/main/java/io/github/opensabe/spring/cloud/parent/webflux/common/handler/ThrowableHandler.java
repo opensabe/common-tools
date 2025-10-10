@@ -17,6 +17,6 @@ public class ThrowableHandler {
     public BaseRsp onThrowable (Throwable e, ServerHttpRequest request) {
         var path = request.getURI().getPath();
         log.error("{} error {}",path,e.getMessage(),e);
-        return RespUtil.error(e.getMessage());
+        return RespUtil.error(null, "Sorry,something went wrong. Please try again later.");
     }
 }
