@@ -2,10 +2,13 @@ package io.github.opensabe.spring.cloud.parent.web.common.test;
 
 import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.base.vo.BaseRsp;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
 
+import io.github.opensabe.common.utils.SpringUtil;
 import io.github.opensabe.spring.cloud.parent.common.validation.annotation.IntegerEnumedValue;
+import io.micrometer.observation.Observation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -135,6 +138,8 @@ public class TestWebService {
 
         @PostMapping("/test-all-type")
         public AllTypeObj testAllType(@RequestBody AllTypeObj obj) {
+            Observation observation = SpringUtil.getBean(UnifiedObservationFactory.class).getCurrentObservation();
+            log.info("request body: {} {}", obj, observation);
             return obj;
         }
 
