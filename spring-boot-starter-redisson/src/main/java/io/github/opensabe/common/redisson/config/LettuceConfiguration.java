@@ -21,15 +21,13 @@ public class LettuceConfiguration {
 
     /**
      * 每 10s 采集一次命令统计
-     *
-     * @return
      */
     @Bean
     public DefaultClientResources getDefaultClientResources(
             UnifiedObservationFactory unifiedObservationFactory, Environment environment
     ) {
         String applicationName = environment.getProperty("spring.application.name", DEFAULT_APPLICATION_NAME);
-        DefaultClientResources build = DefaultClientResources.builder()
+        return DefaultClientResources.builder()
                 .tracing(new MicrometerTracingAdapter(new LazyObservationRegistry(unifiedObservationFactory), applicationName))
                 .commandLatencyRecorder(
                         new DefaultCommandLatencyCollector(
@@ -41,7 +39,6 @@ public class LettuceConfiguration {
                         //每 10s 采集一次命令统计
                         DefaultEventPublisherOptions.builder().eventEmitInterval(Duration.ofSeconds(10)).build()
                 ).build();
-        return build;
     }
 
     @Bean
@@ -55,7 +52,7 @@ public class LettuceConfiguration {
         private final Lazy<ObservationRegistry> observationRegistry;
 
         public LazyObservationRegistry(UnifiedObservationFactory unifiedObservationFactory) {
-            this.observationRegistry = Lazy.of(() -> unifiedObservationFactory.getObservationRegistry());
+            this.observationRegistry = Lazy.of(unifiedObservationFactory::getObservationRegistry);
         }
 
         @Override
