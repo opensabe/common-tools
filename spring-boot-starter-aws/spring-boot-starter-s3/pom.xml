@@ -7,18 +7,18 @@
 	<parent>
 		<groupId>io.github.opensabe-tech</groupId>
 		<artifactId>aws-bom</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.1</version>
 	</parent>
 
 	<artifactId>spring-boot-starter-s3</artifactId>
-	<version>1.1.0</version>
+	<version>1.1.1</version>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 	<packaging>jar</packaging>
 
 	<properties>
-		<spring-boot-starter-redisson.version>1.1.0</spring-boot-starter-redisson.version>
-		<common-utils.version>1.1.0</common-utils.version>
+		<spring-boot-starter-redisson.version>1.1.1</spring-boot-starter-redisson.version>
+		<common-utils.version>1.1.1</common-utils.version>
 		<s3.sdk.version>2.21.2</s3.sdk.version>
 	</properties>
 

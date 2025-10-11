@@ -6,19 +6,19 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>common-utils</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
     <properties>
         <UserAgentUtils.version>1.21</UserAgentUtils.version>
-        <spring-boot-starter-thread-pool.version>1.1.0</spring-boot-starter-thread-pool.version>
+        <spring-boot-starter-thread-pool.version>1.1.1</spring-boot-starter-thread-pool.version>
         <poi.version>4.1.2</poi.version>
         <hutool.version>5.8.25</hutool.version>
         <jctools.version>3.3.0</jctools.version>
