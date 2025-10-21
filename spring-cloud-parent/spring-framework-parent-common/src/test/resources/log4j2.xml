@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration packages="io.github.opensabe">
+    <Properties>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="springAppName">spring-framework-test</Property>
+    </Properties>
     <Appenders>
         <CustomAppender name="CustomAppender">
             <Filters>
