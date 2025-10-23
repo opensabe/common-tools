@@ -110,6 +110,9 @@ public class PayPalService {
 
                 // 缓存起来
                 redisTemplate.opsForValue().set(PAYPAL_TOKEN_REDIS_KEY, token, payPalTokenResponseBO.getExpiresIn(), TimeUnit.SECONDS);
+                log.info("PayPalService.getToken successfully cached token with expires_in: {} seconds", payPalTokenResponseBO.getExpiresIn());
+            } else {
+                log.error("PayPalService.getToken failed to obtain token. Response: {}", payPalTokenResponseBO);
             }
         }
 
@@ -147,7 +150,15 @@ public class PayPalService {
 
         // 返回请求结果
         try (Response response = call.execute()) {
-            return JsonUtil.parseObject(Objects.requireNonNull(response.body()).string(), PayPalTokenResponseBO.class);
+            String responseBody = Objects.requireNonNull(response.body()).string();
+            log.info("PayPalService.obtainTokenFromApi response status: {}, body: {}", response.code(), responseBody);
+            
+            if (!response.isSuccessful()) {
+                log.error("PayPalService.obtainTokenFromApi failed with status: {}, body: {}", response.code(), responseBody);
+                return null;
+            }
+            
+            return JsonUtil.parseObject(responseBody, PayPalTokenResponseBO.class);
         } catch (IOException e) {
             log.error("PayPalService.obtainTokenFromApi error", e);
         }

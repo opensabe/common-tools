@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.paypal.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,6 +38,7 @@ public class PayPalPlanDTO {
     /**
      * 产品id
      */
+    @JsonAlias({"product_id"})
     private String productId;
 
     /**
@@ -57,16 +59,19 @@ public class PayPalPlanDTO {
     /**
      * 得到许可的 LICENSED
      */
+    @JsonAlias({"usage_type"})
     private String usageType;
 
     /**
      * 创建时间
      */
+    @JsonAlias({"create_time"})
     private String createTime;
 
     /**
      * 更新时间
      */
+    @JsonAlias({"update_time"})
     private String updateTime;
 
     /**

@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.paypal.bo;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -57,6 +58,7 @@ public class PayPalTokenResponseBO {
     /**
      * 错误描述
      */
+    @JsonAlias({"error_description"})
     private String errorDescription;
 
     /**
@@ -67,17 +69,20 @@ public class PayPalTokenResponseBO {
     /**
      * token
      */
+    @JsonAlias({"access_token"})
     private String accessToken;
 
     /**
      * 有效时间，秒
      * 每次PayPal创建token有效时间都是9个小时=32400秒
      */
+    @JsonAlias({"expires_in"})
     private Integer expiresIn;
 
     /**
      * token类型
      */
+    @JsonAlias({"token_type"})
     private String tokenType;
 
     /**

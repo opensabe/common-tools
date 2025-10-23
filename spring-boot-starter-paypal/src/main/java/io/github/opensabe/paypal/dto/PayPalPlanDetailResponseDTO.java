@@ -17,6 +17,7 @@ package io.github.opensabe.paypal.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,6 +40,7 @@ public class PayPalPlanDetailResponseDTO {
     /**
      * 产品id
      */
+    @JsonAlias({"product_id"})
     private String productId;
 
     /**
@@ -62,6 +64,7 @@ public class PayPalPlanDetailResponseDTO {
      * 也可以使用：org.openapitools.client.model.BillingCycle
      * 这里就获取续订类型，就自定义内部内即可
      */
+    @JsonAlias({"billing_cycles"})
     private List<BillingCycle> billingCycles;
 
     @Data
@@ -72,6 +75,7 @@ public class PayPalPlanDetailResponseDTO {
          *
          * @see TenureTypeEnum
          */
+        @JsonAlias({"tenure_type"})
         private String tenureType;
 
         /**
@@ -83,6 +87,7 @@ public class PayPalPlanDetailResponseDTO {
          * 执行此计费周期的次数。试用计费周期只能执行有限的次数（对于total_cycles，值在1到999之间）。
          * 常规计费周期可以执行无限次（对于total_cycles，值为0）或有限次数（对于total-cycles，值在1和999之间）。
          */
+        @JsonAlias({"total_cycles"})
         private Integer totalCycles;
 
     }
