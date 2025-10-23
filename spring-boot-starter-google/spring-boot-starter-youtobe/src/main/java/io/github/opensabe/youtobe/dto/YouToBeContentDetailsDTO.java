@@ -70,4 +70,6 @@ public class YouToBeContentDetailsDTO {
      * rectangular
      */
     private String projection;
+
+    private Object contentRating;
 }
