@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -70,20 +71,24 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
             ConfigurationProperties configurationProperties = AnnotatedElementUtils.findMergedAnnotation(object.getClass(), ConfigurationProperties.class);
             boolean classSecret = AnnotatedElementUtils.hasAnnotation(object.getClass(), SecretProperty.class);
             ReflectionUtils.doWithFields(object.getClass(), field -> {
-                boolean secret = classSecret || AnnotatedElementUtils.hasAnnotation(field, SecretProperty.class);
-                if (secret) {
-                    String prefix = configurationProperties.prefix();
-                    String key = prefix + "." + field.getName();
-                    field.setAccessible(true);
-                    Object value = ReflectionUtils.getField(field, object);
-                    if (Objects.nonNull(value)) {
-                        if (result.containsKey(key)) {
-                            result.get(key).add(String.valueOf(value));
-                        } else {
-                            result.put(key, Sets.newHashSet(String.valueOf(value)));
+                // 过滤掉静态字段
+                if (!Modifier.isStatic(field.getModifiers())) {
+                    boolean secret = classSecret || AnnotatedElementUtils.hasAnnotation(field, SecretProperty.class);
+                    if (secret) {
+                        String prefix = configurationProperties.prefix();
+                        String key = prefix + "." + field.getName();
+                        field.setAccessible(true);
+                        Object value = ReflectionUtils.getField(field, object);
+                        if (Objects.nonNull(value)) {
+                            if (result.containsKey(key)) {
+                                result.get(key).add(String.valueOf(value));
+                            } else {
+                                result.put(key, Sets.newHashSet(String.valueOf(value)));
+                            }
                         }
                     }
                 }
+
 
             });
         }
