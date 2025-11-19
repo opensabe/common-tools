@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 处理ConfigurationProperties中的敏感属性，在属性上添加@SecretProperty注解,即可
+ * TODO 支持对象属性
  * @author hengma
  */
 public class ConfigurationPropertiesSecretProvider extends SecretProvider implements ApplicationContextAware {
