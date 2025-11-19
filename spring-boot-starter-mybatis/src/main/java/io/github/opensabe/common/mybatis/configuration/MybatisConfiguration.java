@@ -59,7 +59,7 @@ public class MybatisConfiguration {
                 if (Objects.nonNull(configuration.getAutoMappingBehavior())) {
                     o.setAutoMappingBehavior(configuration.getAutoMappingBehavior());
                 } else {
-                    o.setAutoMappingBehavior(AutoMappingBehavior.FULL);
+                    o.setAutoMappingBehavior(AutoMappingBehavior.PARTIAL);
                 }
 
                 if (Objects.nonNull(configuration.getAutoMappingUnknownColumnBehavior())) {
