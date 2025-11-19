@@ -30,7 +30,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
         classes = BaseRedissonTest.App.class,
         properties = {
                 "eureka.client.enabled=false",
-        }
+        },
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @JfrEventTest
 public abstract class BaseRedissonTest {

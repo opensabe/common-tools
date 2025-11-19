@@ -16,6 +16,7 @@
 package io.github.opensabe.common.redisson.autoconfig;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.redisson.config.LettuceConfiguration;
@@ -23,7 +24,7 @@ import io.github.opensabe.common.redisson.config.LettuceConfiguration;
 /**
  * Lettuce
  */
-@AutoConfiguration
+@AutoConfiguration(before = {RedisAutoConfiguration.class, MultiRedisAutoConfiguration.class})
 @Import(LettuceConfiguration.class)
 public class LettuceAutoConfiguration {
 }
