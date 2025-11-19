@@ -163,7 +163,6 @@ public class RedisComponentTest extends BaseRedissonTest {
     @Test
     void testObservation () {
         ResponseEntity<String> entity = restTemplate.getForEntity("/test", String.class);
-        System.out.println(entity);
         Assertions.assertEquals("test", entity.getBody());
         Assertions.assertTrue(CustomerHandler.called.get());
 
