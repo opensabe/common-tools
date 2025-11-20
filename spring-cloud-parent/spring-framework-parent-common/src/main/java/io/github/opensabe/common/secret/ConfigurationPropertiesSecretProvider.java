@@ -159,11 +159,11 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
      * 判断是否为简单类型
      */
     private boolean isSimpleType(Class<?> type) {
-        String packageName = type.getPackage().getName();
-        if (packageName == null) {
+        Package packageName;
+        if ((packageName = type.getPackage()) == null) {
             return false;
         }
-        return type.isPrimitive() || 
+        return type.isPrimitive() ||
                type == Boolean.class ||
                type == Character.class ||
                type == Byte.class ||
@@ -174,8 +174,8 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
                type == Double.class ||
                type == Void.class ||
                type.isEnum() ||
-               packageName.startsWith("java.") ||
-               packageName.startsWith("javax.") ||
-               packageName.startsWith("org.springframework.");
+               packageName.getName().startsWith("java.") ||
+               packageName.getName().startsWith("javax.") ||
+               packageName.getName().startsWith("org.springframework.");
     }
 }
