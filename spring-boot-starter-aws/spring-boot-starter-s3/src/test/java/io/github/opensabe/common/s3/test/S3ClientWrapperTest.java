@@ -15,18 +15,17 @@
  */
 package io.github.opensabe.common.s3.test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Base64;
-import java.util.Objects;
-
+import io.github.opensabe.common.s3.service.S3ClientWrapper;
+import io.github.opensabe.common.s3.test.common.S3BaseTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.github.opensabe.common.s3.service.S3ClientWrapper;
-import io.github.opensabe.common.s3.test.common.S3BaseTest;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Base64;
+import java.util.Objects;
 
 @DisplayName("S3客户端包装器测试")
 public class S3ClientWrapperTest extends S3BaseTest {

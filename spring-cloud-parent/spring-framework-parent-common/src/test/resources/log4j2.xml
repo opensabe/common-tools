@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration packages="io.github.opensabe">
+<Configuration>
+    <Properties>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="springAppName">spring-framework-test</Property>
+    </Properties>
     <Appenders>
-        <CustomAppender name="CustomAppender">
+        <CustomAppender name="console">
             <Filters>
                 <SecretCheckFilter />
             </Filters>
@@ -10,7 +15,7 @@
     <Loggers>
         <!--必须使用异步日志，否则会有循环调用问题-->
         <Asyncroot level="info">
-            <AppenderRef ref="CustomAppender"/>
+            <AppenderRef ref="console"/>
         </Asyncroot>
     </Loggers>
 </Configuration>

@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.opensabe.common.secret.ConfigurationPropertiesSecretProvider;
 
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.Log4jAppenderCheckSecretCheckFilter;
@@ -36,6 +37,11 @@ public class SpringCommonUtilConfiguration {
     @Bean
     public GlobalSecretManager globalSecretManager() {
         return new GlobalSecretManager();
+    }
+
+    @Bean
+    public ConfigurationPropertiesSecretProvider annotationSecretProvider (GlobalSecretManager globalSecretManager) {
+        return new ConfigurationPropertiesSecretProvider(globalSecretManager);
     }
 
     @Bean
