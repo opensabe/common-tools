@@ -17,6 +17,7 @@ package io.github.opensabe.common.secret;
 
 import com.google.common.collect.Sets;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -42,9 +43,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 处理ConfigurationProperties中的敏感属性，在属性上添加@SecretProperty注解,即可
- * TODO 支持对象属性
  * @author hengma
  */
+@Log4j2
 public class ConfigurationPropertiesSecretProvider extends SecretProvider implements ApplicationContextAware {
 
 
@@ -105,7 +106,10 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
                 }
             }
 
-
+            if (prefix.isEmpty()) {
+                log.warn("ConfigurationProperties bean {} has empty prefix, use ConfigurationPropertiesSecret instead.", beanName);
+                prefix = "ConfigurationPropertiesSecret";
+            }
 
             boolean classSecret = AnnotatedElementUtils.hasAnnotation(object.getClass(), SecretProperty.class);
             // 递归处理对象
@@ -186,11 +190,6 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
             processObject(key, value, secret, result);
         });
     }
-    
-
-    
-
-
     
     /**
      * 判断是否为简单类型
