@@ -134,8 +134,8 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
             if (value instanceof Map<?, ?> map) {
                 map.forEach((k, v) ->  processObject(key + "." + k, v, secret, result));
             }
-            //处理数组
-            if (value.getClass().isArray()) {
+            //处理数组,我们忽略Primitive类型，因为我们不可能去把一个数字进行脱敏
+            if (value.getClass().isArray() && !value.getClass().getComponentType().isPrimitive()) {
                 Object[] array = (Object[]) value;
                 for (Object o : array) {
                     processObject(key, o, secret, result);
@@ -160,6 +160,10 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
      * 判断是否为简单类型
      */
     private boolean isSimpleType(Class<?> type) {
+        String packageName = type.getPackage().getName();
+        if (packageName == null) {
+            return false;
+        }
         return type.isPrimitive() || 
                type == Boolean.class ||
                type == Character.class ||
@@ -171,8 +175,8 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
                type == Double.class ||
                type == Void.class ||
                type.isEnum() ||
-               type.getPackage().getName().startsWith("java.") ||
-               type.getPackage().getName().startsWith("javax.") ||
-               type.getPackage().getName().startsWith("org.springframework.");
+               packageName.startsWith("java.") ||
+               packageName.startsWith("javax.") ||
+               packageName.startsWith("org.springframework.");
     }
 }
