@@ -33,10 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -74,6 +71,7 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
     protected Map<String, Set<String>> reload() {
         Map<String, Object> beans = applicationContext.getBeansWithAnnotation(ConfigurationProperties.class);
         Map<String, Set<String>> result = new ConcurrentHashMap<>();
+        IdentityHashMap<Object, Boolean> processing = new IdentityHashMap<>();
         for (Map.Entry<String, Object> entry : beans.entrySet()) {
 
             Object object = entry.getValue();
@@ -113,7 +111,7 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
 
             boolean classSecret = AnnotatedElementUtils.hasAnnotation(object.getClass(), SecretProperty.class);
             // 递归处理对象
-            processObject(prefix, object, classSecret, result);
+            processObject(prefix, object, classSecret, result, processing);
 
 
         }
@@ -123,8 +121,12 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
     /**
      * 递归处理对象及其嵌套属性
      */
-    private void processObject(String prefix, Object object, boolean parentSecret, Map<String, Set<String>> result) {
+    private void processObject(String prefix, Object object, boolean parentSecret, Map<String, Set<String>> result, Map<Object, Boolean> processing) {
         if (object == null) {
+            return;
+        }
+
+        if (processing.putIfAbsent(object, Boolean.TRUE) != null) {
             return;
         }
 
@@ -147,7 +149,7 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
             for (RecordComponent component : clazz.getRecordComponents()) {
                 try {
                     Object value = component.getAccessor().invoke(object);
-                    processObject(prefix + "." + component.getName(), value, parentSecret || component.isAnnotationPresent(SecretProperty.class), result);
+                    processObject(prefix + "." + component.getName(), value, parentSecret || component.isAnnotationPresent(SecretProperty.class), result, processing);
                 } catch (IllegalAccessException | InvocationTargetException ignore) {
                 }
             }
@@ -160,34 +162,40 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
             if (!field.trySetAccessible()) {
                 return;
             }
-            boolean secret = parentSecret || AnnotatedElementUtils.hasAnnotation(field, SecretProperty.class);
+
+            boolean secret = parentSecret || field.isAnnotationPresent(SecretProperty.class);
             Object value = ReflectionUtils.getField(field, object);
-            
+
             if (Objects.isNull(value)) {
                 return;
             }
-            
+
             String key = prefix + "." + field.getName();
 
 
             //处理map
             if (value instanceof Map<?, ?> map) {
-                map.forEach((k, v) ->  processObject(key + "." + k, v, secret, result));
+                map.forEach((k, v) ->  processObject(key + "." + k, v, secret, result, processing));
             }
             //处理数组,我们忽略Primitive类型，因为我们不可能去把一个数字进行脱敏
             if (value.getClass().isArray() && !value.getClass().getComponentType().isPrimitive()) {
                 Object[] array = (Object[]) value;
                 for (Object o : array) {
-                    processObject(key, o, secret, result);
+                    processObject(key, o, secret, result, processing);
                 }
             }
 
             //处理集合
             if (value instanceof Collection<?> collection) {
-                collection.forEach(v ->  processObject(key, v, secret, result));
+                try {
+                    collection.forEach(v ->  processObject(key, v, secret, result, processing));
+                }catch (UnsupportedOperationException ignore) {
+                }
             }
 
-            processObject(key, value, secret, result);
+            processObject(key, value, secret, result, processing);
+
+
         });
     }
     
