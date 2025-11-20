@@ -76,7 +76,6 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
             // 递归处理对象
             processObject(prefix, object, classSecret, result);
         }
-        System.out.println("-------------result: " + result);
         return result;
     }
 
@@ -114,7 +113,7 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
         }
 
         ReflectionUtils.doWithFields(clazz, field -> {
-            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+            if (Modifier.isStatic(field.getModifiers())) {
                 return;
             }
             if (!field.trySetAccessible()) {
