@@ -17,13 +17,19 @@ package io.github.opensabe.common.secret;
 
 import com.google.common.collect.Sets;
 import lombok.Setter;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.util.Collection;
@@ -66,15 +72,46 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
     @Override
     protected Map<String, Set<String>> reload() {
         Map<String, Object> beans = applicationContext.getBeansWithAnnotation(ConfigurationProperties.class);
-        Collection<Object> objects = beans.values();
         Map<String, Set<String>> result = new ConcurrentHashMap<>();
-        for (Object object : objects) {
-            ConfigurationProperties configurationProperties = AnnotatedElementUtils.findMergedAnnotation(object.getClass(), ConfigurationProperties.class);
+        for (Map.Entry<String, Object> entry : beans.entrySet()) {
+
+            Object object = entry.getValue();
+            String beanName = entry.getKey();
+
+            ConfigurationProperties configurationProperties = object.getClass().getAnnotation(ConfigurationProperties.class);
+
+            // 如果类上没有，则尝试从Bean定义中获取
+            String prefix = "";
+            if (configurationProperties != null) {
+                prefix = configurationProperties.prefix();
+            } else if (applicationContext instanceof ConfigurableApplicationContext configurableApplicationContext) {
+                // 尝试从Bean工厂获取方法级别的注解
+                try {
+                    ConfigurableListableBeanFactory beanFactory = configurableApplicationContext.getBeanFactory();
+                    if (beanFactory instanceof DefaultListableBeanFactory defaultListableBeanFactory) {
+                        BeanDefinition beanDefinition = defaultListableBeanFactory.getBeanDefinition(beanName);
+                        if (beanDefinition instanceof RootBeanDefinition rootBeanDefinition) {
+                            Method factoryMethod = rootBeanDefinition.getResolvedFactoryMethod();
+                            if (factoryMethod != null) {
+                                ConfigurationProperties methodAnnotation = AnnotatedElementUtils.findMergedAnnotation(factoryMethod, ConfigurationProperties.class);
+                                if (methodAnnotation != null) {
+                                    prefix = methodAnnotation.prefix();
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
+                    // 忽略异常，使用默认前缀
+                }
+            }
+
+
+
             boolean classSecret = AnnotatedElementUtils.hasAnnotation(object.getClass(), SecretProperty.class);
-            String prefix = configurationProperties.prefix();
-            
             // 递归处理对象
             processObject(prefix, object, classSecret, result);
+
+
         }
         return result;
     }
