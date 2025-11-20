@@ -20,6 +20,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+import java.util.Map;
+
 @Getter
 @Setter
 @ConfigurationProperties(prefix = SecretAnnotationProperties.PREFIX)
@@ -32,4 +35,22 @@ public class SecretAnnotationProperties {
 
     @SecretProperty
     private String password;
+
+    @SecretProperty
+    private Map<String, String> map;
+
+    private Map<String, Address> omap;
+
+
+    @SecretProperty
+    private List<String> list;
+
+    private List<Address> olist;
+
+    private Address object;
+
+
+    public record Address (String province, @SecretProperty String city) {
+    }
+
 }

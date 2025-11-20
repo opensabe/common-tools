@@ -30,7 +30,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("测试@ConfigurationProperties脱敏")
 @SpringBootTest(properties = {
         "customer.user-name=testUser",
-        "customer.password=testPassword123"
+        "customer.password=testPassword123",
+        "customer.map.m1=mapValue1",
+        "customer.omap.om1.province=hebei",
+        "customer.omap.om1.city=shijiazhuang",
+        "customer.list[0]=listValue1",
+        "customer.olist[0].province=henan",
+        "customer.olist[0].city=zhengzhou",
+        "customer.object.province=guangdong",
+        "customer.object.city=guangzhou",
 },classes = ConfigurationPropertiesSecretTest.App.class)
 public class ConfigurationPropertiesSecretTest {
 
@@ -46,11 +54,35 @@ public class ConfigurationPropertiesSecretTest {
     private GlobalSecretManager globalSecretManager;
 
 
+    /**
+     * 我们期望的敏感信息为 shijiazhuang, zhengzhou, guangzhou, listValue1, mapValue1
+     */
     @DisplayName("通过@SecretProperty注解脱敏")
     @Test
     void testAnnotation () {
+
         FilterSecretStringResult result = globalSecretManager.filterSecretStringAndAlarm("jdbc.password is "+secretAnnotationProperties.getPassword());
         assertTrue(result.isFoundSensitiveString());
         assertEquals("jdbc.password is ******", result.getFilteredContent());
+        // 校验omap中的敏感信息
+        result = globalSecretManager.filterSecretStringAndAlarm("customer.omap.om1.city=shijiazhuang");
+        assertTrue(result.isFoundSensitiveString());
+        assertEquals("customer.omap.om1.city=******", result.getFilteredContent());
+        // 校验list中的敏感信息
+        result = globalSecretManager.filterSecretStringAndAlarm("customer.list[0]=listValue1");
+        assertTrue(result.isFoundSensitiveString());
+        assertEquals("customer.list[0]=******", result.getFilteredContent());
+        // 校验map中的敏感信息
+        result = globalSecretManager.filterSecretStringAndAlarm("customer.map.m1=mapValue1");
+        assertTrue(result.isFoundSensitiveString());
+        assertEquals("customer.map.m1=******", result.getFilteredContent());
+        // 校验object中的敏感信息
+        result = globalSecretManager.filterSecretStringAndAlarm("customer.object.city=guangzhou");
+        assertTrue(result.isFoundSensitiveString());
+        assertEquals("customer.object.city=******", result.getFilteredContent());
+        // 校验olist中的敏感信息
+        result = globalSecretManager.filterSecretStringAndAlarm("customer.olist[0].city=zhengzhou");
+        assertTrue(result.isFoundSensitiveString());
+        assertEquals("customer.olist[0].city=******", result.getFilteredContent());
     }
 }

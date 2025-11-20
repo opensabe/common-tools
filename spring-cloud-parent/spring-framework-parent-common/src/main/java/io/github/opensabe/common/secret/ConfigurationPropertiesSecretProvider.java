@@ -23,7 +23,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.RecordComponent;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +44,6 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
 
     @Setter
     private ApplicationContext applicationContext;
-
     public ConfigurationPropertiesSecretProvider(GlobalSecretManager globalSecretManager) {
         super(globalSecretManager);
     }
@@ -70,28 +71,108 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
         for (Object object : objects) {
             ConfigurationProperties configurationProperties = AnnotatedElementUtils.findMergedAnnotation(object.getClass(), ConfigurationProperties.class);
             boolean classSecret = AnnotatedElementUtils.hasAnnotation(object.getClass(), SecretProperty.class);
-            ReflectionUtils.doWithFields(object.getClass(), field -> {
-                // 过滤掉静态字段
-                if (!Modifier.isStatic(field.getModifiers())) {
-                    boolean secret = classSecret || AnnotatedElementUtils.hasAnnotation(field, SecretProperty.class);
-                    if (secret) {
-                        String prefix = configurationProperties.prefix();
-                        String key = prefix + "." + field.getName();
-                        field.setAccessible(true);
-                        Object value = ReflectionUtils.getField(field, object);
-                        if (Objects.nonNull(value)) {
-                            if (result.containsKey(key)) {
-                                result.get(key).add(String.valueOf(value));
-                            } else {
-                                result.put(key, Sets.newHashSet(String.valueOf(value)));
-                            }
-                        }
-                    }
-                }
-
-
-            });
+            String prefix = configurationProperties.prefix();
+            
+            // 递归处理对象
+            processObject(prefix, object, classSecret, result);
         }
+        System.out.println("-------------result: " + result);
         return result;
+    }
+
+    /**
+     * 递归处理对象及其嵌套属性
+     */
+    private void processObject(String prefix, Object object, boolean parentSecret, Map<String, Set<String>> result) {
+        if (object == null) {
+            return;
+        }
+
+        Class<?> clazz = object.getClass();
+
+        // 如果当前字段标记为敏感，添加到结果中
+        if (parentSecret && object instanceof String string) {
+            if (result.containsKey(prefix)) {
+                result.get(prefix).add(string);
+            } else {
+                result.put(prefix, Sets.newHashSet(string));
+            }
+            return;
+        }
+        if (isSimpleType(clazz)) {
+            return;
+        }
+
+        if (clazz.isRecord()) {
+            for (RecordComponent component : clazz.getRecordComponents()) {
+                try {
+                    Object value = component.getAccessor().invoke(object);
+                    processObject(prefix + "." + component.getName(), value, parentSecret || component.isAnnotationPresent(SecretProperty.class), result);
+                } catch (IllegalAccessException | InvocationTargetException ignore) {
+                }
+            }
+        }
+
+        ReflectionUtils.doWithFields(clazz, field -> {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+                return;
+            }
+            if (!field.trySetAccessible()) {
+                return;
+            }
+            boolean secret = parentSecret || AnnotatedElementUtils.hasAnnotation(field, SecretProperty.class);
+            Object value = ReflectionUtils.getField(field, object);
+            
+            if (Objects.isNull(value)) {
+                return;
+            }
+            
+            String key = prefix + "." + field.getName();
+
+
+            //处理map
+            if (value instanceof Map<?, ?> map) {
+                map.forEach((k, v) ->  processObject(key + "." + k, v, secret, result));
+            }
+            //处理数组
+            if (value.getClass().isArray()) {
+                Object[] array = (Object[]) value;
+                for (Object o : array) {
+                    processObject(key, o, secret, result);
+                }
+            }
+
+            //处理集合
+            if (value instanceof Collection<?> collection) {
+                collection.forEach(v ->  processObject(key, v, secret, result));
+            }
+
+            processObject(key, value, secret, result);
+        });
+    }
+    
+
+    
+
+
+    
+    /**
+     * 判断是否为简单类型
+     */
+    private boolean isSimpleType(Class<?> type) {
+        return type.isPrimitive() || 
+               type == Boolean.class ||
+               type == Character.class ||
+               type == Byte.class ||
+               type == Short.class ||
+               type == Integer.class ||
+               type == Long.class ||
+               type == Float.class ||
+               type == Double.class ||
+               type == Void.class ||
+               type.isEnum() ||
+               type.getPackage().getName().startsWith("java.") ||
+               type.getPackage().getName().startsWith("javax.") ||
+               type.getPackage().getName().startsWith("org.springframework.");
     }
 }
