@@ -24,9 +24,15 @@
         <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
         <joda-time.version>2.14.0</joda-time.version>
         <swagger.version>2.2.31</swagger.version>
+        <org.jetbrains.anotations.version>26.0.2</org.jetbrains.anotations.version>
+        <micrometer.context.propagation.version>1.0.4</micrometer.context.propagation.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
@@ -131,7 +137,13 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>context-propagation</artifactId>
-            <version>1.0.4</version>
+            <version>${micrometer.context.propagation.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${org.jetbrains.anotations.version}</version>
         </dependency>
     </dependencies>
 

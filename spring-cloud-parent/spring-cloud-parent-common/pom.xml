@@ -15,9 +15,6 @@
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <org.jetbrains.anotations.version>26.0.2</org.jetbrains.anotations.version>
-    </properties>
 
     <dependencies>
 
@@ -56,11 +53,7 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>${org.jetbrains.anotations.version}</version>
-        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -6,4 +6,3 @@ io.github.opensabe.spring.cloud.parent.common.auto.LoadBalancerAutoConfiguration
 io.github.opensabe.spring.cloud.parent.common.auto.Log4j2AutoConfiguration
 io.github.opensabe.spring.cloud.parent.common.auto.SchedulingAutoConfiguration
 io.github.opensabe.spring.cloud.parent.common.auto.CustomizedEurekaAutoConfiguration
-io.github.opensabe.spring.cloud.parent.common.auto.ValidationAutoConfiguration

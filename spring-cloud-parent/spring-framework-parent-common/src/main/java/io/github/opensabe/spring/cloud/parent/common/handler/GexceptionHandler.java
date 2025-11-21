@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.web.common.handler;
-
-import org.springframework.core.Ordered;
-import org.springframework.core.PriorityOrdered;
-import org.springframework.validation.BindException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.support.WebExchangeBindException;
+package io.github.opensabe.spring.cloud.parent.common.handler;
 
 import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.base.vo.BaseRsp;
-import io.github.opensabe.spring.cloud.parent.common.handler.BackendException;
-import io.github.opensabe.spring.cloud.parent.common.handler.ErrorHandler;
-import io.github.opensabe.spring.cloud.parent.common.handler.FrontendException;
-import io.github.opensabe.spring.cloud.parent.common.handler.I18nMessageResolver;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.support.WebExchangeBindException;
 
 
 /**
@@ -52,8 +46,8 @@ public class GexceptionHandler extends ErrorHandler implements PriorityOrdered {
     }
 
     @ExceptionHandler(FrontendException.class)
-    public BaseRsp<?> onFrontendException(FrontendException e, HttpServletRequest request) {
-        log.info("{} error inner message {} return message {}", request.getRequestURI(), e.getInnerMessage(), e.getMessage());
+    public BaseRsp<?> onFrontendException(FrontendException e, ServerHttpRequest request) {
+        log.info("{} error inner message {} return message {}", request.getURI().getPath(), e.getInnerMessage(), e.getMessage());
         return onFrontendException(e);
     }
 
@@ -78,8 +72,8 @@ public class GexceptionHandler extends ErrorHandler implements PriorityOrdered {
     }
 
     @ExceptionHandler(BackendException.class)
-    public BaseRsp<?> onBackendException(BackendException e, HttpServletRequest request) {
-        log.info("{} error {}", request.getRequestURI(), e.getMessage());
+    public BaseRsp<?> onBackendException(BackendException e, ServerHttpRequest request) {
+        log.info("{} error {}", request.getURI().getPath(), e.getMessage());
         return onBackendException(e);
     }
 
@@ -113,10 +107,10 @@ public class GexceptionHandler extends ErrorHandler implements PriorityOrdered {
         return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(message).build();
     }
 
-    @ExceptionHandler(ServletRequestBindingException.class)
-    public BaseRsp<?> servletRequestBindingException(ServletRequestBindingException e) {
-        return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(e.getMessage()).build();
-    }
+//    @ExceptionHandler(ServletRequestBindingException.class)
+//    public BaseRsp<?> servletRequestBindingException(ServletRequestBindingException e) {
+//        return BaseRsp.builder().bizCode(BizCodeEnum.INVALID.getVal()).message(e.getBody()).build();
+//    }
 
     @Override
     public int getOrder() {
