@@ -1,1 +1,2 @@
 io.github.opensabe.spring.cloud.parent.webflux.common.auto.WebClientAutoConfiguration
+io.github.opensabe.spring.cloud.parent.webflux.common.auto.WebServerAutoConfiguration

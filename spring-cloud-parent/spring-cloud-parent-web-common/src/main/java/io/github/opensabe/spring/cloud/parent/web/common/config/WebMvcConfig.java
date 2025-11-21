@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.webflux.common.auto;
+package io.github.opensabe.spring.cloud.parent.web.common.config;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+import io.github.opensabe.spring.cloud.parent.common.web.ServletPathResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.TracedPublisherConfiguration;
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfiguration;
+import java.util.List;
 
-@Import({WebClientConfiguration.class, TracedPublisherConfiguration.class})
-@AutoConfiguration
-public class WebClientAutoConfiguration {
+public class WebMvcConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(new ServletPathResolver());
+    }
 }

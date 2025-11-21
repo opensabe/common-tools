@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.webflux.common.auto;
+package io.github.opensabe.spring.cloud.parent.common.web;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.TracedPublisherConfiguration;
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfiguration;
-
-@Import({WebClientConfiguration.class, TracedPublisherConfiguration.class})
-@AutoConfiguration
-public class WebClientAutoConfiguration {
+/**
+ * 类似PathVariable，但是PathVariable是获取部分路径，而Path是获取全部路径
+ * @author maheng
+ */
+@Target(ElementType.PARAMETER)
+@Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+public @interface Path {
 }

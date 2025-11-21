@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.webflux.common.auto;
+package io.github.opensabe.spring.cloud.parent.webflux.common.config;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+import io.github.opensabe.spring.cloud.parent.webflux.common.web.WebFluxPathResolver;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.TracedPublisherConfiguration;
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfiguration;
+/**
+ * @author maheng
+ */
+public class WebServerConfiguration {
 
-@Import({WebClientConfiguration.class, TracedPublisherConfiguration.class})
-@AutoConfiguration
-public class WebClientAutoConfiguration {
+    @Bean
+//    @ConditionalOnMissingBean
+    public WebFluxPathResolver webFluxPathResolver () {
+        return new WebFluxPathResolver();
+    }
 }

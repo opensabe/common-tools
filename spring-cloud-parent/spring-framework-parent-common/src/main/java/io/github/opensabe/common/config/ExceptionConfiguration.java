@@ -15,13 +15,12 @@
  */
 package io.github.opensabe.common.config;
 
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.spring.cloud.parent.common.handler.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 
 /**
  * 拓展validation

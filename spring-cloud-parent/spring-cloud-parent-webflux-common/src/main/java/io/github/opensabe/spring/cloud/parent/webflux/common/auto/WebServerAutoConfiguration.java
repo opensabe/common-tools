@@ -15,13 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.auto;
 
+import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebServerConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.TracedPublisherConfiguration;
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfiguration;
-
-@Import({WebClientConfiguration.class, TracedPublisherConfiguration.class})
+@Import(WebServerConfiguration.class)
 @AutoConfiguration
-public class WebClientAutoConfiguration {
+public class WebServerAutoConfiguration {
 }
