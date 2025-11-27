@@ -231,11 +231,11 @@ public class AlarmUtil {
             String content = matcher.group(1);
             // 根据逗号分割内容并放入集合中
             for (String s : content.split(",")) {
-                s = CLUSTER+s.trim().toLowerCase();
+                s = s.trim().toLowerCase();
                 // 如果匹配上组，则加入，并且标记找到了
                 if (ALL_GROUPS.contains(s)) {
                     find = true;
-                    values.add(s);
+                    values.add(CLUSTER+s);
                 } else {
                     // 尝试部分匹配，可以匹配到比如 project1pm，project2op, pmproject3 这种
                     for (String group : ALL_GROUPS) {
