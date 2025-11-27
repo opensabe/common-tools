@@ -173,9 +173,9 @@ public class AlarmUtil {
                     find = true;
                     values.add(s);
                 } else {
-                    // 尝试部分匹配，可以匹配到比如 project1pm，project2op 这种
+                    // 尝试部分匹配，可以匹配到比如 project1pm，project2op, pmproject3 这种
                     for (String group : ALL_GROUPS) {
-                        if (s.contains(group)) {
+                        if (s.startsWith(group) || s.endsWith(group)) {
                             find = true;
                             values.add(group);
                             break;
