@@ -17,6 +17,7 @@ package io.github.opensabe.spring.cloud.parent.common.handler;
 
 import io.github.opensabe.base.RespUtil;
 import io.github.opensabe.base.vo.BaseRsp;
+import io.github.opensabe.spring.cloud.parent.common.web.Debug;
 import io.github.opensabe.spring.cloud.parent.common.web.Path;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.annotation.Order;
@@ -32,9 +33,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ThrowableHandler {
 
+    private final Debug debug;
+
+    public ThrowableHandler(Debug debug) {
+        this.debug = debug;
+    }
+
     @ExceptionHandler(Throwable.class)
     public BaseRsp<Void> onThrowable(Throwable e, @Path String path) {
         log.error("{} error {}", path, e.getMessage(), e);
-        return RespUtil.error(null,"Sorry,something went wrong. Please try again later.");
+        String msg = debug.isEnabled() ? e.getMessage() : null;
+        return RespUtil.error(msg,"Sorry,something went wrong. Please try again later.");
     }
 }
