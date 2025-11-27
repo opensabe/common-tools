@@ -172,6 +172,15 @@ public class AlarmUtil {
                 if (ALL_GROUPS.contains(s)) {
                     find = true;
                     values.add(s);
+                } else {
+                    // 尝试部分匹配，可以匹配到比如 project1pm，project2op 这种
+                    for (String group : ALL_GROUPS) {
+                        if (s.contains(group)) {
+                            find = true;
+                            values.add(group);
+                            break;
+                        }
+                    }
                 }
             }
             if (find) {
