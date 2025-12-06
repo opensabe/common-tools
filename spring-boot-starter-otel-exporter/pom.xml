@@ -6,10 +6,14 @@
   <parent>
     <groupId>io.github.opensabe-tech</groupId>
     <artifactId>spring-cloud-parent</artifactId>
-    <version>1.0.4.23</version>
+    <version>1.0.8.1</version>
   </parent>
 
   <artifactId>spring-boot-starter-otel-exporter</artifactId>
+  <version>1.0.8.1</version>
+  <name>${project.artifactId}</name>
+  <description>${project.artifactId}</description>
+  <packaging>jar</packaging>
 
   <properties>
   </properties>

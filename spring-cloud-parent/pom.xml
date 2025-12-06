@@ -191,6 +191,11 @@
                 <artifactId>common-testcontainers</artifactId>
                 <version>${opensabe.version}</version>
             </dependency>
+            <dependency>
+              <groupId>io.github.opensabe-tech</groupId>
+              <artifactId>spring-boot-starter-otel-exporter</artifactId>
+              <version>${opensabe.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.springdoc</groupId>

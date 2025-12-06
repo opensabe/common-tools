@@ -48,6 +48,7 @@
         <module>mapstruct-bom</module>
         <module>spring-boot-starter-milvus</module>
         <module>common-testcontainers</module>
+        <module>spring-boot-starter-otel-exporter</module>
     </modules>
 
     <dependencyManagement>
