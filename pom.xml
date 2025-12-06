@@ -47,6 +47,7 @@
         <module>spring-boot-starter-milvus</module>
         <module>common-testcontainers</module>
         <module>springdoc-spring-starter</module>
+        <module>spring-boot-starter-otel-exporter</module>
     </modules>
 
     <dependencyManagement>
