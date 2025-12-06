@@ -11,7 +11,10 @@
     </parent>
 
     <artifactId>common-testcontainers</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.4.23</version>
+    <name>${project.artifactId}</name>
+    <description>${project.artifactId}</description>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

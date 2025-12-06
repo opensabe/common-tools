@@ -10,6 +10,9 @@
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
     <artifactId>mapstruct-bom</artifactId>
+    <version>1.0.4.23</version>
+    <name>${project.artifactId}</name>
+    <description>${project.artifactId}</description>
     <packaging>pom</packaging>
     <modules>
         <module>mapstruct-core</module>
