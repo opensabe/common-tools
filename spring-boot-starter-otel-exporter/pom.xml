@@ -10,6 +10,10 @@
   </parent>
 
   <artifactId>spring-boot-starter-otel-exporter</artifactId>
+  <version>1.0.4.23</version>
+  <name>${project.artifactId}</name>
+  <description>${project.artifactId}</description>
+  <packaging>jar</packaging>
 
   <properties>
   </properties>
