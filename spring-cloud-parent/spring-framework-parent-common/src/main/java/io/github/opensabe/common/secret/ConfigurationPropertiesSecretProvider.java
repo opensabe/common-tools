@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class ConfigurationPropertiesSecretProvider extends SecretProvider implements ApplicationContextAware {
 
+    private static final int MAX_RECURSION_DEPTH = 8;
 
     @Setter
     private ApplicationContext applicationContext;
@@ -111,7 +112,7 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
 
             boolean classSecret = AnnotatedElementUtils.hasAnnotation(object.getClass(), SecretProperty.class);
             // 递归处理对象
-            processObject(prefix, object, classSecret, result, processing);
+            processObject(prefix, object, classSecret, result, processing, 0);
 
 
         }
@@ -121,12 +122,21 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
     /**
      * 递归处理对象及其嵌套属性
      */
-    private void processObject(String prefix, Object object, boolean parentSecret, Map<String, Set<String>> result, Map<Object, Boolean> processing) {
+    private void processObject(String prefix, Object object, boolean parentSecret, Map<String, Set<String>> result, Map<Object, Boolean> processing, int depth) {
         if (object == null) {
             return;
         }
 
+        if (depth > MAX_RECURSION_DEPTH) {
+            log.warn("Recursion depth {} exceeds maximum limit {}, skipping processing for prefix: {}", depth, MAX_RECURSION_DEPTH, prefix);
+            return;
+        }
+
         if (processing.putIfAbsent(object, Boolean.TRUE) != null) {
+            return;
+        }
+
+        if (isSkipType(object.getClass())) {
             return;
         }
 
@@ -149,7 +159,7 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
             for (RecordComponent component : clazz.getRecordComponents()) {
                 try {
                     Object value = component.getAccessor().invoke(object);
-                    processObject(prefix + "." + component.getName(), value, parentSecret || component.isAnnotationPresent(SecretProperty.class), result, processing);
+                    processObject(prefix + "." + component.getName(), value, parentSecret || component.isAnnotationPresent(SecretProperty.class), result, processing, depth + 1);
                 } catch (IllegalAccessException | InvocationTargetException ignore) {
                 }
             }
@@ -172,28 +182,29 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
 
             String key = prefix + "." + field.getName();
 
+            log.debug("Processing field: {}, secret: {}, value type: {}", key, secret, value.getClass().getName());
 
             //处理map
             if (value instanceof Map<?, ?> map) {
-                map.forEach((k, v) ->  processObject(key + "." + k, v, secret, result, processing));
+                map.forEach((k, v) ->  processObject(key + "." + k, v, secret, result, processing, depth + 1));
             }
             //处理数组,我们忽略Primitive类型，因为我们不可能去把一个数字进行脱敏
             if (value.getClass().isArray() && !value.getClass().getComponentType().isPrimitive()) {
                 Object[] array = (Object[]) value;
                 for (Object o : array) {
-                    processObject(key, o, secret, result, processing);
+                    processObject(key, o, secret, result, processing, depth + 1);
                 }
             }
 
             //处理集合
             if (value instanceof Collection<?> collection) {
                 try {
-                    collection.forEach(v ->  processObject(key, v, secret, result, processing));
+                    collection.forEach(v ->  processObject(key, v, secret, result, processing, depth + 1));
                 }catch (UnsupportedOperationException ignore) {
                 }
             }
 
-            processObject(key, value, secret, result, processing);
+            processObject(key, value, secret, result, processing, depth + 1);
 
 
         });
@@ -221,5 +232,16 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
                packageName.getName().startsWith("java.") ||
                packageName.getName().startsWith("javax.") ||
                packageName.getName().startsWith("org.springframework.");
+    }
+
+    /**
+     * 判断是否为需要跳过的类型
+     */
+    private boolean isSkipType(Class<?> type) {
+        Package packageName;
+        if ((packageName = type.getPackage()) == null) {
+            return false;
+        }
+        return packageName.getName().startsWith("com.github.benmanes");
     }
 }
