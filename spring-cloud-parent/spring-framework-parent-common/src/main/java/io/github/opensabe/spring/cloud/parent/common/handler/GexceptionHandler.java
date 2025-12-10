@@ -90,10 +90,11 @@ public class GexceptionHandler implements PriorityOrdered {
         return resolveBindingResult(e, e.getMessage());
     }
 
-
+//
 //    @ExceptionHandler(MissingRequestValueException.class)
-//    public BaseRsp<Void> onMissingRequestValueException(MissingFormatArgumentException e) {
-//        return BaseRsp.<Void>builder().bizCode(BizCodeEnum.INVALID.getVal()).message(e.getMessage()).build();
+//    public BaseRsp<Void> onMissingRequestValueException(MissingRequestValueException e, @Path String path) {
+//        log.info("{}: {}", path, e.getMessage());
+//        return RespUtil.invalid(null);
 //    }
 
     private BaseRsp<Void> resolveBindingResult (BindingResult bindingResult, String fallbackMessage) {

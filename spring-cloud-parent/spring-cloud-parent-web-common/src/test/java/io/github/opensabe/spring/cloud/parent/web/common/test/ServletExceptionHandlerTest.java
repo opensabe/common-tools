@@ -2,11 +2,13 @@ package io.github.opensabe.spring.cloud.parent.web.common.test;
 
 
 import io.github.opensabe.base.RespUtil;
+import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.base.vo.BaseRsp;
 import io.github.opensabe.spring.cloud.parent.common.validation.annotation.IntegerEnumedValue;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
         "spring.servlet.jfr.enabled=false",
         "spring.cloud.config.client.profile=test"
 })
+@Log4j2
 public class ServletExceptionHandlerTest {
 
     @SpringBootApplication
@@ -53,22 +56,28 @@ public class ServletExceptionHandlerTest {
     @DisplayName("测试Validation RequestBody信息")
     void testBindResult () {
         BaseRsp<Void> rsp = restTemplate.postForObject("/body", new Param(null, null), BaseRsp.class);
-        System.out.println(rsp.getMessage());
+        log.error(rsp.getInnerMsg());
+        Assertions.assertEquals(BizCodeEnum.INVALID.code(), rsp.getBizCode());
         rsp = restTemplate.postForObject("/body", new Param("1", 4), BaseRsp.class);
-        System.out.println(rsp.getMessage());
+        log.info(rsp);
+        Assertions.assertEquals(BizCodeEnum.INVALID.code(), rsp.getBizCode());
     }
 
     @Test
     @DisplayName("测试Validation RequestParam信息")
     void testConstraintViolation () {
         BaseRsp<Void> rsp = restTemplate.getForObject("/param", BaseRsp.class);
-        System.out.println(rsp.getMessage());
+        log.info(rsp);
+        Assertions.assertEquals(BizCodeEnum.INVALID.getVal(), rsp.getBizCode());
     }
     @Test
     @DisplayName("测试header或者param缺失")
     void testMissingRequestValueException () {
-        BaseRsp<Void> rsp = restTemplate.getForObject("/header", BaseRsp.class);
-        System.out.println(rsp.getMessage());
+        // 测试缺少必须的header
+        BaseRsp<Void> headerRsp = restTemplate.getForObject("/header", BaseRsp.class);
+        log.info(headerRsp);
+        Assertions.assertNotNull(headerRsp);
+        Assertions.assertEquals(BizCodeEnum.ERROR.getVal(), headerRsp.getBizCode()); // INVALID code
     }
 
 
