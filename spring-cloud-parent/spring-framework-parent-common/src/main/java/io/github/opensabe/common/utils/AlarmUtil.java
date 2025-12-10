@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.MessageFactory;
 
@@ -51,6 +52,8 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class AlarmUtil {
+
+    public static String CLUSTER = "";
 
     //实现一个近似于固定窗口（非滑动窗口）的报警，即报警第一次出现之后 Interval 时间内如果超过多少次就会报警，报警后清空
     private static final LoadingCache<Interval, LoadingCache<String, AtomicInteger>> ERROR_CACHE =
@@ -142,6 +145,67 @@ public class AlarmUtil {
         AlarmLog.log.fatal(JsonUtil.toJSONString(alarmLogContent));
     }
 
+    public static class Group extends HashSet<String> {
+
+        @JsonIgnore
+        private final String cluster;
+
+        private Group(String cluster) {
+            this.cluster = cluster;
+        }
+
+        public static Group builder (String cluster) {
+            return new Group(cluster);
+        }
+        public static Group builder () {
+            return new Group(CLUSTER);
+        }
+
+
+        @Override
+        public boolean add(String string) {
+            return super.add(string+CLUSTER);
+        }
+
+        public Group pm() {
+            add("pm");
+            return this;
+        }
+
+        public Group op() {
+            add("op");
+            return this;
+        }
+
+        public Group mk() {
+            add("mk");
+            return this;
+        }
+        public Group rd() {
+            add("rd");
+            return this;
+        }
+
+        public Group td() {
+            add("td");
+            return this;
+        }
+
+        public Group ad() {
+            add("ad");
+            return this;
+        }
+
+        public Group pr() {
+            add("pr");
+            return this;
+        }
+
+
+
+
+    }
+
     public static Boolean hasUnique(String searchString) {
         // 创建 Matcher 对象
         Matcher matcher = UNIQUE_PATTERN.matcher(searchString);
@@ -171,7 +235,16 @@ public class AlarmUtil {
                 // 如果匹配上组，则加入，并且标记找到了
                 if (ALL_GROUPS.contains(s)) {
                     find = true;
-                    values.add(s);
+                    values.add(s+CLUSTER);
+                } else {
+                    // 尝试部分匹配，可以匹配到比如 project1pm，project2op, pmproject3 这种
+                    for (String group : ALL_GROUPS) {
+                        if (s.startsWith(group) || s.endsWith(group)) {
+                            find = true;
+                            values.add(s);
+                            break;
+                        }
+                    }
                 }
             }
             if (find) {
@@ -219,4 +292,5 @@ public class AlarmUtil {
         private final long interval;
         private final TimeUnit timeUnit;
     }
+
 }

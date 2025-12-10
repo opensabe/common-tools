@@ -68,7 +68,7 @@ public class PayPalPlanDetailResponseDTO {
     private List<BillingCycle> billingCycles;
 
     @Data
-    public class BillingCycle {
+    public static class BillingCycle {
 
         /**
          * 计费周期的保有期类型。如果计划有试验周期，则每个计划只允许2个试验周期。
