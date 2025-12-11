@@ -87,7 +87,6 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
                     //如果 headerName 有敏感信息，则移除整个 header
                     if (headerNameFilterSecretStringResult.isFoundSensitiveString()) {
                         cache.put(path, true);
-//                        responseHeaders.remove(headerName);
                         httpServletResponse.setHeader(headerName, null);
                         continue;
                     }

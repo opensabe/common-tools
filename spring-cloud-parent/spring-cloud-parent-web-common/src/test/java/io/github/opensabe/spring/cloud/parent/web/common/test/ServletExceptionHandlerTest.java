@@ -92,7 +92,7 @@ public class ServletExceptionHandlerTest {
         BaseRsp<Void> headerRsp = restTemplate.getForObject("/header", BaseRsp.class);
         log.info(headerRsp);
         Assertions.assertNotNull(headerRsp);
-        Assertions.assertEquals(BizCodeEnum.ERROR.getVal(), headerRsp.getBizCode()); // INVALID code
+        Assertions.assertEquals(BizCodeEnum.ERROR.getVal(), headerRsp.getBizCode());
     }
 
 

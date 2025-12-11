@@ -35,10 +35,10 @@ public class ServletPathResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         String uri = webRequest.getDescription(false);
-        if (StringUtils.isNotBlank(uri)) {
-            return uri.substring(uri.indexOf("=")+1);
+        if (StringUtils.isNotBlank(uri) && uri.startsWith("uri=")) {
+             return uri.substring(4); // "uri=".length() == 4
         }
-        return null;
+        return uri;
     }
 
 }
