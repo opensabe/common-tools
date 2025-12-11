@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration packages="io.github.opensabe">
+<Configuration>
     <Properties>
         <Property name="springAppName">service-common-test</Property>
         <Property name="LOG_ROOT">log</Property>

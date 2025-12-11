@@ -4,17 +4,21 @@
         <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
         <Property name="LOG_LEVEL_PATTERN">%5p</Property>
         <Property name="springAppName">spring-framework-test</Property>
+        <Property name="CONSOLE_LOG_PATTERN">
+            %clr{%d{${LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${LOG_LEVEL_PATTERN}} [${springAppName},%X{traceId},%X{spanId}] %clr{[${sys:PID}]}{magenta} %clr{[%t]}{faint}%clr{[%C:%L]}{cyan}%clr{:}{faint}%m%n
+        </Property>
     </Properties>
     <Appenders>
-        <CustomAppender name="console">
+        <Console name="console">
             <Filters>
                 <SecretCheckFilter />
             </Filters>
-        </CustomAppender>
+            <PatternLayout pattern="${CONSOLE_LOG_PATTERN}" alwaysWriteExceptions="true" />
+        </Console>
     </Appenders>
     <Loggers>
         <!--必须使用异步日志，否则会有循环调用问题-->
-        <Asyncroot level="info">
+        <Asyncroot level="info" includeLocation="true" additivity="false">
             <AppenderRef ref="console"/>
         </Asyncroot>
     </Loggers>

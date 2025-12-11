@@ -20,9 +20,8 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.webflux.common.config.TracedPublisherConfiguration;
 import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfiguration;
-import io.github.opensabe.spring.cloud.parent.webflux.common.handler.ExceptionConfiguration;
 
-@Import({WebClientConfiguration.class, ExceptionConfiguration.class, TracedPublisherConfiguration.class})
+@Import({WebClientConfiguration.class, TracedPublisherConfiguration.class})
 @AutoConfiguration
 public class WebClientAutoConfiguration {
 }

@@ -39,7 +39,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = {})
 public @interface IntegerEnumedValue {
 
-    String message() default "${field} allowed in {value}";
+    String message() default "allowed in {value}";
 
     Class<?>[] groups() default {};
 

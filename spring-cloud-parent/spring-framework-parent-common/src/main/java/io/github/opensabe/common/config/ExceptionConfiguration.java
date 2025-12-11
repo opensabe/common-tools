@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.webflux.common.handler;
+package io.github.opensabe.common.config;
 
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.condition.ConditionOnSpringCloudConfigProfile;
+import io.github.opensabe.spring.cloud.parent.common.handler.*;
+import io.github.opensabe.spring.cloud.parent.common.web.Debug;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import io.github.opensabe.spring.cloud.parent.common.handler.I18nMessageResolver;
 
 /**
  * 拓展validation
@@ -30,6 +32,24 @@ import io.github.opensabe.spring.cloud.parent.common.handler.I18nMessageResolver
 @Configuration(proxyBeanMethods = false)
 public class ExceptionConfiguration {
 
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionOnSpringCloudConfigProfile("!online")
+    public Debug test() {
+        return new Debug(true);
+    }
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionOnSpringCloudConfigProfile("online")
+    public Debug online() {
+        return new Debug(false);
+    }
+
+    @Bean
+    public ExceptionHandlerObservationAop exceptionHandlerObservationAop(UnifiedObservationFactory unifiedObservationFactory) {
+        return new ExceptionHandlerObservationAop(unifiedObservationFactory);
+    }
 
     @Bean
     public I18nMessageResolver i18nMessageResolver(MessageSource messageSource) {
@@ -44,8 +64,8 @@ public class ExceptionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ThrowableHandler throwableHandler() {
-        return new ThrowableHandler();
+    public ThrowableHandler throwableHandler(Debug debug) {
+        return new ThrowableHandler(debug);
     }
 
     @Bean
@@ -53,4 +73,5 @@ public class ExceptionConfiguration {
     public EnumConvertConfiguration enumConvertConfiguration() {
         return new EnumConvertConfiguration();
     }
+
 }

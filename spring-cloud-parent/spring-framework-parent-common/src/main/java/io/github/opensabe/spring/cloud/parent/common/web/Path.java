@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.web.common.auto;
+package io.github.opensabe.spring.cloud.parent.common.web;
 
-import io.github.opensabe.spring.cloud.parent.web.common.config.UndertowXNIOConfiguration;
-import io.github.opensabe.spring.cloud.parent.web.common.config.WebServerConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-@AutoConfiguration
-@Import({WebServerConfiguration.class, UndertowXNIOConfiguration.class})
-public class UndertowAutoConfiguration {
+/**
+ * 类似PathVariable，但是PathVariable是获取部分路径，而Path是获取全部路径
+ * @author maheng
+ */
+@Target(ElementType.PARAMETER)
+@Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+public @interface Path {
 }

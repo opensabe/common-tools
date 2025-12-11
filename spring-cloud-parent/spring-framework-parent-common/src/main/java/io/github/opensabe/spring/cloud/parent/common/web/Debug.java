@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.web.common.auto;
+package io.github.opensabe.spring.cloud.parent.common.web;
 
-import io.github.opensabe.spring.cloud.parent.web.common.config.UndertowXNIOConfiguration;
-import io.github.opensabe.spring.cloud.parent.web.common.config.WebServerConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+import lombok.Getter;
 
-@AutoConfiguration
-@Import({WebServerConfiguration.class, UndertowXNIOConfiguration.class})
-public class UndertowAutoConfiguration {
+public class Debug {
+    /**
+     * 是否开启debug模式
+     */
+    @Getter
+    private final boolean enabled;
+
+    public Debug(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

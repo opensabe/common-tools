@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.web.common.auto;
+package io.github.opensabe.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.web.common.config.UndertowXNIOConfiguration;
-import io.github.opensabe.spring.cloud.parent.web.common.config.WebServerConfiguration;
+import io.github.opensabe.common.config.ExceptionConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Import;
 
+import io.github.opensabe.common.config.ExtendValidatorConfigure;
+
 @AutoConfiguration
-@Import({WebServerConfiguration.class, UndertowXNIOConfiguration.class})
-public class UndertowAutoConfiguration {
+@Import({ExtendValidatorConfigure.class, ExceptionConfiguration.class})
+@AutoConfigureBefore(org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration.class)
+public class ValidationAutoConfiguration {
 }

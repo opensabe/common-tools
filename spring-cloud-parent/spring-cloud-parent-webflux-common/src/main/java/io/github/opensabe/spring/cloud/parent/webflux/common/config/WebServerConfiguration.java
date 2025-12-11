@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.common.auto;
+package io.github.opensabe.spring.cloud.parent.webflux.common.config;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.context.annotation.Import;
+import io.github.opensabe.spring.cloud.parent.webflux.common.web.WebFluxPathResolver;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 
-import io.github.opensabe.spring.cloud.parent.common.validation.ExtendValidatorConfigure;
+/**
+ * @author maheng
+ */
+public class WebServerConfiguration {
 
-@AutoConfiguration
-@Import(ExtendValidatorConfigure.class)
-@AutoConfigureBefore(org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration.class)
-public class ValidationAutoConfiguration {
+    @Bean
+//    @ConditionalOnMissingBean
+    public WebFluxPathResolver webFluxPathResolver () {
+        return new WebFluxPathResolver();
+    }
 }

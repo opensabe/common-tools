@@ -15,8 +15,13 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.config;
 
-import java.util.List;
-
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.spring.cloud.parent.web.common.handler.SecretCheckResponseAdvice;
+import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerJFRProperties;
+import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerRequestObservationToJFRGenerator;
+import io.github.opensabe.spring.cloud.parent.web.common.undertow.DefaultWebServerFactoryCustomizer;
+import io.github.opensabe.spring.cloud.parent.web.common.undertow.UndertowGracefulShutdownHandler;
+import io.github.opensabe.spring.cloud.parent.web.common.undertow.UndertowGracefulShutdownInitializer;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.embedded.undertow.ConfigurableUndertowWebServerFactory;
@@ -25,13 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.spring.cloud.parent.web.common.handler.SecretCheckResponseAdvice;
-import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerJFRProperties;
-import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerRequestObservationToJFRGenerator;
-import io.github.opensabe.spring.cloud.parent.web.common.undertow.DefaultWebServerFactoryCustomizer;
-import io.github.opensabe.spring.cloud.parent.web.common.undertow.UndertowGracefulShutdownHandler;
-import io.github.opensabe.spring.cloud.parent.web.common.undertow.UndertowGracefulShutdownInitializer;
+import java.util.List;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({HttpServerJFRProperties.class})
@@ -41,6 +40,11 @@ public class WebServerConfiguration {
         return new DefaultWebServerFactoryCustomizer(serverProperties);
     }
 
+
+    @Bean
+    public WebMvcConfig webMvcConfig () {
+        return new WebMvcConfig();
+    }
 
     @Bean
     //仅仅是为了保证项目中至少有一个 UndertowGracefulShutdownHandler

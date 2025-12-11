@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.web.common.auto;
+package io.github.opensabe.spring.cloud.parent.webflux.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.web.common.config.UndertowXNIOConfiguration;
-import io.github.opensabe.spring.cloud.parent.web.common.config.WebServerConfiguration;
+import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebServerConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 
+@Import(WebServerConfiguration.class)
 @AutoConfiguration
-@Import({WebServerConfiguration.class, UndertowXNIOConfiguration.class})
-public class UndertowAutoConfiguration {
+public class WebServerAutoConfiguration {
 }
