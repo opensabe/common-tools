@@ -6,12 +6,12 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>1.0.4.24</version>
+        <version>1.0.4.25</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
 
     </parent>
     <artifactId>mapstruct-bom</artifactId>
-    <version>1.0.4.24</version>
+    <version>1.0.4.25</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>pom</packaging>
