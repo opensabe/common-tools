@@ -91,8 +91,8 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
      */
     @Override
     protected Object determineCurrentLookupKey() {
-        log.info("determine datasource:{},{}", dataSourceCountryCodeHolder.get(), dataSourceRWHolder.get());
-        log.info("dataSourceIndexMap:{}", dataSourceIndexMap.toString());
+        log.debug("DynamicRoutingDataSource-determineCurrentLookupKey: determine datasource:{},{}", dataSourceCountryCodeHolder.get(), dataSourceRWHolder.get());
+        log.debug("DynamicRoutingDataSource-determineCurrentLookupKey: dataSourceIndexMap:{}", dataSourceIndexMap.toString());
         var country = dataSourceIndexMap.get(dataSourceCountryCodeHolder.get());
         if (MapUtils.isEmpty(country)) {
             //如果没有配置国家就取默认的国际，因为Publuc项目只配置一个国家，对应operId没有，
@@ -108,7 +108,7 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
             return null;
         }
         String index = dataSourceKeys.get(RandomUtils.nextInt(0, dataSourceKeys.size()));
-        log.info("choose datasource: {}", index);
+        log.debug("DynamicRoutingDataSource-determineCurrentLookupKey: choose datasource: {}", index);
         return index;
     }
 
