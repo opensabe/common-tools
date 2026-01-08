@@ -38,8 +38,10 @@ public class ActuatorAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         String name = returnType.getMethod().toString().toLowerCase();
-        log.info("name: {}, return: {}", name, body instanceof String
-                ? body : JsonUtil.toJSONString(body));
+        if (log.isDebugEnabled()) {
+            log.debug("ActuatorAdvice: name: {}, return: {}", name, body instanceof String
+                    ? body : JsonUtil.toJSONString(body));
+        }
         return body;
     }
 }
