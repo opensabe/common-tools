@@ -22,8 +22,8 @@ import io.github.opensabe.common.utils.AlarmUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 将环境变量中 NODE_NAME，AZ_NAME 加入 eureka 注册实例信息中的 metadata
- * NODE_NAME，AZ_NAME 是运维团队在 k8s pod 中加入的环境变脸
+ * 将环境变量中 NODE_NAME、AZ_NAME 加入 eureka 注册实例信息中的 metadata
+ * NODE_NAME、AZ_NAME 是运维团队在 k8s pod 中加入的环境变量
  */
 @Log4j2
 public class EurekaInstanceConfigBeanAddNodeInfoCustomizer implements EurekaInstanceConfigBeanCustomizer {
