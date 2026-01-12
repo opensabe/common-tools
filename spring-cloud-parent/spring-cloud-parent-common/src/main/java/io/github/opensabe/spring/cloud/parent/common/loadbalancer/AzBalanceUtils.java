@@ -31,7 +31,7 @@ public class AzBalanceUtils {
             Map<String, List> sourceserviceInstanceMap,
             Map<String, List> targetServiceInstanceMap
     ) {
-        //假设每个实例请求数量为 100，统计总请求数量
+        //假设每个实例请求数量为 1000000，统计总请求数量
         int eachInstanceRequestCount = 1000000;
         int totalRequestCount = 0;
         for (List instances : sourceserviceInstanceMap.values()) {
