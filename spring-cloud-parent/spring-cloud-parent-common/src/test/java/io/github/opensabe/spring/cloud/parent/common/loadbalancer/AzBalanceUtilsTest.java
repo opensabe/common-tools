@@ -29,6 +29,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 class AzBalanceUtilsTest {
 
     /**
@@ -59,6 +61,44 @@ class AzBalanceUtilsTest {
         printResultWithDiagram(sourceMap, targetMap, result);
         compareWithRoundRobin(sourceMap, targetMap, result);
         printTargetInstanceAllocation(targetMap, result);
+        
+        // Assertions to validate AzBalanceUtils.getLoadBalancingRatio behavior
+        validateLoadBalancingResult(sourceMap, targetMap, result);
+    }
+
+    /**
+     * 验证负载均衡结果的正确性
+     * 包括：总分配数等于总请求数、无负值
+     * 注意：不检查每个源可用区的同可用区分配是否 >= 其他可用区分配，
+     * 只要整体同可用区调用比例相对于轮询是提高的即可（已在 compareWithRoundRobin 中展示）
+     */
+    private void validateLoadBalancingResult(Map<String, List<Integer>> sourceMap,
+                                            Map<String, List<Integer>> targetMap,
+                                            Map<String, Map<String, Integer>> result) {
+        // 1. 计算总请求数（从 sourceMap 中所有整数列表的总和）
+        int totalRequests = sourceMap.values().stream()
+                .mapToInt(List::size)
+                .sum() * EACH_INSTANCE_REQUEST_COUNT;
+        
+        // 2. 计算总分配数（result 中所有整数的总和）
+        int totalAllocated = calculateTotalAllocated(result);
+        
+        // 断言：总分配数等于总请求数
+        assertEquals(totalRequests, totalAllocated, 
+                String.format("总分配数(%d)应该等于总请求数(%d)", totalAllocated, totalRequests));
+        
+        // 3. 断言：result 中没有任何分配值为负数
+        for (Map.Entry<String, Map<String, Integer>> sourceEntry : result.entrySet()) {
+            String sourceAz = sourceEntry.getKey();
+            Map<String, Integer> targetAzMap = sourceEntry.getValue();
+            for (Map.Entry<String, Integer> targetEntry : targetAzMap.entrySet()) {
+                String targetAz = targetEntry.getKey();
+                int allocation = targetEntry.getValue();
+                assertTrue(allocation >= 0, 
+                        String.format("源可用区 %s 到目标可用区 %s 的分配值(%d)不应该为负数", 
+                                sourceAz, targetAz, allocation));
+            }
+        }
     }
 
 
