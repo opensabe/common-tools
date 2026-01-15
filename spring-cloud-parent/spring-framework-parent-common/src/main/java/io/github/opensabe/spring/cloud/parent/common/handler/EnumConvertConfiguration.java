@@ -16,10 +16,12 @@
 package io.github.opensabe.spring.cloud.parent.common.handler;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.collect.MapMaker;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -43,7 +45,10 @@ import io.github.opensabe.base.vo.IntValueEnum;
 public class EnumConvertConfiguration {
 
     private static final IntValueEnumConverter CONVERTER = new IntValueEnumConverter();
-    private static final Set<ConversionService> REGISTERED_SERVICES = ConcurrentHashMap.newKeySet();
+    private static final Set<ConversionService> REGISTERED_SERVICES = Collections
+            .newSetFromMap(new MapMaker()
+                    .weakKeys()
+                    .makeMap());
 
     public static boolean isInteger(String s) {
         if (StringUtils.isBlank(s)) {
