@@ -16,9 +16,12 @@
 package io.github.opensabe.spring.cloud.parent.common.handler;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.collect.MapMaker;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -41,6 +44,11 @@ import io.github.opensabe.base.vo.IntValueEnum;
 @ControllerAdvice
 public class EnumConvertConfiguration {
 
+    private static final IntValueEnumConverter CONVERTER = new IntValueEnumConverter();
+    private static final Set<ConversionService> REGISTERED_SERVICES = Collections
+            .newSetFromMap(new MapMaker()
+                    .weakKeys()
+                    .makeMap());
 
     public static boolean isInteger(String s) {
         if (StringUtils.isBlank(s)) {
@@ -58,7 +66,10 @@ public class EnumConvertConfiguration {
     public void initBinder(WebDataBinder dataBinder) {
         ConversionService service = dataBinder.getConversionService();
         if (service instanceof ConverterRegistry registry) {
-            registry.addConverter(new IntValueEnumConverter());
+            //避免内存泄漏：检查是否已经注册过，防止不断创建新的converter实例放入
+            if (REGISTERED_SERVICES.add(service)) {
+                registry.addConverter(CONVERTER);
+            }
         }
     }
 
