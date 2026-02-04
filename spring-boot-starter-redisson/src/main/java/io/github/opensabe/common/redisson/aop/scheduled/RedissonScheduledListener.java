@@ -15,15 +15,14 @@
  */
 package io.github.opensabe.common.redisson.aop.scheduled;
 
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.observation.Observation;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.RedissonShutdownException;
 import org.redisson.api.RLock;
@@ -33,15 +32,13 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.observation.Observation;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 
 @Log4j2
@@ -89,18 +86,30 @@ public class RedissonScheduledListener {
                 }
             }
             if (bean instanceof RedissonScheduledService scheduledService) {
-//                Method method;
-//                try {
-//                    method = RedissonScheduledService.class.getDeclaredMethod("run");
-//                } catch (NoSuchMethodException e) {
-//                    throw new RuntimeException(e);
-//                }
                 map.put(scheduledService.name(), new ExecutorWrapper(redissonClient, unifiedObservationFactory,
                         scheduledService, scheduledService.name(), scheduledService.initialDelay(),
                         scheduledService.fixedDelay(), scheduledService.stopOnceShutdown(), meterRegistry));
             }
         });
         initialized.set(true);
+    }
+
+
+    public void refresh(Function<EnvironmentalRefreshable, Boolean> predicate) {
+        processor.getBeanMap().forEach((beanName, bean) -> {
+            if (bean instanceof RedissonScheduledService scheduledService) {
+                if (bean instanceof EnvironmentalRefreshable refreshable) {
+                    if (predicate.apply(refreshable)) {
+                        ExecutorWrapper wrapper = map.get(scheduledService.name());
+                        if (Objects.isNull(wrapper)) {
+                            log.warn("RedissonScheduledListener.refresh called but not found RedissonScheduledService#{}", scheduledService.name());
+                            return;
+                        }
+                        wrapper.refresh(scheduledService);
+                    }
+                }
+            }
+        });
     }
 
     public void close() {
@@ -111,9 +120,12 @@ public class RedissonScheduledListener {
 
     private static class ExecutorWrapper {
         private final Thread leaderLatch;
+        private final Function<ScheduledService, Runnable>  enhancer;
         private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
-        private final boolean stopOnceShutdown;
         private final DistributionSummary distributionSummary;
+
+        private ScheduledFuture<?> future;
+        private volatile boolean stopOnceShutdown;
         private volatile boolean isLeader;
         private volatile boolean isStopped = false;
 
@@ -160,34 +172,46 @@ public class RedissonScheduledListener {
             }, name + "_latch");
             leaderLatch.start();
 
-            scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, build, new ThreadPoolExecutor.AbortPolicy());
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> observation.observe(() -> {
-                try {
-                    if (isLeader) {
-                        long start = System.currentTimeMillis();
-                        if (log.isDebugEnabled()) {
-                            log.debug("RedissonScheduledBeanPostProcessor task: {} start", name);
-                        }
-//                        method.invoke(bean);
-                        runnable.run();
-                        long elapsed = System.currentTimeMillis() - start;
-                        if (distributionSummary.count() > 10 && elapsed > distributionSummary.max() * 2 && elapsed > 60000) {
-                            log.fatal("RedissonScheduledBeanPostProcessor task: {} end in {} ms, recent mean elapsed time is {}ms", name, elapsed, distributionSummary.mean());
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("RedissonScheduledBeanPostProcessor task: {} end in {} ms", name, elapsed);
+            this.enhancer = scheduledService ->  () -> observation.observe(() -> {
+                        try {
+                            if (isLeader) {
+                                long start = System.currentTimeMillis();
+                                if (log.isDebugEnabled()) {
+                                    log.debug("RedissonScheduledBeanPostProcessor task: {} start", name);
+                                }
+                                scheduledService.run();
+                                long elapsed = System.currentTimeMillis() - start;
+                                if (distributionSummary.count() > 10 && elapsed > distributionSummary.max() * 2 && elapsed > 60000) {
+                                    log.fatal("RedissonScheduledBeanPostProcessor task: {} end in {} ms, recent mean elapsed time is {}ms", name, elapsed, distributionSummary.mean());
+                                } else {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("RedissonScheduledBeanPostProcessor task: {} end in {} ms", name, elapsed);
+                                    }
+                                }
+                                distributionSummary.record(elapsed);
+                            } else {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("RedissonScheduledBeanPostProcessor not leader, ignore task: {}", name);
+                                }
                             }
+                        } catch (Throwable e) {
+                            log.fatal("RedissonScheduledBeanPostProcessor task: {}, error: {}", name, e.getMessage(), e);
                         }
-                        distributionSummary.record(elapsed);
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("RedissonScheduledBeanPostProcessor not leader, ignore task: {}", name);
-                        }
-                    }
-                } catch (Throwable e) {
-                    log.fatal("RedissonScheduledBeanPostProcessor task: {}, error: {}", name, e.getMessage(), e);
-                }
-            }), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
+                    });
+
+
+            scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, build, new ThreadPoolExecutor.AbortPolicy());
+            this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(this.enhancer.apply(runnable), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
+            log.info("RedissonScheduledBeanPostProcessor task: {} started", name);
+        }
+
+        void refresh (RedissonScheduledService service) {
+            //先取消原来的task,参数传false，不中断正在进行的task,下次生效。
+            this.future.cancel(false);
+            //重新提交一个定时任务，更新最新的时间间隔,并重定向future对象
+            this.future = this.scheduledThreadPoolExecutor.scheduleAtFixedRate(enhancer.apply(service), service.initialDelay(), service.fixedDelay(), TimeUnit.MILLISECONDS);
+            this.stopOnceShutdown = service.stopOnceShutdown();
+            log.info("RedissonScheduledBeanPostProcessor task: {} restarted", service.name());
         }
 
         void close() {

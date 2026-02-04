@@ -57,7 +57,7 @@ public class RedissonScheduledBeanPostProcessor implements BeanPostProcessor {
                 beanMap.put(beanName, bean);
             }
         }
-        if (bean instanceof AbstractRedissonScheduledService) {
+        if (bean instanceof RedissonScheduledService) {
             beanMap.put(beanName, bean);
         }
         return bean;

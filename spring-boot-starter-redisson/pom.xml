@@ -53,6 +53,16 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
 
+        <!--
+               监听EnvironmentChanged事件，用来动态刷新定时任务周期
+               scope设置为provided,如果没有spring cloud环境，则不刷新
+            -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
