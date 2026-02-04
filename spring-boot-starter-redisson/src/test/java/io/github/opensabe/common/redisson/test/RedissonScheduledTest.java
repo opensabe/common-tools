@@ -86,7 +86,7 @@ public class RedissonScheduledTest {
 
     @Test
     @DisplayName("测试动态修改时间间隔")
-    void tes1 () throws InterruptedException {
+    void test1 () throws InterruptedException {
         TimeUnit.MILLISECONDS.sleep(4300);
         Mockito.verify(task, Mockito.times(2)).run();
         Mockito.clearInvocations(task);

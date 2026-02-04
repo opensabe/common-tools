@@ -21,7 +21,6 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.RedissonShutdownException;
@@ -124,7 +123,7 @@ public class RedissonScheduledListener {
         private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
         private final DistributionSummary distributionSummary;
 
-        private ScheduledFuture<?> future;
+        private volatile ScheduledFuture<?> future;
         private volatile boolean stopOnceShutdown;
         private volatile boolean isLeader;
         private volatile boolean isStopped = false;
@@ -144,7 +143,6 @@ public class RedissonScheduledListener {
                     .publishPercentiles(0.1, 0.5, 0.9)
                     .register(meterRegistry);
             //
-            Observation observation = unifiedObservationFactory.createEmptyObservation();
             leaderLatch = new Thread(() -> {
                 lock.lock();
                 while (!isStopped) {
@@ -172,7 +170,7 @@ public class RedissonScheduledListener {
             }, name + "_latch");
             leaderLatch.start();
 
-            this.enhancer = scheduledService ->  () -> observation.observe(() -> {
+            this.enhancer = scheduledService ->  () -> unifiedObservationFactory.createEmptyObservation().observe(() -> {
                         try {
                             if (isLeader) {
                                 long start = System.currentTimeMillis();
