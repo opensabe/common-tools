@@ -211,11 +211,9 @@ public class RedissonScheduledListener {
             //重新提交一个定时任务，更新最新的时间间隔,并重定向future对象
             this.future = this.scheduledThreadPoolExecutor.scheduleAtFixedRate(enhancer.apply(service), service.initialDelay(), service.fixedDelay(), TimeUnit.MILLISECONDS);
             this.stopOnceShutdown = service.stopOnceShutdown();
-            log.info("RedissonScheduledBeanPostProcessor task: {} restarted", service.name());
         }
 
         void close() {
-            log.info("closing RedissonScheduledBeanPostProcessor executor {} ...", scheduledThreadPoolExecutor.toString());
             isStopped = true;
             leaderLatch.interrupt();
             if (stopOnceShutdown) {
