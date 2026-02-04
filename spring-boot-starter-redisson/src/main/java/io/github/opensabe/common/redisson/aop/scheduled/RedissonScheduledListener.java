@@ -204,8 +204,8 @@ public class RedissonScheduledListener {
         }
 
         void refresh (RedissonScheduledService service) {
-            if (this.isStopped) {
-                log.warn("RedissonScheduledBeanPostProcessor refresh error, scheduledService is stop, can't submit new task {}", service.name());
+            if (this.isStopped || scheduledThreadPoolExecutor.isShutdown()) {
+                log.warn("RedissonScheduledBeanPostProcessor refresh error, scheduledService is shutdown, can't submit new task {}", service.name());
             }else {
                 //先取消原来的task,参数传false，不中断正在进行的task,下次生效。
                 this.future.cancel(false);
