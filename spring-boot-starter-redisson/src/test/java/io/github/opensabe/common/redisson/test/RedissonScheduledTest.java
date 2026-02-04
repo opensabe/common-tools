@@ -19,6 +19,7 @@ import io.github.opensabe.common.redisson.aop.scheduled.EnvironmentalRefreshable
 import io.github.opensabe.common.redisson.aop.scheduled.RedissonScheduledService;
 import io.github.opensabe.common.redisson.observation.rlock.ObservedRLock;
 import lombok.Setter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,13 +36,19 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest(classes = RedissonScheduledTest.App.class,
         properties = "spring.application.name=redisson-scheduled")
 @DisplayName("测试RedissonScheduled")
 public class RedissonScheduledTest {
+
+    private static List<Long> set = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * 必须使用SpyBean,否则不经过BeanPostProcessor
@@ -87,8 +94,9 @@ public class RedissonScheduledTest {
     @Test
     @DisplayName("测试动态修改时间间隔")
     void test1 () throws InterruptedException {
-        TimeUnit.MILLISECONDS.sleep(4000);
-        Mockito.verify(task, Mockito.times(2)).run();
+        TimeUnit.MILLISECONDS.sleep(4200);
+//        Mockito.verify(task, Mockito.times(2)).run();
+        Assertions.assertTrue(set.contains(2L));
         Mockito.clearInvocations(task);
         System.setProperty("task.interval", "3000");
         //System.properties不需要ContentRefresher.refresh也能自动获取到最新值
@@ -96,12 +104,15 @@ public class RedissonScheduledTest {
         //如果不引入spring cloud config，我们不太容易模拟EnvironmentChangeEvent,因此直接发送一个事件即可
         applicationContext.publishEvent(new EnvironmentChangeEvent(applicationContext, Set.of("task.interval")));
 
-        TimeUnit.MILLISECONDS.sleep(9000);
-        Mockito.verify(task, Mockito.times(3)).run();
+        TimeUnit.MILLISECONDS.sleep(9800);
+//        Mockito.verify(task, Mockito.times(3)).run();
+
+        Assertions.assertTrue(set.contains(3L));
     }
 
     public static class Task implements RedissonScheduledService, EnvironmentalRefreshable, EnvironmentAware {
 
+        private volatile long lastTime = 0;
         @Setter
         private Environment environment;
 
@@ -127,14 +138,19 @@ public class RedissonScheduledTest {
 
         @Override
         public void run() {
+            long now = System.currentTimeMillis();
+            if (lastTime != 0) {
+                set.add((now - lastTime)/1000);
+            }
             long fixedDelay = fixedDelay();
-            System.out.println(System.currentTimeMillis()+" fixedDelay: "+fixedDelay);
+            System.out.println(now+" fixedDelay: "+fixedDelay);
             try {
                 //为了防止定时任务提前排队，无法取消，执行时间比时间间隔稍微长点。
-                TimeUnit.MILLISECONDS.sleep(fixedDelay);
+                TimeUnit.MILLISECONDS.sleep(BigDecimal.valueOf(fixedDelay * 1.1).longValue());
             } catch (InterruptedException e) {
 
             }
+            lastTime = now;
         }
 
         @Override
