@@ -87,7 +87,7 @@ public class RedissonScheduledTest {
     @Test
     @DisplayName("测试动态修改时间间隔")
     void test1 () throws InterruptedException {
-        TimeUnit.MILLISECONDS.sleep(4300);
+        TimeUnit.MILLISECONDS.sleep(4500);
         Mockito.verify(task, Mockito.times(2)).run();
         Mockito.clearInvocations(task);
         System.setProperty("task.interval", "3000");
@@ -131,7 +131,7 @@ public class RedissonScheduledTest {
             System.out.println(System.currentTimeMillis()+" fixedDelay: "+fixedDelay);
             try {
                 //为了防止定时任务提前排队，无法取消，执行时间比时间间隔稍微长点。
-                TimeUnit.MILLISECONDS.sleep(BigDecimal.valueOf(fixedDelay * 1.1).longValue());
+                TimeUnit.MILLISECONDS.sleep(BigDecimal.valueOf(fixedDelay * 1.2).longValue());
             } catch (InterruptedException e) {
 
             }
