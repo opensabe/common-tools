@@ -87,7 +87,7 @@ public class RedissonScheduledTest {
     @Test
     @DisplayName("测试动态修改时间间隔")
     void test1 () throws InterruptedException {
-        TimeUnit.MILLISECONDS.sleep(4500);
+        TimeUnit.MILLISECONDS.sleep(4000);
         Mockito.verify(task, Mockito.times(2)).run();
         Mockito.clearInvocations(task);
         System.setProperty("task.interval", "3000");
@@ -96,7 +96,7 @@ public class RedissonScheduledTest {
         //如果不引入spring cloud config，我们不太容易模拟EnvironmentChangeEvent,因此直接发送一个事件即可
         applicationContext.publishEvent(new EnvironmentChangeEvent(applicationContext, Set.of("task.interval")));
 
-        TimeUnit.MILLISECONDS.sleep(10800);
+        TimeUnit.MILLISECONDS.sleep(9000);
         Mockito.verify(task, Mockito.times(3)).run();
     }
 
@@ -131,7 +131,7 @@ public class RedissonScheduledTest {
             System.out.println(System.currentTimeMillis()+" fixedDelay: "+fixedDelay);
             try {
                 //为了防止定时任务提前排队，无法取消，执行时间比时间间隔稍微长点。
-                TimeUnit.MILLISECONDS.sleep(BigDecimal.valueOf(fixedDelay * 1.2).longValue());
+                TimeUnit.MILLISECONDS.sleep(fixedDelay);
             } catch (InterruptedException e) {
 
             }

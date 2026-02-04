@@ -28,7 +28,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 
 import java.lang.reflect.Method;
@@ -60,7 +60,11 @@ public class RedissonScheduledListener {
     }
 
 
-    @EventListener(ContextRefreshedEvent.class)
+    /**
+     * 监听 ApplicationStartedEvent 事件，因为这个事件比较靠后，如果是原来的 ContentRefresh 事件，
+     * 遇到第三方jar包中@RefreshScope的定时任务，会被忽略。因为在处理这些Bean之前，已经发过一次 ContentRefresh 事件
+     */
+    @EventListener(ApplicationStartedEvent.class)
     public void init() {
         if (initialized.get()) {
             return;
