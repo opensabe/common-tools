@@ -204,11 +204,15 @@ public class RedissonScheduledListener {
         }
 
         void refresh (RedissonScheduledService service) {
-            //先取消原来的task,参数传false，不中断正在进行的task,下次生效。
-            this.future.cancel(false);
-            //重新提交一个定时任务，更新最新的时间间隔,并重定向future对象
-            this.future = this.scheduledThreadPoolExecutor.scheduleAtFixedRate(enhancer.apply(service), service.initialDelay(), service.fixedDelay(), TimeUnit.MILLISECONDS);
-            this.stopOnceShutdown = service.stopOnceShutdown();
+            if (this.isStopped) {
+                log.warn("RedissonScheduledBeanPostProcessor refresh error, scheduledService is stop, can't submit new task {}", service.name());
+            }else {
+                //先取消原来的task,参数传false，不中断正在进行的task,下次生效。
+                this.future.cancel(false);
+                //重新提交一个定时任务，更新最新的时间间隔,并重定向future对象
+                this.future = this.scheduledThreadPoolExecutor.scheduleAtFixedRate(enhancer.apply(service), service.initialDelay(), service.fixedDelay(), TimeUnit.MILLISECONDS);
+                this.stopOnceShutdown = service.stopOnceShutdown();
+            }
         }
 
         void close() {
