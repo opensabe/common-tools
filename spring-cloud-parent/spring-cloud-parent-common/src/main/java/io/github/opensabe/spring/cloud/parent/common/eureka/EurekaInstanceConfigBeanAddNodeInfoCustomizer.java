@@ -22,13 +22,15 @@ import io.github.opensabe.common.utils.AlarmUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 将环境变量中 NODE_NAME 加入 eureka 注册实例信息中的 metadata
- * NODE_NAME 是运维团队在 k8s pod 中加入的环境变脸
+ * 将环境变量中 NODE_NAME、AZ_NAME 加入 eureka 注册实例信息中的 metadata
+ * NODE_NAME、AZ_NAME 是运维团队在 k8s pod 中加入的环境变量
  */
 @Log4j2
 public class EurekaInstanceConfigBeanAddNodeInfoCustomizer implements EurekaInstanceConfigBeanCustomizer {
     public static final String K8S_NODE_INFO = "k8s-node-info";
+    public static final String K8S_AZ_INFO = "az-info";
     private static final String SYSTEM_VARIABLE = "NODE_NAME";
+    private static final String SYSTEM_AZ_VARIABLE = "AZ_NAME";
 
     @Override
     public void customize(EurekaInstanceConfigBean eurekaInstanceConfigBean) {
@@ -38,6 +40,13 @@ public class EurekaInstanceConfigBeanAddNodeInfoCustomizer implements EurekaInst
             eurekaInstanceConfigBean.getMetadataMap().put(K8S_NODE_INFO, nodeName);
         } else {
             AlarmUtil.fatal("EurekaInstanceConfigBeanAddNodeInfoCustomizer-customize: not found k8s-node-info from system variable: {}", SYSTEM_VARIABLE);
+        }
+        String azName = System.getenv(SYSTEM_AZ_VARIABLE);
+        if (StringUtils.isNotBlank(azName)) {
+            log.info("EurekaInstanceConfigBeanAddNodeInfoCustomizer-customize: found az-info: {}", azName);
+            eurekaInstanceConfigBean.getMetadataMap().put(K8S_AZ_INFO, azName);
+        } else {
+            AlarmUtil.fatal("EurekaInstanceConfigBeanAddNodeInfoCustomizer-customize: not found az-info from system variable: {}", SYSTEM_AZ_VARIABLE);
         }
     }
 }
