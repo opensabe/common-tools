@@ -15,33 +15,29 @@
  */
 package io.github.opensabe.common.redisson.aop.scheduled;
 
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.RedissonShutdownException;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.observation.Observation;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.function.Function;
 
 
 @Log4j2
@@ -54,7 +50,6 @@ public class RedissonScheduledListener {
 
     private final Map<String, ExecutorWrapper> map = Maps.newConcurrentMap();
 
-    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     public RedissonScheduledListener(RedissonScheduledBeanPostProcessor processor, UnifiedObservationFactory unifiedObservationFactory, RedissonClient redissonClient, MeterRegistry meterRegistry) {
         this.processor = processor;
@@ -64,11 +59,9 @@ public class RedissonScheduledListener {
     }
 
 
-    @EventListener(ContextRefreshedEvent.class)
+    @EventListener(ApplicationStartedEvent.class)
     public void init() {
-        if (initialized.get()) {
-            return;
-        }
+
         processor.getBeanMap().forEach((beanName, bean) -> {
             Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
             for (Method method : targetClass.getMethods()) {
@@ -79,28 +72,36 @@ public class RedissonScheduledListener {
                         name = targetClass.getSimpleName() + "#" + method.getName();
                     }
                     if (map.containsKey(name)) {
-                        throw new BeanCreationException("RedissonScheduled name duplicated");
-                    } else {
-                        map.put(name, new ExecutorWrapper(redissonClient, unifiedObservationFactory, () -> method.invoke(bean)
-                                , name, annotation.initialDelay(),
-                                annotation.fixedDelay(), annotation.stopOnceShutdown(), meterRegistry));
+                        throw new BeanCreationException("RedissonScheduled name duplicated, name: " + name);
                     }
-
+                    map.put(name, wrapper(name, annotation, method, bean));
                 }
             }
             if (bean instanceof RedissonScheduledService scheduledService) {
-//                Method method;
-//                try {
-//                    method = RedissonScheduledService.class.getDeclaredMethod("run");
-//                } catch (NoSuchMethodException e) {
-//                    throw new RuntimeException(e);
-//                }
-                map.put(scheduledService.name(), new ExecutorWrapper(redissonClient, unifiedObservationFactory,
-                        scheduledService, scheduledService.name(), scheduledService.initialDelay(),
-                        scheduledService.fixedDelay(), scheduledService.stopOnceShutdown(), meterRegistry));
+                if (map.containsKey(scheduledService.name())) {
+                    throw new BeanCreationException("RedissonScheduled name duplicated, name: " + scheduledService.name());
+                }
+                map.put(scheduledService.name(), wrapper(scheduledService));
             }
         });
-        initialized.set(true);
+    }
+
+    private ExecutorWrapper wrapper (RedissonScheduledService service) {
+        return new ExecutorWrapper(redissonClient, unifiedObservationFactory,
+                service, service.name(), service.initialDelay(),
+                service.fixedDelay(), service.stopOnceShutdown(), meterRegistry);
+    }
+    private ExecutorWrapper wrapper (String name, RedissonScheduled annotation, Method method, Object bean) {
+        return new ExecutorWrapper(redissonClient, unifiedObservationFactory, () -> method.invoke(bean), name, annotation.initialDelay(),
+                annotation.fixedDelay(), annotation.stopOnceShutdown(), meterRegistry);
+    }
+
+    public void refresh (RedissonScheduledService service) {
+        ExecutorWrapper wrapper = map.get(service.name());
+        if (Objects.isNull(wrapper)) {
+            log.warn("RedissonScheduledBeanPostProcessor refresh task: {} failed, can't find ExecutorWrapper.", service.name());
+        }
+        wrapper.refresh(service);
     }
 
     public void close() {
@@ -112,8 +113,15 @@ public class RedissonScheduledListener {
     private static class ExecutorWrapper {
         private final Thread leaderLatch;
         private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
-        private final boolean stopOnceShutdown;
         private final DistributionSummary distributionSummary;
+        private final String name;
+        private final Function<ScheduledService, Runnable> enhancer;
+
+        private volatile long initialDelay;
+        private volatile long fixedDelay;
+        private volatile ScheduledFuture<?> future;
+
+        private volatile boolean stopOnceShutdown;
         private volatile boolean isLeader;
         private volatile boolean isStopped = false;
 
@@ -121,8 +129,12 @@ public class RedissonScheduledListener {
                                ScheduledService runnable,
                                String name, long initialDelay,
                                long fixedDelay, boolean stopOnceShutdown, MeterRegistry meterRegistry) {
-            RLock lock = redissonClient.getLock(name + ":leader");
+            this.initialDelay = initialDelay;
+            this.fixedDelay = fixedDelay;
+            this.name = name;
             this.stopOnceShutdown = stopOnceShutdown;
+
+            RLock lock = redissonClient.getLock(name + ":leader");
             ThreadFactory build = new ThreadFactoryBuilder().setNameFormat(name + "_scheduler").build();
             this.distributionSummary = DistributionSummary
                     .builder("redisson.schedule.task." + name)
@@ -132,7 +144,6 @@ public class RedissonScheduledListener {
                     .publishPercentiles(0.1, 0.5, 0.9)
                     .register(meterRegistry);
             //
-            Observation observation = unifiedObservationFactory.createEmptyObservation();
             leaderLatch = new Thread(() -> {
                 lock.lock();
                 while (!isStopped) {
@@ -160,16 +171,15 @@ public class RedissonScheduledListener {
             }, name + "_latch");
             leaderLatch.start();
 
-            scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, build, new ThreadPoolExecutor.AbortPolicy());
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> observation.observe(() -> {
+            this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, build, new ThreadPoolExecutor.AbortPolicy());
+            this.enhancer = service -> () -> unifiedObservationFactory.createEmptyObservation().observe(() -> {
                 try {
                     if (isLeader) {
                         long start = System.currentTimeMillis();
                         if (log.isDebugEnabled()) {
                             log.debug("RedissonScheduledBeanPostProcessor task: {} start", name);
                         }
-//                        method.invoke(bean);
-                        runnable.run();
+                        service.run();
                         long elapsed = System.currentTimeMillis() - start;
                         if (distributionSummary.count() > 10 && elapsed > distributionSummary.max() * 2 && elapsed > 60000) {
                             log.fatal("RedissonScheduledBeanPostProcessor task: {} end in {} ms, recent mean elapsed time is {}ms", name, elapsed, distributionSummary.mean());
@@ -187,11 +197,31 @@ public class RedissonScheduledListener {
                 } catch (Throwable e) {
                     log.fatal("RedissonScheduledBeanPostProcessor task: {}, error: {}", name, e.getMessage(), e);
                 }
-            }), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
+            });
+            this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(enhancer.apply(runnable) , initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
+        }
+
+
+        void refresh (RedissonScheduledService service) {
+            if (Objects.equals(this.name, service.name())) {
+                if (isStopped || this.scheduledThreadPoolExecutor.isShutdown()) {
+                    log.info("RedissonScheduledBeanPostProcessor executor {} is stopped, ignore refresh", name);
+                    return;
+                }
+                if (this.fixedDelay != service.fixedDelay() || this.initialDelay != service.initialDelay()) {
+                    if (this.future != null) {
+                        //不强制中断进行中的任务，等执行完当前的任务，下次生效
+                        this.future.cancel(false);
+                    }
+                    this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(enhancer.apply(service), (initialDelay = service.initialDelay()), (fixedDelay = service.fixedDelay()), TimeUnit.MILLISECONDS);
+                    log.info("RedissonScheduledBeanPostProcessor executor {} refresh with initialDelay: {}ms, fixedDelay: {}ms", name, initialDelay, fixedDelay);
+                }
+                this.stopOnceShutdown = service.stopOnceShutdown();
+            }
         }
 
         void close() {
-            log.info("closing RedissonScheduledBeanPostProcessor executor {} ...", scheduledThreadPoolExecutor.toString());
+            log.info("closing RedissonScheduledBeanPostProcessor executor {} ...", name);
             isStopped = true;
             leaderLatch.interrupt();
             if (stopOnceShutdown) {
@@ -204,9 +234,18 @@ public class RedissonScheduledListener {
                     log.warn("interrupted while waiting in closing RedissonScheduledBeanPostProcessor", e);
                 }
             }
-            log.info("RedissonScheduledBeanPostProcessor executor {} closed...", scheduledThreadPoolExecutor.toString());
+            log.info("RedissonScheduledBeanPostProcessor executor {} closed...", name);
         }
     }
 
 
+    public static void main(String[] args) {
+        Map<String, Integer> map = new HashMap<>();
+        System.out.println(map.computeIfAbsent("1", x -> 1));
+        System.out.println(map.computeIfAbsent("1", x -> {
+            System.out.println("-------");
+            return 2;
+        }));
+        System.out.println(map.get("1"));
+    }
 }
