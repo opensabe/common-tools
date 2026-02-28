@@ -33,11 +33,10 @@ import org.springframework.context.event.EventListener;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 @Log4j2
@@ -115,7 +114,13 @@ public class RedissonScheduledListener {
         private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
         private final DistributionSummary distributionSummary;
         private final String name;
-        private final Function<ScheduledService, Runnable> enhancer;
+        private final Supplier<Runnable> task;
+
+        /**
+         * 如果service是RefreshScope，其他属性刷新，但是fixedDelay属性没刷新，此时线程池保存的还是旧的bean
+         * 因此需要把service做成本地变量，bean刷新时，即使不重新启动定时任务，也要更新一下service
+         */
+        private volatile ScheduledService service;
 
         private volatile long initialDelay;
         private volatile long fixedDelay;
@@ -133,6 +138,7 @@ public class RedissonScheduledListener {
             this.fixedDelay = fixedDelay;
             this.name = name;
             this.stopOnceShutdown = stopOnceShutdown;
+            this.service = runnable;
 
             RLock lock = redissonClient.getLock(name + ":leader");
             ThreadFactory build = new ThreadFactoryBuilder().setNameFormat(name + "_scheduler").build();
@@ -172,14 +178,14 @@ public class RedissonScheduledListener {
             leaderLatch.start();
 
             this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, build, new ThreadPoolExecutor.AbortPolicy());
-            this.enhancer = service -> () -> unifiedObservationFactory.createEmptyObservation().observe(() -> {
+            this.task = () -> () -> unifiedObservationFactory.createEmptyObservation().observe(() -> {
                 try {
                     if (isLeader) {
                         long start = System.currentTimeMillis();
                         if (log.isDebugEnabled()) {
                             log.debug("RedissonScheduledBeanPostProcessor task: {} start", name);
                         }
-                        service.run();
+                        getService().run();
                         long elapsed = System.currentTimeMillis() - start;
                         if (distributionSummary.count() > 10 && elapsed > distributionSummary.max() * 2 && elapsed > 60000) {
                             log.fatal("RedissonScheduledBeanPostProcessor task: {} end in {} ms, recent mean elapsed time is {}ms", name, elapsed, distributionSummary.mean());
@@ -198,7 +204,7 @@ public class RedissonScheduledListener {
                     log.fatal("RedissonScheduledBeanPostProcessor task: {}, error: {}", name, e.getMessage(), e);
                 }
             });
-            this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(enhancer.apply(runnable) , initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
+            this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task.get() , initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
         }
 
 
@@ -208,12 +214,14 @@ public class RedissonScheduledListener {
                     log.info("RedissonScheduledBeanPostProcessor executor {} is stopped, ignore refresh", name);
                     return;
                 }
+                //即使fixedDelay和initialDelay没有修改，也要更新service,否则其他关键配置还是旧的
+                setService(service);
                 if (this.fixedDelay != service.fixedDelay() || this.initialDelay != service.initialDelay()) {
                     if (this.future != null) {
                         //不强制中断进行中的任务，等执行完当前的任务，下次生效
                         this.future.cancel(false);
                     }
-                    this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(enhancer.apply(service), (initialDelay = service.initialDelay()), (fixedDelay = service.fixedDelay()), TimeUnit.MILLISECONDS);
+                    this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task.get(), (initialDelay = service.initialDelay()), (fixedDelay = service.fixedDelay()), TimeUnit.MILLISECONDS);
                     log.info("RedissonScheduledBeanPostProcessor executor {} refresh with initialDelay: {}ms, fixedDelay: {}ms", name, initialDelay, fixedDelay);
                 }
                 this.stopOnceShutdown = service.stopOnceShutdown();
@@ -236,16 +244,13 @@ public class RedissonScheduledListener {
             }
             log.info("RedissonScheduledBeanPostProcessor executor {} closed...", name);
         }
-    }
 
+        public ScheduledService getService() {
+            return service;
+        }
 
-    public static void main(String[] args) {
-        Map<String, Integer> map = new HashMap<>();
-        System.out.println(map.computeIfAbsent("1", x -> 1));
-        System.out.println(map.computeIfAbsent("1", x -> {
-            System.out.println("-------");
-            return 2;
-        }));
-        System.out.println(map.get("1"));
+        public void setService(ScheduledService service) {
+            this.service = service;
+        }
     }
 }
