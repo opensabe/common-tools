@@ -114,7 +114,7 @@ public class RedissonScheduledListener {
         private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
         private final DistributionSummary distributionSummary;
         private final String name;
-        private final Supplier<Runnable> task;
+        private final Runnable task;
 
         /**
          * 如果service是RefreshScope，其他属性刷新，但是fixedDelay属性没刷新，此时线程池保存的还是旧的bean
@@ -178,7 +178,7 @@ public class RedissonScheduledListener {
             leaderLatch.start();
 
             this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, build, new ThreadPoolExecutor.AbortPolicy());
-            this.task = () -> () -> unifiedObservationFactory.createEmptyObservation().observe(() -> {
+            this.task = () -> unifiedObservationFactory.createEmptyObservation().observe(() -> {
                 try {
                     if (isLeader) {
                         long start = System.currentTimeMillis();
@@ -204,7 +204,7 @@ public class RedissonScheduledListener {
                     log.fatal("RedissonScheduledBeanPostProcessor task: {}, error: {}", name, e.getMessage(), e);
                 }
             });
-            this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task.get() , initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
+            this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task , initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
         }
 
 
@@ -221,7 +221,7 @@ public class RedissonScheduledListener {
                         //不强制中断进行中的任务，等执行完当前的任务，下次生效
                         this.future.cancel(false);
                     }
-                    this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task.get(), (initialDelay = service.initialDelay()), (fixedDelay = service.fixedDelay()), TimeUnit.MILLISECONDS);
+                    this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task, (initialDelay = service.initialDelay()), (fixedDelay = service.fixedDelay()), TimeUnit.MILLISECONDS);
                     log.info("RedissonScheduledBeanPostProcessor executor {} refresh with initialDelay: {}ms, fixedDelay: {}ms", name, initialDelay, fixedDelay);
                 }
                 this.stopOnceShutdown = service.stopOnceShutdown();
