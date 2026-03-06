@@ -98,6 +98,7 @@ public class RedissonScheduledListener {
         ExecutorWrapper wrapper = map.get(service.name());
         if (Objects.isNull(wrapper)) {
             log.warn("RedissonScheduledBeanPostProcessor refresh task: {} failed, can't find ExecutorWrapper.", service.name());
+            return;
         }
         wrapper.refresh(service);
     }
