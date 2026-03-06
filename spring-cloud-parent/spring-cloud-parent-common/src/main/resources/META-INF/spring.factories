@@ -1,0 +1,2 @@
+org.springframework.context.ApplicationContextInitializer=\
+io.github.opensabe.spring.cloud.parent.common.secret.AesPropertySourceResolver
