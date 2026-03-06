@@ -127,7 +127,7 @@ public class AlarmUtil {
     }
 
     public static void fatal(String message, Set<String> groups, Boolean unique, Object... params) {
-        final String messageResult = groups.toString() + " " + (unique ? "UNIQUE" : "") + message;
+        final String messageResult = groups.toString() + " " + (unique ? "UNIQUE" : " ") + message;
         log.fatal(messageResult, params);
         Pair<String, String> traceSpan = analysisTraceSpan();
         MessageFactory messageFactory = AlarmLog.log.getMessageFactory();
