@@ -34,12 +34,11 @@ import io.github.opensabe.common.redisson.aop.slock.SLockPointcut;
 import io.github.opensabe.common.redisson.jfr.*;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -144,17 +143,11 @@ public class RedissonAnnotationConfiguration {
 
 
     @Bean
-    @ConditionalOnClass(RefreshScopeRefreshedEvent.class)
-    public ApplicationListener<RefreshScopeRefreshedEvent> redissonScheduledRefreshListener(RedissonScheduledListener redissonScheduledListener, BeanFactory beanFactory) {
+    @ConditionalOnClass(name = "org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent")
+    public ApplicationListener<ApplicationEvent> redissonScheduledRefreshListener(RedissonScheduledListener redissonScheduledListener, BeanFactory beanFactory) {
         return event -> {
-            String name = event.getName();
-            if (RefreshScopeRefreshedEvent.DEFAULT_NAME.equals(name) || StringUtils.isBlank(name)) {
+            if (event.getClass().getName().equals("org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent")) {
                 beanFactory.getBeanProvider(RedissonScheduledService.class).forEach(redissonScheduledListener::refresh);
-            }else {
-               Object bean = beanFactory.getBean(name);
-               if (bean instanceof RedissonScheduledService service) {
-                   redissonScheduledListener.refresh(service);
-               }
             }
         };
     }
