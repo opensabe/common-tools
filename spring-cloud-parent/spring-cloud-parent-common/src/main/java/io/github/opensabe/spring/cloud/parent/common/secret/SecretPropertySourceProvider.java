@@ -17,17 +17,16 @@ package io.github.opensabe.spring.cloud.parent.common.secret;
 
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.*;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 将 secretPropertySource 中的配置脱敏。
@@ -59,17 +58,24 @@ public class SecretPropertySourceProvider extends SecretProvider implements Envi
 
     @Override
     protected Map<String, Set<String>> reload() {
-        PropertySource<?> propertySource = environment.getPropertySources().get(AesPropertySourceResolver.SECRET_PROPERTY_SOURCE_NAME);
-        if (propertySource instanceof EnumerablePropertySource<?> enumerablePropertySource) {
-            Map<String, Set<String>> properties = new HashMap<>(1);
-            Set<String> set = new HashSet<>(enumerablePropertySource.getPropertyNames().length);
-            for (String propertyName : enumerablePropertySource.getPropertyNames()) {
-                set.add(enumerablePropertySource.getProperty(propertyName).toString());
+        MutablePropertySources mutablePropertySources = environment.getPropertySources();
+        Map<String, Set<String>> map = new HashMap<>();
+        for (PropertySource<?> propertySource : mutablePropertySources) {
+            //支持 多个secretPropertySource: bootstrapProperties-secretPropertySource-application-profile
+            if (propertySource.getName().startsWith(AesPropertySourceResolver.SECRET_PROPERTY_SOURCE_NAME)) {
+                //这里必须跟MapPropertySource比较，如果直接跟EnumerablePropertySource比较，可能会添加上未解密的
+                if (propertySource instanceof MapPropertySource mapPropertySource) {
+                    Set<String> set = mapPropertySource.getSource().values()
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .map(Object::toString)
+                            .filter(StringUtils::isNotBlank)
+                            .collect(Collectors.toSet());
+                    map.put(propertySource.getName(), set);
+                }
             }
-            properties.put(name(), set);
-            return properties;
         }
-        return Map.of();
+        return map;
     }
 
     @Override
