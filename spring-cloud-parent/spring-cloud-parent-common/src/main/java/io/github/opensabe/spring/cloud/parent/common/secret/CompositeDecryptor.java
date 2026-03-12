@@ -16,24 +16,69 @@
 package io.github.opensabe.spring.cloud.parent.common.secret;
 
 
+import io.github.opensabe.common.secret.Decryptor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 /**
- * AES解密工具，支持opensabe的AES加密工具 CBC（先把key base64解密，再 iv偏移16位）
- * 以及mysql默认的EBC加密方式，（后续再）
+ *
+ * 聚合所有的解密算法，根据order顺序，依次解密
  * @author maheng
  */
-public class CompositeAESDecryptor {
+public class CompositeDecryptor implements Decryptor {
 
-    public String decrypt(String base64, String cipher) throws Exception {
-        if (cipher.length() == 24) {
-            return AESCBCDecryptor.decrypt(base64, cipher);
+
+    private List<Decryptor> decrypters;
+
+    /**
+     * 使用 spring spi 加载解密算法
+     * @param decrypters spi中加载的解密算法
+     */
+    public CompositeDecryptor(List<Decryptor> decrypters) {
+        if (decrypters == null || decrypters.isEmpty()) {
+            this.decrypters = new ArrayList<>(0);
+        }else {
+            this.decrypters = decrypters;
+            AnnotationAwareOrderComparator.sort(this.decrypters);
         }
-        return AESECBDecryptor.decryptBase64(base64, cipher);
+    }
+
+    @Override
+    public String decrypt(String base64, String cipher) {
+        String result;
+        //优先使用自定义的算法解密
+        for (Decryptor decryptor : decrypters) {
+            result = decryptor.decrypt(base64, cipher);
+            if (StringUtils.isNotBlank(result)) {
+                return result;
+            }
+        }
+
+        //如果自定义的算法解密失败，就是用默认的
+        try {
+            if (cipher.length() == 24) {
+                result = AESCBCDecryptor.decrypt(base64, cipher);
+            }else {
+                result = AESECBDecryptor.decryptBase64(base64, cipher);
+            }
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 
 

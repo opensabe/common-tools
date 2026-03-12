@@ -43,7 +43,7 @@ public class SecretPropertySourceProvider extends SecretProvider implements Envi
 
     @Override
     protected String name() {
-        return "aesPropertiesTablePropertiesProvider";
+        return "secretPropertiesTablePropertiesProvider";
     }
 
     @Override
@@ -62,7 +62,7 @@ public class SecretPropertySourceProvider extends SecretProvider implements Envi
         Map<String, Set<String>> map = new HashMap<>();
         for (PropertySource<?> propertySource : mutablePropertySources) {
             //支持 多个secretPropertySource: bootstrapProperties-secretPropertySource-application-profile
-            if (propertySource.getName().startsWith(AesPropertySourceResolver.SECRET_PROPERTY_SOURCE_NAME)) {
+            if (propertySource.getName().startsWith(SecretPropertySourceResolver.SECRET_PROPERTY_SOURCE_NAME)) {
                 //这里必须跟MapPropertySource比较，如果直接跟EnumerablePropertySource比较，可能会添加上未解密的
                 if (propertySource instanceof MapPropertySource mapPropertySource) {
                     Set<String> set = mapPropertySource.getSource().values()

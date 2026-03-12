@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.secret;
 
+import io.github.opensabe.common.secret.Decryptor;
 import org.springframework.cloud.bootstrap.config.BootstrapPropertySource;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.context.ApplicationContextInitializer;
@@ -25,8 +26,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,16 +40,17 @@ import java.util.Objects;
  * </p>
  * @author maheng
  */
-public class AesPropertySourceResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ContextRefreshedEvent> {
+public class SecretPropertySourceResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ContextRefreshedEvent> {
 
     public static final String SECRET_PROPERTY_SOURCE_NAME = PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME+"-secretPropertySource";
 
 
-    private static final String AES_ECB = "AES/ECB/PKCS5Padding";
-    private static final int AES_KEY_LENGTH = 16;
+    private final Decryptor decryptor;
 
-
-    private CompositeAESDecryptor decryptor = new CompositeAESDecryptor();
+    public SecretPropertySourceResolver() {
+        List<Decryptor> decrypters = SpringFactoriesLoader.loadFactories(Decryptor.class, getClass().getClassLoader());
+        this.decryptor = new CompositeDecryptor(decrypters);
+    }
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
