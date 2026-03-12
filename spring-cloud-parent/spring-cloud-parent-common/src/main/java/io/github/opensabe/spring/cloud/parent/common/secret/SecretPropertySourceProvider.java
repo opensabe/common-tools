@@ -59,7 +59,7 @@ public class SecretPropertySourceProvider extends SecretProvider implements Envi
     @Override
     protected Map<String, Set<String>> reload() {
         MutablePropertySources mutablePropertySources = environment.getPropertySources();
-        Map<String, Set<String>> map = new HashMap<>();
+        Map<String, Set<String>> map = new HashMap<>(2);
         for (PropertySource<?> propertySource : mutablePropertySources) {
             //支持 多个secretPropertySource: bootstrapProperties-secretPropertySource-application-profile
             if (propertySource.getName().startsWith(SecretPropertySourceResolver.SECRET_PROPERTY_SOURCE_NAME)) {

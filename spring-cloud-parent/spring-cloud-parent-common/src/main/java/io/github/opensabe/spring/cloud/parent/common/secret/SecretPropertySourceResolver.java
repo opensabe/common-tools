@@ -16,6 +16,7 @@
 package io.github.opensabe.spring.cloud.parent.common.secret;
 
 import io.github.opensabe.common.secret.Decryptor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.cloud.bootstrap.config.BootstrapPropertySource;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.context.ApplicationContextInitializer;
@@ -34,12 +35,13 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 将 aes properties 解密
+ * 将 secret properties 解密
  * <p>
- *     cipher.length(固定两位数) + cipher + base64(encrypt)
+ *     cipher.length(固定两位数) + cipher + encrypt
  * </p>
  * @author maheng
  */
+@Log4j2
 public class SecretPropertySourceResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ContextRefreshedEvent> {
 
     public static final String SECRET_PROPERTY_SOURCE_NAME = PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME+"-secretPropertySource";
@@ -48,8 +50,13 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
     private final Decryptor decryptor;
 
     public SecretPropertySourceResolver() {
-        List<Decryptor> decrypters = SpringFactoriesLoader.loadFactories(Decryptor.class, getClass().getClassLoader());
-        this.decryptor = new CompositeDecryptor(decrypters);
+        try {
+            List<Decryptor> decrypters = SpringFactoriesLoader.loadFactories(Decryptor.class, getClass().getClassLoader());
+            this.decryptor = new CompositeDecryptor(decrypters);
+        }catch (Exception e){
+            log.error("Could not initialize SecretPropertySourceResolver, load Decryptor error.", e);
+            throw e;
+        }
     }
 
     @Override
@@ -75,7 +82,15 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
                 String[] names = bootstrapPropertySource.getPropertyNames();
                 Map<String, Object> map = new HashMap<>(names.length);
                 for (String name : names) {
-                    map.put(name, decryptValue(bootstrapPropertySource.getProperty(name)));
+                    Object value = bootstrapPropertySource.getProperty(name);
+                    try {
+                        value = decryptValue(value);
+                    }catch (Exception e) {
+                        log.warn("SecretPropertySourceResolver.decrypt Unable to decrypt property,key: {}, message: {}", name, e.getMessage());
+                    }
+                    if (Objects.nonNull(value)) {
+                        map.put(name, value);
+                    }
                 }
                 mutablePropertySources.replace(propertySource.getName(), new MapPropertySource(propertySource.getName(), map));
             }
@@ -89,6 +104,11 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
             return null;
         }
         String string = value.toString();
+
+        //如果原始字符串为空，
+        if (string.length() <= 2) {
+            return string;
+        }
         int keyLength = Integer.parseInt(string.substring(0, 2));
         int index = keyLength + 2;
         String key = string.substring(2, index);
