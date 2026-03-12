@@ -53,11 +53,11 @@ public class CompositeDecryptor implements Decryptor {
     }
 
     @Override
-    public String decrypt(String base64, String cipher) {
+    public String decrypt(String encrypted, String cipher) {
         String result;
         //优先使用自定义的算法解密
         for (Decryptor decryptor : decrypters) {
-            result = decryptor.decrypt(base64, cipher);
+            result = decryptor.decrypt(encrypted, cipher);
             if (StringUtils.isNotBlank(result)) {
                 return result;
             }
@@ -66,9 +66,9 @@ public class CompositeDecryptor implements Decryptor {
         //如果自定义的算法解密失败，就是用默认的
         try {
             if (cipher.length() == 24) {
-                result = AESCBCDecryptor.decrypt(base64, cipher);
+                result = AESCBCDecryptor.decrypt(encrypted, cipher);
             }else {
-                result = AESECBDecryptor.decryptBase64(base64, cipher);
+                result = AESECBDecryptor.decryptBase64(encrypted, cipher);
             }
         }catch (Exception e) {
             throw new RuntimeException(e);
