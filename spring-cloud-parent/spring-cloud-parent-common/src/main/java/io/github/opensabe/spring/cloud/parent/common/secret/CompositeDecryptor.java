@@ -24,6 +24,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -83,23 +84,19 @@ public class CompositeDecryptor implements Decryptor {
 
 
     public static class AESCBCDecryptor {
-        private static final String AES_ECB = "AES/CBC/PKCS5Padding";
+        private static final String AES_CBC = "AES/CBC/PKCS5Padding";
 
         public static String decrypt(String base64, String keyString) throws Exception {
             Base64.Decoder decoder = Base64.getDecoder();
-
-            byte[] keyBytes = decoder.decode(keyString);
-            byte[] bytes = decoder.decode(base64);
-
-            byte[] ivBytes = new byte[16];
-            System.arraycopy(bytes, 0, ivBytes, 0, 16);
-            IvParameterSpec iv = new IvParameterSpec(ivBytes);
-
-            SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-            Cipher cipher = Cipher.getInstance(AES_ECB);
-            cipher.init(Cipher.DECRYPT_MODE, key, iv);
-            byte[] plain = cipher.doFinal(bytes, 16, bytes.length - 16);
-            return new String(plain, StandardCharsets.UTF_8);
+            byte[] raw = decoder.decode(keyString);
+            SecretKeySpec sKeySpec = new SecretKeySpec(raw, "AES");
+            Cipher cipher = Cipher.getInstance(AES_CBC);
+            byte[] encrypted = decoder.decode(base64);
+            byte[] ivByte = new byte[16];
+            System.arraycopy(encrypted, 0, ivByte, 0, 16);
+            cipher.init(2, sKeySpec, new IvParameterSpec(ivByte));
+            byte[] decrypted = cipher.doFinal(encrypted, 16, encrypted.length - 16);
+            return new String(decrypted, Charset.defaultCharset());
         }
 
     }

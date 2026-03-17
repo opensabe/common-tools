@@ -19,7 +19,9 @@ import io.github.opensabe.common.secret.Decryptor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cloud.bootstrap.config.BootstrapPropertySource;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
+import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -42,12 +44,15 @@ import java.util.Objects;
  * @author maheng
  */
 @Log4j2
-public class SecretPropertySourceResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ContextRefreshedEvent> {
+public class SecretPropertySourceResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ApplicationEvent> {
 
     public static final String SECRET_PROPERTY_SOURCE_NAME = PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME+"-secretPropertySource";
 
 
-    private final Decryptor decryptor;
+
+    private CompositeDecryptor decryptor;
+
+
 
     public SecretPropertySourceResolver() {
         try {
@@ -65,9 +70,15 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext() instanceof ConfigurableApplicationContext applicationContext) {
-            decrypt(applicationContext);
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof ContextRefreshedEvent contextRefreshedEvent) {
+            if (contextRefreshedEvent.getApplicationContext() instanceof ConfigurableApplicationContext applicationContext) {
+                decrypt(applicationContext);
+            }
+        }else if (event instanceof EnvironmentChangeEvent environmentChangeEvent) {
+            if (environmentChangeEvent.getSource() instanceof ConfigurableApplicationContext context) {
+                decrypt(context);
+            }
         }
     }
 
@@ -123,5 +134,4 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
             throw new RuntimeException(e);
         }
     }
-
 }

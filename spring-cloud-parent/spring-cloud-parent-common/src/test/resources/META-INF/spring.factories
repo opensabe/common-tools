@@ -1,0 +1,5 @@
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+com.github.opensabe.spring.cloud.parent.common.test.MockConfigServierConfig
+
+io.github.opensabe.common.secret.Decryptor=\
+com.github.opensabe.spring.cloud.parent.common.test.CustomerDecrptor
