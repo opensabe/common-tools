@@ -17,6 +17,8 @@ package io.github.opensabe.spring.cloud.parent.common.secret;
 
 import io.github.opensabe.common.secret.Decryptor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bootstrap.config.BootstrapPropertySource;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
@@ -44,7 +46,7 @@ import java.util.Objects;
  * @author maheng
  */
 @Log4j2
-public class SecretPropertySourceResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ApplicationEvent> {
+public class SecretPropertySourceResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ApplicationEvent>, InitializingBean {
 
     public static final String SECRET_PROPERTY_SOURCE_NAME = PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME+"-secretPropertySource";
 
@@ -52,17 +54,19 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
 
     private CompositeDecryptor decryptor;
 
+    @Autowired(required = false)
+    private List<Decryptor> decrypters;
 
-
-    public SecretPropertySourceResolver() {
-        try {
-            List<Decryptor> decrypters = SpringFactoriesLoader.loadFactories(Decryptor.class, getClass().getClassLoader());
-            this.decryptor = new CompositeDecryptor(decrypters);
-        }catch (Exception e){
-            log.error("Could not initialize SecretPropertySourceResolver, load Decryptor error.", e);
-            throw e;
-        }
-    }
+//
+//    public SecretPropertySourceResolver() {
+//        try {
+//            List<Decryptor> decrypters = SpringFactoriesLoader.loadFactories(Decryptor.class, getClass().getClassLoader());
+//            this.decryptor = new CompositeDecryptor(decrypters);
+//        }catch (Exception e){
+//            log.error("Could not initialize SecretPropertySourceResolver, load Decryptor error.", e);
+//            throw e;
+//        }
+//    }
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -133,5 +137,10 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.decryptor = new CompositeDecryptor(decrypters);
     }
 }

@@ -1,4 +1,2 @@
-org.springframework.context.ApplicationContextInitializer=\
-io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceResolver
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceResolver
