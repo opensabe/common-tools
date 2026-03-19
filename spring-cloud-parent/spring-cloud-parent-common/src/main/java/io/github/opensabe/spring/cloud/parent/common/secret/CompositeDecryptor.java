@@ -24,7 +24,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -96,7 +95,7 @@ public class CompositeDecryptor implements Decryptor {
             System.arraycopy(encrypted, 0, ivByte, 0, 16);
             cipher.init(Cipher.DECRYPT_MODE, sKeySpec, new IvParameterSpec(ivByte));
             byte[] decrypted = cipher.doFinal(encrypted, 16, encrypted.length - 16);
-            return new String(decrypted, Charset.defaultCharset());
+            return new String(decrypted, StandardCharsets.UTF_8);
         }
 
     }
