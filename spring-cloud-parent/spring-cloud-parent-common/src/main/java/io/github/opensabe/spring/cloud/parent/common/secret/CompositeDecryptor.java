@@ -94,7 +94,7 @@ public class CompositeDecryptor implements Decryptor {
             byte[] encrypted = decoder.decode(base64);
             byte[] ivByte = new byte[16];
             System.arraycopy(encrypted, 0, ivByte, 0, 16);
-            cipher.init(2, sKeySpec, new IvParameterSpec(ivByte));
+            cipher.init(Cipher.DECRYPT_MODE, sKeySpec, new IvParameterSpec(ivByte));
             byte[] decrypted = cipher.doFinal(encrypted, 16, encrypted.length - 16);
             return new String(decrypted, Charset.defaultCharset());
         }
