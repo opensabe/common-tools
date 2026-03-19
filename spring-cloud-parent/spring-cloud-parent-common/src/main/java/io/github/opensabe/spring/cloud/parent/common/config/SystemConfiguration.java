@@ -15,6 +15,8 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,5 +29,11 @@ public class SystemConfiguration {
     @Bean
     public MonitorMemoryRSS getMonitorMemoryRSS() {
         return new MonitorMemoryRSS();
+    }
+
+
+    @Bean
+    public SecretPropertySourceProvider secretPropertySourceProvider (GlobalSecretManager globalSecretManager) {
+        return new SecretPropertySourceProvider(globalSecretManager);
     }
 }
