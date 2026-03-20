@@ -37,7 +37,7 @@ import java.util.List;
 public class CompositeDecryptor implements Decryptor {
 
 
-    private List<Decryptor> decrypters;
+    private final List<Decryptor> decrypters;
 
     /**
      * 使用 spring spi 加载解密算法
@@ -68,7 +68,7 @@ public class CompositeDecryptor implements Decryptor {
             if (cipher.length() == 24) {
                 result = AESCBCDecryptor.decrypt(encrypted, cipher);
             }else {
-                result = AESECBDecryptor.decryptBase64(encrypted, cipher);
+                result = AESECBDecryptor.decrypt(encrypted, cipher);
             }
         }catch (Exception e) {
             throw new RuntimeException(e);
@@ -127,25 +127,8 @@ public class CompositeDecryptor implements Decryptor {
         /**
          * 密文为 Base64 字符串时（例如从别处导出为 Base64）
          */
-        public static String decryptBase64(String base64Cipher, String keyString) throws Exception {
+        public static String decrypt(String base64Cipher, String keyString) throws Exception {
             return decrypt(Base64.getDecoder().decode(base64Cipher), keyString);
-        }
-
-        /**
-         * 密文为 HEX 字符串时（例如 SELECT HEX(AES_ENCRYPT('test','aa'))）
-         */
-        public static String decryptHex(String hexCipher, String keyString) throws Exception {
-            return decrypt(hexToBytes(hexCipher), keyString);
-        }
-
-        private static byte[] hexToBytes(String hex) {
-            int len = hex.length();
-            byte[] data = new byte[len / 2];
-            for (int i = 0; i < len; i += 2) {
-                data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
-                        + Character.digit(hex.charAt(i + 1), 16));
-            }
-            return data;
         }
 
     }

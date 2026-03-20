@@ -15,11 +15,15 @@
  */
 package com.github.opensabe.spring.cloud.parent.common.test;
 
+import io.github.opensabe.common.utils.AesGcm128Util;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,5 +38,18 @@ public class MockConfigServerPropertySourceLocator implements PropertySourceLoca
 
     static void put(String key, String value) {
         properties.put(key, value);
+    }
+    static void put(String key, String aesKey, String aesValue) {
+        byte[] keyBytes = aesKey.getBytes(StandardCharsets.UTF_8);
+        byte[] valueBytes = aesValue.getBytes(StandardCharsets.UTF_8);
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + keyBytes.length + valueBytes.length)
+                .putInt(keyBytes.length)
+                .put(keyBytes)
+                .put(valueBytes);
+        try {
+            properties.put(key, AesGcm128Util.encryptToBase64(buffer.array()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

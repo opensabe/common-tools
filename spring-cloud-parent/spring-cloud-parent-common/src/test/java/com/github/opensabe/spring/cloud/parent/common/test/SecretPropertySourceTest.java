@@ -16,6 +16,8 @@
 package com.github.opensabe.spring.cloud.parent.common.test;
 
 
+import io.github.opensabe.common.secret.FilterSecretStringResult;
+import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceResolver;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,6 +46,7 @@ import java.util.Set;
 @EnableConfigurationProperties(SecretPropertySourceTest.FooProperties.class)
 public class SecretPropertySourceTest {
 
+    @SpringBootApplication
     public static class App {
 
     }
@@ -66,11 +70,11 @@ public class SecretPropertySourceTest {
     @BeforeAll
     static void setup () {
         //mysql select to_base64(aes_encrypt('foobar', 'foo'))
-        MockConfigServerPropertySourceLocator.put("foo.bar", "03fooDzll4Tp79x73q9e+rnQXhA==");
+        MockConfigServerPropertySourceLocator.put("foo.bar", "foo","Dzll4Tp79x73q9e+rnQXhA==");
         // AESUtil.encrypt("foobar","TJoYhg9kjpzWIG/HXMugMQ==")
-        MockConfigServerPropertySourceLocator.put("foo.par", "24TJoYhg9kjpzWIG/HXMugMQ==tNYjSk4o1A3aeKAV2NZliO36AsV84VNcak5jAW6l+bs=");
+        MockConfigServerPropertySourceLocator.put("foo.par", "TJoYhg9kjpzWIG/HXMugMQ==","tNYjSk4o1A3aeKAV2NZliO36AsV84VNcak5jAW6l+bs=");
 
-        MockConfigServerPropertySourceLocator.put("ping.pong", "03fooDzll4Tp79x73q9e+rnQXhA==");
+        MockConfigServerPropertySourceLocator.put("ping.pong", "foo", "Dzll4Tp79x73q9e+rnQXhA==");
     }
 
     @Autowired
@@ -83,7 +87,7 @@ public class SecretPropertySourceTest {
     private ConfigurableApplicationContext  applicationContext;
 
     @Autowired
-    private SecretPropertySourceResolver secretPropertySourceResolver;
+    private GlobalSecretManager globalSecretManager;
 
     @Test
     @DisplayName("测试Environment中的属性是解密后的")
@@ -103,7 +107,7 @@ public class SecretPropertySourceTest {
     @DisplayName("测试/actuator/env/refresh以后能更新")
     void testRefresh () {
         Assertions.assertEquals("foobar", environment.getProperty("ping.pong"));
-        MockConfigServerPropertySourceLocator.put("ping.pong", "24TJoYhg9kjpzWIG/HXMugMQ==tNYjSk4o1A3aeKAV2NZliO36AsV84VNcak5jAW6l+bs=");
+        MockConfigServerPropertySourceLocator.put("ping.pong", "TJoYhg9kjpzWIG/HXMugMQ==", "tNYjSk4o1A3aeKAV2NZliO36AsV84VNcak5jAW6l+bs=");
         applicationContext.getEnvironment().getPropertySources().replace(SecretPropertySourceResolver.SECRET_PROPERTY_SOURCE_NAME, new BootstrapPropertySource<>((EnumerablePropertySource) propertySourceLocator.locate(null)));
         applicationContext.publishEvent(new EnvironmentChangeEvent(applicationContext, Set.of("ping.pong")));
         Assertions.assertEquals("foopar", environment.getProperty("ping.pong"));
@@ -115,5 +119,16 @@ public class SecretPropertySourceTest {
     void testCustomDecryptor () {
         org.assertj.core.api.Assertions.assertThat(CustomerDecrptor.getRun())
                 .isGreaterThan(0);
+    }
+
+    @Test
+    @DisplayName("测试敏感信息可以脱敏")
+    void testSensitivity() {
+       String value  = "this is a log " + fooProperties.getBar();
+        FilterSecretStringResult result = globalSecretManager.filterSecretStringAndAlarm(value);
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isFoundSensitiveString());
+        String content = result.getFilteredContent().replace("this is a log ", "");
+        Assertions.assertEquals(GlobalSecretManager.MASKER, content);
     }
 }

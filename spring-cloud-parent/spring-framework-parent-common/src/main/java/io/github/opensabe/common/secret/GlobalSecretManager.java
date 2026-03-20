@@ -33,6 +33,7 @@ public class GlobalSecretManager {
         cache.put(secretName, secret);
     }
 
+    public static final String MASKER = "******";
     /**
      * Filter sensitive string in content, and alarm if found
      *
@@ -49,7 +50,7 @@ public class GlobalSecretManager {
                 for (String sensitiveString : stringSetEntry.getValue()) {
                     if (StringUtils.contains(filteredContent, sensitiveString)) {
                         foundSensitiveString = true;
-                        filteredContent = StringUtils.replace(filteredContent, sensitiveString, "******");
+                        filteredContent = StringUtils.replace(filteredContent, sensitiveString, MASKER);
                         foundKeys.add("SecretProvider: " + stringMapEntry.getKey() + ", key: " + stringSetEntry.getKey());
                     }
                 }

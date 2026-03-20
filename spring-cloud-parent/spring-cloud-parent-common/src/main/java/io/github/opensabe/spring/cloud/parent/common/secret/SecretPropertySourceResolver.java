@@ -16,6 +16,7 @@
 package io.github.opensabe.spring.cloud.parent.common.secret;
 
 import io.github.opensabe.common.secret.Decryptor;
+import io.github.opensabe.common.utils.AesGcm128Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,17 +32,19 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * 将 secret properties 解密
+ * 将 secret properties 解密。
+ * 整个config value格式：
  * <p>
- *     cipher.length(固定两位数) + cipher + encrypt
+ *    base64 (AES_GCM_128 (cipher.length(4字节) + cipher(字节)  + payload(字节)))
  * </p>
  * @author maheng
  */
@@ -114,21 +117,25 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
 
     }
 
-    private String decryptValue (Object value) {
+    private String decryptValue (Object value) throws Exception {
         if (Objects.isNull(value)) {
             return null;
         }
         String string = value.toString();
 
-        //如果原始字符串为空，
-        if (string.length() <= 2) {
-            return string;
-        }
-        int keyLength = Integer.parseInt(string.substring(0, 2));
-        int index = keyLength + 2;
-        String key = string.substring(2, index);
-        String decrypted = string.substring(index);
-        return decrypt(decrypted, key);
+        //[4字节 密钥长度] + [AES密钥] + [MySQL中的AES密文]
+        byte[] bytes = AesGcm128Util.decryptBase64(string);
+
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+
+        int keyLength = buffer.getInt();
+        byte[] key = new byte[keyLength];
+        buffer.get(key);
+
+        byte[] payload = new byte[buffer.remaining()];
+        buffer.get(payload);
+
+        return decrypt(new String(payload, StandardCharsets.UTF_8), new String(key, StandardCharsets.UTF_8));
     }
 
     private String decrypt(String value, String key) {
