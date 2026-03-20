@@ -15,10 +15,6 @@
  */
 package io.github.opensabe.common.utils;
 
-/**
- * AES-GCM-128 工具类（128位密钥，硬件加速，内网专用）
- * @author maheng
- */
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -31,7 +27,9 @@ import java.util.HexFormat;
 
 /**
  * AES-GCM-128 工具类（128位密钥，硬件加速，内网专用）
+ * @author maheng
  */
+
 public class AesGcm128Util {
 
     private static volatile byte[] PSK = HexFormat.of().parseHex("7f2d189a3e5c0b678a1d0f2e3c4b5a69");
@@ -49,7 +47,6 @@ public class AesGcm128Util {
 
     /**
      * 设置共享PSK
-     * @param psk
      */
     public static synchronized void setPSK(byte[] psk) {
         PSK = psk;
@@ -112,6 +109,10 @@ public class AesGcm128Util {
     public static byte[] decryptBase64(byte[] psk, String base64) throws Exception {
         // 1. 十六进制转二进制
         byte[] data = Base64.getDecoder().decode(base64);
+
+        if (data.length < NONCE_LENGTH + TAG_LENGTH) {
+            throw new IllegalArgumentException("Invalid AES-GCM payload");
+        }
 
         // 2. 固定拆分：Nonce(12) + Tag(16) + 密文体
         byte[] nonce = new byte[NONCE_LENGTH];

@@ -96,21 +96,23 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
         for (PropertySource<?> propertySource : mutablePropertySources) {
             //这里必须跟 BootstrapPropertySource 比较，解密完替换为 MapPropertiesSource
             //如果直接跟 MapPropertiesSource 比较，会重复解密，导致报错
-            if (propertySource instanceof BootstrapPropertySource<?> bootstrapPropertySource) {
-                String[] names = bootstrapPropertySource.getPropertyNames();
-                Map<String, Object> map = new HashMap<>(names.length);
-                for (String name : names) {
-                    Object value = bootstrapPropertySource.getProperty(name);
-                    try {
-                        value = decryptValue(value);
-                    }catch (Exception e) {
-                        log.warn("SecretPropertySourceResolver.decrypt Unable to decrypt property,key: {}, message: {}", name, e.getMessage());
+            if (propertySource.getName().startsWith(SECRET_PROPERTY_SOURCE_NAME)) {
+                if (propertySource instanceof BootstrapPropertySource<?> bootstrapPropertySource) {
+                    String[] names = bootstrapPropertySource.getPropertyNames();
+                    Map<String, Object> map = new HashMap<>(names.length);
+                    for (String name : names) {
+                        Object value = bootstrapPropertySource.getProperty(name);
+                        try {
+                            value = decryptValue(value);
+                        }catch (Exception e) {
+                            log.warn("SecretPropertySourceResolver.decrypt Unable to decrypt property,key: {}, message: {}", name, e.getMessage());
+                        }
+                        if (Objects.nonNull(value)) {
+                            map.put(name, value);
+                        }
                     }
-                    if (Objects.nonNull(value)) {
-                        map.put(name, value);
-                    }
+                    mutablePropertySources.replace(propertySource.getName(), new MapPropertySource(propertySource.getName(), map));
                 }
-                mutablePropertySources.replace(propertySource.getName(), new MapPropertySource(propertySource.getName(), map));
             }
         }
 
