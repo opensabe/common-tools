@@ -128,9 +128,18 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
         //[4字节 密钥长度] + [AES密钥] + [MySQL中的AES密文]
         byte[] bytes = AesGcm128Util.decryptBase64(string);
 
+        if (bytes.length < Integer.BYTES) {
+            throw new IllegalStateException("Invalid secret payload");
+        }
+
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
         int keyLength = buffer.getInt();
+
+        if (keyLength <0 || keyLength > buffer.remaining()) {
+            throw new IllegalStateException("Invalid AES key length: " + keyLength);
+        }
+
         byte[] key = new byte[keyLength];
         buffer.get(key);
 
