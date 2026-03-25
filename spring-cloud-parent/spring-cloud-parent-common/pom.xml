@@ -19,6 +19,11 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-context</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>io.github.opensabe-tech</groupId>
             <artifactId>spring-framework-parent-common</artifactId>
         </dependency>
@@ -34,6 +39,7 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+
 
         <!--不用Ribbon，用Spring Cloud LoadBalancer-->
         <dependency>

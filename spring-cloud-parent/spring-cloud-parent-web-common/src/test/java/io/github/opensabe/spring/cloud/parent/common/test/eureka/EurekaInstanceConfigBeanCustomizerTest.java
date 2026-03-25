@@ -41,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         properties = {
                 "eureka.client.register-with-eureka=false",
                 "eureka.client.fetch-registry=false",
+                "eureka.client.enabled=true",
         },
         classes = EurekaInstanceConfigBeanCustomizerTest.TestConfiguration.class
 )

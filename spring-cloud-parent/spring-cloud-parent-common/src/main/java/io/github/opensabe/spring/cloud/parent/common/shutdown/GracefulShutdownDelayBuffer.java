@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.shutdown;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -63,21 +64,22 @@ public class GracefulShutdownDelayBuffer extends OnlyOnceApplicationListener<Con
      */
     private static final int SLEEP_SECONDS_FOR_CACHE = 5;
 
-    @Autowired
-    private ObjectProvider<EurekaClientConfigBean> eurekaClientConfigBean;
-    @Autowired
-    private ObjectProvider<EurekaInstanceConfigBean> eurekaInstanceConfigBean;
+    @Autowired(required = false)
+    private EurekaClientConfigBean eurekaClientConfigBean;
+    @Autowired(required = false)
+    private EurekaInstanceConfigBean eurekaInstanceConfigBean;
     @Autowired
     private ServerProperties serverProperties;
 
     @Override
     protected void onlyOnce(ContextClosedEvent event) {
+        if (Objects.isNull(eurekaClientConfigBean) || Objects.isNull(eurekaInstanceConfigBean)) {
+            return;
+        }
         if (serverProperties.getShutdown() != null && serverProperties.getShutdown() == Shutdown.GRACEFUL) {
             //以下均为推测时间，根据本实例的配置，推测其他微服务也是这么配置的
-            int registryFetchIntervalSeconds = eurekaClientConfigBean.getIfAvailable()
-                    .getRegistryFetchIntervalSeconds();
-            int leaseRenewalIntervalInSeconds = eurekaInstanceConfigBean.getIfAvailable()
-                    .getLeaseRenewalIntervalInSeconds();
+            int registryFetchIntervalSeconds = eurekaClientConfigBean.getRegistryFetchIntervalSeconds();
+            int leaseRenewalIntervalInSeconds = eurekaInstanceConfigBean.getLeaseRenewalIntervalInSeconds();
             int sleepSeconds = registryFetchIntervalSeconds + leaseRenewalIntervalInSeconds + SLEEP_SECONDS_FOR_CACHE;
             log.info("GracefulShutdownDelayBuffer-onApplicationEvent start, sleepSeconds: {}", sleepSeconds);
             try {

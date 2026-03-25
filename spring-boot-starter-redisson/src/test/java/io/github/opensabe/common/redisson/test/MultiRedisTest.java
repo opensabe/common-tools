@@ -39,6 +39,7 @@ import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFac
 @Testcontainers
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = {
+        "eureka.client.enabled=false",
         //spring-boot 2.6.x 开始，禁止循环依赖（A -> B, B -> A），字段注入一般会导致这种循环依赖，但是我们字段注入太多了，挨个检查太多了
         "spring.main.allow-circular-references=true",
         "spring.data.redis.enable-multi=true",

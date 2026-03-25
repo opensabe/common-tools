@@ -13,27 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.spring.cloud.parent.common.config;
+package com.github.opensabe.spring.cloud.parent.common.test;
 
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceProvider;
+import io.github.opensabe.common.secret.Decryptor;
+import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import io.github.opensabe.spring.cloud.parent.common.system.MonitorMemoryRSS;
-import lombok.extern.log4j.Log4j2;
-
-@Log4j2
 @Configuration(proxyBeanMethods = false)
-public class SystemConfiguration {
-    @Bean
-    public MonitorMemoryRSS getMonitorMemoryRSS() {
-        return new MonitorMemoryRSS();
-    }
-
+public class MockConfigServierConfig {
 
     @Bean
-    public SecretPropertySourceProvider secretPropertySourceProvider (GlobalSecretManager globalSecretManager) {
-        return new SecretPropertySourceProvider(globalSecretManager);
+    public PropertySourceLocator configServerPropertySourceLocator() {
+        return new MockConfigServerPropertySourceLocator();
     }
 }
