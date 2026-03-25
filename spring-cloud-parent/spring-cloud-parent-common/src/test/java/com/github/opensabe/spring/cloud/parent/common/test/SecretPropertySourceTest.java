@@ -18,6 +18,7 @@ package com.github.opensabe.spring.cloud.parent.common.test;
 
 import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.common.utils.AesGcm128Util;
 import io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceResolver;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,6 +37,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 
+import java.util.HexFormat;
 import java.util.Set;
 
 
@@ -50,7 +52,6 @@ public class SecretPropertySourceTest {
     public static class App {
 
     }
-
 
 
     @Autowired
@@ -69,6 +70,9 @@ public class SecretPropertySourceTest {
 
     @BeforeAll
     static void setup () {
+
+        AesGcm128Util.setPSK(HexFormat.of().parseHex("7f2d189a3e5c0b678a1d0f2e3c4b5a69"));
+
         //mysql select to_base64(aes_encrypt('foobar', 'foo'))
         MockConfigServerPropertySourceLocator.put("foo.bar", "foo","Dzll4Tp79x73q9e+rnQXhA==");
         // AESUtil.encrypt("foobar","TJoYhg9kjpzWIG/HXMugMQ==")

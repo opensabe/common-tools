@@ -23,7 +23,6 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.HexFormat;
 
 /**
  * AES-GCM-128 工具类（128位密钥，硬件加速，内网专用）
@@ -32,7 +31,8 @@ import java.util.HexFormat;
 
 public class AesGcm128Util {
 
-    private static volatile byte[] PSK = HexFormat.of().parseHex("7f2d189a3e5c0b678a1d0f2e3c4b5a69");
+//    private static volatile byte[] PSK = HexFormat.of().parseHex("7f2d189a3e5c0b678a1d0f2e3c4b5a69");
+    private static volatile byte[] PSK = null;
 
     // 算法标识
     private static final String ALGORITHM = "AES";
@@ -49,7 +49,10 @@ public class AesGcm128Util {
      * 设置共享PSK
      */
     public static synchronized void setPSK(byte[] psk) {
-        PSK = psk;
+        if (psk == null || psk.length != 16) {
+            throw new IllegalArgumentException("Invalid PSK length: " + psk.length);
+        }
+        PSK = psk.clone();
     }
 
     /**
@@ -102,12 +105,12 @@ public class AesGcm128Util {
 
 
     /**
-     * 解析服务端返回的十六进制字符串
+     * 解析服务端返回的base64字符串
      * @param base64 加密后的base64
      * @return [业务密钥, MySQL密文]
      */
     public static byte[] decryptBase64(byte[] psk, String base64) throws Exception {
-        // 1. 十六进制转二进制
+        // 1.  base64解码
         byte[] data = Base64.getDecoder().decode(base64);
 
         if (data.length < NONCE_LENGTH + TAG_LENGTH) {
@@ -132,13 +135,16 @@ public class AesGcm128Util {
     }
 
     /**
-     * AES-GCM-128 加密，将字节转为16进制字符串
+     * AES-GCM-128 加密，将字节转为base64字符串
      * @param psk 预共享密钥（16字节）
      * @param nonce 随机数（12字节）
      * @param plainData 明文数据
      * @return 密文 = [12字节 nonce] + [16字节 tag] + [加密后的payload]
      */
     public static String encryptToBase64(byte[] psk, byte[] nonce, byte[] plainData) throws Exception {
+        if (nonce.length != NONCE_LENGTH) {
+            throw new IllegalArgumentException("Invalid nonce");
+        }
         //[加密后的 payload] + [16字节 tag]
         byte[] encryptedWithTag = encrypt(psk, nonce, plainData);
 
@@ -151,7 +157,7 @@ public class AesGcm128Util {
         System.arraycopy(encryptedWithTag, payloadLength, result, nonce.length, TAG_LENGTH);
         System.arraycopy(encryptedWithTag, 0, result, TAG_LENGTH + NONCE_LENGTH, payloadLength);
 
-        // 6. 转十六进制返回（小写，可改为大写）
+        // 6. 转base64
         return Base64.getEncoder().encodeToString(result);
     }
     public static String encryptToBase64(byte[] nonce, byte[] plainData) throws Exception {

@@ -17,6 +17,7 @@ package io.github.opensabe.spring.cloud.parent.common.secret;
 
 
 import io.github.opensabe.common.secret.Decryptor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -34,6 +35,7 @@ import java.util.List;
  * 聚合所有的解密算法，根据order顺序，依次解密
  * @author maheng
  */
+@Log4j2
 public class CompositeDecryptor implements Decryptor {
 
 
@@ -54,10 +56,14 @@ public class CompositeDecryptor implements Decryptor {
 
     @Override
     public String decrypt(String encrypted, String cipher) {
-        String result;
+        String result = null;
         //优先使用自定义的算法解密
         for (Decryptor decryptor : decrypters) {
-            result = decryptor.decrypt(encrypted, cipher);
+            try {
+                result = decryptor.decrypt(encrypted, cipher);
+            }catch (Exception e) {
+                log.info("Decryptor: {} decrypt error: {}", decryptor.getClass().getName(), e.getMessage());
+            }
             if (StringUtils.isNotBlank(result)) {
                 return result;
             }

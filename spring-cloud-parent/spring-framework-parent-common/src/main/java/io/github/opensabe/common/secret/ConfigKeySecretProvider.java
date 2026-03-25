@@ -16,9 +16,11 @@
 package io.github.opensabe.common.secret;
 
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,6 +44,13 @@ public abstract class ConfigKeySecretProvider extends SecretProvider implements 
 
     @Override
     protected Map<String, Set<String>> reload() {
-        return keys().stream().collect(Collectors.toMap(k -> k, k -> Set.of(environment.getProperty(k))));
+        Map<String, Set<String>> map = new HashMap<>(keys().size());
+        for (String key : keys()) {
+            String value = environment.getProperty(key);
+            if (StringUtils.isNotBlank(value)) {
+                map.put(key, Set.of(value));
+            }
+        }
+        return map;
     }
 }
