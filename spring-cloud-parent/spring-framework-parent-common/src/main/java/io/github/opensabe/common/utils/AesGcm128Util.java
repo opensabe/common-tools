@@ -112,6 +112,7 @@ public class AesGcm128Util {
      * @return [业务密钥, MySQL密文]
      */
     public static byte[] decryptBase64(byte[] psk, String base64) throws Exception {
+        Assert.notNull(psk, "psk cannot be null");
         // 1.  base64解码
         byte[] data = Base64.getDecoder().decode(base64);
 
