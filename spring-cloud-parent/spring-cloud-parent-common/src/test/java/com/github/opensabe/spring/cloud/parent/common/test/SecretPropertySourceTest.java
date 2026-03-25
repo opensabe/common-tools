@@ -93,6 +93,9 @@ public class SecretPropertySourceTest {
     @Autowired
     private GlobalSecretManager globalSecretManager;
 
+    @Autowired
+    private CustomerDecrptor customerDecrptor;
+
     @Test
     @DisplayName("测试Environment中的属性是解密后的")
     void testEnvironment () {
@@ -121,7 +124,7 @@ public class SecretPropertySourceTest {
     @Test
     @DisplayName("测试spring.factories中定义的Decryptor能正常执行")
     void testCustomDecryptor () {
-        org.assertj.core.api.Assertions.assertThat(CustomerDecrptor.getRun())
+        org.assertj.core.api.Assertions.assertThat(customerDecrptor.getRun())
                 .isGreaterThan(0);
     }
 

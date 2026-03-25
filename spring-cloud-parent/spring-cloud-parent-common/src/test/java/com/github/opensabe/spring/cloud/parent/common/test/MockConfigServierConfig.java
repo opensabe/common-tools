@@ -27,9 +27,4 @@ public class MockConfigServierConfig {
     public PropertySourceLocator configServerPropertySourceLocator() {
         return new MockConfigServerPropertySourceLocator();
     }
-
-    @Bean
-    public Decryptor decryptor () {
-        return new CustomerDecrptor();
-    }
 }

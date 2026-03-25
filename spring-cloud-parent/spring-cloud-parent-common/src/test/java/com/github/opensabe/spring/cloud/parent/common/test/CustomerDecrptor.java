@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CustomerDecrptor implements Decryptor {
 
-    private final static AtomicInteger run = new AtomicInteger(0);
+    private static AtomicInteger run = new AtomicInteger(0);
 
     @Override
     public @Nullable String decrypt(String encrypted, String cipher) {
@@ -32,7 +32,7 @@ public class CustomerDecrptor implements Decryptor {
     }
 
 
-    static int getRun() {
+    int getRun() {
         return run.get();
     }
 
