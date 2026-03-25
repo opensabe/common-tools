@@ -16,6 +16,8 @@
 package io.github.opensabe.common.utils;
 
 
+import org.springframework.util.Assert;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -142,6 +144,7 @@ public class AesGcm128Util {
      * @return 密文 = [12字节 nonce] + [16字节 tag] + [加密后的payload]
      */
     public static String encryptToBase64(byte[] psk, byte[] nonce, byte[] plainData) throws Exception {
+        Assert.notNull(psk, "psk cannot be null");
         if (nonce.length != NONCE_LENGTH) {
             throw new IllegalArgumentException("Invalid nonce");
         }
