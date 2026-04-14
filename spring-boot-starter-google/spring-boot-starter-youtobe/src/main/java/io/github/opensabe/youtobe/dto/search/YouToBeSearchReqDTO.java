@@ -16,6 +16,8 @@
 package io.github.opensabe.youtobe.dto.search;
 
 
+import io.github.opensabe.youtobe.constants.SearchEventTypeEnum;
+import io.github.opensabe.youtobe.constants.SearchTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,7 +48,12 @@ public class YouToBeSearchReqDTO {
     /**
      * 请求资源的类型
      */
-//    private SearchTypeEnum type;
+    private SearchTypeEnum type;
+
+    /**
+     * 请求事件的类型
+     */
+    private SearchEventTypeEnum eventType;
 
     /**
      * 用于指示 API 返回可在指定国家/地区观看的视频的搜索结果。此参数值是 ISO 3166-1 alpha-2 国家/地区代码。
