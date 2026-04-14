@@ -111,7 +111,7 @@ public class YouToBeSearchService {
         if (Objects.nonNull(reqDTO.getType())) {
             sb.append("&type=").append(reqDTO.getType().getName());
         }
-        if (Objects.nonNull(reqDTO.getType())) {
+        if (Objects.nonNull(reqDTO.getEventType())) {
             sb.append("&eventType=").append(reqDTO.getEventType().getName());
         }
         if (StringUtils.isNotBlank(reqDTO.getRegionCode())) {
