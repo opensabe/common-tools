@@ -108,9 +108,12 @@ public class YouToBeSearchService {
 //        if (StringUtils.isNotBlank(reqDTO.getChannelId())) {
 //            sb.append("&channelId=").append(reqDTO.getChannelId());
 //        }
-//        if (Objects.nonNull(reqDTO.getType())) {
-//            sb.append("&type=").append(reqDTO.getType().getName());
-//        }
+        if (Objects.nonNull(reqDTO.getType())) {
+            sb.append("&type=").append(reqDTO.getType().getName());
+        }
+        if (Objects.nonNull(reqDTO.getType())) {
+            sb.append("&eventType=").append(reqDTO.getEventType().getName());
+        }
         if (StringUtils.isNotBlank(reqDTO.getRegionCode())) {
             sb.append("&regionCode=").append(reqDTO.getRegionCode());
         } else {
