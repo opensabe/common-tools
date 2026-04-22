@@ -48,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         SpringExtension.class, SingleRedisIntegrationTest.class
 })
 @SpringBootTest(properties = {
+        "eureka.client.enabled=false",
         "caches.enabled=true",
         "caches.custom[0].type=caffeine",
         "caches.custom[0].cacheNames[0]=test_caffeine",

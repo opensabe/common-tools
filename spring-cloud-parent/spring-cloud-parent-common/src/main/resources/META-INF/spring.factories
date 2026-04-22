@@ -1,0 +1,2 @@
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceResolver

@@ -51,7 +51,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Import(ListenerSortTest.Conf.class)
 @SpringBootTest(classes = SocketIOStarter.App.class, properties = {
-        "server.socketio.port=4002"
+        "server.socketio.port=4002",
+        "eureka.client.enabled=false",
 })
 @JfrEventTest
 @AutoConfigureObservability

@@ -28,7 +28,8 @@ public class CustomizedS3Container extends GenericContainer<CustomizedS3Containe
     public static final int S3_PORT = 4566;
 
     public CustomizedS3Container() {
-        super("localstack/localstack");
+        //指定localstack版本，如果是latest，需要秘钥
+        super("localstack/localstack:1.3.0");
     }
 
     @Override
