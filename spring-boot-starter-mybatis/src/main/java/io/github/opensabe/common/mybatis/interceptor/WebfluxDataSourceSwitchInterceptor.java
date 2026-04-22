@@ -26,6 +26,7 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
+import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -35,6 +36,7 @@ import reactor.core.scheduler.Schedulers;
         @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class,
                 RowBounds.class, ResultHandler.class, CacheKey.class, BoundSql.class}),
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class})})
+@Log4j2
 public class WebfluxDataSourceSwitchInterceptor extends DataSourceSwitchInterceptor {
 
 
@@ -46,19 +48,48 @@ public class WebfluxDataSourceSwitchInterceptor extends DataSourceSwitchIntercep
     public void configureDataSourceContext(BoundSql boundSql) {
         if (boundSql != null
                 && StringUtils.containsIgnoreCase(boundSql.getSql().replace(" ", ""), "/*#mode=readonly*/")) {
+            if (log.isDebugEnabled()) {
+                log.debug("WebfluxDataSourceSwitchInterceptor.configureDataSourceContext: readonly hint, set RW=read");
+            }
             DynamicRoutingDataSource.setDataSourceRW("read");
         } else if (StringUtils.isBlank(DynamicRoutingDataSource.getDataSourceRW())) {
+            if (log.isDebugEnabled()) {
+                log.debug("WebfluxDataSourceSwitchInterceptor.configureDataSourceContext: RW blank, set RW=write");
+            }
             DynamicRoutingDataSource.setDataSourceRW("write");
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("WebfluxDataSourceSwitchInterceptor.configureDataSourceContext: keep RW={}",
+                        DynamicRoutingDataSource.getDataSourceRW());
+            }
         }
         var dataSource = DynamicRoutingDataSource.currentDataSource();
         if (StringUtils.isNotBlank(dataSource)) {
-            DynamicRoutingDataSource.setDataSourceCountryCode(getCurrentOperCode(dataSource));
+            String code = getCurrentOperCode(dataSource);
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "WebfluxDataSourceSwitchInterceptor.configureDataSourceContext: dataSource holder set, operFromHolder={}, countryCode={}",
+                        dataSource,
+                        code);
+            }
+            DynamicRoutingDataSource.setDataSourceCountryCode(code);
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("WebfluxDataSourceSwitchInterceptor.configureDataSourceContext: no dataSource holder, resolve operId from reactor context");
+            }
             Mono.deferContextual(context -> Mono.just(context.getOrDefault("operId", "")))
                     .publishOn(Schedulers.immediate())
                     .subscribeOn(Schedulers.immediate())
-                    .subscribe(operId ->
-                            DynamicRoutingDataSource.setDataSourceCountryCode(getCurrentOperCode(operId)));
+                    .subscribe(operId -> {
+                        String code = getCurrentOperCode(operId);
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "WebfluxDataSourceSwitchInterceptor.configureDataSourceContext: context operId={}, countryCode={}",
+                                    operId,
+                                    code);
+                        }
+                        DynamicRoutingDataSource.setDataSourceCountryCode(code);
+                    });
         }
     }
 }

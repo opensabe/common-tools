@@ -24,19 +24,17 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
-import com.alibaba.ttl.TransmittableThreadLocal;
-
 import io.github.opensabe.common.mybatis.interceptor.DataSourceSwitchInterceptor;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
 
-    private static TransmittableThreadLocal<String> dataSourceHolder = new TransmittableThreadLocal<>();
+    private static final ThreadLocal<String> dataSourceHolder = new ThreadLocal<>();
 
-    private static TransmittableThreadLocal<String> dataSourceRWHolder = new TransmittableThreadLocal<>();
+    private static final ThreadLocal<String> dataSourceRWHolder = new ThreadLocal<>();
 
-    private static TransmittableThreadLocal<String> dataSourceCountryCodeHolder = new TransmittableThreadLocal<>();
+    private static final ThreadLocal<String> dataSourceCountryCodeHolder = new ThreadLocal<>();
     /**
      * 根据DataSourceName和Read/Write进行数据源路由的Map，其value为AbstractRoutingDataSource中的TargetDataSources的Key
      */
@@ -49,19 +47,38 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         setTargetDataSources(dataSourceMap);
         setDefaultTargetDataSource(defaultIndex != null ? dataSourceMap.get(defaultIndex) : null);
         this.dataSourceIndexMap = dataSourceIndexMap;
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "DynamicRoutingDataSource ctor: defaultClusterName={}, dataSourceMapSize={}, dataSourceIndexMapKeys={}",
+                    defaultClusterName,
+                    dataSourceMap != null ? dataSourceMap.size() : 0,
+                    dataSourceIndexMap != null ? dataSourceIndexMap.keySet() : null);
+        }
         afterPropertiesSet();
     }
 
     public static void clear() {
+        if (log.isDebugEnabled()) {
+            log.debug("DynamicRoutingDataSource.clear: removing dataSourceHolder, previous={}", dataSourceHolder.get());
+        }
         dataSourceHolder.remove();
     }
 
     public static void clearCountryCodeAndRW() {
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "DynamicRoutingDataSource.clearCountryCodeAndRW: rw={}, countryCode={}",
+                    dataSourceRWHolder.get(),
+                    dataSourceCountryCodeHolder.get());
+        }
         dataSourceRWHolder.remove();
         dataSourceCountryCodeHolder.remove();
     }
 
     public static void clearRW() {
+        if (log.isDebugEnabled()) {
+            log.debug("DynamicRoutingDataSource.clearRW: previous={}", dataSourceRWHolder.get());
+        }
         dataSourceRWHolder.remove();
     }
 
@@ -70,10 +87,16 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
     }
 
     public static void dataSource(String dataSource) {
+        if (log.isDebugEnabled()) {
+            log.debug("DynamicRoutingDataSource.dataSource: set={}", dataSource);
+        }
         dataSourceHolder.set(dataSource);
     }
 
     public static void setDataSourceCountryCode(String dataSourceCountryCode) {
+        if (log.isDebugEnabled()) {
+            log.debug("DynamicRoutingDataSource.setDataSourceCountryCode: {}", dataSourceCountryCode);
+        }
         dataSourceCountryCodeHolder.set(dataSourceCountryCode);
     }
 
@@ -82,6 +105,9 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
     }
 
     public static void setDataSourceRW(String dataSourceRW) {
+        if (log.isDebugEnabled()) {
+            log.debug("DynamicRoutingDataSource.setDataSourceRW: {}", dataSourceRW);
+        }
         dataSourceRWHolder.set(dataSourceRW);
     }
 
@@ -91,24 +117,52 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
      */
     @Override
     protected Object determineCurrentLookupKey() {
-        log.debug("DynamicRoutingDataSource-determineCurrentLookupKey: determine datasource:{},{}", dataSourceCountryCodeHolder.get(), dataSourceRWHolder.get());
-        log.debug("DynamicRoutingDataSource-determineCurrentLookupKey: dataSourceIndexMap:{}", dataSourceIndexMap.toString());
-        var country = dataSourceIndexMap.get(dataSourceCountryCodeHolder.get());
+        String countryCode = dataSourceCountryCodeHolder.get();
+        String rw = dataSourceRWHolder.get();
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "DynamicRoutingDataSource.determineCurrentLookupKey: countryCode={}, rw={}, dataSourceIndexMap={}",
+                    countryCode,
+                    rw,
+                    dataSourceIndexMap);
+        }
+        var country = dataSourceIndexMap.get(countryCode);
         if (MapUtils.isEmpty(country)) {
             //如果没有配置国家就取默认的国际，因为Publuc项目只配置一个国家，对应operId没有，
             //如果直接取默认的数据源，这时候就不走从库了
-            country = dataSourceIndexMap.get(DataSourceSwitchInterceptor.getDefaultCountryCode());
+            String fallback = DataSourceSwitchInterceptor.getDefaultCountryCode();
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "DynamicRoutingDataSource.determineCurrentLookupKey: empty country for code={}, fallbackDefaultCountryCode={}",
+                        countryCode,
+                        fallback);
+            }
+            country = dataSourceIndexMap.get(fallback);
         }
         if (MapUtils.isEmpty(country)) {
+            if (log.isDebugEnabled()) {
+                log.debug("DynamicRoutingDataSource.determineCurrentLookupKey: no country map after fallback, return null");
+            }
             return null;
         }
-        List<String> dataSourceKeys = country.get(dataSourceRWHolder.get());
+        List<String> dataSourceKeys = country.get(rw);
 
         if (CollectionUtils.isEmpty(dataSourceKeys)) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "DynamicRoutingDataSource.determineCurrentLookupKey: no datasource keys for rw={}, countryKeys={}",
+                        rw,
+                        country.keySet());
+            }
             return null;
         }
         String index = dataSourceKeys.get(RandomUtils.nextInt(0, dataSourceKeys.size()));
-        log.debug("DynamicRoutingDataSource-determineCurrentLookupKey: choose datasource: {}", index);
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "DynamicRoutingDataSource.determineCurrentLookupKey: chose index={}, poolSize={}",
+                    index,
+                    dataSourceKeys.size());
+        }
         return index;
     }
 
@@ -117,13 +171,31 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         Map<String, List<String>> rwIndexMap = dataSourceIndexMap.get(defaultClusterName);
         if (rwIndexMap != null) {
             if (rwIndexMap.get("write") != null && rwIndexMap.get("write").size() > 0) {
-                return rwIndexMap.get("write").get(0);
+                String idx = rwIndexMap.get("write").get(0);
+                if (log.isDebugEnabled()) {
+                    log.debug("DynamicRoutingDataSource.resolveDefaultIndex: cluster={}, using first write={}",
+                            defaultClusterName, idx);
+                }
+                return idx;
             } else if (rwIndexMap.get("read") != null && rwIndexMap.get("read").size() > 0) {
-                return rwIndexMap.get("read").get(0);
+                String idx = rwIndexMap.get("read").get(0);
+                if (log.isDebugEnabled()) {
+                    log.debug("DynamicRoutingDataSource.resolveDefaultIndex: cluster={}, no write, using first read={}",
+                            defaultClusterName, idx);
+                }
+                return idx;
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "DynamicRoutingDataSource.resolveDefaultIndex: cluster={} has rwIndexMap but no read/write keys",
+                            defaultClusterName);
+                }
                 return null;
             }
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("DynamicRoutingDataSource.resolveDefaultIndex: no rwIndexMap for cluster={}", defaultClusterName);
+            }
             return null;
         }
     }

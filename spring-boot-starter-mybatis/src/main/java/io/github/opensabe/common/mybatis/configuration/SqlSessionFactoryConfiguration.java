@@ -116,6 +116,13 @@ public class SqlSessionFactoryConfiguration
                     Assert.hasLength(v.getDefaultClusterName(), "clusterName shall not be null");
 
                     // Create Datasource
+                    if (log.isDebugEnabled()) {
+                        log.debug(
+                                "SqlSessionFactoryConfiguration: create DynamicRoutingDataSource for factoryKey={}, defaultClusterName={}, dataSourceConfigs={}",
+                                k,
+                                v.getDefaultClusterName(),
+                                v.getDataSource() != null ? v.getDataSource().size() : 0);
+                    }
                     DynamicRoutingDataSource dynamicRoutingDataSource = DataSourceFactory
                             .createDynamicRoutingDataSource(v.getDefaultClusterName(), v.getDataSource());
                     beanDefiner.registerDataSource(k, dynamicRoutingDataSource);

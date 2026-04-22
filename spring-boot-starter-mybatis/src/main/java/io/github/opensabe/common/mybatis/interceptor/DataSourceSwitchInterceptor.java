@@ -42,7 +42,9 @@ import com.github.pagehelper.util.StringUtil;
 import io.github.opensabe.common.mybatis.configuration.SqlSessionFactoryConfiguration;
 import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
 import io.github.opensabe.common.mybatis.properties.CountryProperties;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public abstract class DataSourceSwitchInterceptor implements Interceptor {
 
 
@@ -68,9 +70,21 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
 
     public String getCurrentOperCode(String operId) {
         if (StringUtils.isBlank(operId)) {
-            operId = getDefaultOperId();
+            String def = getDefaultOperId();
+            if (log.isDebugEnabled()) {
+                log.debug("DataSourceSwitchInterceptor.getCurrentOperCode: blank operId, use defaultOperId={}", def);
+            }
+            operId = def;
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("DataSourceSwitchInterceptor.getCurrentOperCode: operId={}", operId);
+            }
         }
-        return getCountryProperties().getMap().get(operId);
+        String code = getCountryProperties().getMap().get(operId);
+        if (log.isDebugEnabled()) {
+            log.debug("DataSourceSwitchInterceptor.getCurrentOperCode: resolved countryCode={}", code);
+        }
+        return code;
     }
 
     /**
@@ -113,15 +127,25 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
         // 先判断是否存在手写的 count 查询
         MappedStatement countMs = ExecutorUtil.getExistedMappedStatement(ms.getConfiguration(), countMsId);
         if (countMs != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("DataSourceSwitchInterceptor.count: use manual count msId={}", countMsId);
+            }
             // DynamicRoutingDataSource.dataSource(dataSource);
             count = ExecutorUtil.executeManualCount(executor, countMs, parameter, boundSql, resultHandler);
         } else {
             countMs = msCountMap.get(countMsId);
             // 自动创建
             if (countMs == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("DataSourceSwitchInterceptor.count: create auto count msId={}", countMsId);
+                }
                 // 根据当前的 ms 创建一个返回值为 Long 类型的 ms
                 countMs = MSUtils.newCountMappedStatement(ms, countMsId);
                 msCountMap.put(countMsId, countMs);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("DataSourceSwitchInterceptor.count: use cached auto count msId={}", countMsId);
+                }
             }
             // DynamicRoutingDataSource.dataSource(dataSource);
             count = ExecutorUtil.executeAutoCount(dialect, executor, countMs, parameter, boundSql, rowBounds,
@@ -137,6 +161,10 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
         try {
             Object[] args = invocation.getArgs();
             if (args.length == 2) {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "DataSourceSwitchInterceptor.intercept: argsLength=2 (update path), configureDataSourceContext without boundSql");
+                }
                 configureDataSourceContext(null);
                 return invocation.proceed();
             }
@@ -149,39 +177,72 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
             BoundSql boundSql;
             // 由于逻辑关系，只会进入一次
             if (args.length == 4) {
+                if (log.isDebugEnabled()) {
+                    log.debug("DataSourceSwitchInterceptor.intercept: argsLength=4, msId={}", ms.getId());
+                }
                 // 4 个参数时
                 boundSql = ms.getBoundSql(parameter);
                 cacheKey = executor.createCacheKey(ms, parameter, rowBounds, boundSql);
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("DataSourceSwitchInterceptor.intercept: argsLength={}, msId={}", args.length, ms.getId());
+                }
                 // 6 个参数时
                 cacheKey = (CacheKey) args[4];
                 boundSql = (BoundSql) args[5];
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "DataSourceSwitchInterceptor.intercept: configureDataSourceContext with boundSql present={}",
+                        boundSql != null);
             }
             configureDataSourceContext(boundSql);
             checkDialectExists();
             List resultList;
             // 调用方法判断是否需要进行分页，如果不需要，直接返回结果
             if (!dialect.skip(ms, parameter, rowBounds)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("DataSourceSwitchInterceptor.intercept: paging path, skip=false, msId={}", ms.getId());
+                }
                 // 判断是否需要进行 count 查询
                 if (dialect.beforeCount(ms, parameter, rowBounds)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("DataSourceSwitchInterceptor.intercept: beforeCount=true, run count, msId={}", ms.getId());
+                    }
                     // 查询总数
                     Long count = count(executor, ms, parameter, rowBounds, resultHandler, boundSql);
                     // 处理查询总数，返回 true 时继续分页查询，false 时直接返回
                     if (!dialect.afterCount(count, parameter, rowBounds)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "DataSourceSwitchInterceptor.intercept: afterCount=false, count={}, return empty page",
+                                    count);
+                        }
                         // 当查询总数为 0 时，直接返回空的结果
                         return dialect.afterPage(new ArrayList(), parameter, rowBounds);
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("DataSourceSwitchInterceptor.intercept: beforeCount=false, msId={}", ms.getId());
                     }
                 }
                 resultList = ExecutorUtil.pageQuery(dialect, executor, ms, parameter, rowBounds, resultHandler,
                         boundSql, cacheKey);
                 return dialect.afterPage(resultList, parameter, rowBounds);
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("DataSourceSwitchInterceptor.intercept: skip=true, proceed without page helper, msId={}",
+                            ms.getId());
+                }
                 // rowBounds用参数值，不使用分页插件处理时，仍然支持默认的内存分页
                 return invocation.proceed();
             }
         } finally {
             if (dialect != null) {
                 dialect.afterAll();
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("DataSourceSwitchInterceptor.intercept: finally clearCountryCodeAndRW");
             }
             clear();
             // dataSource = null;
@@ -216,6 +277,9 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
     }
 
     protected void clear() {
+        if (log.isDebugEnabled()) {
+            log.debug("DataSourceSwitchInterceptor.clear: invoke DynamicRoutingDataSource.clearCountryCodeAndRW");
+        }
         DynamicRoutingDataSource.clearCountryCodeAndRW();
     }
 }

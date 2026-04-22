@@ -159,10 +159,22 @@ public class DataSourceFactory {
 
     public static DynamicRoutingDataSource createDynamicRoutingDataSource(String defaultClusterName,
                                                                           List<DataSourceProperties> dataSourceProperties) {
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "DataSourceFactory.createDynamicRoutingDataSource: defaultClusterName={}, dataSourcePropertyCount={}",
+                    defaultClusterName,
+                    dataSourceProperties != null ? dataSourceProperties.size() : 0);
+        }
         Map<String, Map<String, List<String>>> dataSourceIndexMap = new HashMap<>();
         Map<String, DataSource> dataSourceMap = batchCreate(dataSourceProperties, dataSourceIndexMap);
         DynamicRoutingDataSource dynamicRoutingDataSource = new DynamicRoutingDataSource(defaultClusterName,
                 dataSourceMap, dataSourceIndexMap);
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "DataSourceFactory.createDynamicRoutingDataSource: built index clusters={}, physicalDataSources={}",
+                    dataSourceIndexMap.keySet(),
+                    dataSourceMap.size());
+        }
         return dynamicRoutingDataSource;
     }
 }

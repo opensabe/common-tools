@@ -73,9 +73,20 @@ public class WebInterceptorConfiguration {
             return (exchange, chain) -> {
                 var operId = exchange.getRequest().getHeaders().getFirst("operId");
                 if (StringUtils.isNotBlank(operId)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("WebInterceptorConfiguration.operatorEventFilter: operId header present, publish OperatorEvent");
+                    }
                     applicationContext.publishEvent(new OperatorEvent(operId));
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("WebInterceptorConfiguration.operatorEventFilter: blank operId header, skip OperatorEvent");
+                    }
                 }
                 return chain.filter(exchange).doFinally(s -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("WebInterceptorConfiguration.operatorEventFilter: doFinally signal={}, reset hooks and DynamicRoutingDataSource.clear",
+                                s);
+                    }
                     Hooks.resetOnEachOperator(HookRefresher.class.getName());
                     DynamicRoutingDataSource.clear();
                 });
@@ -102,6 +113,9 @@ public class WebInterceptorConfiguration {
             @Override
             public void onApplicationEvent(OperatorEvent event) {
                 var operId = event.getSource();
+                if (log.isDebugEnabled()) {
+                    log.debug("WebInterceptorConfiguration.HookRefresher: OperatorEvent operId={}", operId);
+                }
                 Hooks.resetOnEachOperator(HookRefresher.class.getName());
                 Hooks.onEachOperator(HookRefresher.class.getName(), Operators.liftPublisher((p, sb) -> {
                     var context = sb.currentContext().put("operId", operId);

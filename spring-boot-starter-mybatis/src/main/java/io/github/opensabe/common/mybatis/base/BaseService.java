@@ -56,7 +56,9 @@ public abstract class BaseService<T> {
 
     @SuppressWarnings("unchecked")
     public BaseService() {
-        log.debug("init service {}", this.getClass());
+        if (log.isDebugEnabled()) {
+            log.debug("init service {}", this.getClass());
+        }
         //考虑多重继承的情况
         Class<?> aClass = this.getClass();
         while (aClass.getSuperclass() != null && !aClass.getSuperclass().equals(Object.class) && !aClass.getSuperclass().equals(BaseService.class)
@@ -76,8 +78,14 @@ public abstract class BaseService<T> {
     @SuppressWarnings("all")
     public BaseService<T> readOnly(boolean isReadOnly) {
         if (isReadOnly) {
+            if (log.isDebugEnabled()) {
+                log.debug("BaseService.readOnly: service={}, isReadOnly=true, set RW=read", this.getClass().getName());
+            }
             DynamicRoutingDataSource.setDataSourceRW("read");
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("BaseService.readOnly: service={}, isReadOnly=false, set RW=write", this.getClass().getName());
+            }
             DynamicRoutingDataSource.setDataSourceRW("write");
         }
         return this;
