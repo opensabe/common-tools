@@ -29,8 +29,9 @@ import lombok.extern.log4j.Log4j2;
 public class EurekaInstanceConfigBeanAddNodeInfoCustomizer implements EurekaInstanceConfigBeanCustomizer {
     public static final String K8S_NODE_INFO = "k8s-node-info";
     public static final String K8S_AZ_INFO = "az-info";
+    public static final String DEFAULT_AZ_INFO = "unknown";
     private static final String SYSTEM_VARIABLE = "NODE_NAME";
-    private static final String SYSTEM_AZ_VARIABLE = "AZ_NAME";
+    private static final String SYSTEM_AZ_VARIABLE = "ZONE";
 
     @Override
     public void customize(EurekaInstanceConfigBean eurekaInstanceConfigBean) {
@@ -47,6 +48,7 @@ public class EurekaInstanceConfigBeanAddNodeInfoCustomizer implements EurekaInst
             eurekaInstanceConfigBean.getMetadataMap().put(K8S_AZ_INFO, azName);
         } else {
             AlarmUtil.fatal("EurekaInstanceConfigBeanAddNodeInfoCustomizer-customize: not found az-info from system variable: {}", SYSTEM_AZ_VARIABLE);
+            eurekaInstanceConfigBean.getMetadataMap().put(K8S_AZ_INFO, DEFAULT_AZ_INFO);
         }
     }
 }
