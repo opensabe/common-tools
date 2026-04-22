@@ -16,12 +16,7 @@
 package io.github.opensabe.common.mybatis.configuration;
 
 import org.apache.commons.lang3.StringUtils;
-import org.reactivestreams.Subscription;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.server.WebFilter;
@@ -30,14 +25,13 @@ import io.github.opensabe.common.mybatis.interceptor.DataSourceSwitchInterceptor
 import io.github.opensabe.common.mybatis.interceptor.WebMvcDataSourceSwitchInterceptor;
 import io.github.opensabe.common.mybatis.interceptor.WebfluxDataSourceSwitchInterceptor;
 import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
+import io.github.opensabe.common.mybatis.webflux.WebFluxRoutingContext;
 import lombok.extern.log4j.Log4j2;
-import reactor.core.CoreSubscriber;
-import reactor.core.publisher.Hooks;
-import reactor.core.publisher.Operators;
-import reactor.util.context.Context;
+import reactor.core.publisher.Mono;
+import reactor.util.context.ContextView;
 
 /**
- * 根据 request header里的opeId，自动设置数据源
+ * 根据 request header 里的 operId，自动设置数据源
  *
  * @author heng.ma
  */
@@ -59,121 +53,37 @@ public class WebInterceptorConfiguration {
 
 
     /**
-     * 对webflux支持
+     * WebFlux：通过 {@code contextWrite} 写入 operId，用 {@code doOnEach} 把信号上的 {@link ContextView}
+     * 同步到 {@link WebFluxRoutingContext}（ThreadLocal），请求结束在 {@code doFinally} 中清理；
+     * 不再使用全局 {@code Hooks.onEachOperator} / {@code OperatorEvent}，避免跨请求串扰。
      */
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     static class WebfluxSupportConfiguration {
 
-        @Autowired
-        private ApplicationContext applicationContext;
-
         @Bean
         public WebFilter operatorEventFilter() {
             return (exchange, chain) -> {
-                var operId = exchange.getRequest().getHeaders().getFirst("operId");
-                if (StringUtils.isNotBlank(operId)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("WebInterceptorConfiguration.operatorEventFilter: operId header present, publish OperatorEvent");
-                    }
-                    applicationContext.publishEvent(new OperatorEvent(operId));
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("WebInterceptorConfiguration.operatorEventFilter: blank operId header, skip OperatorEvent");
-                    }
-                }
-                return chain.filter(exchange).doFinally(s -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("WebInterceptorConfiguration.operatorEventFilter: doFinally signal={}, reset hooks and DynamicRoutingDataSource.clear",
-                                s);
-                    }
-                    Hooks.resetOnEachOperator(HookRefresher.class.getName());
-                    DynamicRoutingDataSource.clear();
-                });
+                String operId = StringUtils.trimToEmpty(exchange.getRequest().getHeaders().getFirst("operId"));
+                Mono<Void> downstream = chain.filter(exchange)
+                        .contextWrite(ctx -> ctx.put("operId", operId));
+                return downstream.transformDeferredContextual((Mono<Void> mono, ContextView ignored) ->
+                        mono.doOnEach(signal -> {
+                                    ContextView sigCtx = signal.getContextView();
+                                    if (!sigCtx.isEmpty()) {
+                                        WebFluxRoutingContext.restoreContextView(sigCtx);
+                                    }
+                                })
+                                .doFinally(signalType -> {
+                                    WebFluxRoutingContext.clear();
+                                    DynamicRoutingDataSource.clear();
+                                }));
             };
         }
 
         @Bean
         public DataSourceSwitchInterceptor webfluxInterceptor() {
             return new WebfluxDataSourceSwitchInterceptor();
-        }
-
-        @Bean
-        public HookRefresher operatorHookRefresher() {
-            return new HookRefresher();
-        }
-
-
-        /**
-         * 这里是关键，Mono.subscribeContext的时候，每次都会创建新的context，因此，用Hook，
-         * 给context添加operId
-         */
-        class HookRefresher implements ApplicationListener<OperatorEvent> {
-
-            @Override
-            public void onApplicationEvent(OperatorEvent event) {
-                var operId = event.getSource();
-                if (log.isDebugEnabled()) {
-                    log.debug("WebInterceptorConfiguration.HookRefresher: OperatorEvent operId={}", operId);
-                }
-                Hooks.resetOnEachOperator(HookRefresher.class.getName());
-                Hooks.onEachOperator(HookRefresher.class.getName(), Operators.liftPublisher((p, sb) -> {
-                    var context = sb.currentContext().put("operId", operId);
-                    return new WrappedSubscriber<>(sb, context);
-                }));
-            }
-        }
-
-        class WrappedSubscriber<T> implements CoreSubscriber<T> {
-
-
-            private CoreSubscriber<T> delegate;
-            private Context context;
-
-            WrappedSubscriber(CoreSubscriber<T> delegate, Context context) {
-                this.delegate = delegate;
-                this.context = context;
-            }
-
-            @Override
-            public Context currentContext() {
-                return delegate.currentContext().putAll(context);
-            }
-
-            @Override
-            public void onSubscribe(Subscription s) {
-                delegate.onSubscribe(s);
-            }
-
-            @Override
-            public void onNext(T t) {
-                delegate.onNext(t);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                delegate.onError(t);
-                delegate.currentContext().delete("operId");
-            }
-
-            @Override
-            public void onComplete() {
-                delegate.onComplete();
-                delegate.currentContext().delete("operId");
-            }
-        }
-
-        class OperatorEvent extends ApplicationEvent {
-
-            /**
-             * Create a new {@code ApplicationEvent}.
-             *
-             * @param source the object on which the event initially occurred or with
-             *               which the event is associated (never {@code null})
-             */
-            OperatorEvent(Object source) {
-                super(source);
-            }
         }
     }
 

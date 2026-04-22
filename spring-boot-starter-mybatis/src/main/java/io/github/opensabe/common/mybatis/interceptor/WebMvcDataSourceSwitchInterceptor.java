@@ -92,8 +92,8 @@ public class WebMvcDataSourceSwitchInterceptor extends DataSourceSwitchIntercept
         DynamicRoutingDataSource.setDataSourceCountryCode(countryCode);
         if (boundSql != null
                 && StringUtils.containsIgnoreCase(boundSql.getSql().replace(" ", ""), "/*#mode=readonly*/")) {
-            if (log.isDebugEnabled()) {
-                log.debug("WebMvcDataSourceSwitchInterceptor.configureDataSourceContext: SQL hint mode=readonly, set RW=read");
+            if (log.isInfoEnabled()) {
+                log.info("WebMvcDataSourceSwitchInterceptor.configureDataSourceContext: SQL hint mode=readonly, set RW=read");
             }
             DynamicRoutingDataSource.setDataSourceRW("read");
         } else if (StringUtils.isBlank(DynamicRoutingDataSource.getDataSourceRW())) {
