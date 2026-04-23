@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.common.mybatis.test.webflux;
+package io.github.opensabe.common.webflux.mybatis.test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,7 +37,7 @@ import org.redisson.spring.starter.RedissonAutoConfigurationV2;
  * 显式排除类路径上被 {@code common-utils} 等引入的 MyBatis/Redis/Redisson 自动配置，避免本 IT 需要真实 Redis。
  */
 @SpringBootApplication(
-        scanBasePackages = "io.github.opensabe.common.mybatis.test.webflux",
+        scanBasePackages = "io.github.opensabe.common.webflux.mybatis.test",
         exclude = {
                 MyBatisAutoConfiguration.class,
                 RedissonAutoConfiguration.class,
