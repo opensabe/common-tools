@@ -104,6 +104,10 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         return dataSourceRWHolder.get();
     }
 
+    public static String getDataSourceCountryCode() {
+        return dataSourceCountryCodeHolder.get();
+    }
+
     public static void setDataSourceRW(String dataSourceRW) {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.setDataSourceRW: {}", dataSourceRW);

@@ -85,6 +85,9 @@ public class WebInterceptorConfiguration {
                                 .doFinally(signalType -> {
                                     WebFluxRoutingContext.clear();
                                     DynamicRoutingDataSource.clear();
+                                    // doFinally 与 subscribeOn 工作线程可能不同；此处清理当前信号线程上的 holder，
+                                    // 并清除 RW/国家码 ThreadLocal（clear() 仅移除 dataSourceHolder）。
+                                    DynamicRoutingDataSource.clearCountryCodeAndRW();
                                 }));
             };
         }
