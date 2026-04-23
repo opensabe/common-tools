@@ -52,11 +52,21 @@ public class WebMvcDataSourceSwitchInterceptor extends DataSourceSwitchIntercept
             RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
 
             if (requestAttributes instanceof ServletRequestAttributes servletRequestAttributes) {
+                if (log.isDebugEnabled()) {
+                    log.debug("WebMvcDataSourceSwitchInterceptor.getRequest: servlet request present");
+                }
                 return servletRequestAttributes.getRequest();
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("WebMvcDataSourceSwitchInterceptor.getRequest: requestAttributes type={}",
+                            requestAttributes != null ? requestAttributes.getClass().getName() : "null");
+                }
                 return null;
             }
         } catch (Throwable e) {
+            if (log.isDebugEnabled()) {
+                log.debug("WebMvcDataSourceSwitchInterceptor.getRequest: no request context, {}", e.toString());
+            }
             return null;
         }
     }
@@ -67,13 +77,35 @@ public class WebMvcDataSourceSwitchInterceptor extends DataSourceSwitchIntercept
         var operId = "";
         if (request != null) {
             operId = request.getHeader("operId");
+            if (log.isDebugEnabled()) {
+                log.debug("WebMvcDataSourceSwitchInterceptor.configureDataSourceContext: operIdHeader={}", operId);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("WebMvcDataSourceSwitchInterceptor.configureDataSourceContext: no HttpServletRequest, use default oper mapping");
+            }
         }
-        DynamicRoutingDataSource.setDataSourceCountryCode(getCurrentOperCode(operId));
+        String countryCode = getCurrentOperCode(operId);
+        if (log.isDebugEnabled()) {
+            log.debug("WebMvcDataSourceSwitchInterceptor.configureDataSourceContext: resolved countryCode={}", countryCode);
+        }
+        DynamicRoutingDataSource.setDataSourceCountryCode(countryCode);
         if (boundSql != null
                 && StringUtils.containsIgnoreCase(boundSql.getSql().replace(" ", ""), "/*#mode=readonly*/")) {
+            if (log.isInfoEnabled()) {
+                log.info("WebMvcDataSourceSwitchInterceptor.configureDataSourceContext: SQL hint mode=readonly, set RW=read");
+            }
             DynamicRoutingDataSource.setDataSourceRW("read");
         } else if (StringUtils.isBlank(DynamicRoutingDataSource.getDataSourceRW())) {
+            if (log.isDebugEnabled()) {
+                log.debug("WebMvcDataSourceSwitchInterceptor.configureDataSourceContext: RW blank, set RW=write");
+            }
             DynamicRoutingDataSource.setDataSourceRW("write");
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("WebMvcDataSourceSwitchInterceptor.configureDataSourceContext: keep existing RW={}",
+                        DynamicRoutingDataSource.getDataSourceRW());
+            }
         }
     }
 }
