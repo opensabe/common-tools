@@ -60,6 +60,14 @@ public class WebfluxDataSourceSwitchInterceptor extends DataSourceSwitchIntercep
     }
 
     /**
+     * 与无 dataSource holder 时 {@link #configureDataSourceContext} 中通过 {@code resolveOperIdFromBoundContext} 得到的结果一致
+     * （尚未经 {@link #getCurrentOperCode(String)} 映射为国家码），供 WebFlux 集成测试验证 {@link WebFluxRoutingContext}。
+     */
+    public static String resolutionProbeOperIdFromBoundContext() {
+        return resolveOperIdFromBoundContext();
+    }
+
+    /**
      * 优先使用 Context 中的 {@code operId}（由 WebFilter {@code contextWrite} 写入），
      * 否则从 {@link ServerWebExchangeContextFilter} 放入的 {@link ServerWebExchange} 读请求头。
      */

@@ -67,10 +67,18 @@ public class WebInterceptorConfiguration {
                 String operId = StringUtils.trimToEmpty(exchange.getRequest().getHeaders().getFirst("operId"));
                 Mono<Void> downstream = chain.filter(exchange)
                         .contextWrite(ctx -> ctx.put("operId", operId));
-                return downstream.transformDeferredContextual((Mono<Void> mono, ContextView ignored) ->
-                        mono.doOnEach(signal -> {
+                return downstream.transformDeferredContextual((Mono<Void> mono, ContextView merged) ->
+                        mono
+                                // merged 为订阅时合并后的 Reactor Context（已含上文的 contextWrite(operId)），
+                                // 在 doOnEach 的 signal 之前先写入，便于同请求内后续 subscribeOn/嵌套 Mono 的线程在 doOnEach 已同步过一轮。
+                                .doOnSubscribe(s -> {
+                                    if (merged != null && !merged.isEmpty()) {
+                                        WebFluxRoutingContext.restoreContextView(merged);
+                                    }
+                                })
+                                .doOnEach(signal -> {
                                     ContextView sigCtx = signal.getContextView();
-                                    if (!sigCtx.isEmpty()) {
+                                    if (sigCtx != null && !sigCtx.isEmpty()) {
                                         WebFluxRoutingContext.restoreContextView(sigCtx);
                                     }
                                 })
