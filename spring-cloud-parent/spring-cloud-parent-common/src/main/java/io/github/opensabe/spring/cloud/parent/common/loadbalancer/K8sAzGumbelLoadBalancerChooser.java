@@ -324,10 +324,6 @@ public class K8sAzGumbelLoadBalancerChooser {
                 return az;
             }
         }
-        String envZone = System.getenv("ZONE");
-        if (StringUtils.isNotBlank(envZone)) {
-            return envZone;
-        }
         return EurekaInstanceConfigBeanAddNodeInfoCustomizer.DEFAULT_AZ_INFO;
     }
 

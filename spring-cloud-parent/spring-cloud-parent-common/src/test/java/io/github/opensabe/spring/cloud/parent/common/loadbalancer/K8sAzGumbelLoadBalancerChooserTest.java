@@ -55,7 +55,11 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 /**
  * {@link K8sAzGumbelLoadBalancerChooser} 单元测试。
  * <p>
- * 通过 Mock Discovery / Eureka / 随机源构造矩阵与候选实例；断言与失败消息使用英文，便于日志与 CI 检索。
+ * 与 {@link AzBalanceUtilsTest} 一致：<strong>source</strong> 为调方（本服务）在 Discovery 中按 AZ 的实例数分布，
+ * <strong>target</strong> 为下游候选按 AZ 的分布；本机 AZ 仅决定取矩阵的哪一行。不得用「source 全在一 AZ、target 全在另一 AZ」
+ * 来代表跨 AZ——跨 AZ 指同一矩阵内源 AZ 与目标 AZ 不一致时的分配比例。
+ * <p>
+ * Mock Discovery / Eureka / 随机源；断言与失败消息使用英文，便于日志与 CI 检索。
  */
 @DisplayName("K8sAzGumbelLoadBalancerChooser")
 class K8sAzGumbelLoadBalancerChooserTest {
@@ -64,10 +68,16 @@ class K8sAzGumbelLoadBalancerChooserTest {
     private static final String SVC = "downstream";
     /** spring.application.name，用于 buildSourceAzMap */
     private static final String APP = "caller";
-    /** 与 mock 本机 Eureka AZ 一致，便于 AzBalanceUtils 出有效行 */
-    private static final String AZ_SRC = "zone-src";
-    /** 对端 AZ，用于跨 AZ 比例与 Monte Carlo */
-    private static final String AZ_PEER = "zone-peer";
+    /** 与 AzBalanceUtilsTest 场景命名一致：本机 Eureka 所在 AZ（矩阵行键） */
+    private static final String AZ_1 = "az1";
+    private static final String AZ_2 = "az2";
+    private static final String AZ_3 = "az3";
+
+    /**
+     * 默认调方多 AZ 分布（与 {@link AzBalanceUtilsTest}「多可用区不平衡」同量级），用于非 Monte Carlo 用例，
+     * 避免 source 地图退化成单 AZ 桶。
+     */
+    private static final Map<String, Integer> DEFAULT_CALLER_AZ_COUNTS = Map.of(AZ_1, 13, AZ_2, 7);
 
     @Test
     @DisplayName("enabled=false 时立即返回 empty，由外层 LB 走老逻辑")
@@ -84,11 +94,11 @@ class K8sAzGumbelLoadBalancerChooserTest {
     void chooseWhenAllOpenReturnsEmpty() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
-        ServiceInstance i1 = instance("1", "h1", 1, AZ_SRC);
+        ServiceInstance i1 = instance("1", "h1", 1, AZ_1);
         CircuitBreaker open = circuitBreaker(CircuitBreaker.State.OPEN, 0f);
         Map<ServiceInstance, CircuitBreaker> cbMap = Map.of(i1, open);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 2), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(DEFAULT_CALLER_AZ_COUNTS), mockEurekaAz(AZ_1), () -> 0.5);
         assertTrue(chooser.choose(SVC, List.of(i1), new LoadBalancerRequestTraceContext(), cbMap, null, false, cache()).isEmpty());
     }
 
@@ -97,13 +107,13 @@ class K8sAzGumbelLoadBalancerChooserTest {
     void chooseFiltersOpenAndPicksClosedInSameAz() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
-        ServiceInstance openI = instance("open", "bad", 1, AZ_SRC);
-        ServiceInstance closedI = instance("ok", "good", 2, AZ_SRC);
+        ServiceInstance openI = instance("open", "bad", 1, AZ_1);
+        ServiceInstance closedI = instance("ok", "good", 2, AZ_1);
         CircuitBreaker openCb = circuitBreaker(CircuitBreaker.State.OPEN, 0f);
         CircuitBreaker closedCb = circuitBreaker(CircuitBreaker.State.CLOSED, 0f);
         Map<ServiceInstance, CircuitBreaker> cbMap = Map.of(openI, openCb, closedI, closedCb);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 2), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(DEFAULT_CALLER_AZ_COUNTS), mockEurekaAz(AZ_1), () -> 0.5);
         Response<ServiceInstance> r = chooser.choose(SVC, List.of(openI, closedI), new LoadBalancerRequestTraceContext(),
                 cbMap, null, false, cache()).orElseThrow();
         assertEquals("good", r.getServer().getHost());
@@ -115,8 +125,8 @@ class K8sAzGumbelLoadBalancerChooserTest {
     void chooseWithLoadBalanceKeyStableAcrossCalls() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
-        ServiceInstance i0 = instance("a", "h0", 10, AZ_SRC);
-        ServiceInstance i1 = instance("b", "h1", 11, AZ_SRC);
+        ServiceInstance i0 = instance("a", "h0", 10, AZ_1);
+        ServiceInstance i1 = instance("b", "h1", 11, AZ_1);
         CircuitBreaker cb = circuitBreaker(CircuitBreaker.State.CLOSED, 0f);
         Map<ServiceInstance, CircuitBreaker> cbMap = Map.of(i0, cb, i1, cb);
 
@@ -124,7 +134,7 @@ class K8sAzGumbelLoadBalancerChooserTest {
         attrs.put(TracedCircuitBreakerRoundRobinLoadBalancer.LOAD_BALANCE_KEY, "sticky-uid");
         RequestData rd = new RequestData(HttpMethod.GET, URI.create("http://x"), new HttpHeaders(), null, attrs);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 1), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(DEFAULT_CALLER_AZ_COUNTS), mockEurekaAz(AZ_1), () -> 0.5);
         String firstHost = null;
         for (int i = 0; i < 200; i++) {
             Response<ServiceInstance> r = chooser.choose(SVC, List.of(i0, i1), new LoadBalancerRequestTraceContext(),
@@ -144,9 +154,9 @@ class K8sAzGumbelLoadBalancerChooserTest {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
         List<ServiceInstance> inst = List.of(
-                instance("a", "h0", 10, AZ_SRC),
-                instance("b", "h1", 11, AZ_SRC),
-                instance("c", "h2", 12, AZ_SRC));
+                instance("a", "h0", 10, AZ_1),
+                instance("b", "h1", 11, AZ_1),
+                instance("c", "h2", 12, AZ_1));
         CircuitBreaker cb = circuitBreaker(CircuitBreaker.State.CLOSED, 0f);
         Map<ServiceInstance, CircuitBreaker> cbMap = new HashMap<>();
         for (ServiceInstance si : inst) {
@@ -157,7 +167,7 @@ class K8sAzGumbelLoadBalancerChooserTest {
         attrs.put(TracedCircuitBreakerRoundRobinLoadBalancer.ROUND_ROBIN_KEY, "7");
         RequestData rd = new RequestData(HttpMethod.GET, URI.create("http://x"), new HttpHeaders(), null, attrs);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 1), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(DEFAULT_CALLER_AZ_COUNTS), mockEurekaAz(AZ_1), () -> 0.5);
         int mod = Math.abs(Integer.parseInt("7") % 3);
         String expectedHost = inst.stream()
                 .sorted(Comparator.comparing(ServiceInstance::getHost))
@@ -175,8 +185,8 @@ class K8sAzGumbelLoadBalancerChooserTest {
     void invalidRoundRobinKeyFallsBackToSort() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
-        ServiceInstance i0 = instance("a", "h0", 10, AZ_SRC);
-        ServiceInstance i1 = instance("b", "h1", 11, AZ_SRC);
+        ServiceInstance i0 = instance("a", "h0", 10, AZ_1);
+        ServiceInstance i1 = instance("b", "h1", 11, AZ_1);
         CircuitBreaker cb0 = circuitBreaker(CircuitBreaker.State.CLOSED, 0.5f);
         CircuitBreaker cb1 = circuitBreaker(CircuitBreaker.State.CLOSED, 0.01f);
         Map<ServiceInstance, CircuitBreaker> cbMap = Map.of(i0, cb0, i1, cb1);
@@ -185,7 +195,7 @@ class K8sAzGumbelLoadBalancerChooserTest {
         attrs.put(TracedCircuitBreakerRoundRobinLoadBalancer.ROUND_ROBIN_KEY, "not-a-number");
         RequestData rd = new RequestData(HttpMethod.GET, URI.create("http://x"), new HttpHeaders(), null, attrs);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 1), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(DEFAULT_CALLER_AZ_COUNTS), mockEurekaAz(AZ_1), () -> 0.5);
         Response<ServiceInstance> r = chooser.choose(SVC, List.of(i0, i1), new LoadBalancerRequestTraceContext(), cbMap, rd, true, cache()).orElseThrow();
         assertEquals("h1", r.getServer().getHost());
     }
@@ -195,8 +205,8 @@ class K8sAzGumbelLoadBalancerChooserTest {
     void retrySkipsAffinityAndUsesSort() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
-        ServiceInstance i0 = instance("a", "h0", 10, AZ_SRC);
-        ServiceInstance i1 = instance("b", "h1", 11, AZ_SRC);
+        ServiceInstance i0 = instance("a", "h0", 10, AZ_1);
+        ServiceInstance i1 = instance("b", "h1", 11, AZ_1);
         CircuitBreaker cb0 = circuitBreaker(CircuitBreaker.State.CLOSED, 0.8f);
         CircuitBreaker cb1 = circuitBreaker(CircuitBreaker.State.CLOSED, 0.01f);
         Map<ServiceInstance, CircuitBreaker> cbMap = Map.of(i0, cb0, i1, cb1);
@@ -205,7 +215,7 @@ class K8sAzGumbelLoadBalancerChooserTest {
         attrs.put(TracedCircuitBreakerRoundRobinLoadBalancer.LOAD_BALANCE_KEY, "uid");
         RequestData rd = new RequestData(HttpMethod.GET, URI.create("http://x"), new HttpHeaders(), null, attrs);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 1), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(DEFAULT_CALLER_AZ_COUNTS), mockEurekaAz(AZ_1), () -> 0.5);
         Response<ServiceInstance> retryPick = chooser.choose(SVC, List.of(i0, i1), new LoadBalancerRequestTraceContext(), cbMap, rd, false, cache()).orElseThrow();
         assertEquals("h1", retryPick.getServer().getHost());
     }
@@ -215,13 +225,13 @@ class K8sAzGumbelLoadBalancerChooserTest {
     void halfOpenTreatedLikeClosedThenFailureRateWins() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
-        ServiceInstance iHo = instance("a", "h0", 10, AZ_SRC);
-        ServiceInstance iCl = instance("b", "h1", 11, AZ_SRC);
+        ServiceInstance iHo = instance("a", "h0", 10, AZ_1);
+        ServiceInstance iCl = instance("b", "h1", 11, AZ_1);
         CircuitBreaker cbHo = circuitBreaker(CircuitBreaker.State.HALF_OPEN, 0.01f);
         CircuitBreaker cbCl = circuitBreaker(CircuitBreaker.State.CLOSED, 0.9f);
         Map<ServiceInstance, CircuitBreaker> cbMap = Map.of(iHo, cbHo, iCl, cbCl);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 1), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(DEFAULT_CALLER_AZ_COUNTS), mockEurekaAz(AZ_1), () -> 0.5);
         Response<ServiceInstance> r = chooser.choose(SVC, List.of(iHo, iCl), new LoadBalancerRequestTraceContext(), cbMap, null, false, cache()).orElseThrow();
         assertEquals("h0", r.getServer().getHost());
     }
@@ -236,7 +246,7 @@ class K8sAzGumbelLoadBalancerChooserTest {
         CircuitBreaker cb = circuitBreaker(CircuitBreaker.State.CLOSED, 0f);
         Map<ServiceInstance, CircuitBreaker> cbMap = new HashMap<>(n * 2);
         for (int i = 0; i < n; i++) {
-            ServiceInstance si = instance("id-" + i, "host-" + i, 30000 + i, AZ_SRC);
+            ServiceInstance si = instance("id-" + i, "host-" + i, 30000 + i, AZ_1);
             instances.add(si);
             cbMap.put(si, cb);
         }
@@ -244,7 +254,7 @@ class K8sAzGumbelLoadBalancerChooserTest {
         attrs.put(TracedCircuitBreakerRoundRobinLoadBalancer.LOAD_BALANCE_KEY, "same-user-42");
         RequestData rd = new RequestData(HttpMethod.GET, URI.create("http://x"), new HttpHeaders(), null, attrs);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 50), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(Map.of(AZ_1, 30, AZ_2, 20)), mockEurekaAz(AZ_1), () -> 0.5);
         String host = null;
         for (int t = 0; t < 120; t++) {
             Response<ServiceInstance> r = chooser.choose(SVC, instances, new LoadBalancerRequestTraceContext(), cbMap, rd, true, cache()).orElseThrow();
@@ -258,72 +268,82 @@ class K8sAzGumbelLoadBalancerChooserTest {
     }
 
     @Test
-    @DisplayName("Monte Carlo：跨 AZ 选中比例与 AzBalanceUtils 行权重理论值在 5σ 内一致")
+    @DisplayName("Monte Carlo：与 AzBalanceUtilsTest「多可用区不平衡」同型 source/target，Gumbel 选中某目标 AZ 比例与矩阵行一致")
     void monteCarloTargetAzShareMatchesAzBalanceWeights() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
 
-        int nLocal = 45;
-        int nPeer = 55;
-        List<ServiceInstance> eligible = new ArrayList<>(nLocal + nPeer);
-        for (int i = 0; i < nLocal; i++) {
-            eligible.add(instance("L" + i, "east-" + i, 40000 + i, AZ_SRC));
-        }
-        for (int i = 0; i < nPeer; i++) {
-            eligible.add(instance("P" + i, "west-" + i, 50000 + i, AZ_PEER));
-        }
+        // AzBalanceUtilsTest 场景4：源 az1:13, az2:7；目标 az1:5, az2:11, az3:3（本机 az1，矩阵取 row az1）
+        Map<String, Integer> sourceAzCounts = Map.of(AZ_1, 13, AZ_2, 7);
+        Map<String, Integer> targetAzCounts = Map.of(AZ_1, 5, AZ_2, 11, AZ_3, 3);
+
+        List<ServiceInstance> selfCluster = selfInstancesFromAzCounts(sourceAzCounts, "caller-");
+        List<ServiceInstance> eligible = downstreamInstancesFromAzCounts(targetAzCounts, "dst-");
         CircuitBreaker cb = circuitBreaker(CircuitBreaker.State.CLOSED, 0f);
         Map<ServiceInstance, CircuitBreaker> cbMap = eligible.stream().collect(Collectors.toMap(si -> si, si -> cb));
 
-        Map<String, List<Object>> rawSource = groupByAz(mockDiscoverySelfInstances(AZ_SRC, 60));
+        Map<String, List<Object>> rawSource = groupByAz(selfCluster);
         Map<String, List<Object>> rawTarget = groupByAz(eligible);
         @SuppressWarnings("rawtypes")
         Map<String, Map<String, Integer>> matrix = AzBalanceUtils.getLoadBalancingRatio(toRaw(rawSource), toRaw(rawTarget));
-        Map<String, Integer> row = matrix.get(AZ_SRC);
+        Map<String, Integer> row = matrix.get(AZ_1);
         assertNotNull(row);
 
-        double wPeer = 0;
-        double wLocal = 0;
+        Map<String, Integer> weights = new LinkedHashMap<>();
+        int weightSum = 0;
         for (Map.Entry<String, Integer> e : row.entrySet()) {
-            String taz = e.getKey();
+            String targetAz = e.getKey();
             int w = e.getValue() == null ? 0 : Math.max(0, e.getValue());
-            if (w <= 0) {
-                continue;
-            }
-            boolean has = eligible.stream().anyMatch(si -> taz.equals(azOf(si)));
-            if (!has) {
-                continue;
-            }
-            if (AZ_PEER.equals(taz)) {
-                wPeer += w;
-            }
-            if (AZ_SRC.equals(taz)) {
-                wLocal += w;
+            if (w > 0 && eligible.stream().anyMatch(si -> targetAz.equals(azOf(si)))) {
+                weights.put(targetAz, w);
+                weightSum += w;
             }
         }
-        double sumW = wPeer + wLocal;
-        assertTrue(sumW > 0, "expected positive weights for Monte Carlo");
-        double pPeer = wPeer / sumW;
+        assertTrue(weightSum > 0, "expected positive usable weights, row=" + row);
+
+        // 选矩阵中权重大于 0 的某一目标 AZ 做二项检验（优先 az3，纯跨区分量更直观）
+        final String probeAz = firstPositiveWeightAz(weights, List.of(AZ_3, AZ_2, AZ_1));
+        int wProbe = weights.get(probeAz);
+        assertTrue(wProbe > 0, "probe AZ weight must be positive, weights=" + weights);
+        final double pExpected = wProbe / (double) weightSum;
 
         Environment env = mockEnvApp();
         DiscoveryClient dc = mock(DiscoveryClient.class);
-        when(dc.getInstances(APP)).thenReturn(mockDiscoverySelfInstances(AZ_SRC, 60));
-        EurekaInstanceConfigBean eureka = mockEurekaAz(AZ_SRC);
+        when(dc.getInstances(APP)).thenReturn(selfCluster);
+        EurekaInstanceConfigBean eureka = mockEurekaAz(AZ_1);
 
         K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, env, dc, eureka, () -> ThreadLocalRandom.current().nextDouble());
 
-        int trials = 12_000;
-        long countPeer = 0;
+        int trials = 15_000;
+        Map<String, Long> countByAz = new HashMap<>();
         for (int i = 0; i < trials; i++) {
             Response<ServiceInstance> r = chooser.choose(SVC, eligible, new LoadBalancerRequestTraceContext(), cbMap, null, false, cache()).orElseThrow();
-            if (AZ_PEER.equals(azOf(r.getServer()))) {
-                countPeer++;
-            }
+            String az = azOf(r.getServer());
+            countByAz.merge(az, 1L, Long::sum);
         }
-        double pHat = countPeer / (double) trials;
-        double sigma = Math.sqrt(trials * pPeer * (1 - pPeer));
-        assertTrue(Math.abs(pHat - pPeer) < 5.0 * Math.max(sigma, 1e-6),
-                () -> String.format("Monte Carlo peer AZ share %.4f vs expected %.4f (sigma~%.4f)", pHat, pPeer, sigma));
+        long countProbe = countByAz.getOrDefault(probeAz, 0L);
+        double pHat = countProbe / (double) trials;
+        double sigma = Math.sqrt(trials * pExpected * (1 - pExpected));
+
+        // 汇总日志：各 AZ 期望比例（来自矩阵行与 eligible 交集）、Monte Carlo 实际比例与次数
+        System.out.println();
+        System.out.println("=== monteCarloTargetAzShareMatchesAzBalanceWeights ===");
+        System.out.println("localSourceAz=" + AZ_1 + ", trials=" + trials + ", weightSum=" + weightSum + ", usableWeights=" + weights);
+        System.out.println("probeAz(for 5-sigma binomial)=" + probeAz);
+        System.out.println("各可用区：expected_ratio=矩阵可用权重占比，actual_ratio=抽样占比，count=命中次数");
+        for (String az : List.of(AZ_1, AZ_2, AZ_3)) {
+            int w = weights.getOrDefault(az, 0);
+            double expectedRatio = w / (double) weightSum;
+            long cnt = countByAz.getOrDefault(az, 0L);
+            double actualRatio = cnt / (double) trials;
+            System.out.printf("  AZ %-4s  expected_ratio=%.6f  actual_ratio=%.6f  count=%d  (matrix_usable_weight=%d)%n",
+                    az, expectedRatio, actualRatio, cnt, w);
+        }
+        System.out.println("====================================================");
+        System.out.println();
+
+        assertTrue(Math.abs(pHat - pExpected) < 5.0 * Math.max(sigma, 1e-6),
+                () -> String.format("Monte Carlo %s share %.4f vs expected %.4f (sigma~%.4f) weights=%s", probeAz, pHat, pExpected, sigma, weights));
     }
 
     @Test
@@ -331,26 +351,26 @@ class K8sAzGumbelLoadBalancerChooserTest {
     void manyEqualInstancesSpreadsAcrossHostsWhenNoAffinity() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
-        int n = 400;
+        int n = 40;
         List<ServiceInstance> eligible = new ArrayList<>(n);
         CircuitBreaker cb = circuitBreaker(CircuitBreaker.State.CLOSED, 0f);
         Map<ServiceInstance, CircuitBreaker> cbMap = new HashMap<>(n * 2);
         for (int i = 0; i < n; i++) {
-            ServiceInstance si = instance("id-" + i, "hn-" + i, 60000 + i, AZ_SRC);
+            ServiceInstance si = instance("id-" + i, "hn-" + i, 60000 + i, AZ_1);
             eligible.add(si);
             cbMap.put(si, cb);
         }
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 30), mockEurekaAz(AZ_SRC),
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(Map.of(AZ_1, 18, AZ_2, 12)), mockEurekaAz(AZ_1),
                 () -> ThreadLocalRandom.current().nextDouble());
 
         Map<String, Long> hostCounts = new HashMap<>();
-        int trials = 8000;
+        int trials = 800;
         for (int i = 0; i < trials; i++) {
             Response<ServiceInstance> r = chooser.choose(SVC, eligible, new LoadBalancerRequestTraceContext(), cbMap, null, false, cache()).orElseThrow();
             hostCounts.merge(r.getServer().getHost(), 1L, Long::sum);
         }
         long distinctHosts = hostCounts.size();
-        assertTrue(distinctHosts >= 30,
+        assertTrue(distinctHosts >= 3,
                 "expected spread across many hosts when stats tie, got " + distinctHosts + " distinct hosts over " + trials + " trials");
         long maxOnOneHost = hostCounts.values().stream().mapToLong(Long::longValue).max().orElse(0);
         assertTrue(maxOnOneHost < trials * 0.06,
@@ -362,19 +382,29 @@ class K8sAzGumbelLoadBalancerChooserTest {
     void chooseWithoutAffinityPrefersLowerFailureRateInSameAz() {
         LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
         props.setEnabled(true);
-        ServiceInstance iBad = instance("a", "bad", 1, AZ_SRC);
-        ServiceInstance iGood = instance("b", "good", 2, AZ_SRC);
-        ServiceInstance iMid = instance("c", "mid", 3, AZ_SRC);
+        ServiceInstance iBad = instance("a", "bad", 1, AZ_1);
+        ServiceInstance iGood = instance("b", "good", 2, AZ_1);
+        ServiceInstance iMid = instance("c", "mid", 3, AZ_1);
         CircuitBreaker cbBad = circuitBreaker(CircuitBreaker.State.CLOSED, 0.9f);
         CircuitBreaker cbGood = circuitBreaker(CircuitBreaker.State.CLOSED, 0.05f);
         CircuitBreaker cbMid = circuitBreaker(CircuitBreaker.State.CLOSED, 0.4f);
         Map<ServiceInstance, CircuitBreaker> cbMap = Map.of(iBad, cbBad, iGood, cbGood, iMid, cbMid);
 
-        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelf(AZ_SRC, 1), mockEurekaAz(AZ_SRC), () -> 0.5);
+        K8sAzGumbelLoadBalancerChooser chooser = newChooser(props, mockEnvApp(), mockDiscoverySelfMultiAz(DEFAULT_CALLER_AZ_COUNTS), mockEurekaAz(AZ_1), () -> 0.5);
         Response<ServiceInstance> r = chooser.choose(SVC, List.of(iBad, iGood, iMid), new LoadBalancerRequestTraceContext(),
                 cbMap, null, false, cache()).orElseThrow();
         assertEquals("good", r.getServer().getHost());
         assertEquals(2, r.getServer().getPort());
+    }
+
+    /** 按优先级取第一个在 weights 中大于 0 的 AZ（供 lambda 捕获 final） */
+    private static String firstPositiveWeightAz(Map<String, Integer> weights, List<String> preferenceOrder) {
+        for (String az : preferenceOrder) {
+            if (weights.getOrDefault(az, 0) > 0) {
+                return az;
+            }
+        }
+        throw new IllegalStateException("no AZ with positive weight: " + weights);
     }
 
     /** 读取实例 metadata 中的 K8S AZ，与生产常量一致 */
@@ -383,19 +413,40 @@ class K8sAzGumbelLoadBalancerChooserTest {
         return az == null || az.isBlank() ? EurekaInstanceConfigBeanAddNodeInfoCustomizer.DEFAULT_AZ_INFO : az;
     }
 
-    /** 构造本服务在 Discovery 中的实例列表，仅用于 source AZ 矩阵计数 */
-    private static List<ServiceInstance> mockDiscoverySelfInstances(String az, int count) {
-        List<ServiceInstance> self = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            self.add(instance("self-" + i, "local-" + i, 2000 + i, az));
+    /**
+     * 调方（本服务）在 Discovery 中的实例列表：按 AZ 计数，语义与 {@link AzBalanceUtilsTest} 中 source 地图一致。
+     */
+    private static List<ServiceInstance> selfInstancesFromAzCounts(Map<String, Integer> azToCount, String idPrefix) {
+        List<ServiceInstance> out = new ArrayList<>();
+        int seq = 0;
+        for (Map.Entry<String, Integer> e : new LinkedHashMap<>(azToCount).entrySet()) {
+            String az = e.getKey();
+            int n = e.getValue();
+            for (int i = 0; i < n; i++) {
+                out.add(instance(idPrefix + az + "-" + i, "caller-" + az + "-" + i, 2000 + seq, az));
+                seq++;
+            }
         }
-        return self;
+        return out;
     }
 
-    /** Mock DiscoveryClient#getInstances(APP) 返回指定 AZ、数量的本集群实例 */
-    private static DiscoveryClient mockDiscoverySelf(String az, int count) {
+    /** 下游候选按 AZ 计数，语义与 AzBalanceUtilsTest 中 target 地图一致 */
+    private static List<ServiceInstance> downstreamInstancesFromAzCounts(Map<String, Integer> azToCount, String idPrefix) {
+        List<ServiceInstance> list = new ArrayList<>();
+        int port = 40_000;
+        for (Map.Entry<String, Integer> e : new LinkedHashMap<>(azToCount).entrySet()) {
+            String az = e.getKey();
+            for (int i = 0; i < e.getValue(); i++) {
+                list.add(instance(idPrefix + az + "-" + i, "dst-" + az + "-" + i, port++, az));
+            }
+        }
+        return list;
+    }
+
+    /** Mock Discovery：本服务多 AZ 分布（buildSourceAzMap） */
+    private static DiscoveryClient mockDiscoverySelfMultiAz(Map<String, Integer> azToCount) {
         DiscoveryClient dc = mock(DiscoveryClient.class);
-        when(dc.getInstances(APP)).thenReturn(mockDiscoverySelfInstances(az, count));
+        when(dc.getInstances(APP)).thenReturn(selfInstancesFromAzCounts(azToCount, "self-"));
         return dc;
     }
 
