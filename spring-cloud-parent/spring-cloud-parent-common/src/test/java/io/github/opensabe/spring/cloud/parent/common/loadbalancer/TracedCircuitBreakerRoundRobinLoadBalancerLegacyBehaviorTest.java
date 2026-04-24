@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.Response;
@@ -153,6 +155,27 @@ class TracedCircuitBreakerRoundRobinLoadBalancerLegacyBehaviorTest {
 
         Response<ServiceInstance> r = lb.selectServiceInstanceForTest(List.of(i0, i1), ctx);
         assertEquals(expected.getHost(), r.getServer().getHost());
+    }
+
+    @Test
+    @DisplayName("K8S 开启：仅首次调 chooser，重试只走 called 感知的 legacy 且不再调 chooser")
+    void k8sEnabledRetry_skipsK8sChooser_noSecondChooseCall() {
+        LoadBalancerK8sAzBalanceProperties props = new LoadBalancerK8sAzBalanceProperties();
+        props.setEnabled(true);
+        K8sAzGumbelLoadBalancerChooser chooser = mock(K8sAzGumbelLoadBalancerChooser.class);
+        ServiceInstance i0 = instance("a", "h0", 80);
+        ServiceInstance i1 = instance("b", "h1", 81);
+        when(chooser.choose(anyString(), any(), any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(Optional.of(new DefaultResponse(i0)));
+
+        TracedCircuitBreakerRoundRobinLoadBalancer lb = newBalancerEightArg(props, chooser);
+        RequestDataContext ctx = requestContextWithLoadBalanceKey("retry-k8s");
+        List<ServiceInstance> pair = List.of(i0, i1);
+
+        lb.selectServiceInstanceForTest(pair, ctx);
+        lb.selectServiceInstanceForTest(pair, ctx);
+
+        verify(chooser, times(1)).choose(anyString(), any(), any(), any(), any(), anyBoolean(), any());
     }
 
     @Test

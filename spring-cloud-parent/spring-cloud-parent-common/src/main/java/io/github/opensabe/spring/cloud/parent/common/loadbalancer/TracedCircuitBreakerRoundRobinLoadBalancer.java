@@ -283,8 +283,9 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         Response<ServiceInstance> result = null;
         RequestData clientRequest = requestDataContext.getClientRequest();
 
-        // K8S AZ 路径：仅在三元条件满足且 chooser 返回非空时短路；否则继续走下方原有亲和与排序逻辑
-        if (k8sAzBalanceEnabled()) {
+        // K8S AZ 路径：仅首次选路且 chooser 返回非空时短路。重试时与下方「不尝试 clientRequest 亲和」一致，不走
+        // Gumbel 选桶：否则只按跨 AZ 权重定 inAz，无法像 loadBalancedByRequestLoadBalancerContext 那样用 calledInstances 优先换未调用实例。
+        if (k8sAzBalanceEnabled() && requestLoadBalancerContext.getCount() == 0) {
             Optional<Response<ServiceInstance>> k8sPick = k8sAzGumbelLoadBalancerChooser.choose(
                     serviceId,
                     serviceInstances,
