@@ -182,16 +182,16 @@ public class K8sAzGumbelLoadBalancerChooser {
 
         ServiceInstance picked;
         if (useClientAffinity && clientRequest != null) {
-            picked = pickWithAffinityInAz(inAzForAffinity, clientRequest, serviceId, requestLoadBalancerContext);
-            if (picked != null && isNewlyStartup(picked)) {
-                logPerRequestDetail(requestLoadBalancerContext,
-                        "K8sAzGumbelLoadBalancerChooser serviceId={} affinity picked newly startup instance {}, use legacy sort in AZ {}",
-                        serviceId, picked.getInstanceId(), tStar);
-                picked = null;
-            }
+            picked = pickWithAffinityInAz(
+                    inAzForAffinity,
+                    clientRequest,
+                    serviceId,
+                    requestLoadBalancerContext,
+                    serviceInstanceCircuitBreakerMap);
         } else {
             picked = null;
         }
+        // 亲和未命中或 HALF_OPEN 等退回排序时：HALF_OPEN 仍可按 sort 规则分到流量，避免从负载均衡中彻底消失而无法恢复。
         if (picked == null) {
             picked = sortAndPickFirst(inAz, requestLoadBalancerContext, serviceInstanceCircuitBreakerMap, loadBalancedCount, serviceId);
         }
@@ -210,16 +210,29 @@ public class K8sAzGumbelLoadBalancerChooser {
                     "K8sAzGumbelLoadBalancerChooser serviceId={} single target AZ {}, skip Gumbel", serviceId, only);
             return only;
         }
-        String bestAz = null;
+        // 非空默认值：random / log 出现 NaN 时比较链不会更新 bestAz，避免返回 null 与下游 NPE
+        String bestAz = weights.keySet().iterator().next();
         double bestScore = Double.NEGATIVE_INFINITY;
         for (Map.Entry<String, Integer> e : weights.entrySet()) {
             int w = e.getValue();
-            double gumbel = -Math.log(-Math.log(clampUnit(randomUnit.get())));
+            if (w <= 0) {
+                continue;
+            }
+            double rawU = randomUnit.get();
+            double unit = clampUnit(Double.isNaN(rawU) || Double.isInfinite(rawU) ? 0.5 : rawU);
+            double innerLog = -Math.log(unit);
+            if (Double.isNaN(innerLog) || innerLog <= 0.0) {
+                continue;
+            }
+            double gumbel = -Math.log(innerLog);
+            if (Double.isNaN(gumbel) || Double.isInfinite(gumbel)) {
+                continue;
+            }
             double score = Math.log(w) + gumbel;
             logPerRequestDetail(requestLoadBalancerContext,
                     "K8sAzGumbelLoadBalancerChooser serviceId={} Gumbel candidate az={} weight={} score={}",
                     serviceId, e.getKey(), w, score);
-            if (score > bestScore) {
+            if (!Double.isNaN(score) && !Double.isInfinite(score) && score > bestScore) {
                 bestScore = score;
                 bestAz = e.getKey();
             }
@@ -230,6 +243,9 @@ public class K8sAzGumbelLoadBalancerChooser {
     }
 
     private static double clampUnit(double u) {
+        if (Double.isNaN(u) || Double.isInfinite(u)) {
+            return 0.5;
+        }
         if (u <= 0.0) {
             return 1e-12;
         }
@@ -259,16 +275,24 @@ public class K8sAzGumbelLoadBalancerChooser {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 亲和命中失败（含 HALF_OPEN 等）时返回 null，由 {@link #sortAndPickFirst} 选路；HALF_OPEN 不得从全链路剔除，见
+     * {@link #affinityPickCircuitHealthy} 注释。
+     */
     private ServiceInstance pickWithAffinityInAz(
             List<ServiceInstance> inAz,
             RequestData clientRequest,
             String serviceId,
-            LoadBalancerRequestTraceContext requestLoadBalancerContext) {
+            LoadBalancerRequestTraceContext requestLoadBalancerContext,
+            Map<ServiceInstance, CircuitBreaker> serviceInstanceCircuitBreakerMap) {
         Map<String, Object> attributes = clientRequest.getAttributes();
         Object loadKey = attributes.get(TracedCircuitBreakerRoundRobinLoadBalancer.LOAD_BALANCE_KEY);
         if (loadKey != null) {
             int idx = Math.abs(loadKey.hashCode() % inAz.size());
             ServiceInstance si = inAz.get(idx);
+            if (!affinityPickCircuitHealthy(si, serviceInstanceCircuitBreakerMap)) {
+                return null;
+            }
             logPerRequestDetail(requestLoadBalancerContext,
                     "K8sAzGumbelLoadBalancerChooser serviceId={} LOAD_BALANCE_KEY affinity in az -> {}:{}",
                     serviceId, si.getHost(), si.getPort());
@@ -279,6 +303,9 @@ public class K8sAzGumbelLoadBalancerChooser {
             try {
                 int mod = Math.abs(Integer.parseInt(rrKey.toString()) % inAz.size());
                 ServiceInstance si = inAz.get(mod);
+                if (!affinityPickCircuitHealthy(si, serviceInstanceCircuitBreakerMap)) {
+                    return null;
+                }
                 logPerRequestDetail(requestLoadBalancerContext,
                         "K8sAzGumbelLoadBalancerChooser serviceId={} ROUND_ROBIN_KEY affinity in az -> {}:{}",
                         serviceId, si.getHost(), si.getPort());
@@ -289,6 +316,31 @@ public class K8sAzGumbelLoadBalancerChooser {
             }
         }
         return null;
+    }
+
+    /**
+     * 判断「是否允许用亲和键把请求钉到该实例」。
+     * <p>
+     * 返回 false 表示不走亲和捷径，交给 {@link #sortAndPickFirst} 在整个 inAz 上重选；实例不会从候选列表里删掉，
+     * HALF_OPEN 仍可能通过排序被选中（排序里 HALF_OPEN 与 CLOSED 同级，见该方法）。
+     * 只有「从全局负载均衡彻底剔除 HALF_OPEN」才会导致无法探测恢复；本方法不做剔除，只做「是否允许亲和钉死」。
+     */
+    private boolean affinityPickCircuitHealthy(
+            ServiceInstance si,
+            Map<ServiceInstance, CircuitBreaker> serviceInstanceCircuitBreakerMap) {
+        CircuitBreaker cb = serviceInstanceCircuitBreakerMap.get(si);
+        if (cb == null) {
+            return false;
+        }
+        CircuitBreaker.State state = cb.getState();
+        if (state == CircuitBreaker.State.OPEN) {
+            return false;
+        }
+        // HALF_OPEN：不允许「仅因 hash/mod 就固定选中」这一条亲和路径；不是从 inAz 剔除。下一步 sort 仍包含本实例且与 CLOSED 同级，可分到探测流量。
+        if (state == CircuitBreaker.State.HALF_OPEN) {
+            return false;
+        }
+        return !isNewlyStartup(si);
     }
 
     private ServiceInstance sortAndPickFirst(
@@ -310,6 +362,7 @@ public class K8sAzGumbelLoadBalancerChooser {
                         .build()));
         List<ServiceInstance> sorted = inAz.stream()
                 .sorted(Comparator
+                        // 与 TracedCircuitBreakerRoundRobinLoadBalancer 一致：HALF_OPEN 与 CLOSED 同级，避免 HALF_OPEN 永远垫底吃不到流量而无法恢复。
                         .<ServiceInstance>comparingInt(si -> {
                             CircuitBreaker.State state = statMap.get(si).getState();
                             if (state == CircuitBreaker.State.HALF_OPEN) {

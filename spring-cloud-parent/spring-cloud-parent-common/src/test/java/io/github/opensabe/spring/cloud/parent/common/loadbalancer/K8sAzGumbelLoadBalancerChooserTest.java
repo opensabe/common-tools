@@ -323,7 +323,8 @@ class K8sAzGumbelLoadBalancerChooserTest {
         }
         long countProbe = countByAz.getOrDefault(probeAz, 0L);
         double pHat = countProbe / (double) trials;
-        double sigma = Math.sqrt(trials * pExpected * (1 - pExpected));
+        // 比例 pHat 的标准误 SE(p) = sqrt(p*(1-p)/n)，勿用计数标准差 sqrt(n*p*(1-p))
+        double se = Math.sqrt(pExpected * (1 - pExpected) / trials);
 
         // 汇总日志：各 AZ 期望比例（来自矩阵行与 eligible 交集）、Monte Carlo 实际比例与次数
         System.out.println();
@@ -342,8 +343,8 @@ class K8sAzGumbelLoadBalancerChooserTest {
         System.out.println("====================================================");
         System.out.println();
 
-        assertTrue(Math.abs(pHat - pExpected) < 5.0 * Math.max(sigma, 1e-6),
-                () -> String.format("Monte Carlo %s share %.4f vs expected %.4f (sigma~%.4f) weights=%s", probeAz, pHat, pExpected, sigma, weights));
+        assertTrue(Math.abs(pHat - pExpected) < 5.0 * Math.max(se, 1e-6),
+                () -> String.format("Monte Carlo %s share %.4f vs expected %.4f (se~%.6f) weights=%s", probeAz, pHat, pExpected, se, weights));
     }
 
     @Test
