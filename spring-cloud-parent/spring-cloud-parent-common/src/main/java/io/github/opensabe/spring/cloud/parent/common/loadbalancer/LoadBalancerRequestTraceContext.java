@@ -37,9 +37,9 @@ public class LoadBalancerRequestTraceContext {
     /** 本 trace 内已选过的 K8S 节点标识 */
     private final Set<String> calledNodes = Sets.newHashSet();
     /**
-     * 约 10% 概率为 true，排序明细走 INFO，其余走 DEBUG，用于控制日志量。
+     * 约 5% 概率为 true，排序明细走 INFO，其余走 DEBUG，用于控制日志量。
      */
-    private final boolean detailLog = ThreadLocalRandom.current().nextInt(0, 100) < 10;
+    private final boolean detailLog = ThreadLocalRandom.current().nextInt(0, 10000) < 500;
     /**
      * 第一次选择前为 0；每次 {@link TracedCircuitBreakerRoundRobinLoadBalancer} 记录选择后自增，大于 0 表示重试路径。
      */

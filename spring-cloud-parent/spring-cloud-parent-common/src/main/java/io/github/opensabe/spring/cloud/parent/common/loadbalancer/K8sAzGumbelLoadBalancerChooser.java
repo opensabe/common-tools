@@ -112,7 +112,8 @@ public class K8sAzGumbelLoadBalancerChooser {
                         && serviceInstanceCircuitBreakerMap.get(si).getState() != CircuitBreaker.State.OPEN)
                 .collect(Collectors.toList());
         int openFiltered = serviceInstances.size() - eligible.size();
-        log.info("K8sAzGumbelLoadBalancerChooser serviceId={} after OPEN filter: eligible={}, filteredOpen={}",
+        logPerRequestDetail(requestLoadBalancerContext,
+                "K8sAzGumbelLoadBalancerChooser serviceId={} after OPEN filter: eligible={}, filteredOpen={}",
                 serviceId, eligible.size(), openFiltered);
         if (eligible.isEmpty()) {
             log.info("K8sAzGumbelLoadBalancerChooser serviceId={} all instances OPEN, defer to legacy path", serviceId);
@@ -122,14 +123,15 @@ public class K8sAzGumbelLoadBalancerChooser {
         Collections.shuffle(eligible);
         if (eligible.stream().allMatch(si -> requestLoadBalancerContext.getCalledInstances()
                 .contains(instanceKey(si)))) {
-            log.info("K8sAzGumbelLoadBalancerChooser serviceId={} all eligible instances already called in trace, clearing called sets",
+            logPerRequestDetail(requestLoadBalancerContext,
+                    "K8sAzGumbelLoadBalancerChooser serviceId={} all eligible instances already called in trace, clearing called sets",
                     serviceId);
             requestLoadBalancerContext.getCalledInstances().clear();
             requestLoadBalancerContext.getCalledNodes().clear();
         }
 
         String localSourceAz = resolveLocalK8sAzInfo();
-        Map<String, List<Object>> sourceAzMap = buildSourceAzMap(localSourceAz);
+        Map<String, List<Object>> sourceAzMap = buildSourceAzMap(localSourceAz, requestLoadBalancerContext);
         Map<String, List<Object>> targetAzMap = buildTargetAzMap(eligible);
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -156,10 +158,11 @@ public class K8sAzGumbelLoadBalancerChooser {
             return Optional.empty();
         }
 
-        log.info("K8sAzGumbelLoadBalancerChooser serviceId={} sourceAz={} AzBalanceUtils row={} usableWeights={} sum={}",
+        logPerRequestDetail(requestLoadBalancerContext,
+                "K8sAzGumbelLoadBalancerChooser serviceId={} sourceAz={} AzBalanceUtils row={} usableWeights={} sum={}",
                 serviceId, localSourceAz, row, weights, weightSum);
 
-        String tStar = pickTargetAzByGumbelMax(weights, serviceId);
+        String tStar = pickTargetAzByGumbelMax(weights, serviceId, requestLoadBalancerContext);
         List<ServiceInstance> inAz = eligible.stream()
                 .filter(si -> tStar.equals(k8sAzOf(si)))
                 .collect(Collectors.toList());
@@ -172,14 +175,17 @@ public class K8sAzGumbelLoadBalancerChooser {
         List<ServiceInstance> inAzForAffinity = inAz;
         if (useClientAffinity && clientRequest != null && hasClientAffinityKeys(clientRequest)) {
             inAzForAffinity = sortInstancesStableForAffinity(inAz);
-            log.info("K8sAzGumbelLoadBalancerChooser serviceId={} stable-sorted {} instances in az={} for affinity", serviceId, inAzForAffinity.size(), tStar);
+            logPerRequestDetail(requestLoadBalancerContext,
+                    "K8sAzGumbelLoadBalancerChooser serviceId={} stable-sorted {} instances in az={} for affinity",
+                    serviceId, inAzForAffinity.size(), tStar);
         }
 
         ServiceInstance picked;
         if (useClientAffinity && clientRequest != null) {
-            picked = pickWithAffinityInAz(inAzForAffinity, clientRequest, serviceId);
+            picked = pickWithAffinityInAz(inAzForAffinity, clientRequest, serviceId, requestLoadBalancerContext);
             if (picked != null && isNewlyStartup(picked)) {
-                log.info("K8sAzGumbelLoadBalancerChooser serviceId={} affinity picked newly startup instance {}, use legacy sort in AZ {}",
+                logPerRequestDetail(requestLoadBalancerContext,
+                        "K8sAzGumbelLoadBalancerChooser serviceId={} affinity picked newly startup instance {}, use legacy sort in AZ {}",
                         serviceId, picked.getInstanceId(), tStar);
                 picked = null;
             }
@@ -194,10 +200,14 @@ public class K8sAzGumbelLoadBalancerChooser {
         return Optional.of(new DefaultResponse(picked));
     }
 
-    private String pickTargetAzByGumbelMax(Map<String, Integer> weights, String serviceId) {
+    private String pickTargetAzByGumbelMax(
+            Map<String, Integer> weights,
+            String serviceId,
+            LoadBalancerRequestTraceContext requestLoadBalancerContext) {
         if (weights.size() == 1) {
             String only = weights.keySet().iterator().next();
-            log.info("K8sAzGumbelLoadBalancerChooser serviceId={} single target AZ {}, skip Gumbel", serviceId, only);
+            logPerRequestDetail(requestLoadBalancerContext,
+                    "K8sAzGumbelLoadBalancerChooser serviceId={} single target AZ {}, skip Gumbel", serviceId, only);
             return only;
         }
         String bestAz = null;
@@ -206,13 +216,16 @@ public class K8sAzGumbelLoadBalancerChooser {
             int w = e.getValue();
             double gumbel = -Math.log(-Math.log(clampUnit(randomUnit.get())));
             double score = Math.log(w) + gumbel;
-            log.info("K8sAzGumbelLoadBalancerChooser serviceId={} Gumbel candidate az={} weight={} score={}", serviceId, e.getKey(), w, score);
+            logPerRequestDetail(requestLoadBalancerContext,
+                    "K8sAzGumbelLoadBalancerChooser serviceId={} Gumbel candidate az={} weight={} score={}",
+                    serviceId, e.getKey(), w, score);
             if (score > bestScore) {
                 bestScore = score;
                 bestAz = e.getKey();
             }
         }
-        log.info("K8sAzGumbelLoadBalancerChooser serviceId={} Gumbel-max winner az={} score={}", serviceId, bestAz, bestScore);
+        logPerRequestDetail(requestLoadBalancerContext,
+                "K8sAzGumbelLoadBalancerChooser serviceId={} Gumbel-max winner az={} score={}", serviceId, bestAz, bestScore);
         return bestAz;
     }
 
@@ -246,13 +259,19 @@ public class K8sAzGumbelLoadBalancerChooser {
                 .collect(Collectors.toList());
     }
 
-    private ServiceInstance pickWithAffinityInAz(List<ServiceInstance> inAz, RequestData clientRequest, String serviceId) {
+    private ServiceInstance pickWithAffinityInAz(
+            List<ServiceInstance> inAz,
+            RequestData clientRequest,
+            String serviceId,
+            LoadBalancerRequestTraceContext requestLoadBalancerContext) {
         Map<String, Object> attributes = clientRequest.getAttributes();
         Object loadKey = attributes.get(TracedCircuitBreakerRoundRobinLoadBalancer.LOAD_BALANCE_KEY);
         if (loadKey != null) {
             int idx = Math.abs(loadKey.hashCode() % inAz.size());
             ServiceInstance si = inAz.get(idx);
-            log.info("K8sAzGumbelLoadBalancerChooser serviceId={} LOAD_BALANCE_KEY affinity in az -> {}:{}", serviceId, si.getHost(), si.getPort());
+            logPerRequestDetail(requestLoadBalancerContext,
+                    "K8sAzGumbelLoadBalancerChooser serviceId={} LOAD_BALANCE_KEY affinity in az -> {}:{}",
+                    serviceId, si.getHost(), si.getPort());
             return si;
         }
         Object rrKey = attributes.get(TracedCircuitBreakerRoundRobinLoadBalancer.ROUND_ROBIN_KEY);
@@ -260,10 +279,13 @@ public class K8sAzGumbelLoadBalancerChooser {
             try {
                 int mod = Math.abs(Integer.parseInt(rrKey.toString()) % inAz.size());
                 ServiceInstance si = inAz.get(mod);
-                log.info("K8sAzGumbelLoadBalancerChooser serviceId={} ROUND_ROBIN_KEY affinity in az -> {}:{}", serviceId, si.getHost(), si.getPort());
+                logPerRequestDetail(requestLoadBalancerContext,
+                        "K8sAzGumbelLoadBalancerChooser serviceId={} ROUND_ROBIN_KEY affinity in az -> {}:{}",
+                        serviceId, si.getHost(), si.getPort());
                 return si;
             } catch (NumberFormatException ex) {
-                log.info("K8sAzGumbelLoadBalancerChooser serviceId={} invalid ROUND_ROBIN_KEY {}", serviceId, rrKey);
+                logPerRequestDetail(requestLoadBalancerContext,
+                        "K8sAzGumbelLoadBalancerChooser serviceId={} invalid ROUND_ROBIN_KEY {}", serviceId, rrKey);
             }
         }
         return null;
@@ -327,14 +349,15 @@ public class K8sAzGumbelLoadBalancerChooser {
         return EurekaInstanceConfigBeanAddNodeInfoCustomizer.DEFAULT_AZ_INFO;
     }
 
-    private Map<String, List<Object>> buildSourceAzMap(String localSourceAz) {
+    private Map<String, List<Object>> buildSourceAzMap(String localSourceAz, LoadBalancerRequestTraceContext traceCtx) {
         String appName = environment.getProperty("spring.application.name");
         DiscoveryClient discoveryClient = discoveryClientProvider.getIfAvailable();
         List<ServiceInstance> self = (discoveryClient == null || StringUtils.isBlank(appName))
                 ? List.of()
                 : discoveryClient.getInstances(appName);
         if (self.isEmpty()) {
-            log.info("K8sAzGumbelLoadBalancerChooser buildSourceAzMap: no discovery instances for appName={}, use single placeholder for az={}",
+            logPerRequestDetail(traceCtx,
+                    "K8sAzGumbelLoadBalancerChooser buildSourceAzMap: no discovery instances for appName={}, use single placeholder for az={}",
                     appName, localSourceAz);
             return Map.of(localSourceAz, Collections.singletonList(new Object()));
         }
@@ -342,9 +365,22 @@ public class K8sAzGumbelLoadBalancerChooser {
         for (ServiceInstance si : self) {
             map.computeIfAbsent(k8sAzOf(si), k -> new ArrayList<>()).add(new Object());
         }
-        log.info("K8sAzGumbelLoadBalancerChooser buildSourceAzMap: appName={} azCounts={}", appName,
+        logPerRequestDetail(traceCtx,
+                "K8sAzGumbelLoadBalancerChooser buildSourceAzMap: appName={} azCounts={}", appName,
                 map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size())));
         return map;
+    }
+
+    /**
+     * 非关键路径：默认 DEBUG；{@link LoadBalancerRequestTraceContext#isDetailLog()} 为 true 时打 INFO，与
+     * {@link #sortAndPickFirst} 行为一致。
+     */
+    private void logPerRequestDetail(LoadBalancerRequestTraceContext ctx, String message, Object... params) {
+        if (ctx != null && ctx.isDetailLog()) {
+            log.info(message, params);
+        } else {
+            log.debug(message, params);
+        }
     }
 
     private static Map<String, List<Object>> buildTargetAzMap(List<ServiceInstance> eligible) {
