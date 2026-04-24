@@ -20,8 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -44,7 +43,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.LeaseInfo;
 
@@ -95,9 +93,9 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
     private static final long HALF_OPEN_WEIGHT = 10;
     //这里通过 RequestDataContext 来确定请求在负载均衡器的上下文
     //需要注意，如果是重试请求，必须使用最初的 RequestDataContext，不能每次重试使用新的 RequestDataContext，否则负载均衡器的上下文也是新的
-    //这里使用了 Caffeine 的 weakKeys，如果 RequestDataContext 被回收了，那么对应的 RequestLoadBalancerContext 也会被回收
+    //这里使用了 Caffeine 的 weakKeys，如果 RequestDataContext 被回收了，那么对应的 LoadBalancerRequestTraceContext 也会被回收
     //所以，web 和 webflux 还有 gateway 包都加了单元测试验证这一点
-    private final Cache<RequestDataContext, RequestLoadBalancerContext> requestRequestDataContextMap =
+    private final Cache<RequestDataContext, LoadBalancerRequestTraceContext> requestRequestDataContextMap =
             Caffeine.newBuilder().weakKeys().weakValues().build();
     //负载均衡次数
     private final LoadingCache<String, AtomicLong> loadBalancedCount = Caffeine.newBuilder()
@@ -109,6 +107,14 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
     private CircuitBreakerExtractor circuitBreakerExtractor;
     private CircuitBreakerRegistry circuitBreakerRegistry;
     private UnifiedObservationFactory unifiedObservationFactory;
+    /**
+     * K8S AZ 加权与 Gumbel 选路配置；为 null 或 {@code isEnabled()==false} 时不参与选路，行为与改造前一致。
+     */
+    private LoadBalancerK8sAzBalanceProperties k8sAzBalanceProperties;
+    /**
+     * 可选 AZ 选择器；为 null 时不启用新算法。
+     */
+    private K8sAzGumbelLoadBalancerChooser k8sAzGumbelLoadBalancerChooser;
 
     public TracedCircuitBreakerRoundRobinLoadBalancer(
             ServiceInstanceListSupplier serviceInstanceListSupplier,
@@ -117,12 +123,49 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
             CircuitBreakerExtractor circuitBreakerExtractor,
             CircuitBreakerRegistry circuitBreakerRegistry,
             UnifiedObservationFactory unifiedObservationFactory) {
+        this(serviceInstanceListSupplier, degradation, serviceId, circuitBreakerExtractor, circuitBreakerRegistry,
+                unifiedObservationFactory, null, null);
+    }
+
+    public TracedCircuitBreakerRoundRobinLoadBalancer(
+            ServiceInstanceListSupplier serviceInstanceListSupplier,
+            RoundRobinLoadBalancer degradation,
+            String serviceId,
+            CircuitBreakerExtractor circuitBreakerExtractor,
+            CircuitBreakerRegistry circuitBreakerRegistry,
+            UnifiedObservationFactory unifiedObservationFactory,
+            LoadBalancerK8sAzBalanceProperties k8sAzBalanceProperties,
+            K8sAzGumbelLoadBalancerChooser k8sAzGumbelLoadBalancerChooser) {
         this.serviceInstanceListSupplier = serviceInstanceListSupplier;
         this.degradation = degradation;
         this.serviceId = serviceId;
         this.circuitBreakerExtractor = circuitBreakerExtractor;
         this.circuitBreakerRegistry = circuitBreakerRegistry;
         this.unifiedObservationFactory = unifiedObservationFactory;
+        this.k8sAzBalanceProperties = k8sAzBalanceProperties;
+        this.k8sAzGumbelLoadBalancerChooser = k8sAzGumbelLoadBalancerChooser;
+    }
+
+    /**
+     * 仅当配置开启且 Bean 齐全时才尝试 K8S AZ 路径；否则行为与改造前一致。
+     */
+    private boolean k8sAzBalanceEnabled() {
+        return k8sAzBalanceProperties != null
+                && k8sAzBalanceProperties.isEnabled()
+                && k8sAzGumbelLoadBalancerChooser != null;
+    }
+
+    /**
+     * 供同包单元测试直接调用 {@link #getInstanceResponse}，不经过 Reactor 与 Observation 包装。
+     *
+     * @param serviceInstances  候选实例列表
+     * @param requestDataContext 与线上 choose 相同的请求上下文
+     * @return 选中的实例或空响应
+     */
+    Response<ServiceInstance> selectServiceInstanceForTest(
+            List<ServiceInstance> serviceInstances,
+            RequestDataContext requestDataContext) {
+        return getInstanceResponse(serviceInstances, requestDataContext);
     }
 
     /**
@@ -235,15 +278,32 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
                                     v.getHost(), v.getPort()
                             );
                 }));
-        RequestLoadBalancerContext requestLoadBalancerContext = requestRequestDataContextMap
-                .get(requestDataContext, k -> {
-                    return new RequestLoadBalancerContext();
-                });
+        LoadBalancerRequestTraceContext requestLoadBalancerContext = requestRequestDataContextMap
+                .get(requestDataContext, k -> new LoadBalancerRequestTraceContext());
         Response<ServiceInstance> result = null;
         RequestData clientRequest = requestDataContext.getClientRequest();
+
+        // K8S AZ 路径：仅首次选路且 chooser 返回非空时短路。重试时与下方「不尝试 clientRequest 亲和」一致，不走
+        // Gumbel 选桶：否则只按跨 AZ 权重定 inAz，无法像 loadBalancedByRequestLoadBalancerContext 那样用 calledInstances 优先换未调用实例。
+        if (k8sAzBalanceEnabled() && requestLoadBalancerContext.getCount() == 0) {
+            Optional<Response<ServiceInstance>> k8sPick = k8sAzGumbelLoadBalancerChooser.choose(
+                    serviceId,
+                    serviceInstances,
+                    requestLoadBalancerContext,
+                    serviceInstanceCircuitBreakerMap,
+                    clientRequest,
+                    requestLoadBalancerContext.getCount() == 0,
+                    loadBalancedCount);
+            if (k8sPick.isPresent()) {
+                result = k8sPick.get();
+                recordCurrentLoadBalanceContext(requestLoadBalancerContext, result.getServer(), serviceInstanceCircuitBreakerMap);
+                return result;
+            }
+        }
+
         if (clientRequest != null) {
             //第一次，尝试使用 clientRequest 信息进行负载均衡
-            if (requestLoadBalancerContext.count == 0) {
+            if (requestLoadBalancerContext.getCount() == 0) {
                 result = loadBalancedByClientRequest(serviceInstances, clientRequest);
                 if (result == null) {
                     result = loadBalancedByRequestLoadBalancerContext(
@@ -275,7 +335,7 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
 
     private Response<ServiceInstance> loadBalancedByRequestLoadBalancerContext(
             List<ServiceInstance> serviceInstances,
-            RequestLoadBalancerContext requestLoadBalancerContext,
+            LoadBalancerRequestTraceContext requestLoadBalancerContext,
             Map<ServiceInstance, CircuitBreaker> serviceInstanceCircuitBreakerMap
     ) {
 
@@ -284,19 +344,19 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         //如果 calledIps 包含了所有服务实例，那么证明所有实例都出现了问题，或者在同一个请求 traceId 中多次调用了同一个微服务的接口
         //这时候我们需要清空 calledIps 防止之后的请求重试到相同实例
         if (serviceInstances.stream().allMatch(serviceInstance -> {
-            return requestLoadBalancerContext.calledInstances.contains(getInstanceKey(serviceInstance));
+            return requestLoadBalancerContext.getCalledInstances().contains(getInstanceKey(serviceInstance));
         })) {
             log.info("TracedCircuitBreakerRoundRobinLoadBalancer-getInstanceResponseByRoundRobin: calledInstances contains all instances, clear");
-            requestLoadBalancerContext.calledInstances.clear();
-            requestLoadBalancerContext.calledNodes.clear();
+            requestLoadBalancerContext.getCalledInstances().clear();
+            requestLoadBalancerContext.getCalledNodes().clear();
         }
         //需要先将所有参数缓存起来，否则 comparator 会调用多次，并且可能在排序过程中参数发生改变
         Map<ServiceInstance, ServiceInstanceStat> statMap = serviceInstances.stream().collect(Collectors.toMap(k -> k,
                 v -> ServiceInstanceStat.builder()
                         .host(v.getHost())
                         .port(v.getPort())
-                        .called(requestLoadBalancerContext.calledInstances.contains(getInstanceKey(v)) ? 1 : 0)
-                        .calledNode(requestLoadBalancerContext.calledNodes.contains(v.getMetadata().get(EurekaInstanceConfigBeanAddNodeInfoCustomizer.K8S_NODE_INFO)) ? 1 : 0)
+                        .called(requestLoadBalancerContext.getCalledInstances().contains(getInstanceKey(v)) ? 1 : 0)
+                        .calledNode(requestLoadBalancerContext.getCalledNodes().contains(v.getMetadata().get(EurekaInstanceConfigBeanAddNodeInfoCustomizer.K8S_NODE_INFO)) ? 1 : 0)
                         .state(serviceInstanceCircuitBreakerMap.get(v).getState())
                         .failureRate(serviceInstanceCircuitBreakerMap.get(v).getMetrics().getFailureRate())
                         .recentLoadBalancedCount(loadBalancedCount.get(v.getInstanceId()).get())
@@ -336,7 +396,7 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
                             return statMap.get(serviceInstance).numberOfBufferedCalls;
                         })
         ).peek(serviceInstance -> {
-            if (requestLoadBalancerContext.detailLog) {
+            if (requestLoadBalancerContext.isDetailLog()) {
                 log.info("loadbalancer stat sorted: {}:{} -> {}", serviceInstance.getHost(), serviceInstance.getPort(), statMap.get(serviceInstance));
             } else {
                 log.debug("loadbalancer stat sorted: {}:{} -> {}", serviceInstance.getHost(), serviceInstance.getPort(), statMap.get(serviceInstance));
@@ -361,13 +421,13 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         return null;
     }
 
-    private void recordCurrentLoadBalanceContext(RequestLoadBalancerContext requestLoadBalancerContext, ServiceInstance serviceInstance, Map<ServiceInstance, CircuitBreaker> serviceInstanceCircuitBreakerMap) {
-        requestLoadBalancerContext.calledInstances.add(getInstanceKey(serviceInstance));
+    private void recordCurrentLoadBalanceContext(LoadBalancerRequestTraceContext requestLoadBalancerContext, ServiceInstance serviceInstance, Map<ServiceInstance, CircuitBreaker> serviceInstanceCircuitBreakerMap) {
+        requestLoadBalancerContext.getCalledInstances().add(getInstanceKey(serviceInstance));
         String s = serviceInstance.getMetadata().get(EurekaInstanceConfigBeanAddNodeInfoCustomizer.K8S_NODE_INFO);
         if (StringUtils.isNotBlank(s)) {
-            requestLoadBalancerContext.calledNodes.add(s);
+            requestLoadBalancerContext.getCalledNodes().add(s);
         }
-        requestLoadBalancerContext.count++;
+        requestLoadBalancerContext.setCount(requestLoadBalancerContext.getCount() + 1);
         loadBalancedCount.get(serviceInstance.getInstanceId())
                 .getAndAdd(
                         getServiceInstanceCallWeightedIncrement(
@@ -379,20 +439,6 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
 
     private String getInstanceKey(ServiceInstance serviceInstance) {
         return serviceInstance.getHost() + ":" + serviceInstance.getPort();
-    }
-
-    @Data
-    @NoArgsConstructor
-    private static class RequestLoadBalancerContext {
-        //调用过的实例列表
-        private final Set<String> calledInstances = Sets.newHashSet();
-        //调用过的 Node 列表
-        private final Set<String> calledNodes = Sets.newHashSet();
-        //对于这个请求，日志级别是 DEBUG (detailLog = false) 或者 INFO (detailLog = true)
-        //%1 的概率是 INFO 级别输出，精简日志量
-        private final boolean detailLog = ThreadLocalRandom.current().nextInt(0, 100) < 10;
-        //请求执行次数，第一次是 0，大于 0 代表是重试
-        private int count = 0;
     }
 
     @Data
