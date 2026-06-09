@@ -83,7 +83,7 @@ class TracedCircuitBreakerRoundRobinLoadBalancerLegacyBehaviorTest {
     }
 
     @Test
-    @DisplayName("六参构造：重试跳过亲和；未调用实例优先（本数据下为低失败率 h1）")
+    @DisplayName("六参构造：重试在 called 同档时按 failureRate 选（不依赖未调用优先）")
     void sixArgConstructor_retrySkipsAffinityAndSortsByFailureRate() {
         CircuitBreakerExtractor extractor = mock(CircuitBreakerExtractor.class);
         CircuitBreakerRegistry registry = mock(CircuitBreakerRegistry.class);
@@ -104,15 +104,17 @@ class TracedCircuitBreakerRoundRobinLoadBalancerLegacyBehaviorTest {
         ServiceInstance i0 = instance("a", "h0", 80);
         ServiceInstance i1 = instance("b", "h1", 81);
         List<ServiceInstance> pair = List.of(i0, i1);
-        // 首次必须命中 h0（高失败率）：重试路径优先未调用实例，再比失败率，否则会稳定选到另一侧
-        Object key = loadBalanceKeyHashingToListIndex(pair, 0);
-        RequestDataContext ctx = requestContextWithLoadBalanceKey(key);
+        // RequestDataContext 仍由 requestContextWithLoadBalanceKey 构造；预置 h0/h1 均已调用且 count>0，
+        // 使 loadBalancedByRequestLoadBalancerContext 中 called 同档，排序差异只能来自 failureRate（低者为 h1）。
+        RequestDataContext ctx = requestContextWithLoadBalanceKey("retry-sorts-by-failrate");
+        lb.prepareTraceStateForTest(
+                ctx,
+                1,
+                List.of(hostPortKey(i0), hostPortKey(i1)));
 
-        Response<ServiceInstance> first = lb.selectServiceInstanceForTest(pair, ctx);
-        assertEquals("h0", first.getServer().getHost());
-        Response<ServiceInstance> second = lb.selectServiceInstanceForTest(pair, ctx);
-        assertEquals("h1", second.getServer().getHost());
-        assertEquals(81, second.getServer().getPort());
+        Response<ServiceInstance> pick = lb.selectServiceInstanceForTest(pair, ctx);
+        assertEquals("h1", pick.getServer().getHost());
+        assertEquals(81, pick.getServer().getPort());
     }
 
     @Test
@@ -273,18 +275,8 @@ class TracedCircuitBreakerRoundRobinLoadBalancerLegacyBehaviorTest {
         return new RequestDataContext(rd, null);
     }
 
-    /**
-     * 与 {@link TracedCircuitBreakerRoundRobinLoadBalancer} 中 LOAD_BALANCE_KEY 亲和一致：
-     * {@code Math.abs(key.hashCode() % list.size())} 对应列表下标。
-     */
-    private static Object loadBalanceKeyHashingToListIndex(List<ServiceInstance> ordered, int indexInList) {
-        int n = ordered.size();
-        for (int i = 0; i < 100_000; i++) {
-            Object k = "lb-retry-" + i;
-            if (Math.abs(k.hashCode() % n) == indexInList) {
-                return k;
-            }
-        }
-        throw new IllegalStateException("no key for index " + indexInList + " size " + n);
+    /** 与 {@link TracedCircuitBreakerRoundRobinLoadBalancer} 中实例 key 一致（host:port） */
+    private static String hostPortKey(ServiceInstance si) {
+        return si.getHost() + ":" + si.getPort();
     }
 }

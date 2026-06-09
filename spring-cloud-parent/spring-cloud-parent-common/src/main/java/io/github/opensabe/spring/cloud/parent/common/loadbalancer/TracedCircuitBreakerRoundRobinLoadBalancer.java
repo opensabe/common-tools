@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.loadbalancer;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -166,6 +167,18 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
             List<ServiceInstance> serviceInstances,
             RequestDataContext requestDataContext) {
         return getInstanceResponse(serviceInstances, requestDataContext);
+    }
+
+    /**
+     * 同包单测用：为 {@link RequestDataContext} 在缓存中对应的 {@link LoadBalancerRequestTraceContext} 预置
+     * {@code calledInstances} 与 {@code count}。{@code calledInstanceKeys} 须与 {@link #getInstanceKey(ServiceInstance)} 相同（host:port）。
+     */
+    void prepareTraceStateForTest(RequestDataContext requestDataContext, int count, Collection<String> calledInstanceKeys) {
+        LoadBalancerRequestTraceContext t = requestRequestDataContextMap.get(requestDataContext, k -> new LoadBalancerRequestTraceContext());
+        t.getCalledInstances().clear();
+        t.getCalledNodes().clear();
+        t.getCalledInstances().addAll(calledInstanceKeys);
+        t.setCount(count);
     }
 
     /**
