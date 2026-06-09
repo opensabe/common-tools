@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>spring-cloud-parent-web-common</artifactId>
-    <version>1.0.8.4</version>
+    <version>1.0.8.5</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <packaging>jar</packaging>
