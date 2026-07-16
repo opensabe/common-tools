@@ -63,7 +63,7 @@ public class AlarmUtil {
             });
     private static final Pattern UNIQUE_PATTERN = Pattern.compile("\\bUNIQUE\\b", Pattern.CASE_INSENSITIVE);
     private static final Set<String> ALL_GROUPS = Set.of(
-            "pm", "op", "mk", "rd", "td", "ad", "pr"
+            "pm", "op", "mk", "rd", "td", "ad", "pr", "fm", "qa", "cs", "frt", "and", "ios"
     );
     private static final Pattern EXTRACT_GROUP_PATTERN = Pattern.compile("\\[(.*?)\\]");
 
