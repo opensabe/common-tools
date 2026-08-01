@@ -27,10 +27,12 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class SingleElasticSearchIntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
-    public static final ElasticsearchContainer ES = new ElasticsearchContainer("elasticsearch:7.17.8")
+    // Align with Boot 4.1 / elasticsearch-java 9.x (Rest5 client)
+    public static final ElasticsearchContainer ES = new ElasticsearchContainer("elasticsearch:9.1.5")
             .withEnv("discovery.type", "single-node")
             .withEnv("xpack.security.enabled", "false")
-            .withEnv("xpack.security.http.ssl.enabled", "false");
+            .withEnv("xpack.security.http.ssl.enabled", "false")
+            .withEnv("xpack.security.transport.ssl.enabled", "false");
 
     public static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.elasticsearch.addresses", () -> {

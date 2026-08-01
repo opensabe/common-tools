@@ -29,22 +29,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 
 @DisplayName("测试全局的ExceptionHandler跟Validation兼容问题")
-@AutoConfigureObservability
 @SpringBootTest(classes = ServletExceptionHandlerTest.App.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "eureka.client.enabled=false",
         "spring.cloud.openfeign.jfr.enabled=false",
         "spring.servlet.jfr.enabled=false",
         "spring.cloud.config.client.profile=test"
 })
+@AutoConfigureTestRestTemplate
 @Log4j2
 public class ServletExceptionHandlerTest {
 

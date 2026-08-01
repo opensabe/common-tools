@@ -36,6 +36,11 @@ import io.github.opensabe.mapstruct.core.MapperRepository;
 @DisplayName("MapStruct所有类型映射测试")
 public class AllTypesTest {
 
+    static {
+        MapstructTestBootstrap.init();
+    }
+
+
     @Test
     @DisplayName("测试类到Record的映射 - 验证所有数据类型转换")
     void testToRecord() {

@@ -15,14 +15,12 @@
  */
 package io.github.opensabe.common.entity.base.vo;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -60,11 +58,11 @@ public class BaseMQMessage extends BaseMessage<String> {
         }
 
         @Override
-        public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+        public String deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
             JsonToken jsonToken = p.currentToken();
             if (jsonToken.isStructStart()) {
                 log.warn("BaseMQMessage.deserialize: v2 String type auto-fixed, you can use new AbstractConsumer instead of AbstractMQConsumer to avoid this warning. message");
-                return p.getCodec().readTree(p).toString();
+                return ctxt.readTree(p).toString();
             }
             return p.getValueAsString();
         }

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -76,10 +78,20 @@ public class SpringCacheWithValkeyTest {
     private CacheService service;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
 
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleValkeyIntegrationTest.setProperties(registry);
+    }
+
+    @BeforeEach
+    void flushSharedValkey() {
+        try (var connection = redisConnectionFactory.getConnection()) {
+            connection.serverCommands().flushAll();
+        }
+        storage.getData().clear();
     }
 
     @Test
@@ -180,7 +192,7 @@ public class SpringCacheWithValkeyTest {
 
         String cachedItem = cacheManager.getCache(REDIS_CACHE_NAME).get(redisKey, String.class);
         assertNotNull(cachedItem);
-        assertEquals(cachedItem, item.getName());
+        assertEquals(item.getName(), cachedItem);
 
         String redisRst = redisTemplate.opsForValue().get(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX + REDIS_CACHE_KEY_PREFIX + redisKey).toString();
         assertEquals(item.getName(), redisRst.replace("\"", ""));
@@ -203,7 +215,7 @@ public class SpringCacheWithValkeyTest {
     @DisplayName("测试Redis缓存删除 - CacheEvict注解")
     public void test_cacheEvict_redis() {
 
-        ItemObject item = ItemObject.builder().id(100L).name("redisCache").value("Test_Redis").build();
+        ItemObject item = ItemObject.builder().id(301L).name("redisCache").value("Test_Redis").build();
         storage.addItem(item);
         service.getItemFromRedis(item.getId());
 

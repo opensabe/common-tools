@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.common.executor.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,13 +22,16 @@ import org.springframework.context.annotation.Configuration;
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.ThreadPoolFactoryGracefulShutDownHandler;
 
-
-@ConditionalOnClass(name = "io.undertow.Undertow")
+/**
+ * Registers graceful shutdown for ThreadPoolFactory.
+ * Named historically for Undertow; Boot 4 no longer ships Undertow, but the handler
+ * is still invoked via {@code UndertowGracefulShutdownInitializer} during app stop.
+ */
 @Configuration(proxyBeanMethods = false)
 public class UndertowThreadConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(ThreadPoolFactoryGracefulShutDownHandler.class)
     public ThreadPoolFactoryGracefulShutDownHandler threadPoolFactoryGracefulShutDownHandler(ThreadPoolFactory threadPoolFactory) {
         return new ThreadPoolFactoryGracefulShutDownHandler(threadPoolFactory);
     }

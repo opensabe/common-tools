@@ -23,15 +23,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
@@ -39,19 +39,23 @@ import io.github.opensabe.spring.cloud.parent.web.common.test.CommonMicroService
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.TraceContext;
+import io.micrometer.tracing.Tracer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@AutoConfigureObservability
+@AutoConfigureTracing
+@SpringBootTest(properties = {
+        "management.tracing.sampling.probability=1.0",
+        "spring.cloud.openfeign.micrometer.enabled=true"
+})
 @ActiveProfiles("observation")
 @EnableFeignClients
 public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "TestOpenFeignWithObservation-TestService1";
     static final String CONTEXT_ID_1 = "TestOpenFeignWithObservation-testService1Client";
-    @MockBean
+    @MockitoBean
     SimpleDiscoveryClient discoveryClient;
     List<ServiceInstance> serviceInstances = List.of(
             new DefaultServiceInstance(
@@ -62,6 +66,8 @@ public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
     private TestService1Client testService1Client;
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
+    @Autowired
+    private Tracer tracer;
 
     @BeforeEach
     void setup() {
@@ -69,40 +75,29 @@ public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
     }
 
     /**
-     * 验证 FeignClient 的请求是否被 Trace
-     * 这里的代码实现主要靠引入：
-     * feign.micrometer.MicrometerCapability
+     * 验证 FeignClient 在有活跃 Observation 时会通过 MicrometerObservationCapability
+     * 向下游传播 Traceparent，且 child span 与 parent 同 TraceId、不同 spanId。
      */
     @Test
     public void testRequestHasObservation() {
+        assertNotNull(tracer, "Tracer bean required for W3C Traceparent injection");
+        assertTrue(tracer != Tracer.NOOP, "Tracer must not be NOOP, got " + tracer.getClass());
         ObservationRegistry observationRegistry = unifiedObservationFactory.getObservationRegistry();
-        var response = testService1Client.anything();
-        assertNotNull(response);
-        assertNotNull(response.getHeaders());
-        //验证发出的请求，即使没有被 Trace，也会在请求 Header 中包含 traceparent
-        assertTrue(
-                response.getHeaders().entrySet().stream()
-                        .anyMatch(entry -> {
-                            boolean b = StringUtils.equalsIgnoreCase(entry.getKey(), UnifiedObservationFactory.TRACE_PARENT);
-                            if (b) {
-                                System.out.println(entry);
-                            }
-                            return b;
-                        })
-        );
         var parent = Observation.start("parent", observationRegistry);
         parent.scoped(() -> {
             Observation currentObservation = unifiedObservationFactory.getCurrentObservation();
             TraceContext traceContext = UnifiedObservationFactory.getTraceContext(currentObservation);
+            assertNotNull(traceContext, "active Observation must produce a TraceContext");
+            assertTrue(StringUtils.isNotBlank(traceContext.traceId()), "traceId blank; tracer=" + tracer.getClass());
             var responseInParent = testService1Client.anything();
             assertNotNull(responseInParent);
-            assertNotNull(responseInParent.getHeaders());
+            assertNotNull(responseInParent.getHeaders(),
+                    "httpbin headers missing; body=" + responseInParent);
             assertTrue(
                     responseInParent.getHeaders().entrySet().stream()
                             .anyMatch(entry -> {
                                 boolean b = StringUtils.equalsIgnoreCase(entry.getKey(), UnifiedObservationFactory.TRACE_PARENT);
                                 if (b) {
-                                    System.out.println(entry);
                                     //发送的请求的 Header，traceId 是一样的，但是 spanId 是新的
                                     assertTrue(entry.getValue().get(0).contains(
                                             traceContext.traceId() + UnifiedObservationFactory.TRACEPARENT_DELIMITER
@@ -112,7 +107,10 @@ public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
                                     ));
                                 }
                                 return b;
-                            })
+                            }),
+                    () -> "expected Traceparent header, got: " + responseInParent.getHeaders()
+                            + "; tracer=" + tracer.getClass()
+                            + "; parentTrace=" + traceContext.traceId()
             );
         });
     }

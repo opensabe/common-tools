@@ -17,8 +17,8 @@ package io.github.opensabe.common.webflux.mybatis.test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.idgenerator.autoconfig.IdGeneratorAutoConfiguration;
@@ -29,6 +29,8 @@ import io.github.opensabe.common.redisson.autoconfig.MultiRedisAutoConfiguration
 import io.github.opensabe.common.redisson.autoconfig.RedissonAutoConfiguration;
 import io.github.opensabe.common.s3.autoconf.AwsS3AutoConfiguration;
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
+import org.redisson.spring.starter.RedissonAutoConfigurationV4;
+import org.springframework.boot.data.redis.autoconfigure.health.DataRedisReactiveHealthContributorAutoConfiguration;
 
 /**
  * 仅用于 {@link WebFluxRoutingContextIntegrationTest}：只加载 WebFlux 与
@@ -44,8 +46,10 @@ import org.redisson.spring.starter.RedissonAutoConfigurationV2;
                 MultiRedisAutoConfiguration.class,
                 LettuceAutoConfiguration.class,
                 RedissonAutoConfigurationV2.class,
-                RedisAutoConfiguration.class,
-                RedisRepositoriesAutoConfiguration.class,
+                RedissonAutoConfigurationV4.class,
+                DataRedisAutoConfiguration.class,
+                DataRedisRepositoriesAutoConfiguration.class,
+                DataRedisReactiveHealthContributorAutoConfiguration.class,
                 IdGeneratorAutoConfiguration.class,
                 AwsS3AutoConfiguration.class
         }

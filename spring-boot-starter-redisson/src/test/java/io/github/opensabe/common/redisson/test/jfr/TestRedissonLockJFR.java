@@ -42,11 +42,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @JfrEventTest
 @Import(TestRedissonLockJFR.Config.class)
 @Execution(ExecutionMode.SAME_THREAD)
 //JFR 测试最好在本地做
+@AutoConfigureTracing
 @Disabled
 public class TestRedissonLockJFR extends BaseRedissonTest {
     private static final int COUNT_OF_THREADS = 12;

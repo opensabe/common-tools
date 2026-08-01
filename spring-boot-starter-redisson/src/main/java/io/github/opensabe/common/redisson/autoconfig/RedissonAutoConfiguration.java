@@ -17,7 +17,7 @@ package io.github.opensabe.common.redisson.autoconfig;
 
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
@@ -33,6 +33,6 @@ import io.github.opensabe.common.redisson.config.RedissonScheduleProperties;
  */
 @EnableConfigurationProperties({RedissonScheduleProperties.class, RedissonAopOrderProperties.class})
 @AutoConfiguration(before = RedissonAutoConfigurationV2.class)
-@Import({RedissonClientBeanPostProcessor.class, RedissonAnnotationConfiguration.class, RedisAutoConfiguration.class})
+@Import({RedissonClientBeanPostProcessor.class, RedissonAnnotationConfiguration.class, DataRedisAutoConfiguration.class})
 public class RedissonAutoConfiguration {
 }

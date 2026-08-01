@@ -34,13 +34,13 @@ public class ExceptionConfiguration {
 
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(Debug.class)
     @ConditionOnSpringCloudConfigProfile("!online")
     public Debug test() {
         return new Debug(true);
     }
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(Debug.class)
     @ConditionOnSpringCloudConfigProfile("online")
     public Debug online() {
         return new Debug(false);
@@ -57,19 +57,19 @@ public class ExceptionConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(GexceptionHandler.class)
     public GexceptionHandler gexceptionHandler(I18nMessageResolver i18nMessageResolver) {
         return new GexceptionHandler(i18nMessageResolver);
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(ThrowableHandler.class)
     public ThrowableHandler throwableHandler(Debug debug) {
         return new ThrowableHandler(debug);
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(EnumConvertConfiguration.class)
     public EnumConvertConfiguration enumConvertConfiguration() {
         return new EnumConvertConfiguration();
     }

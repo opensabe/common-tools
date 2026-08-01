@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +37,7 @@ import reactor.core.publisher.Mono;
  * 测试可以正常创建一个微服务
  */
 @Log4j2
-@AutoConfigureObservability
+@AutoConfigureWebTestClient
 @SpringBootTest(
         properties = {
                 "webclient.jfr.enabled=false",

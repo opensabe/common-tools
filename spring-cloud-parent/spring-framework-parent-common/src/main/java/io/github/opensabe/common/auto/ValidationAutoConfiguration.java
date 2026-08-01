@@ -24,6 +24,6 @@ import io.github.opensabe.common.config.ExtendValidatorConfigure;
 
 @AutoConfiguration
 @Import({ExtendValidatorConfigure.class, ExceptionConfiguration.class})
-@AutoConfigureBefore(org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration.class)
+@AutoConfigureBefore(org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration.class)
 public class ValidationAutoConfiguration {
 }

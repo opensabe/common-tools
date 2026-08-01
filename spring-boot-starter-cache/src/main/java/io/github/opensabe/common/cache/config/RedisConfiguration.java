@@ -22,12 +22,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
+import org.springframework.boot.cache.autoconfigure.CacheManagerCustomizers;
+import org.springframework.boot.cache.autoconfigure.CacheProperties;
 import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -115,8 +116,11 @@ public class RedisConfiguration implements InitializingBean {
     private CacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory, CacheManagerCustomizers customizers, CacheProperties properties) {
         CacheProperties.Redis redis = properties.getRedis();
         RedisCacheConfiguration configuration = configuration(redis);
+        // Spring Data Redis 4.x defaults to async writes with Lettuce; restore sync visibility.
+        RedisCacheWriter cacheWriter = RedisCacheWriter.create(
+                redisConnectionFactory, config -> config.immediateWrites());
         RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager
-                .builder(redisConnectionFactory)
+                .builder(cacheWriter)
                 .cacheDefaults(configuration)
                 .disableCreateOnMissingCache();
 

@@ -19,8 +19,8 @@ package io.github.opensabe.common.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.module.blackbird.BlackbirdModule;
 
 import io.github.opensabe.common.jackson.TimestampModule;
 
@@ -34,7 +34,7 @@ public class JacksonCustomizedConfiguration {
      * @return
      */
     @Bean
-    public Module timstampModule() {
+    public JacksonModule timstampModule() {
         return new TimestampModule();
     }
 
@@ -43,7 +43,7 @@ public class JacksonCustomizedConfiguration {
      * @return
      */
     @Bean
-    public Module blackbirdModule() {
+    public JacksonModule blackbirdModule() {
         return new BlackbirdModule();
     }
 }

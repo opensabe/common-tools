@@ -19,7 +19,6 @@ package io.github.opensabe.common.location.test.common;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -29,7 +28,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @ExtendWith({SpringExtension.class})
 @SpringBootTest(classes = GeoPlacesBaseTest.App.class)
-@AutoConfigureObservability
 //@JfrEventTest
 public abstract class GeoPlacesBaseTest {
 

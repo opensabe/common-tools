@@ -25,9 +25,10 @@ import com.apple.itunes.storekit.client.APIException;
 import com.apple.itunes.storekit.client.BearerTokenAuthenticator;
 import com.apple.itunes.storekit.model.ErrorPayload;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import io.github.opensabe.apple.appstoreconnectapi.inapppurchasesv2.InAppPurchasesV2Response;
 import io.github.opensabe.apple.appstoreconnectapi.subscriptiongroup.SubscriptionGroupsResponse;
@@ -55,14 +56,15 @@ public class AppleStoreConnectAPIClient {
         this.bearerTokenAuthenticator = new BearerTokenAuthenticator(signingKey, keyId, issuerId, bundleId);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         this.httpClient = builder.build();
-        this.objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
+        this.objectMapper = JsonMapper.builder()
+                .changeDefaultVisibility(v -> v
                         .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                         .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withCreatorVisibility(JsonAutoDetect.Visibility.NONE))
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, Boolean.FALSE);
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
         this.appleStoreId = appStoreId;
     }
 
@@ -107,7 +109,7 @@ public class AppleStoreConnectAPIClient {
                 }
                 try {
                     return objectMapper.readValue(responseBody.charStream(), clazz);
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     throw new APIException(r.code(), e);
                 }
             } else {

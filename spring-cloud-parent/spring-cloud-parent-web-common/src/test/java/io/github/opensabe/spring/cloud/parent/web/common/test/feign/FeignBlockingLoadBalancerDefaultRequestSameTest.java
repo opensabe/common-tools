@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -57,7 +56,6 @@ import static org.mockito.Mockito.when;
 @EnableFeignClients
 @ActiveProfiles("feignDefaultRequest")
 @SpringBootTest
-@AutoConfigureObservability
 public class FeignBlockingLoadBalancerDefaultRequestSameTest extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "testService1";
     static final String CONTEXT_ID_1 = "testService1Client";

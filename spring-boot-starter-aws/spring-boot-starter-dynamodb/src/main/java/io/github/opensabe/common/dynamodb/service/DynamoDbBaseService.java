@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.common.dynamodb.service;
 
+import java.lang.invoke.MethodHandles;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +27,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
-import org.springframework.data.util.TypeInformation;
+import org.springframework.data.core.TypeInformation;
 
 import cn.hutool.core.bean.BeanDesc;
 import cn.hutool.core.bean.BeanUtil;
@@ -125,10 +126,11 @@ public abstract class DynamoDbBaseService<T> {
     private TableSchema<T> customerSchema(Class<T> type) {
         BeanDesc desc = BeanUtil.getBeanDesc(type);
 
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
         StaticAttribute[] attributes = desc.getProps().stream().map(prop -> {
             StaticAttribute.Builder<T, ?> builder = StaticAttribute.builder(type, prop.getFieldClass())
-                    .getter(BeanAttributeGetter.create(type, prop.getGetter()))
-                    .setter(BeanAttributeSetter.create(type, prop.getSetter()));
+                    .getter(BeanAttributeGetter.create(type, prop.getGetter(), lookup))
+                    .setter(BeanAttributeSetter.create(type, prop.getSetter(), lookup));
             HashKeyName hashKey = AnnotatedElementUtils.findMergedAnnotation(prop.getField(), HashKeyName.class);
             RangeKeyName rangeKey = AnnotatedElementUtils.findMergedAnnotation(prop.getField(), RangeKeyName.class);
             if (Objects.nonNull(hashKey)) {

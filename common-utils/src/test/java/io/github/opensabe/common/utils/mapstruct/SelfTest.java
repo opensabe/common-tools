@@ -26,6 +26,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("MapStruct自映射测试")
 public class SelfTest {
 
+    static {
+        MapstructTestBootstrap.init();
+    }
+
+
     @Test
     @DisplayName("测试对象自映射功能")
     void test1() {

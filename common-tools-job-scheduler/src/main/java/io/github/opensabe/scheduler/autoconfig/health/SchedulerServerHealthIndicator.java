@@ -16,8 +16,8 @@
 package io.github.opensabe.scheduler.autoconfig.health;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
 
 import io.github.opensabe.scheduler.conf.SchedulerProperties;
 import io.github.opensabe.scheduler.server.SchedulerServer;

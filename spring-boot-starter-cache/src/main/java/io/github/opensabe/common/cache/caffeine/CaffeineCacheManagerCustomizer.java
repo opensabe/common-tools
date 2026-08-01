@@ -15,7 +15,7 @@
  */
 package io.github.opensabe.common.cache.caffeine;
 
-import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
+import org.springframework.boot.cache.autoconfigure.CacheManagerCustomizer;
 import org.springframework.cache.caffeine.CaffeineCache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;

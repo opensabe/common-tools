@@ -21,8 +21,8 @@ import java.util.List;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.autoconfigure.contributor.ConditionalOnEnabledHealthIndicator;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -114,7 +114,7 @@ public class SchedulerJobAutoConfiguration {
     @ConditionalOnEnabledHealthIndicator("schedulerjob")
     public static class SchedulerServerHealthIndicatorAutoConfiguration {
         @Bean
-        public HealthIndicator healthIndicator(SchedulerProperties schedulerProperties, ObjectProvider<SchedulerServer> schedulerServerProvider) {
+        public HealthIndicator schedulerJobHealthIndicator(SchedulerProperties schedulerProperties, ObjectProvider<SchedulerServer> schedulerServerProvider) {
             return new SchedulerServerHealthIndicator(schedulerProperties, schedulerServerProvider);
         }
     }

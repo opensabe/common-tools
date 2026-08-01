@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.redisson.api.RedissonClient;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -191,7 +192,8 @@ public class SocketIoConfiguration {
         @Override
         public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
             AtomicBoolean add = new AtomicBoolean();
-            ReflectionUtils.doWithMethods(bean.getClass(),
+            Class<?> targetClass = AopUtils.getTargetClass(bean);
+            ReflectionUtils.doWithMethods(targetClass,
                     method -> add.set(true),
                     method -> {
                         for (Class<? extends Annotation> annotationClass : annotations) {

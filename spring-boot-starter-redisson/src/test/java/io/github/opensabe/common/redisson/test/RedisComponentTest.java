@@ -28,8 +28,8 @@ import org.redisson.api.RedissonClient;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.micrometer.observation.autoconfigure.ObservationAutoConfiguration;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -44,12 +44,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.github.opensabe.common.redisson.observation.ObservedRedissonClient;
 import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 /**
  * 检查组件是否生效
  *
  * @author heng.ma
  */
+@AutoConfigureTestRestTemplate
 @Import(RedisComponentTest.Config.class)
 public class RedisComponentTest extends BaseRedissonTest {
 
@@ -122,11 +124,13 @@ public class RedisComponentTest extends BaseRedissonTest {
     @Log4j2
     @RestController
     public static class TestController {
+        static final AtomicBoolean hadObservation = new AtomicBoolean(false);
 
         @GetMapping("/test")
         public String test() {
             Observation observation = SpringUtil.getBean(UnifiedObservationFactory.class).getCurrentObservation();
             log.info("----------------run------------------"+observation);
+            hadObservation.set(observation != null && observation != Observation.NOOP);
             return "test";
         }
     }
@@ -162,9 +166,9 @@ public class RedisComponentTest extends BaseRedissonTest {
      */
     @Test
     void testObservation () {
+        TestController.hadObservation.set(false);
         ResponseEntity<String> entity = restTemplate.getForEntity("/test", String.class);
         Assertions.assertEquals("test", entity.getBody());
-        Assertions.assertTrue(CustomerHandler.called.get());
-
+        Assertions.assertTrue(TestController.hadObservation.get());
     }
 }

@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -30,7 +29,6 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @JfrEventTest
-@AutoConfigureObservability
 @SpringBootTest(classes = SocketIOStarter.App.class, properties = "eureka.client.enabled=false")
 @ExtendWith(SingleRedisIntegrationTest.class)
 public class SocketIOStarter {

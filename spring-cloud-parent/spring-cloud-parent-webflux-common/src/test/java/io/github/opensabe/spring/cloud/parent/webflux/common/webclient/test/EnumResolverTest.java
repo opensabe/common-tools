@@ -21,9 +21,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,13 +34,13 @@ import io.github.opensabe.base.vo.IntValueEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 /**
  * @author heng.ma
  */
 @Log4j2
 @SpringJUnitConfig
-@AutoConfigureObservability
 @SpringBootTest(
         properties = {
                 "eureka.client.enabled=false",
@@ -51,6 +50,7 @@ import lombok.extern.log4j.Log4j2;
         classes = EnumResolverTest.App.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
+@AutoConfigureTestRestTemplate
 public class EnumResolverTest {
 
     @Autowired

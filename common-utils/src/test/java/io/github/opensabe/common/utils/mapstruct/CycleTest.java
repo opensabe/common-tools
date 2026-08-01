@@ -41,6 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("MapStruct循环引用测试")
 public class CycleTest {
 
+    static {
+        MapstructTestBootstrap.init();
+    }
+
+
     private Node node;
 
     @BeforeEach

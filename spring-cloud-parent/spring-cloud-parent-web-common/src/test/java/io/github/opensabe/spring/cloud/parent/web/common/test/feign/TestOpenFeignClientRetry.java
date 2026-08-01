@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
@@ -54,7 +53,6 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("retrytest")
 @SpringBootTest
-@AutoConfigureObservability
 @EnableFeignClients
 public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "RetryTestService1";

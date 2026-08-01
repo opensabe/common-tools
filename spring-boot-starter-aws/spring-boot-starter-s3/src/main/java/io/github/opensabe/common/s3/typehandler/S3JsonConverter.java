@@ -24,10 +24,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.convert.PropertyValueConverter;
 import org.springframework.data.convert.ValueConversionContext;
 import org.springframework.data.mapping.PersistentProperty;
-import org.springframework.data.util.TypeInformation;
+import org.springframework.data.core.TypeInformation;
 import org.springframework.http.MediaType;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 import cn.hutool.core.codec.Hashids;
 import io.github.opensabe.common.s3.properties.S3Properties;

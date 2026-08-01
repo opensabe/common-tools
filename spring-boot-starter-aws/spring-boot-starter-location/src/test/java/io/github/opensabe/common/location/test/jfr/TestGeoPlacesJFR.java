@@ -23,7 +23,6 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 
 import io.github.opensabe.common.location.service.GeocodeService;
 import io.github.opensabe.common.location.test.common.GeoPlacesBaseTest;
@@ -39,16 +38,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 /**
  * @author changhongwei
  * @date 2025/1/22 14:25
  * @description:
  */
+@AutoConfigureTracing
 @Log4j2
 @Execution(ExecutionMode.SAME_THREAD)
 @Disabled
-@AutoConfigureObservability
 @DisplayName("地理位置JFR事件测试")
 public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
     private final String address = "Samuel Asabia House 35 Marina,Lagos,Nigeria";

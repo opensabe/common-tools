@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
@@ -38,12 +37,13 @@ import io.micrometer.tracing.TraceContext;
 import lombok.extern.log4j.Log4j2;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @JfrEventTest
-@AutoConfigureObservability
 @SpringBootTest(properties = {
-        "management.tracing.sampling.probability=1",
-})
+                "management.tracing.sampling.probability=1.0",
+        "management.tracing.sampling.probability=1",})
+@AutoConfigureTracing
 @Log4j2
 public class TestThirdPartyWebClient extends CommonMicroServiceTest {
 

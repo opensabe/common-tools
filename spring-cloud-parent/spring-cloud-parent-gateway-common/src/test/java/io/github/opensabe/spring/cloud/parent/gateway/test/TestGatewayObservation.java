@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -57,11 +57,13 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
-@AutoConfigureObservability
+@AutoConfigureWebTestClient
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
         properties = {
+                "management.tracing.sampling.probability=1.0",
                 "spring.main.allow-circular-references=true",
                 "eureka.client.enabled=false",
                 "webclient.configs.testService.baseUrl=http://testService",
@@ -82,6 +84,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         },
         classes = TestGatewayObservation.MockConfig.class
 )
+@AutoConfigureTracing
 public class TestGatewayObservation extends CommonMicroServiceTest {
     private static final String serviceId = "testService";
     //不同的测试方法的类对象不是同一个对象，会重新生成，保证互相没有影响

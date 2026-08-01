@@ -19,7 +19,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.github.opensabe.common.secret.ConfigurationPropertiesSecretProvider;
 
 import io.github.opensabe.common.secret.GlobalSecretManager;

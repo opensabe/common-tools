@@ -17,30 +17,30 @@ package io.github.opensabe.common.elasticsearch.script;
 
 import java.io.IOException;
 
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.json.JsonData;
 import lombok.extern.log4j.Log4j2;
 
 
 @Log4j2
 public class ScriptedSearcher {
-    private final RestHighLevelClient restHighLevelClient;
+    private final ElasticsearchClient elasticsearchClient;
 
-    public ScriptedSearcher(RestHighLevelClient restHighLevelClient) {
-        this.restHighLevelClient = restHighLevelClient;
-
+    public ScriptedSearcher(ElasticsearchClient elasticsearchClient) {
+        this.elasticsearchClient = elasticsearchClient;
     }
 
-    public SearchResponse search(SearchRequest searchRequest, AbstractElasticSearchScript abstractElasticSearchScript, Object... objects) throws IOException {
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(QueryBuilders.wrapperQuery(abstractElasticSearchScript.getScript(objects)));
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse search = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        if (search.getTook() != null && search.getTook().getMillis() > 3000L) {
+    public SearchResponse<JsonData> search(SearchRequest searchRequest, AbstractElasticSearchScript abstractElasticSearchScript, Object... objects) throws IOException {
+        String script = abstractElasticSearchScript.getScript(objects);
+        SearchRequest requestWithQuery = SearchRequest.of(s -> s
+                .index(searchRequest.index())
+                .preference(searchRequest.preference())
+                .query(q -> q.wrapper(w -> w.query(script)))
+        );
+        SearchResponse<JsonData> search = elasticsearchClient.search(requestWithQuery, JsonData.class);
+        if (search.took() > 3000L) {
             log.error("ScriptedSearcher-search took more than 3s");
         }
         return search;

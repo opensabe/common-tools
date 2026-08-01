@@ -30,9 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 /**
  * 测试可以正常创建一个微服务
@@ -69,7 +69,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @Log4j2
 @SpringJUnitConfig
-@AutoConfigureObservability
 @SpringBootTest(
         properties = {
                 "eureka.client.enabled=false",
@@ -79,6 +78,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         classes = TestWebService.TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
+@AutoConfigureTestRestTemplate
 public class TestWebService {
     private static final String SECRET = "secretString";
     /**

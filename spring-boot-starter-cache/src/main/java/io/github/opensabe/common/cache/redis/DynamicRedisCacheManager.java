@@ -16,6 +16,7 @@
 package io.github.opensabe.common.cache.redis;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +50,10 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
     public DynamicRedisCacheManager(RedisConnectionFactory connectionFactory,
                                     RedisCacheConfiguration defaultCacheConfiguration,
                                     Map<String, RedisCacheConfiguration> configurations) {
-        super(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory), defaultCacheConfiguration, configurations);
+        // Spring Data Redis 4.x defaults to async writes with Lettuce; keep 3.x sync semantics
+        // so @CachePut/@CacheEvict are visible to subsequent reads in the same thread.
+        super(RedisCacheWriter.create(connectionFactory, config -> config.immediateWrites()),
+                defaultCacheConfiguration, configurations);
         this.map = new ConcurrentHashMap<>();
         this.onRedisCacheConfiguration = Function.identity();
     }
@@ -68,16 +72,26 @@ public class DynamicRedisCacheManager extends RedisCacheManager implements Expir
     }
 
     /**
-     *
-     * 因为redis是分布式缓存，相同的key只需要删除一次，为了避免重复操作，返回任意一个cache实例即可
+     * When expire-scoped caches exist, return a {@link CompositedCache} over them so
+     * {@code @CacheEvict} without {@code @Expire} can still clear TTL-scoped entries.
+     * Otherwise return {@code null} so {@link CompositeCacheManager} falls through to the
+     * dedicated {@link RedisCacheManager} beans (do not use {@code super.getCache}, which would
+     * shadow those managers and split put/evict across different RedisCache instances).
      *
      * @see CompositedCache
      */
     @Override
     public Cache getCache(String name) {
         Map<Duration, Cache> caches = map.get(name);
-        if (caches != null) {
-            return new CompositedCache(name, caches.values().stream().limit(1).toList());
+        if (caches != null && !caches.isEmpty()) {
+            List<Cache> all = new ArrayList<>(caches.values());
+            // Also evict/put on the initial dedicated cache for this name when present, so
+            // non-@Expire operations that wrote via Composite→dedicated Redis stay consistent.
+            Cache dedicated = super.getCache(name);
+            if (dedicated != null && !(dedicated instanceof CompositedCache)) {
+                all.add(dedicated);
+            }
+            return new CompositedCache(name, all);
         }
         return null;
     }

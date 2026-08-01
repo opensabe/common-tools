@@ -39,10 +39,12 @@ import jdk.jfr.consumer.RecordedEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @Import(TestRedissonSemaphoreJFR.Config.class)
 //JFR 测试最好在本地做
+@AutoConfigureTracing
 @Disabled
 public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;

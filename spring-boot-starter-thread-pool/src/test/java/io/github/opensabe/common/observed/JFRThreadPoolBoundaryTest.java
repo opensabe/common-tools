@@ -37,7 +37,6 @@ import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -51,14 +50,15 @@ import jdk.jfr.consumer.RecordedEvent;
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @JfrEventTest
 @ActiveProfiles("jfr")
-@AutoConfigureObservability
 @SpringBootTest(properties = {
-        "eureka.client.enabled=false",
-})
+                "management.tracing.sampling.probability=1.0",
+        "eureka.client.enabled=false",})
 //JFR 测试最好在本地做
+@AutoConfigureTracing
 @Disabled
 @DisplayName("JFR线程池边界测试")
 public class JFRThreadPoolBoundaryTest {

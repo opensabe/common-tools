@@ -40,7 +40,8 @@ import com.apple.itunes.storekit.model.TransactionInfoResponse;
 import com.apple.itunes.storekit.verification.SignedDataVerifier;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import io.github.opensabe.apple.appstoreconnectapi.AppleStoreConnectAPIClient;
 import io.github.opensabe.apple.appstoreconnectapi.inapppurchasesv2.InAppPurchasesV2Response;
@@ -244,7 +245,7 @@ public class AppleAutoConfigurationTest {
             AppleLoginAPIClient appleWebLoginAPIClient = context.getBean("appleWebLoginAPIClient", AppleLoginAPIClient.class);
             String code = "";
             AppleLoginAPIClient.TokenResponse tokenResponse = appleWebLoginAPIClient.authToken(code);
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = JsonMapper.builder().build();
             System.out.println(objectMapper.writeValueAsString(tokenResponse));
         });
     }
@@ -254,7 +255,7 @@ public class AppleAutoConfigurationTest {
         contextRunner.run(context -> {
             AppleLoginAPIClient appleWebLoginAPIClient = context.getBean("appleWebLoginAPIClient", AppleLoginAPIClient.class);
             AppleLoginAPIClient.AuthKeys authKeys = appleWebLoginAPIClient.authKeys();
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = JsonMapper.builder().build();
             System.out.println(objectMapper.writeValueAsString(authKeys));
         });
     }

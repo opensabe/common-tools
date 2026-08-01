@@ -28,7 +28,6 @@ import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -56,10 +55,11 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @JfrEventTest
-@AutoConfigureObservability
 @SpringBootTest(properties = {
+                "management.tracing.sampling.probability=1.0",
         "eureka.client.enabled=false",
         "webclient.configs.testService.baseUrl=http://testService",
         "webclient.configs.testService.serviceName=testService",
@@ -70,11 +70,11 @@ import static org.mockito.Mockito.when;
         "resilience4j.circuitbreaker.configs.default.slidingWindowType=TIME_BASED",
         "resilience4j.circuitbreaker.configs.default.slidingWindowSize=5",
         "resilience4j.circuitbreaker.configs.default.minimumNumberOfCalls=4",
-        "resilience4j.circuitbreaker.configs.default.recordExceptions=java.lang.Exception"
-}, classes = TestWebClientRequestJFREvent.MockConfig.class)
+        "resilience4j.circuitbreaker.configs.default.recordExceptions=java.lang.Exception"}, classes = TestWebClientRequestJFREvent.MockConfig.class)
 //jfr 测试需要串行，因为收集的是进程纬度的数据，如果并行会导致数据错乱
 @Execution(ExecutionMode.SAME_THREAD)
 //JFR 测试最好在本地做
+@AutoConfigureTracing
 @Disabled
 public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
     private final String serviceId = "testService";

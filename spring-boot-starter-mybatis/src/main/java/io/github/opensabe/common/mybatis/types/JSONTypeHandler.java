@@ -25,9 +25,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * pojo里不支持泛型，如果遇到泛型需要用子类包一层，如果泛型类型为基本类型，则直接用：
@@ -79,8 +80,9 @@ public class JSONTypeHandler extends BaseTypeHandler<Object> {
 
     public JSONTypeHandler(Class<?> type) {
         this.type = type;
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        this.objectMapper = JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
 
@@ -119,7 +121,7 @@ public class JSONTypeHandler extends BaseTypeHandler<Object> {
         }
         try {
             return objectMapper.readValue(content, type);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -133,7 +135,7 @@ public class JSONTypeHandler extends BaseTypeHandler<Object> {
         }
         try {
             return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }

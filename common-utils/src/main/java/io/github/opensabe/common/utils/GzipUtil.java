@@ -18,7 +18,7 @@ package io.github.opensabe.common.utils;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Charsets;
 

@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.boot.actuate.metrics.web.reactive.client.ObservationWebClientCustomizer;
+import org.springframework.boot.webclient.observation.ObservationWebClientCustomizer;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.CustomizedReactorLoadBalancerExchangeFilterFunction;
@@ -68,10 +68,7 @@ import reactor.netty.http.client.HttpClient;
 public class WebClientDefaultConfiguration {
     private static ServiceInstance getServiceInstance(ClientRequest clientRequest) {
         URI url = clientRequest.url();
-        DefaultServiceInstance defaultServiceInstance = new DefaultServiceInstance();
-        defaultServiceInstance.setHost(url.getHost());
-        defaultServiceInstance.setPort(url.getPort());
-        return defaultServiceInstance;
+        return new DefaultServiceInstance(null, null, url.getHost(), url.getPort(), false);
     }
 
     private static Mono<ClientResponse> tracedFilter(

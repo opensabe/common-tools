@@ -33,7 +33,6 @@ import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -53,16 +52,18 @@ import lombok.extern.log4j.Log4j2;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @JfrEventTest
-@AutoConfigureObservability
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
         classes = BatchBufferQueueTest.App.class,
         properties = {
+                "management.tracing.sampling.probability=1.0",
                 "eureka.client.enabled=false"
         }
 )
+@AutoConfigureTracing
 @DisplayName("批量缓冲队列测试")
 public class BatchBufferQueueTest {
     private static final int EVENT_COUNT = 150;

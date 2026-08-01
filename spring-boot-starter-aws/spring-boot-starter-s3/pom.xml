@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.github.opensabe-tech</groupId>
 		<artifactId>aws-bom</artifactId>
-		<version>2.0.9</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../../spring-boot-starter-aws/pom.xml</relativePath>
 	</parent>
 
@@ -15,10 +15,6 @@
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 	<packaging>jar</packaging>
-
-	<properties>
-		<s3.sdk.version>2.21.2</s3.sdk.version>
-	</properties>
 
 	<dependencies>
 

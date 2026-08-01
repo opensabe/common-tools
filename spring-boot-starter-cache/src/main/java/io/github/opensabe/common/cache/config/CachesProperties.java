@@ -17,7 +17,7 @@ package io.github.opensabe.common.cache.config;
 
 import java.util.List;
 
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
+import org.springframework.boot.cache.autoconfigure.CacheProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Getter;

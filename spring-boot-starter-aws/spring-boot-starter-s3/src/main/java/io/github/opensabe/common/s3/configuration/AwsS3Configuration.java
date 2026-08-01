@@ -37,6 +37,8 @@ import io.github.opensabe.common.s3.service.S3ClientWrapper;
 import io.github.opensabe.common.s3.service.S3SyncFileService;
 import io.github.opensabe.common.s3.typehandler.S3OBSService;
 import lombok.extern.log4j.Log4j2;
+import software.amazon.awssdk.core.checksums.RequestChecksumCalculation;
+import software.amazon.awssdk.core.checksums.ResponseChecksumValidation;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
@@ -63,8 +65,11 @@ public class AwsS3Configuration {
     public S3Client s3SyncClient() {
         log.info("s3 sync client inits...");
         S3ClientBuilder builder = S3Client.builder();
+        // SDK 2.30+ defaults CRC32 on uploads; LocalStack / some S3-compat endpoints reject it.
         builder.region(Region.of(s3Properties.getRegion()))
-                .credentialsProvider(() -> create(s3Properties.getAccessKeyId(), s3Properties.getAccessKey()));
+                .credentialsProvider(() -> create(s3Properties.getAccessKeyId(), s3Properties.getAccessKey()))
+                .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
+                .responseChecksumValidation(ResponseChecksumValidation.WHEN_REQUIRED);
         if (StringUtils.isNotEmpty(awsS3LocalUrl)) {
             log.fatal("AwsS3 will use local url {}", awsS3LocalUrl);
             builder.endpointOverride(URI.create(awsS3LocalUrl));

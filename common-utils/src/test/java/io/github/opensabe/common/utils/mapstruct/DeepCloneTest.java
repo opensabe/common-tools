@@ -40,6 +40,11 @@ import static org.assertj.core.api.Assertions.tuple;
 @DisplayName("MapStruct深度克隆测试")
 public class DeepCloneTest {
 
+    static {
+        MapstructTestBootstrap.init();
+    }
+
+
     @Test
     @DisplayName("测试复杂对象深度克隆 - 验证对象引用和内容")
     void test() {

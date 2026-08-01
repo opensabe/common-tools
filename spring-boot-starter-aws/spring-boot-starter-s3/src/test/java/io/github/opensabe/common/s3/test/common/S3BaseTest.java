@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -43,7 +42,6 @@ import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
         "aws.s3.defaultBucket=" + S3BaseTest.BUCKET_NAME,
         "aws.s3.profile=test"
 }, classes = App.class)
-@AutoConfigureObservability
 public abstract class S3BaseTest {
     public static final String FOLDER_NAME = "testFolder/country";
     public static final String BUCKET_NAME = "test-bucket";

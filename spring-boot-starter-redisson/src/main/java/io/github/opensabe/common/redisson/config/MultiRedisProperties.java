@@ -17,7 +17,7 @@ package io.github.opensabe.common.redisson.config;
 
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
@@ -33,5 +33,5 @@ public class MultiRedisProperties {
     public static final String DEFAULT = "default";
 
     private boolean enableMulti = false;
-    private Map<String, RedisProperties> multi;
+    private Map<String, DataRedisProperties> multi;
 }

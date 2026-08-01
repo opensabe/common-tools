@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.core.Ordered;
 
-import io.github.opensabe.spring.cloud.parent.web.common.undertow.UndertowGracefulShutdownHandler;
+import io.github.opensabe.common.executor.GracefulShutdownHandler;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class ThreadPoolFactoryGracefulShutDownHandler implements UndertowGracefulShutdownHandler {
+public class ThreadPoolFactoryGracefulShutDownHandler implements GracefulShutdownHandler {
 
     private final ThreadPoolFactory threadPoolFactory;
     @Getter

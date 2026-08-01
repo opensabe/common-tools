@@ -151,4 +151,32 @@ public class ExpireTest {
         String s = redisTemplate.opsForValue().get(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX + "test_redis::" + id + ":" + filed);
         Assertions.assertNull(s);
     }
+
+    /**
+     * Without {@code @Expire}, {@code @CacheEvict} must clear every TTL-scoped Redis cache
+     * for the same name (not only {@code limit(1)} as in 2.x).
+     */
+    @Test
+    void testCacheEvictFansOutAcrossExpireTtls() {
+        Long id = 401L;
+        String field = "multiTtl";
+        String cacheKey = id + ":" + field;
+        ItemObject item = ItemObject.builder().id(id).name(field).value("multi").build();
+        storage.addItem(item);
+
+        cacheService.getRedisExpireTtl5(id, field);
+        cacheService.getRedisExpireTtl30(id, field);
+
+        Cache ttl5 = cacheManager.getCache("test_redis", Duration.ofSeconds(5));
+        Cache ttl30 = cacheManager.getCache("test_redis", Duration.ofSeconds(30));
+        Assertions.assertNotNull(ttl5.get(cacheKey));
+        Assertions.assertNotNull(ttl30.get(cacheKey));
+
+        cacheService.deleteRedis(id, field);
+
+        Assertions.assertNull(ttl5.get(cacheKey));
+        Assertions.assertNull(ttl30.get(cacheKey));
+        Assertions.assertNull(redisTemplate.opsForValue().get(
+                RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX + "test_redis::" + cacheKey));
+    }
 }

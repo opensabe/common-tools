@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
@@ -34,8 +35,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Log4j2
 @SpringBootTest(
-        classes = TracingTest.Main.class
+        classes = TracingTest.Main.class,
+        properties = {
+                "management.tracing.sampling.probability=1.0"
+        }
 )
+@AutoConfigureTracing
 @DisplayName("链路追踪测试")
 public class TracingTest {
     @Autowired

@@ -25,9 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
@@ -49,7 +48,6 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("circuitbreaker")
 @SpringBootTest
-@AutoConfigureObservability
 @EnableFeignClients
 public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
     static final String TEST_SERVICE_CIRCUITBREAKER = "testServiceCircuitbreaker";
@@ -64,7 +62,7 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
     RetryRegistry retryRegistry;
     @Autowired
     TestServiceCircuitbreakerClient testServiceCircuitbreakerClient;
-    @MockBean
+    @MockitoBean
     SimpleDiscoveryClient discoveryClient;
     List<ServiceInstance> serviceInstances = List.of(new DefaultServiceInstance(
             "service2Instance2", TEST_SERVICE_CIRCUITBREAKER, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1"))

@@ -19,15 +19,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import io.github.opensabe.spring.cloud.parent.common.config.Log4j2Configuration;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 @SpringJUnitConfig
-@AutoConfigureObservability
 @SpringBootTest(
         properties = {
                 "eureka.client.enabled=false",
@@ -36,6 +35,7 @@ import io.github.opensabe.spring.cloud.parent.common.config.Log4j2Configuration;
         classes = Log4j2PrometheusMetricsTest.Main.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
+@AutoConfigureTestRestTemplate
 public class Log4j2PrometheusMetricsTest {
     private final TestRestTemplate testRestTemplate;
 

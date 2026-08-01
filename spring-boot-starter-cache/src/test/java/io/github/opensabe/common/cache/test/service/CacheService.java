@@ -50,7 +50,7 @@ public class CacheService {
         storage.deleteItem(id);
     }
 
-    @CacheEvict(value = "test_redis")
+    @CacheEvict(value = "test_redis", key = "#id + ':' + #field")
     public void deleteRedis(Long id, String field) {
         storage.deleteItem(id);
     }
@@ -58,6 +58,22 @@ public class CacheService {
     @Expire(5)
     @Cacheable(value = "test_redis")
     public ItemObject getRedisExpire(Long id, String field) {
+        return storage.getItem(id);
+    }
+
+    /**
+     * Same cache name + key as {@link #getRedisExpireLong}, different TTL — used to verify
+     * {@code @CacheEvict} without {@code @Expire} fans out across all TTL-scoped Redis caches.
+     */
+    @Expire(5)
+    @Cacheable(value = "test_redis", key = "#id + ':' + #field")
+    public ItemObject getRedisExpireTtl5(Long id, String field) {
+        return storage.getItem(id);
+    }
+
+    @Expire(30)
+    @Cacheable(value = "test_redis", key = "#id + ':' + #field")
+    public ItemObject getRedisExpireTtl30(Long id, String field) {
         return storage.getItem(id);
     }
 

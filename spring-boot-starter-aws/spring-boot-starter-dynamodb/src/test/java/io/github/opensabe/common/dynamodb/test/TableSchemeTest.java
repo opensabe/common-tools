@@ -15,13 +15,14 @@
  */
 package io.github.opensabe.common.dynamodb.test;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.util.TypeInformation;
+import org.springframework.data.core.TypeInformation;
 
 import cn.hutool.core.bean.BeanDesc;
 import cn.hutool.core.bean.BeanUtil;
@@ -54,10 +55,11 @@ public class TableSchemeTest {
     @Test
     void testGenerateTableScheme() {
         BeanDesc desc = BeanUtil.getBeanDesc(EightDataTypesPo.class);
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
         StaticAttribute[] attributes = desc.getProps().stream().map(prop -> {
             StaticAttribute.Builder<EightDataTypesPo, ?> builder = StaticAttribute.builder(EightDataTypesPo.class, prop.getFieldClass())
-                    .setter(BeanAttributeSetter.create(EightDataTypesPo.class, prop.getSetter()))
-                    .getter(BeanAttributeGetter.create(EightDataTypesPo.class, prop.getGetter()));
+                    .setter(BeanAttributeSetter.create(EightDataTypesPo.class, prop.getSetter(), lookup))
+                    .getter(BeanAttributeGetter.create(EightDataTypesPo.class, prop.getGetter(), lookup));
             HashKeyName keyName = prop.getField().getAnnotation(HashKeyName.class);
             if (Objects.nonNull(keyName)) {
                 builder = builder.name("".equals(keyName.name()) ? prop.getFieldName() : keyName.name())

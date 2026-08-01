@@ -58,22 +58,46 @@ public class CompositedCache implements Cache {
 
     @Override
     public ValueWrapper get(Object key) {
-        throw new UnsupportedOperationException();
+        for (Cache cache : list) {
+            ValueWrapper wrapper = cache.get(key);
+            if (wrapper != null) {
+                return wrapper;
+            }
+        }
+        return null;
     }
 
     @Override
     public <T> T get(Object key, Class<T> type) {
-        throw new UnsupportedOperationException();
+        for (Cache cache : list) {
+            T value = cache.get(key, type);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
-        throw new UnsupportedOperationException();
+        ValueWrapper wrapper = get(key);
+        if (wrapper != null) {
+            @SuppressWarnings("unchecked")
+            T value = (T) wrapper.get();
+            return value;
+        }
+        try {
+            T value = valueLoader.call();
+            put(key, value);
+            return value;
+        } catch (Exception ex) {
+            throw new ValueRetrievalException(key, valueLoader, ex);
+        }
     }
 
     @Override
     public void put(Object key, Object value) {
-        throw new UnsupportedOperationException();
+        list.forEach(cache -> cache.put(key, value));
     }
 
     @Override

@@ -21,7 +21,7 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.boot.http.converter.autoconfigure.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -43,7 +43,6 @@ public class ConverterConfiguration {
         List<MediaType> supportedMediaTypes = Lists.newArrayList();
         //从1.1.41升级到1.2.之后的版本必须配置，否则会报错
         supportedMediaTypes.add(MediaType.APPLICATION_JSON);
-        supportedMediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
         fastJsonHttpMessageConverter.setSupportedMediaTypes(supportedMediaTypes);
 
         //创建FastJson对象并设定序列化规则

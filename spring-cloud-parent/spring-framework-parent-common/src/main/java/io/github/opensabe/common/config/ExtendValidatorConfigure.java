@@ -26,7 +26,7 @@ import io.github.opensabe.spring.cloud.parent.common.validation.StringNotNullVal
 import org.hibernate.validator.cfg.ConstraintMapping;
 import org.hibernate.validator.internal.engine.ConfigurationImpl;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.validation.ValidationConfigurationCustomizer;
+import org.springframework.boot.validation.autoconfigure.ValidationConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 
 import io.github.opensabe.spring.cloud.parent.common.validation.annotation.IntegerEnumedValue;

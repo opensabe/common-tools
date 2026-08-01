@@ -18,12 +18,13 @@ package io.github.opensabe.common.utils.json;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.module.blackbird.BlackbirdModule;
 
 import io.github.opensabe.common.jackson.TimestampModule;
 import lombok.SneakyThrows;
@@ -45,12 +46,13 @@ public final class JsonUtil {
 
     static {
         //就算不在 Spring 环境中，也可以使用 ObjectMapper
-        objectMapper = new ObjectMapper();
-        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        objectMapper.disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES);
-        objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        objectMapper.registerModule(new BlackbirdModule());
-        objectMapper.registerModule(new TimestampModule());
+        objectMapper = JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES)
+                .enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .addModule(new BlackbirdModule())
+                .addModule(new TimestampModule())
+                .build();
     }
 
     /**

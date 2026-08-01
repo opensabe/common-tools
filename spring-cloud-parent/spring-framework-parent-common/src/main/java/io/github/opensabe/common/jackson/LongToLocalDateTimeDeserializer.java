@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.common.jackson;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,10 +25,10 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -39,7 +38,7 @@ import lombok.extern.log4j.Log4j2;
  * long 类型只到毫秒时间
  */
 @Log4j2
-public class LongToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
+public class LongToLocalDateTimeDeserializer extends ValueDeserializer<LocalDateTime> {
 
     @Getter
     private static final LongToLocalDateTimeDeserializer INSTANCE = new LongToLocalDateTimeDeserializer();
@@ -84,7 +83,7 @@ public class LongToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateT
 
 
     @Override
-    public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) {
         try {
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(p.getLongValue()), zoneId);
         } catch (Throwable e) {

@@ -19,15 +19,12 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.BatchOptions;
-import org.redisson.api.ClusterNodesGroup;
 import org.redisson.api.ExecutorOptions;
 import org.redisson.api.LocalCachedMapCacheOptions;
 import org.redisson.api.LocalCachedMapOptions;
 import org.redisson.api.LockOptions;
 import org.redisson.api.MapCacheOptions;
 import org.redisson.api.MapOptions;
-import org.redisson.api.Node;
-import org.redisson.api.NodesGroup;
 import org.redisson.api.RAtomicDouble;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RBatch;
@@ -36,6 +33,7 @@ import org.redisson.api.RBitSet;
 import org.redisson.api.RBlockingDeque;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RBloomFilter;
+import org.redisson.api.RTDigest;
 import org.redisson.api.RBoundedBlockingQueue;
 import org.redisson.api.RBucket;
 import org.redisson.api.RBuckets;
@@ -108,6 +106,13 @@ import org.redisson.api.options.LiveObjectOptions;
 import org.redisson.api.options.OptionalOptions;
 import org.redisson.api.options.PatternTopicOptions;
 import org.redisson.api.options.PlainOptions;
+import org.redisson.api.RArray;
+import org.redisson.api.RGcra;
+import org.redisson.api.RReliablePubSubTopic;
+import org.redisson.api.RBitVectorStore;
+import org.redisson.api.RBloomFilterNative;
+import org.redisson.api.RCuckooFilter;
+import org.redisson.api.RTopK;
 import org.redisson.api.redisnode.BaseRedisNodes;
 import org.redisson.api.redisnode.RedisNodes;
 import org.redisson.client.codec.Codec;
@@ -952,6 +957,16 @@ public class RedissonClientDelegate implements RedissonClient {
     }
 
     @Override
+    public RTDigest getTDigest(String name) {
+        return delegate.getTDigest(name);
+    }
+
+    @Override
+    public RTDigest getTDigest(PlainOptions options) {
+        return delegate.getTDigest(options);
+    }
+
+    @Override
     public RIdGenerator getIdGenerator(String name) {
         return delegate.getIdGenerator(name);
     }
@@ -1106,13 +1121,143 @@ public class RedissonClientDelegate implements RedissonClient {
     }
 
     @Override
+    public <V> RArray<V> getArray(String name) {
+        return delegate.getArray(name);
+    }
+
+    @Override
+    public <V> RArray<V> getArray(String name, Codec codec) {
+        return delegate.getArray(name, codec);
+    }
+
+    @Override
+    public <V> RArray<V> getArray(PlainOptions options) {
+        return delegate.getArray(options);
+    }
+
+    @Override
+    public RGcra getGcra(String name) {
+        return delegate.getGcra(name);
+    }
+
+    @Override
+    public RGcra getGcra(CommonOptions options) {
+        return delegate.getGcra(options);
+    }
+
+    @Override
+    public RLock getNonReentrantLock(String name) {
+        return delegate.getNonReentrantLock(name);
+    }
+
+    @Override
+    public RLock getNonReentrantLock(CommonOptions options) {
+        return delegate.getNonReentrantLock(options);
+    }
+
+    @Override
+    public RLock getNonReentrantFairLock(String name) {
+        return delegate.getNonReentrantFairLock(name);
+    }
+
+    @Override
+    public RLock getNonReentrantFairLock(CommonOptions options) {
+        return delegate.getNonReentrantFairLock(options);
+    }
+
+    @Override
+    public <V> RReliablePubSubTopic<V> getReliablePubSubTopic(String name) {
+        return delegate.getReliablePubSubTopic(name);
+    }
+
+    @Override
+    public <V> RReliablePubSubTopic<V> getReliablePubSubTopic(String name, Codec codec) {
+        return delegate.getReliablePubSubTopic(name, codec);
+    }
+
+    @Override
+    public <V> RReliablePubSubTopic<V> getReliablePubSubTopic(PlainOptions options) {
+        return delegate.getReliablePubSubTopic(options);
+    }
+
+    @Override
+    public <K> RBitVectorStore<K> getBitVectorStore(String name) {
+        return delegate.getBitVectorStore(name);
+    }
+
+    @Override
+    public <K> RBitVectorStore<K> getBitVectorStore(String name, Codec codec) {
+        return delegate.getBitVectorStore(name, codec);
+    }
+
+    @Override
+    public <K> RBitVectorStore<K> getBitVectorStore(PlainOptions options) {
+        return delegate.getBitVectorStore(options);
+    }
+
+    @Override
+    public <V> RBloomFilterNative<V> getBloomFilterNative(String name) {
+        return delegate.getBloomFilterNative(name);
+    }
+
+    @Override
+    public <V> RBloomFilterNative<V> getBloomFilterNative(String name, Codec codec) {
+        return delegate.getBloomFilterNative(name, codec);
+    }
+
+    @Override
+    public <V> RBloomFilterNative<V> getBloomFilterNative(PlainOptions options) {
+        return delegate.getBloomFilterNative(options);
+    }
+
+    @Override
+    public <V> RCuckooFilter<V> getCuckooFilter(String name) {
+        return delegate.getCuckooFilter(name);
+    }
+
+    @Override
+    public <V> RCuckooFilter<V> getCuckooFilter(String name, Codec codec) {
+        return delegate.getCuckooFilter(name, codec);
+    }
+
+    @Override
+    public <V> RCuckooFilter<V> getCuckooFilter(PlainOptions options) {
+        return delegate.getCuckooFilter(options);
+    }
+
+    @Override
+    public <V> RTopK<V> getTopK(String name) {
+        return delegate.getTopK(name);
+    }
+
+    @Override
+    public <V> RTopK<V> getTopK(String name, Codec codec) {
+        return delegate.getTopK(name, codec);
+    }
+
+    @Override
+    public <V> RTopK<V> getTopK(PlainOptions options) {
+        return delegate.getTopK(options);
+    }
+
+    @Override
     public void shutdown() {
         delegate.shutdown();
     }
 
     @Override
+    public java.util.concurrent.CompletionStage<Void> shutdownAsync() {
+        return delegate.shutdownAsync();
+    }
+
+    @Override
     public void shutdown(long quietPeriod, long timeout, TimeUnit unit) {
         delegate.shutdown(quietPeriod, timeout, unit);
+    }
+
+    @Override
+    public java.util.concurrent.CompletionStage<Void> shutdownAsync(java.time.Duration quietPeriod, java.time.Duration timeout) {
+        return delegate.shutdownAsync(quietPeriod, timeout);
     }
 
     @Override
@@ -1123,18 +1268,6 @@ public class RedissonClientDelegate implements RedissonClient {
     @Override
     public <T extends BaseRedisNodes> T getRedisNodes(RedisNodes<T> nodes) {
         return delegate.getRedisNodes(nodes);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public NodesGroup<Node> getNodesGroup() {
-        return delegate.getNodesGroup();
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public ClusterNodesGroup getClusterNodesGroup() {
-        return delegate.getClusterNodesGroup();
     }
 
     @Override

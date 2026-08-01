@@ -154,7 +154,7 @@ public class TraceableForkJoinExecutorService extends ForkJoinPool {
     }
 
     @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
         List<CustomerCallable<T>> collect = tasks.stream()
                 .map(call -> {
                     if (call instanceof CustomerCallable) {

@@ -136,6 +136,26 @@ public class ObservedRedissonClient extends RedissonClientDelegate {
     }
 
     @Override
+    public RLock getNonReentrantLock(String name) {
+        return getObservedLock(delegate.getNonReentrantLock(name));
+    }
+
+    @Override
+    public RLock getNonReentrantLock(CommonOptions options) {
+        return getObservedLock(delegate.getNonReentrantLock(options));
+    }
+
+    @Override
+    public RLock getNonReentrantFairLock(String name) {
+        return getObservedLock(delegate.getNonReentrantFairLock(name));
+    }
+
+    @Override
+    public RLock getNonReentrantFairLock(CommonOptions options) {
+        return getObservedLock(delegate.getNonReentrantFairLock(options));
+    }
+
+    @Override
     public RReadWriteLock getReadWriteLock(String name) {
         return new ObservedRReadWriteLock(delegate.getReadWriteLock(name), unifiedObservationFactory);
     }

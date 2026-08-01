@@ -23,9 +23,9 @@ import java.util.Objects;
 import org.springframework.core.env.Environment;
 import org.springframework.data.convert.PropertyValueConverter;
 import org.springframework.data.convert.ValueConversionContext;
-import org.springframework.data.util.TypeInformation;
+import org.springframework.data.core.TypeInformation;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 import cn.hutool.core.codec.Hashids;
 import io.github.opensabe.common.dynamodb.service.DynamoDbBaseService;

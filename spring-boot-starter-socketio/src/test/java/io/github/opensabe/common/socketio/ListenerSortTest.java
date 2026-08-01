@@ -28,7 +28,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -55,7 +54,6 @@ import lombok.extern.log4j.Log4j2;
         "eureka.client.enabled=false",
 })
 @JfrEventTest
-@AutoConfigureObservability
 @ExtendWith(SingleRedisIntegrationTest.class)
 @DisplayName("SocketIO监听器排序测试")
 public class ListenerSortTest {

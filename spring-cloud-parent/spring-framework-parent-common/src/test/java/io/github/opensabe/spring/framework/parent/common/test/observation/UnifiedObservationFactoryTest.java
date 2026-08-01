@@ -26,7 +26,9 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
+@AutoConfigureTracing
 @SpringBootTest(classes = UnifiedObservationFactoryTest.Main.class)
 @DisplayName("统一观察者工厂测试")
 public class UnifiedObservationFactoryTest {

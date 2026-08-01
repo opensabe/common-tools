@@ -24,6 +24,7 @@ import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateIntervalUnit;
 import org.redisson.api.RateLimiterConfig;
 import org.redisson.api.RateType;
+import org.redisson.api.ratelimiter.RateLimiterArgs;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.observation.rexpirable.ObservedRExpirable;
@@ -160,6 +161,47 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
         }
     }
 
+    @Override
+    public void setRate(RateLimiterArgs args) {
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(delegate.getName(), Thread.currentThread().getName(), RateType.OVERALL, -1L, Duration.ZERO, Duration.ZERO);
+        Observation observation = RRateLimiterObservationDocumentation.SET_RATE.start(
+                null,
+                RRateLimiterSetRateConvention.DEFAULT,
+                () -> context,
+                unifiedObservationFactory.getObservationRegistry()
+        );
+        try {
+            delegate.setRate(args);
+            context.setSetRateSuccessfully(true);
+        } catch (Throwable t) {
+            observation.error(t);
+            throw t;
+        } finally {
+            observation.stop();
+        }
+    }
+
+    @Override
+    public boolean updateRate(RateLimiterArgs args) {
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(delegate.getName(), Thread.currentThread().getName(), RateType.OVERALL, -1L, Duration.ZERO, Duration.ZERO);
+        Observation observation = RRateLimiterObservationDocumentation.SET_RATE.start(
+                null,
+                RRateLimiterSetRateConvention.DEFAULT,
+                () -> context,
+                unifiedObservationFactory.getObservationRegistry()
+        );
+        try {
+            boolean result = delegate.updateRate(args);
+            context.setSetRateSuccessfully(result);
+            return result;
+        } catch (Throwable t) {
+            observation.error(t);
+            throw t;
+        } finally {
+            observation.stop();
+        }
+    }
+
     private boolean acquire0(long permits, long timeout, TimeUnit unit, AcquireCallable callable) {
         RRateLimiterAcquireContext context = new RRateLimiterAcquireContext(
                 delegate.getName(), Thread.currentThread().getName(), permits, timeout, unit
@@ -245,77 +287,131 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
     }
 
     @Override
+    public void release(long permits) {
+        // No dedicated release JFR event; reuse ACQUIRE observation for visibility.
+        RRateLimiterAcquireContext context = new RRateLimiterAcquireContext(
+                delegate.getName(), Thread.currentThread().getName(), permits, -1, TimeUnit.SECONDS
+        );
+        Observation observation = RRateLimiterObservationDocumentation.ACQUIRE.start(
+                null,
+                RRateLimiterAcquireConvention.DEFAULT,
+                () -> context,
+                unifiedObservationFactory.getObservationRegistry()
+        );
+        try {
+            delegate.release(permits);
+            context.setRateLimiterAcquiredSuccessfully(true);
+        } catch (Throwable t) {
+            observation.error(t);
+            throw t;
+        } finally {
+            observation.stop();
+        }
+    }
+
+    @Override
     @SuppressWarnings("deprecation")
     public RFuture<Boolean> trySetRateAsync(RateType mode, long rate, long rateInterval, RateIntervalUnit rateIntervalUnit) {
-        return delegate.trySetRateAsync(mode, rate, rateInterval, rateIntervalUnit);
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(
+                delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, rateIntervalUnit);
+        return observeSetRateAsync(context, delegate.trySetRateAsync(mode, rate, rateInterval, rateIntervalUnit));
     }
 
     @Override
     public RFuture<Boolean> trySetRateAsync(RateType mode, long rate, Duration rateInterval) {
-        return delegate.trySetRateAsync(mode, rate, rateInterval);
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(
+                delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, Duration.ZERO);
+        return observeSetRateAsync(context, delegate.trySetRateAsync(mode, rate, rateInterval));
     }
 
     @Override
     public RFuture<Boolean> trySetRateAsync(RateType mode, long rate, Duration rateInterval, Duration keepAliveTime) {
-        return delegate.trySetRateAsync(mode, rate, rateInterval, keepAliveTime);
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(
+                delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, keepAliveTime);
+        return observeSetRateAsync(context, delegate.trySetRateAsync(mode, rate, rateInterval, keepAliveTime));
     }
 
     @Override
     public RFuture<Boolean> tryAcquireAsync() {
-        return delegate.tryAcquireAsync();
+        return observeAcquireAsync(1, -1, TimeUnit.SECONDS, delegate.tryAcquireAsync());
     }
 
     @Override
     public RFuture<Boolean> tryAcquireAsync(long permits) {
-        return delegate.tryAcquireAsync(permits);
+        return observeAcquireAsync(permits, -1, TimeUnit.SECONDS, delegate.tryAcquireAsync(permits));
     }
 
     @Override
     public RFuture<Void> acquireAsync() {
-        return delegate.acquireAsync();
+        return observeAcquireAsync(1, -1, TimeUnit.SECONDS, delegate.acquireAsync());
     }
 
     @Override
     public RFuture<Void> acquireAsync(long permits) {
-        return delegate.acquireAsync(permits);
+        return observeAcquireAsync(permits, -1, TimeUnit.SECONDS, delegate.acquireAsync(permits));
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public RFuture<Boolean> tryAcquireAsync(long timeout, TimeUnit unit) {
-        return delegate.tryAcquireAsync(timeout, unit);
+        return observeAcquireAsync(1, timeout, unit, delegate.tryAcquireAsync(timeout, unit));
     }
 
     @Override
     public RFuture<Boolean> tryAcquireAsync(Duration timeout) {
-        return delegate.tryAcquireAsync(timeout);
+        return observeAcquireAsync(1, timeout.toMillis(), TimeUnit.MILLISECONDS, delegate.tryAcquireAsync(timeout));
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public RFuture<Boolean> tryAcquireAsync(long permits, long timeout, TimeUnit unit) {
-        return delegate.tryAcquireAsync(permits, timeout, unit);
+        return observeAcquireAsync(permits, timeout, unit, delegate.tryAcquireAsync(permits, timeout, unit));
     }
 
     @Override
     public RFuture<Boolean> tryAcquireAsync(long permits, Duration timeout) {
-        return delegate.tryAcquireAsync(permits, timeout);
+        return observeAcquireAsync(permits, timeout.toMillis(), TimeUnit.MILLISECONDS, delegate.tryAcquireAsync(permits, timeout));
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public RFuture<Void> setRateAsync(RateType mode, long rate, long rateInterval, RateIntervalUnit rateIntervalUnit) {
-        return delegate.setRateAsync(mode, rate, rateInterval, rateIntervalUnit);
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(
+                delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, rateIntervalUnit);
+        return observeSetRateAsync(context, delegate.setRateAsync(mode, rate, rateInterval, rateIntervalUnit));
     }
 
     @Override
     public RFuture<Void> setRateAsync(RateType mode, long rate, Duration rateInterval) {
-        return delegate.setRateAsync(mode, rate, rateInterval);
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(
+                delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, Duration.ZERO);
+        return observeSetRateAsync(context, delegate.setRateAsync(mode, rate, rateInterval));
     }
 
     @Override
     public RFuture<Void> setRateAsync(RateType mode, long rate, Duration rateInterval, Duration keepAliveTime) {
-        return delegate.setRateAsync(mode, rate, rateInterval, keepAliveTime);
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(
+                delegate.getName(), Thread.currentThread().getName(), mode, rate, rateInterval, keepAliveTime);
+        return observeSetRateAsync(context, delegate.setRateAsync(mode, rate, rateInterval, keepAliveTime));
+    }
+
+    @Override
+    public RFuture<Void> releaseAsync(long permits) {
+        return observeAcquireAsync(permits, -1, TimeUnit.SECONDS, delegate.releaseAsync(permits));
+    }
+
+    @Override
+    public RFuture<Void> setRateAsync(RateLimiterArgs args) {
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(
+                delegate.getName(), Thread.currentThread().getName(), RateType.OVERALL, -1L, Duration.ZERO, Duration.ZERO);
+        return observeSetRateAsync(context, delegate.setRateAsync(args));
+    }
+
+    @Override
+    public RFuture<Boolean> updateRateAsync(RateLimiterArgs args) {
+        RRateLimiterSetRateContext context = new RRateLimiterSetRateContext(
+                delegate.getName(), Thread.currentThread().getName(), RateType.OVERALL, -1L, Duration.ZERO, Duration.ZERO);
+        return observeSetRateAsync(context, delegate.updateRateAsync(args));
     }
 
     @Override
@@ -326,6 +422,55 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
     @Override
     public RFuture<Long> availablePermitsAsync() {
         return delegate.availablePermitsAsync();
+    }
+
+    private <T> RFuture<T> observeSetRateAsync(RRateLimiterSetRateContext context, RFuture<T> future) {
+        Observation observation = RRateLimiterObservationDocumentation.SET_RATE.start(
+                null,
+                RRateLimiterSetRateConvention.DEFAULT,
+                () -> context,
+                unifiedObservationFactory.getObservationRegistry()
+        );
+        future.whenComplete((result, error) -> {
+            try {
+                if (error != null) {
+                    observation.error(error);
+                } else if (result instanceof Boolean success) {
+                    context.setSetRateSuccessfully(success);
+                } else {
+                    context.setSetRateSuccessfully(true);
+                }
+            } finally {
+                observation.stop();
+            }
+        });
+        return future;
+    }
+
+    private <T> RFuture<T> observeAcquireAsync(long permits, long timeout, TimeUnit unit, RFuture<T> future) {
+        RRateLimiterAcquireContext context = new RRateLimiterAcquireContext(
+                delegate.getName(), Thread.currentThread().getName(), permits, timeout, unit
+        );
+        Observation observation = RRateLimiterObservationDocumentation.ACQUIRE.start(
+                null,
+                RRateLimiterAcquireConvention.DEFAULT,
+                () -> context,
+                unifiedObservationFactory.getObservationRegistry()
+        );
+        future.whenComplete((result, error) -> {
+            try {
+                if (error != null) {
+                    observation.error(error);
+                } else if (result instanceof Boolean success) {
+                    context.setRateLimiterAcquiredSuccessfully(success);
+                } else {
+                    context.setRateLimiterAcquiredSuccessfully(true);
+                }
+            } finally {
+                observation.stop();
+            }
+        });
+        return future;
     }
 
     private interface AcquireCallable {

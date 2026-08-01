@@ -24,7 +24,7 @@ import org.springframework.data.mapping.model.AbstractPersistentProperty;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
-import org.springframework.data.util.TypeInformation;
+import org.springframework.data.core.TypeInformation;
 
 import io.github.opensabe.common.dynamodb.test.common.DynamicdbStarter;
 import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;

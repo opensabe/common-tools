@@ -29,10 +29,9 @@ import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
@@ -70,6 +69,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 @Log4j2
 @JfrEventTest
@@ -84,15 +85,16 @@ import static org.mockito.Mockito.when;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ActiveProfiles("jfr")
-@AutoConfigureObservability
 @EnableFeignClients
 //JFR 测试最好在本地做
+@AutoConfigureTestRestTemplate
+@AutoConfigureTracing
 @Disabled
 public class TestJFREvent extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "TestOpenFeignJFREvent-TestService1";
     static final String CONTEXT_ID_1 = "TestOpenFeignJFREvent-testService1Client";
     public JfrEvents jfrEvents = new JfrEvents();
-    @MockBean
+    @MockitoBean
     SimpleDiscoveryClient discoveryClient;
     List<ServiceInstance> normal = List.of(
             new DefaultServiceInstance(

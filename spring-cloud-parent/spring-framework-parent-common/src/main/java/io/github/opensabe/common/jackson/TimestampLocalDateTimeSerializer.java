@@ -15,14 +15,13 @@
  */
 package io.github.opensabe.common.jackson;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 import lombok.Getter;
 
@@ -30,7 +29,7 @@ import lombok.Getter;
  * LocalDateTime 序列化为毫秒时间戳
  * 注意，这里的时间戳是毫秒级别的，LocalDateTime 是纳秒级别的，所以会丢失精度
  */
-public class TimestampLocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
+public class TimestampLocalDateTimeSerializer extends ValueSerializer<LocalDateTime> {
 
     @Getter
     private static final TimestampLocalDateTimeSerializer INSTANCE = new TimestampLocalDateTimeSerializer();
@@ -42,7 +41,7 @@ public class TimestampLocalDateTimeSerializer extends JsonSerializer<LocalDateTi
     }
 
     @Override
-    public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(LocalDateTime value, JsonGenerator gen, SerializationContext serializers) {
         if (Objects.nonNull(value)) {
             gen.writeNumber(value.atZone(zoneId).toInstant().toEpochMilli());
         }

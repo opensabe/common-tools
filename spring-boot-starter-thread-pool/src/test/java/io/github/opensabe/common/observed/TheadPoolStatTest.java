@@ -27,7 +27,6 @@ import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -43,7 +42,6 @@ import static org.junit.Assert.assertTrue;
 @Log4j2
 @JfrEventTest
 @ActiveProfiles("jfr")
-@AutoConfigureObservability
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
 })

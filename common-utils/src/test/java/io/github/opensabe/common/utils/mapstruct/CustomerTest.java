@@ -18,16 +18,19 @@ package io.github.opensabe.common.utils.mapstruct;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.Mapper;
 
 import io.github.opensabe.common.utils.mapstruct.vo.Activity;
 import io.github.opensabe.common.utils.mapstruct.vo.ActivityDto;
 import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.mapstruct.core.MapperRepository;
-import io.github.opensabe.mapstruct.core.RegisterRepository;
 
 @DisplayName("自定义MapStruct映射器测试")
 public class CustomerTest {
+
+    static {
+        MapstructTestBootstrap.init();
+    }
+
 
     private MapperRepository repository = MapperRepository.getInstance();
 
@@ -56,14 +59,5 @@ public class CustomerTest {
         ActivityDto source = new ActivityDto("a1");
         Activity dto = mapper.map(source);
         Assertions.assertThat(dto.getName()).isEqualTo("a1Customer");
-    }
-
-    @Mapper
-    @RegisterRepository
-    public interface CustomerMapper extends CommonCopyMapper<Activity, ActivityDto> {
-
-        default String convert(String src) {
-            return src + "Customer";
-        }
     }
 }

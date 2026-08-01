@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -57,6 +58,11 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
         }
     }
 
+    /**
+     * Own manager list. Do not rely on the parent {@code cacheManagers} field:
+     * Spring's {@code setCacheManagers} only {@code addAll}s and never clears, so calling
+     * {@code super.setCacheManagers} on each Caffeine/Redis init would duplicate managers.
+     */
     private final List<CacheManager> cacheManagers = new ArrayList<>();
     private Integer caffeineIndex;
     private Integer redisIndex;
@@ -67,8 +73,15 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
 
     @Override
     public void setCacheManagers(Collection<CacheManager> cacheManagers) {
-        super.setCacheManagers(cacheManagers);
-        this.cacheManagers.addAll(cacheManagers);
+        // CaffeineConfiguration and RedisConfiguration each call this; merge instead of replace
+        // so both caffeine and redis managers remain visible to CacheInterceptor.
+        for (CacheManager cacheManager : cacheManagers) {
+            if (!this.cacheManagers.contains(cacheManager)) {
+                this.cacheManagers.add(cacheManager);
+            }
+        }
+        this.caffeineIndex = null;
+        this.redisIndex = null;
         for (int i = 0; i < this.cacheManagers.size(); i++) {
             CacheManager cacheManager = this.cacheManagers.get(i);
             if (cacheManager instanceof DynamicCaffeineCacheManager) {
@@ -77,6 +90,27 @@ public class CompositeCacheManager extends org.springframework.cache.support.Com
                 redisIndex = i;
             }
         }
+        // Parent setCacheManagers is addAll-only; keep resolution on this.cacheManagers via overrides.
+    }
+
+    @Override
+    public Cache getCache(String name) {
+        for (CacheManager cacheManager : this.cacheManagers) {
+            Cache cache = cacheManager.getCache(name);
+            if (cache != null) {
+                return cache;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<String> getCacheNames() {
+        Set<String> names = new LinkedHashSet<>();
+        for (CacheManager cacheManager : this.cacheManagers) {
+            names.addAll(cacheManager.getCacheNames());
+        }
+        return Collections.unmodifiableSet(names);
     }
 
     @Override
