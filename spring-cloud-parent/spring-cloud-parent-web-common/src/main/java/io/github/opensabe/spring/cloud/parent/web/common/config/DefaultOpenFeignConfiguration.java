@@ -17,9 +17,14 @@ package io.github.opensabe.spring.cloud.parent.web.common.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.http.converter.autoconfigure.ClientHttpMessageConvertersCustomizer;
+import org.springframework.cloud.openfeign.support.FeignHttpMessageConverters;
+import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 
 import feign.Feign;
@@ -28,6 +33,7 @@ import feign.codec.ErrorDecoder;
 import io.github.opensabe.spring.cloud.parent.web.common.feign.DefaultErrorDecoder;
 import io.github.opensabe.spring.cloud.parent.web.common.feign.FeignDecoratorBuilderInterceptor;
 import io.github.opensabe.spring.cloud.parent.web.common.feign.OpenfeignUtil;
+import io.github.opensabe.spring.cloud.parent.web.common.feign.ThreadSafeFeignHttpMessageConverters;
 import io.github.resilience4j.core.ConfigurationNotFoundException;
 import io.github.resilience4j.feign.FeignDecorators;
 import io.github.resilience4j.feign.Resilience4jFeign;
@@ -48,6 +54,18 @@ public class DefaultOpenFeignConfiguration {
     @Bean
     public ErrorDecoder errorDecoder() {
         return new DefaultErrorDecoder();
+    }
+
+    /**
+     * Prefer over OpenFeign's default {@link FeignHttpMessageConverters} so concurrent first
+     * decode cannot observe an empty converter list (Boot 4 / OpenFeign 5 race).
+     */
+    @Bean
+    @Primary
+    public FeignHttpMessageConverters feignHttpMessageConverters(
+            ObjectProvider<ClientHttpMessageConvertersCustomizer> customizers,
+            ObjectProvider<HttpMessageConverterCustomizer> cloudCustomizers) {
+        return new ThreadSafeFeignHttpMessageConverters(customizers, cloudCustomizers);
     }
 
     @Bean
