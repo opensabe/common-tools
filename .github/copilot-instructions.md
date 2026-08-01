@@ -1,18 +1,18 @@
 # common-tools — Copilot instructions
 
-Maven `pom` aggregator / BOM for Matchplay Java services. Consumers pull versions via `be-matchplay-parent` → `spring-cloud-parent`.
+Maven `pom` aggregator publishing shared BOM and Spring Boot starters. Downstream services consume versions via the `spring-cloud-parent` BOM.
 
 ## Stack (3.0.0-SNAPSHOT)
 
 - Java **25**, Spring Boot **4.1**, Spring Cloud **2025.1.2**
 - HTTP JSON: **Jackson 3** (`tools.jackson`); Redis Cache serializer remains Jackson 2 `GenericJackson2JsonRedisSerializer`
-- No Matchplay Eureka; do not couple Matchplay business constants into starters
+- Starters must stay domain-agnostic: no product-specific constants, service names, or Eureka wiring
 
 ## Change ownership
 
-- Prefer fixing Matchplay **business** bugs in business repos; change this repo only when the defect is in a starter/BOM itself
-- Version bumps affect all services on this BOM — keep changes intentional and documented
-- Coordinate breaking upgrades with `be-matchplay-parent`
+- Change this repo only for starter/BOM/infrastructure defects; keep product logic in consumer applications
+- Version bumps affect all BOM consumers — keep changes intentional and documented
+- Coordinate breaking upgrades with the consumer parent POM that imports this BOM
 
 ## Build / CI
 
