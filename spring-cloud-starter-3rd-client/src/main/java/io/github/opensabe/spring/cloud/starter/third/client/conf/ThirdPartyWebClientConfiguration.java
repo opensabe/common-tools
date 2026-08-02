@@ -23,8 +23,18 @@ import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdParty
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(ThirdPartyWebClientConfigurationProperties.class)
+/**
+ * ThirdPartyWebClientConfiguration 类。
+ * <p>Third Party Web Client Configuration。</p>
+ */
 public class ThirdPartyWebClientConfiguration {
+/**
+ * getThirdPartyWebClientNamedContextFactory 方法。
+ */
     @Bean
+/**
+ * getThirdPartyWebClientNamedContextFactory 方法。
+ */
     public ThirdPartyWebClientNamedContextFactory getThirdPartyWebClientNamedContextFactory() {
         return new ThirdPartyWebClientNamedContextFactory();
     }

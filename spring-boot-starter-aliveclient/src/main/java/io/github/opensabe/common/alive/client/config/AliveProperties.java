@@ -22,11 +22,18 @@ import lombok.Data;
 
 @ConfigurationProperties(prefix = "alive.push")
 @Data
+/**
+ * AliveProperties 类。
+ * <p>Alive 推送Properties。</p>
+ */
 public class AliveProperties {
 
+/** ROCKET_CLIENT_NAME 字段。 */
     public static final String ROCKET_CLIENT_NAME = "rocketAliveClient";
 
+/** 产品代码。 */
     private int product;
 
+/** RocketMQ 连接配置。 */
     private RocketMQProperties rocketmq;
 }

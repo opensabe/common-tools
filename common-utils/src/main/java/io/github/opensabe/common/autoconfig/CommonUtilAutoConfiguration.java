@@ -20,6 +20,9 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.config.SpringCommonUtilConfiguration;
 
+/**
+ * CommonUtilAutoConfiguration Spring Boot 自动配置。
+ */
 @AutoConfiguration
 @Import({
         SpringCommonUtilConfiguration.class,

@@ -19,6 +19,9 @@ package io.github.opensabe.common.executor;
 import io.micrometer.observation.Observation;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * 可传播链路追踪信息的任务标记接口。
+ */
 public interface Traceable<V> {
 
     @NotNull

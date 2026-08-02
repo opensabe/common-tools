@@ -25,7 +25,12 @@ import io.github.opensabe.common.web.config.base.ErrResponse;
 import io.github.opensabe.common.web.config.base.ErrorUtil;
 
 @ResponseStatus(HttpStatus.OK)
+/**
+ * C200Exception 类。
+ * <p>C200异常。</p>
+ */
 public class C200Exception extends RESTFull2xxBaseException implements Serializable {
+/** serialVersionUID 字段。 */
     private static final long serialVersionUID = -2312393803704717855L;
 
     public C200Exception(String message) {

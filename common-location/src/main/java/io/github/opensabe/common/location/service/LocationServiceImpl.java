@@ -28,6 +28,9 @@ import io.github.opensabe.common.utils.OptionalUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * LocationServiceImpl 实现类。
+ */
 @Log4j2
 public class LocationServiceImpl implements LocationService {
     private final GeoLocation geoLocation;

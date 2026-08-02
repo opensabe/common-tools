@@ -31,18 +31,24 @@ import lombok.SneakyThrows;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * OBSTypeHandler 测试。
+ */
 @DisplayName("OBS类型处理器测试")
 public class OBSTypeHandlerTest extends BaseMybatisTest {
+    /** order Mapper。 */
     @Autowired
     private OrderMapper orderMapper;
+    /** s3OBS 服务。 */
     @Autowired
     private S3OBSService s3OBSService;
+    /** dynamicRoutingDataSource。 */
     @Autowired
     private DynamicRoutingDataSource dynamicRoutingDataSource;
 
+    @DisplayName("测试OBS类型处理器 - 验证数据存储和查询")
     @Test
     @SneakyThrows
-    @DisplayName("测试OBS类型处理器 - 验证数据存储和查询")
     public void create() {
         var order = new Order();
         order.setId("OBSTypeHandlerTestOrder1");

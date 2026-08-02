@@ -30,11 +30,13 @@ public enum ConnectionDocumentation implements ObservationDocumentation {
      * 连接被使用
      */
     CONNECT {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "mysql.connection.connect";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return ConnectionObservationConvention.class;
@@ -45,11 +47,13 @@ public enum ConnectionDocumentation implements ObservationDocumentation {
      * 释放连接
      */
     RELEASE {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "mysql.connection.release";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return ConnectionObservationConvention.class;

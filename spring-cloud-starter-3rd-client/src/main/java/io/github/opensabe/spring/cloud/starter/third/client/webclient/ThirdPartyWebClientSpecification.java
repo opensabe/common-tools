@@ -19,10 +19,16 @@ import java.util.Arrays;
 
 import org.springframework.cloud.context.named.NamedContextFactory;
 
+/**
+ * ThirdPartyWebClientSpecification 类。
+ * <p>Third Party Web Client Specification。</p>
+ */
 public class ThirdPartyWebClientSpecification implements NamedContextFactory.Specification {
 
+/** name 字段。 */
     private final String name;
 
+/** configuration 字段。 */
     private final Class<?>[] configuration;
 
     public ThirdPartyWebClientSpecification(String name, Class<?>[] configuration) {
@@ -31,6 +37,9 @@ public class ThirdPartyWebClientSpecification implements NamedContextFactory.Spe
     }
 
     @Override
+/**
+ * 返回调试字符串。
+ */
     public String toString() {
         return "WebClientSpecification{" +
                 "name='" + name + '\'' +
@@ -39,11 +48,17 @@ public class ThirdPartyWebClientSpecification implements NamedContextFactory.Spe
     }
 
     @Override
+/**
+ * getName 方法。
+ */
     public String getName() {
         return name;
     }
 
     @Override
+/**
+ * getConfiguration 方法。
+ */
     public Class<?>[] getConfiguration() {
         return configuration;
     }

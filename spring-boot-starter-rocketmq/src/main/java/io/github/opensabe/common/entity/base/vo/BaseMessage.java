@@ -21,6 +21,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * BaseMessage。
+ */
 @Getter
 @Setter
 @ToString
@@ -33,6 +36,7 @@ public class BaseMessage<T> {
      */
     private String traceId;
 
+/** spanId。 */
     private String spanId;
     /**
      * 消息发送时间戳

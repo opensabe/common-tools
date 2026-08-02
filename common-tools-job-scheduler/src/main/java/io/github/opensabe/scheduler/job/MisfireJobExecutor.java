@@ -27,6 +27,9 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * MisfireJobExecutor 调度任务。
+ */
 @Log4j2
 @NoArgsConstructor
 @AllArgsConstructor

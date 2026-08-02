@@ -22,6 +22,9 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * DynamoDB 操作 JFR 事件。
+ */
 @Getter
 @Setter
 @Category({"observation", "Dynamodb-Execute"})
@@ -30,12 +33,18 @@ import lombok.Setter;
 public class DynamodbExecuteEvent extends Event {
 
     @Label("SQL Executed Method")
+/** method。 */
     private final String method;
 
+/** traceId。 */
     private String traceId;
+/** spanId。 */
     private String spanId;
+/** hashKey。 */
     private String hashKey;
+/** rangeKey。 */
     private String rangeKey;
+/** expression。 */
     private String expression;
 
     public DynamodbExecuteEvent(String method, String hashKey, String rangeKey, String expression) {

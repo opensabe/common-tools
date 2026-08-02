@@ -146,14 +146,23 @@ public class DynamodbConverter extends DynamoDbBaseService<DynamodbConverter.Con
         JacksonParameterizedTypeTypeReference(final TypeInformation<T> information) {
             final List<TypeInformation<?>> arguments = information.getTypeArguments();
             this.type = new ParameterizedType() {
+                /**
+                 * @return actualTypeArguments
+                 */
                 public Type[] getActualTypeArguments() {
                     return arguments.stream().map(TypeInformation::getType).toArray(Type[]::new);
                 }
 
+                /**
+                 * @return rawType
+                 */
                 public Type getRawType() {
                     return information.getType();
                 }
 
+                /**
+                 * @return ownerType
+                 */
                 public Type getOwnerType() {
                     return null;
                 }

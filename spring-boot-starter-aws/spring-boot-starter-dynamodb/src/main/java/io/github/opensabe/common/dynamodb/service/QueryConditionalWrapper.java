@@ -22,11 +22,13 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 /**
- * @author heng.ma
+ * DynamoDB {@link QueryConditional} 装饰器，在表达式生成后附加自定义处理。
  */
 public class QueryConditionalWrapper implements QueryConditional {
 
+/** 被装饰的 QueryConditional。 */
     private final QueryConditional delegate;
+/** 表达式生成后的回调。 */
     private final Consumer<Expression> consumer;
 
     public QueryConditionalWrapper(QueryConditional delegate, Consumer<Expression> consumer) {
@@ -35,6 +37,7 @@ public class QueryConditionalWrapper implements QueryConditional {
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public Expression expression(TableSchema<?> tableSchema, String indexName) {
         Expression expression = delegate.expression(tableSchema, indexName);

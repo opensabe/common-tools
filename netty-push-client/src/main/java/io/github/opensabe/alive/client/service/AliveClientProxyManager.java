@@ -22,11 +22,19 @@ import java.util.Map;
 import io.github.opensabe.alive.client.Client;
 import io.github.opensabe.alive.client.exception.AliveClientRuntimeException;
 
+/**
+ * AliveClientProxyManager 类。
+ * <p>Alive 推送ClientProxyManager。</p>
+ */
 public class AliveClientProxyManager {
+/** managerList 字段。 */
     private List<AliveClientManager> managerList;
 
     private Map<String, AliveClientManager> managerMap;
 
+/**
+ * init 方法。
+ */
     public void init() {
         managerMap = new HashMap<String, AliveClientManager>();
         if (managerList != null) {
@@ -36,6 +44,9 @@ public class AliveClientProxyManager {
         }
     }
 
+/**
+ * getClient 方法。
+ */
     public Client getClient(Integer productCode) {
         if (productCode == null) {
             throw new IllegalArgumentException("product code is null");
@@ -48,6 +59,9 @@ public class AliveClientProxyManager {
         }
     }
 
+/**
+ * getClient 方法。
+ */
     public Client getClient(String productCode) {
         if (productCode == null) {
             throw new IllegalArgumentException("product code is null");
@@ -60,10 +74,16 @@ public class AliveClientProxyManager {
         }
     }
 
+/**
+ * getManagerList 方法。
+ */
     public List<AliveClientManager> getManagerList() {
         return managerList;
     }
 
+/**
+ * setManagerList 方法。
+ */
     public void setManagerList(List<AliveClientManager> managerList) {
         this.managerList = managerList;
     }

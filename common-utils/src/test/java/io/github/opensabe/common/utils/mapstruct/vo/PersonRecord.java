@@ -17,12 +17,21 @@ package io.github.opensabe.common.utils.mapstruct.vo;
 
 import java.util.List;
 
+/**
+ * PersonRecord 数据记录。
+ */
 public record PersonRecord(String name, AddressRecord address, List<BookRecord> books) {
 
-    public record AddressRecord(String code, String name) {
+    /**
+ * AddressRecord 数据记录。
+ */
+public record AddressRecord(String code, String name) {
     }
 
-    public record BookRecord(String name) {
+    /**
+ * BookRecord 数据记录。
+ */
+public record BookRecord(String name) {
     }
 
 }

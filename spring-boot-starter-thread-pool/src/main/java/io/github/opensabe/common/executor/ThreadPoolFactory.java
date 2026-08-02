@@ -37,6 +37,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * ThreadPoolFactory。
+ */
 @Log4j2
 @SuppressFBWarnings("EI_EXPOSE_REP")
 public class ThreadPoolFactory implements BeanFactoryAware {
@@ -46,8 +49,10 @@ public class ThreadPoolFactory implements BeanFactoryAware {
     //每个线程池大小不超过1024
     private static final int MAX_THREAD_SIZE_INCLUSIVE = 2 << 10;
     private final Set<WeakReference<ExecutorService>> allExecutors = Sets.newConcurrentHashSet();
+/** unifiedObservation 工厂。 */
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    /** @return 是否Completed */
     public static boolean isCompleted(ExecutorService executorService) {
         if (executorService instanceof ThreadPoolExecutor) {
             ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executorService;
@@ -81,6 +86,9 @@ public class ThreadPoolFactory implements BeanFactoryAware {
         assert size <= MAX_THREAD_SIZE_INCLUSIVE && (size & (size - 1)) == 0;
     }
 
+    /**
+     * @return threadFactory
+     */
     private static ThreadFactory getThreadFactory(String threadNamePrefix) {
         if (!threadNamePrefix.contains("%d")) {
             threadNamePrefix = threadNamePrefix + "-%d";
@@ -90,11 +98,15 @@ public class ThreadPoolFactory implements BeanFactoryAware {
                 .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         this.unifiedObservationFactory = beanFactory.getBean(UnifiedObservationFactory.class);
     }
 
+    /**
+     * @return allExecutors
+     */
     public Set<WeakReference<ExecutorService>> getAllExecutors() {
         return allExecutors;
     }
@@ -159,6 +171,7 @@ public class ThreadPoolFactory implements BeanFactoryAware {
         return new JFRThreadPoolExecutor(threadPoolExecutor, unifiedObservationFactory);
     }
 
+    /** addWeakReference。 */
     public void addWeakReference(ExecutorService executorService) {
         this.allExecutors.add(new WeakReference<>(executorService));
     }

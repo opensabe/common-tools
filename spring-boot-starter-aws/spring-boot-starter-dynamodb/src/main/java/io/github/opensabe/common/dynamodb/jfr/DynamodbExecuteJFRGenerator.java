@@ -22,22 +22,29 @@ import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
+/**
+ * Observation 到 JFR 的桥接生成器（DynamodbExecuteJFRGenerator）。
+ */
 public class DynamodbExecuteJFRGenerator extends ObservationToJFRGenerator<DynamodbExecuteContext> {
+    /** {@inheritDoc} */
     @Override
     public Class<DynamodbExecuteContext> getContextClazz() {
         return DynamodbExecuteContext.class;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(DynamodbExecuteContext context) {
         return context.containsKey(DynamodbExecuteEvent.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(DynamodbExecuteContext context) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(DynamodbExecuteContext context) {
         DynamodbExecuteEvent event = context.get(DynamodbExecuteEvent.class);
@@ -53,6 +60,7 @@ public class DynamodbExecuteJFRGenerator extends ObservationToJFRGenerator<Dynam
         event.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(DynamodbExecuteContext context) {
         DynamodbExecuteEvent event = new DynamodbExecuteEvent(context.getMethod(), context.getHashKey(), context.getRangeKey(), context.getExpression());

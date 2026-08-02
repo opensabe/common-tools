@@ -15,16 +15,24 @@
  */
 package io.github.opensabe.common.alive.client.message.enumeration;
 
+/**
+ * PushType 枚举。
+ * <p>推送类型。</p>
+ */
 public enum PushType {
     GROUP(1),
     SPECIAL(2),
     MULTI(3);
+/** val 字段。 */
     private int val;
 
     PushType(int val) {
         this.val = val;
     }
 
+/**
+ * getVal 方法。
+ */
     public int getVal() {
         return val;
     }

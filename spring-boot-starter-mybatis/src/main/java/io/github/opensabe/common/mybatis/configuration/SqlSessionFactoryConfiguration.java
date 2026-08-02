@@ -74,9 +74,13 @@ import tk.mybatis.spring.mapper.SpringBootBindUtil;
 public class SqlSessionFactoryConfiguration
         implements ResourceLoaderAware, EnvironmentAware, BeanFactoryPostProcessor {
 
+/** country 配置属性。 */
     public static CountryProperties countryProperties;
+/** defaultOperId。 */
     public static String defaultOperId;
+/** environment。 */
     private Environment environment;
+/** resourceLoader。 */
     private ResourceLoader resourceLoader;
 
     /**
@@ -95,6 +99,7 @@ public class SqlSessionFactoryConfiguration
         scanner.doScan(basePackage);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         try {
@@ -197,6 +202,7 @@ public class SqlSessionFactoryConfiguration
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
@@ -204,6 +210,7 @@ public class SqlSessionFactoryConfiguration
         SqlSessionFactoryConfiguration.defaultOperId = environment.getProperty("defaultOperId");
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
@@ -251,11 +258,13 @@ public class SqlSessionFactoryConfiguration
         }
     }
 
+    /** sqlSessionTemplate。 */
     private SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
         SqlSessionTemplate sqlSessionTemplate = new SqlSessionTemplate(sqlSessionFactory);
         return sqlSessionTemplate;
     }
 
+    /** transactionManager。 */
     private DataSourceTransactionManager transactionManager(DataSource dataSource) {
         DataSourceTransactionManager transactionManager = new CustomizedDataSourceTransactionManager(dataSource);
         return transactionManager;

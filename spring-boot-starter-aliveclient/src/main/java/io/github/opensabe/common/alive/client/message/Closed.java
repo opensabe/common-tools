@@ -26,7 +26,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+/**
+ * Closed 类。
+ * <p>连接关闭。</p>
+ */
 public class Closed extends MqMessage {
+/** 设备 ID。 */
     private String deviceId;
 
 }

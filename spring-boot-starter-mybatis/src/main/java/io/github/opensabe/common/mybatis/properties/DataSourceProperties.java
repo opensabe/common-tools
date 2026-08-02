@@ -31,9 +31,13 @@ public class DataSourceProperties {
      * jdbc
      */
     private String url;
+/** username。 */
     private String username;
+/** password。 */
     private String password;
+/** driverClassName。 */
     private String driverClassName;
+/** name。 */
     private String name;
     private Boolean isWriteAllowed = true;
     private String clusterName = "";

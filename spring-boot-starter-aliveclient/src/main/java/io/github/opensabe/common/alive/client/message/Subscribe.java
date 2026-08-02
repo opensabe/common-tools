@@ -26,15 +26,24 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+/**
+ * Subscribe 类。
+ * <p>订阅。</p>
+ */
 public class Subscribe extends MqMessage {
+/** 请求 ID。 */
     private Integer requestId;
 
+/** MQ 主题名。 */
     private String topic;
 
+/** subType 字段。 */
     private SubType subType;
 
+/** 推送类型。 */
     private PushType pushType;
 
+/** 账号 ID。 */
     private String accountId;
 
 }

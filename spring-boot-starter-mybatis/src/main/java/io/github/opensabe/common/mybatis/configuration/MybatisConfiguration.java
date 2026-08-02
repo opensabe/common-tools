@@ -27,15 +27,21 @@ import tk.mybatis.mapper.autoconfigure.MybatisProperties;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Mybatis Spring 配置类。
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 public class MybatisConfiguration {
-	@Autowired
+	/** sqlSessionFactories。 */
+    @Autowired
 	private List<SqlSessionFactory> sqlSessionFactories;
 
-	@Autowired
+	/** mybatis 配置属性。 */
+    @Autowired
 	private MybatisProperties mybatisProperties;
 
+	/** afterProperties。 */
 	@PostConstruct
 	public void afterProperties() {
 		MybatisProperties.CoreConfiguration configuration = mybatisProperties.getConfiguration();

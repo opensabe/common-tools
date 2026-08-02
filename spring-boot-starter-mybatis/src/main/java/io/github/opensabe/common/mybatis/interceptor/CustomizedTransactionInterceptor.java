@@ -37,6 +37,9 @@ import io.github.opensabe.common.utils.SpringUtil;
 import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * CustomizedTransaction 拦截器。
+ */
 @Log4j2
 public class CustomizedTransactionInterceptor extends TransactionInterceptor {
 
@@ -50,16 +53,22 @@ public class CustomizedTransactionInterceptor extends TransactionInterceptor {
     private static final ThreadLocal<String> CURRENT_TRANSACTION_MANAGER = new ThreadLocal<>();
     private static final ThreadLocal<String> CURRENT_TRANSACTION_ID = new ThreadLocal<>();
 
+/** unifiedObservation 工厂。 */
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    /** putTransactionManagerName。 */
     public static void putTransactionManagerName(String key, String value) {
         TRANSACTION_MANAGER_NAME_MAP.put(key, value);
     }
 
+    /**
+     * @return currentTransactionId
+     */
     public static String getCurrentTransactionId() {
         return CURRENT_TRANSACTION_ID.get();
     }
 
+    /** {@inheritDoc} */
     @Override
     /**
      * Determine the specific transaction manager to use for the given transaction,
@@ -83,6 +92,7 @@ public class CustomizedTransactionInterceptor extends TransactionInterceptor {
         return transactionManager;
     }
 
+    /** {@inheritDoc} — 执行拦截逻辑。 */
     @Override
     @Nullable
     public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -126,6 +136,9 @@ public class CustomizedTransactionInterceptor extends TransactionInterceptor {
         }
     }
 
+    /**
+     * @return unifiedObservationFactory
+     */
     public UnifiedObservationFactory getUnifiedObservationFactory() {
         if (Objects.isNull(this.unifiedObservationFactory) && Objects.nonNull(SpringUtil.getApplicationContext())) {
             this.unifiedObservationFactory = SpringUtil.getBean(UnifiedObservationFactory.class);

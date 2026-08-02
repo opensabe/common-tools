@@ -15,6 +15,8 @@
  */
 package io.github.opensabe.common.location.test;
 
+import org.junit.jupiter.api.DisplayName;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @date 2024/11/27 19:52
  * @description: 地址测试
  */
+@DisplayName("GeoPlaces测试")
 @Log4j2
 public class GeoPlacesTest extends GeoPlacesBaseTest {
 
@@ -38,10 +41,12 @@ public class GeoPlacesTest extends GeoPlacesBaseTest {
 
     private final List<Double> position = List.of(11.196417, 5.605130);
 
+    /** geocode 服务。 */
     @Autowired
     private GeocodeService geocodeService;
 
     //    @Test
+    /** testGetCoordinates。 */
     public void testGetCoordinates() {
         List<Double> coordinates = geocodeService.getCoordinates(address);
         assertNotNull(coordinates, "Coordinates should not be null");
@@ -49,6 +54,7 @@ public class GeoPlacesTest extends GeoPlacesBaseTest {
     }
 
     //    @Test
+    /** reverseGeocode。 */
     public void reverseGeocode() {
         ReverseGeocodeResponse reverseGeocodeResponse = geocodeService.reverseGeocode(position);
         log.info("Reverse Geocode Response: {}", reverseGeocodeResponse);

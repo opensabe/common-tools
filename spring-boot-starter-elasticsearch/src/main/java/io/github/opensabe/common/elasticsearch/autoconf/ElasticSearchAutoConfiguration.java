@@ -25,6 +25,9 @@ import io.github.opensabe.common.elasticsearch.config.ElasticSearchProperties;
 @Configuration(proxyBeanMethods = false)
 @Import({
         ElasticSearchConfiguration.class
+/**
+ * Elasticsearch Starter 自动配置入口，导入 {@link io.github.opensabe.common.elasticsearch.config.ElasticSearchConfiguration} 并启用配置属性。
+ */
 })
 @EnableConfigurationProperties(ElasticSearchProperties.class)
 public class ElasticSearchAutoConfiguration {

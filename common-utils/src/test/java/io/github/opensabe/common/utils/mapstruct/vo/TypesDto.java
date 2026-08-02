@@ -20,6 +20,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+/**
+ * TypesDto 数据传输对象。
+ */
 public record TypesDto(String name, int age, Integer age0,
                        LocalDateTime time1, Instant time2, Date time3,
                        boolean flag, Boolean flag0, double money,

@@ -19,9 +19,13 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
 
+/**
+ * DynamodbExecute Observation 文档。
+ */
 public enum DynamodbExecuteDocumentation implements ObservationDocumentation {
 
     PUT_ITEM {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "aws.execute.dynamodb.insert";
@@ -29,6 +33,7 @@ public enum DynamodbExecuteDocumentation implements ObservationDocumentation {
     },
 
     SELECT {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "aws.execute.dynamodb.select";
@@ -36,6 +41,7 @@ public enum DynamodbExecuteDocumentation implements ObservationDocumentation {
     },
 
     DELETE_ITEM {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "aws.execute.dynamodb.delete";
@@ -43,12 +49,14 @@ public enum DynamodbExecuteDocumentation implements ObservationDocumentation {
     },
 
     UPDATE_ITEM {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "aws.execute.dynamodb.update";
         }
     };
 
+    /** {@inheritDoc} */
     @Override
     public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
         return DynamodbExecuteObservationConvention.class;

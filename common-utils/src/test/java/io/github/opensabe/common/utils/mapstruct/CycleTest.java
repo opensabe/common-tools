@@ -164,13 +164,19 @@ public class CycleTest {
 
     }
 
-    @Mapper(uses = ObjectConverter.class, disableSubMappingMethodsGeneration = true)
+    /**
+ * NodeMa 接口。
+ */
+@Mapper(uses = ObjectConverter.class, disableSubMappingMethodsGeneration = true)
     public interface NodeMa extends FromMapMapper<Node> {
 
 
     }
 
-    @Mapper(uses = CycleAvoidingMappingContext.class)
+    /**
+ * DtoMapper 数据传输对象。
+ */
+@Mapper(uses = CycleAvoidingMappingContext.class)
     public interface DtoMapper {
 
 

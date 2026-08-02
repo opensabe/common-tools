@@ -24,13 +24,19 @@ import java.util.function.Consumer;
 import io.github.opensabe.common.s3.properties.S3Properties;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * S3AsyncTaskFileService。
+ */
 @Log4j2
 public class S3AsyncTaskFileService implements AsyncTaskFileService {
 
+/** s3SyncFile 服务。 */
     private final FileService s3SyncFileService;
 
+/** executor 服务。 */
     private final ExecutorService executorService;
 
+/** s3 配置属性。 */
     private final S3Properties s3Properties;
 
     private final AtomicBoolean atomicBoolean = new AtomicBoolean(true);
@@ -41,6 +47,7 @@ public class S3AsyncTaskFileService implements AsyncTaskFileService {
         this.s3Properties = s3Properties;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Future<String> upload(Provider<byte[]> provider, String country, String fileName) {
         var lock = atomicBoolean.compareAndSet(true, false);
@@ -50,6 +57,7 @@ public class S3AsyncTaskFileService implements AsyncTaskFileService {
         return executorService.submit(() -> upload1(provider, country, fileName));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void upload(Provider<byte[]> provider, String country, String fileName, Consumer<String> consumer) {
         var lock = atomicBoolean.compareAndSet(true, false);
@@ -68,6 +76,7 @@ public class S3AsyncTaskFileService implements AsyncTaskFileService {
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public Future<String> uploadFile(Provider<File> provider, String country, String fileName) {
         var lock = atomicBoolean.compareAndSet(true, false);
@@ -77,6 +86,7 @@ public class S3AsyncTaskFileService implements AsyncTaskFileService {
         return executorService.submit(() -> uploadFile1(provider, country, fileName));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void uploadFile(Provider<File> provider, String country, String fileName, Consumer<String> consumer) {
         var lock = atomicBoolean.compareAndSet(true, false);
@@ -95,6 +105,7 @@ public class S3AsyncTaskFileService implements AsyncTaskFileService {
         });
     }
 
+    /** upload1。 */
     private String upload1(Provider<byte[]> provider, String country, String fileName) {
         try {
             s3SyncFileService.putObject(provider.supply(), s3Properties.getProfile(), country + "/biz/task/" + fileName);
@@ -107,6 +118,7 @@ public class S3AsyncTaskFileService implements AsyncTaskFileService {
         return null;
     }
 
+    /** uploadFile1。 */
     private String uploadFile1(Provider<File> provider, String country, String fileName) {
         try {
             s3SyncFileService.putObject(provider.supply(), s3Properties.getProfile(), country + "/biz/task/" + fileName);

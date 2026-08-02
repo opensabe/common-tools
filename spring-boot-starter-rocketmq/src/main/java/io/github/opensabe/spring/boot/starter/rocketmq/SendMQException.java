@@ -17,6 +17,9 @@ package io.github.opensabe.spring.boot.starter.rocketmq;
 
 import org.apache.rocketmq.client.producer.SendResult;
 
+/**
+ * RocketMQ 消息发送失败时抛出的运行时异常。
+ */
 public class SendMQException extends Exception {
 
     private static final long serialVersionUID = 6258285084638536983L;

@@ -17,6 +17,10 @@ package io.github.opensabe.spring.boot.starter.rocketmq.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/** RocketMQExtendProperties。 */
+/**
+ * RocketMQExtend 配置属性。
+ */
 @ConfigurationProperties(prefix = "rocketmq.extend")
 public record RocketMQExtendProperties(
         /**

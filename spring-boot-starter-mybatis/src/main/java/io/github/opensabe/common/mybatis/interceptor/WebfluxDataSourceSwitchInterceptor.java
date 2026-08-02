@@ -34,6 +34,9 @@ import io.github.opensabe.common.mybatis.webflux.WebFluxRoutingContext;
 import lombok.extern.log4j.Log4j2;
 import reactor.util.context.ContextView;
 
+/**
+ * WebfluxDataSourceSwitch 拦截器。
+ */
 @Intercepts({
         @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class,
                 RowBounds.class, ResultHandler.class}),
@@ -83,6 +86,7 @@ public class WebfluxDataSourceSwitchInterceptor extends DataSourceSwitchIntercep
                 .orElse("");
     }
 
+    /** {@inheritDoc} */
     @Override
     public void configureDataSourceContext(BoundSql boundSql) {
         if (boundSql != null

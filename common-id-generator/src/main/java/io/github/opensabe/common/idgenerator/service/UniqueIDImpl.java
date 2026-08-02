@@ -34,27 +34,41 @@ import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.idgenerator.exception.IdGenerateException;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 带业务类型前缀的全局唯一 ID 生成实现，基于 Redis 自增序列与 Redisson 分布式锁。
+ */
 @Log4j2
 public class UniqueIDImpl implements UniqueID {
 
+    /** 标准序列号上限。 */
     private static final Long MAX_SEQUENCE_NUM = 100000000L;
+    /** 短 ID 序列号上限。 */
     private static final Long MAX_SHORT_SEQUENCE_NUM = 10000L;
     /**
-     * key for sequence
+     * 全局序列 Redis 键。
      */
     private static final String SEQUENCE_NUM_KEY = "sequence_num_key";
+    /** 短 ID 序列 Redis 键前缀。 */
     private static final String SHORT_SEQUENCE_NUM_KEY_PREFIX = "sequence_short_num_key:";
     /**
-     * lock name
+     * 全局序列分布式锁名。
      */
     private static final String SEQUENCE_NUM_LOCK = "sequnce_num_lock";
+    /** 短 ID 序列分布式锁名前缀。 */
     private static final String SHORT_SEQUENCE_NUM_LOCK_PREFIX = "sequnce_short_num_lock:";
+    /** 标准 ID 时间戳格式。 */
     public static DateTimeFormatter format = DateTimeFormatter.ofPattern("yyMMddHHmmss");
+    /** 短 ID 时间戳格式（含毫秒）。 */
     public static DateTimeFormatter formatForShortId = DateTimeFormatter.ofPattern("yyMMddHHmmssSSS");
     private final StringRedisTemplate redisTemplate;
     private final RedissonClient redissonClient;
     private final ExecutorService threadPoolExecutor;
 
+    /**
+     * @param redisTemplate    Redis 字符串模板
+     * @param redissonClient   Redisson 客户端（分布式锁）
+     * @param threadPoolFactory 超时生成用的线程池工厂
+     */
     public UniqueIDImpl(StringRedisTemplate redisTemplate, RedissonClient redissonClient, ThreadPoolFactory threadPoolFactory) {
         this.redisTemplate = redisTemplate;
         this.redissonClient = redissonClient;

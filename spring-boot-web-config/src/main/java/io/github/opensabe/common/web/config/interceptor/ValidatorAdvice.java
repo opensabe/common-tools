@@ -24,12 +24,20 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.InitBinder;
 
 @ControllerAdvice
+/**
+ * ValidatorAdvice 类。
+ * <p>校验器Advice。</p>
+ */
 public class ValidatorAdvice {
 
     @Autowired
+/** validator 字段。 */
     protected LocalValidatorFactoryBean validator;
 
     @InitBinder
+/**
+ * initBinder 方法。
+ */
     public void initBinder(WebDataBinder binder) {
         Object target = binder.getTarget();
         if (target != null) {

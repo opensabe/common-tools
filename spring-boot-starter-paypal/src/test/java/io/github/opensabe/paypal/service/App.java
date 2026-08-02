@@ -15,13 +15,15 @@
  */
 package io.github.opensabe.paypal.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * 这个类不需要启动，这个仅是给单测使用，为了IOC容器能够自动装配
+ * PayPal 单测 Spring Boot 启动类（仅用于 IOC 自动装配）。
  */
 @SpringBootApplication(scanBasePackages = "io.github.opensabe.paypal")
+@DisplayName("PayPal 测试应用入口")
 public class App {
 
     public static void main(String[] args) {

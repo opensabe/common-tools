@@ -44,6 +44,9 @@ public abstract class BaseUniqueIdWithValkeyTest {
     }
 
     @SpringBootApplication(scanBasePackages = {"io.github.opensabe.common.idgenerator.test"})
-    public static class App {
+    /**
+ * App。
+ */
+public static class App {
     }
 }

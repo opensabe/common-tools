@@ -21,6 +21,9 @@ import org.springframework.context.annotation.Configuration;
 
 import io.github.opensabe.common.dynamodb.jfr.DynamodbExecuteJFRGenerator;
 
+/**
+ * Monitor Spring 配置类。
+ */
 @Configuration(proxyBeanMethods = false)
 public class MonitorConfiguration {
 

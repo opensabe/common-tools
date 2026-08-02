@@ -33,5 +33,9 @@ import io.github.opensabe.common.web.config.interceptor.ValidatorAdvice;
         ResponseAdvice.class,
         ValidatorAdvice.class,
 })
+/**
+ * WebConfigAutoConfiguration 类。
+ * <p>WebConfig自动配置uration。</p>
+ */
 public class WebConfigAutoConfiguration {
 }

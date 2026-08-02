@@ -46,6 +46,9 @@ import static org.junit.Assert.assertTrue;
         "eureka.client.enabled=false",
 })
 //JFR 测试最好在本地做
+/**
+ * TheadPoolStat 测试。
+ */
 @Disabled
 @DisplayName("线程池统计测试")
 public class TheadPoolStatTest {
@@ -58,8 +61,8 @@ public class TheadPoolStatTest {
     @Autowired
     UnifiedObservationFactory unifiedObservationFactory;
 
-    @Test
     @DisplayName("测试线程池统计功能 - 验证JFR事件记录")
+    @Test
     public void testNormal() {
         ExecutorService executorService = threadPoolFactory.createNormalThreadPool("threadPoolStat", 2);
 

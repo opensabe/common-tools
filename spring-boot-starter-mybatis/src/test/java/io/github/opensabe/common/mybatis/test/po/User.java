@@ -30,6 +30,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.ColumnType;
 
+/**
+ * 用户测试 PO。
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -38,19 +41,27 @@ import tk.mybatis.mapper.annotation.ColumnType;
 public class User {
 
     @Id
+/** id。 */
     private String id;
+/** firstName。 */
     private String firstName;
+/** lastName。 */
     private String lastName;
+/** createTime。 */
     private Timestamp createTime;
     @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = JSONTypeHandler.class)
+/** properties。 */
     private Properties properties;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Property {
+/** key。 */
         private String key;
+/** value。 */
         private String value;
+/** properties。 */
         private Properties properties;
     }
 

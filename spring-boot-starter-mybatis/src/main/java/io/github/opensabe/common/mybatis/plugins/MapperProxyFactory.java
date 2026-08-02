@@ -29,11 +29,13 @@ public class MapperProxyFactory<T> extends org.apache.ibatis.binding.MapperProxy
         super(mapperInterface);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected T newInstance(MapperProxy<T> mapperProxy) {
         return super.newInstance(mapperProxy);
     }
 
+    /** {@inheritDoc} */
     @Override
     public T newInstance(SqlSession sqlSession) {
         final MapperProxy<T> mapperProxy = new io.github.opensabe.common.mybatis.plugins.MapperProxy<>(sqlSession, getMapperInterface(), getMethodCache());

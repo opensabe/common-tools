@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("MQ V1↔V2 交叉兼容（信封 JsonUtil；内层 JsonUtil/Fastjson）")
 class MQCrossVersionWireContractTest {
 
+    /** sample。 */
     private static CompatPayload sample() {
         LocalDateTime updated = LocalDateTime.of(2024, 6, 15, 12, 30, 45).truncatedTo(ChronoUnit.MILLIS);
         return new CompatPayload(
@@ -59,7 +60,7 @@ class MQCrossVersionWireContractTest {
      * V1 双编码信封经 {@link AbstractConsumer} 消费，内层 JsonUtil 解析。
      */
     @Test
-    @DisplayName("老产新消：V1 双编码信封 → AbstractConsumer；内层 JsonUtil")
+    @DisplayName("新产老消：V2 object data → AbstractMQConsumer；内层 JsonUtil 与 Fastjson")
     void oldProduceNewConsumeV1() {
         CompatPayload payload = sample();
         BaseMQMessage envelope = new BaseMQMessage();
@@ -82,7 +83,6 @@ class MQCrossVersionWireContractTest {
      * V1 信封内层 Fastjson 编码，{@link AbstractConsumer} 仍可用 JsonUtil 解析。
      */
     @Test
-    @DisplayName("老产新消：V1 信封；内层 Fastjson → AbstractConsumer(JsonUtil 解析)")
     void oldProduceNewConsumeV1FastjsonInner() {
         CompatPayload payload = sample();
         BaseMQMessage envelope = new BaseMQMessage();
@@ -105,7 +105,6 @@ class MQCrossVersionWireContractTest {
      * V2 object data 信封经 {@link AbstractMQConsumer} 消费，内层 JsonUtil 与 Fastjson 均可读。
      */
     @Test
-    @DisplayName("新产老消：V2 object data → AbstractMQConsumer；内层 JsonUtil 与 Fastjson")
     void newProduceOldConsumeV2() {
         CompatPayload payload = sample();
         BaseMessage<CompatPayload> envelope = new BaseMessage<>();
@@ -126,6 +125,7 @@ class MQCrossVersionWireContractTest {
         assertPayload(payload, consumer.viaFastjson);
     }
 
+    /** assertPayload。 */
     private static void assertPayload(CompatPayload expected, CompatPayload actual) {
         assertNotNull(actual);
         assertEquals(expected.getEntityId(), actual.getEntityId());
@@ -138,20 +138,26 @@ class MQCrossVersionWireContractTest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CompatPayload {
+/** entityId。 */
         private String entityId;
+/** status。 */
         private int status;
+/** updatedAt。 */
         private LocalDateTime updatedAt;
+/** createdAt。 */
         private Date createdAt;
     }
 
     static class CompatPayloadConsumer extends AbstractConsumer<CompatPayload> {
         CompatPayload last;
 
+        /** {@inheritDoc} */
         @Override
         public void onMessage(MessageExt ext) {
             onBaseMessage(convert(ext));
         }
 
+        /** {@inheritDoc} */
         @Override
         protected void onBaseMessage(BaseMessage<CompatPayload> baseMessage) {
             last = baseMessage.getData();
@@ -162,11 +168,13 @@ class MQCrossVersionWireContractTest {
         CompatPayload viaJsonUtil;
         CompatPayload viaFastjson;
 
+        /** {@inheritDoc} */
         @Override
         public void onMessage(MessageExt ext) {
             onBaseMessage(convert(ext));
         }
 
+        /** {@inheritDoc} */
         @Override
         protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
             viaJsonUtil = JsonUtil.parseObject(baseMQMessage.getData(), CompatPayload.class);

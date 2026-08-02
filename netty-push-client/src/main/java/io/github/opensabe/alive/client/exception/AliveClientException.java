@@ -15,8 +15,13 @@
  */
 package io.github.opensabe.alive.client.exception;
 
+/**
+ * AliveClientException 类。
+ * <p>Alive 推送ClientException。</p>
+ */
 public class AliveClientException extends Exception {
 
+/** serialVersionUID 字段。 */
     private static final long serialVersionUID = 1L;
 
     public AliveClientException(String message) {

@@ -19,12 +19,18 @@ import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * MessageConsume Observation 上下文。
+ */
 @Getter
 @Setter
 public class MessageConsumeContext extends Observation.Context {
+/** originTraceId。 */
     private final String originTraceId;
+/** topic。 */
     private final String topic;
     private Boolean successful = false;
+/** throwable。 */
     private Throwable throwable;
 
     public MessageConsumeContext(String originTraceId, String topic) {

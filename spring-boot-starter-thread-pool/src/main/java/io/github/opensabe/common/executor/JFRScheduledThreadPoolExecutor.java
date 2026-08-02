@@ -28,9 +28,13 @@ import io.micrometer.tracing.TraceContext;
 import lombok.extern.log4j.Log4j2;
 
 
+/**
+ * 集成 JFR 的调度线程池执行器。
+ */
 @Log4j2
 public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implements ScheduledExecutorService {
 
+/** scheduledThreadPoolExecutor。 */
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     public JFRScheduledThreadPoolExecutor(ScheduledThreadPoolExecutor threadPoolExecutor, UnifiedObservationFactory unifiedObservationFactory) {
@@ -38,6 +42,7 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
         this.scheduledThreadPoolExecutor = threadPoolExecutor;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
         return scheduledThreadPoolExecutor.schedule(
@@ -46,6 +51,7 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
         return scheduledThreadPoolExecutor.schedule(
@@ -54,6 +60,7 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
         return scheduledThreadPoolExecutor.scheduleAtFixedRate(
@@ -62,6 +69,7 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
         return scheduledThreadPoolExecutor.scheduleWithFixedDelay(
@@ -71,8 +79,11 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
     }
 
     protected static class CallableWrapper<T> implements Callable<T> {
+/** observation。 */
         private final Observation observation;
+/** callable。 */
         private final Callable<T> callable;
+/** threadTaskJFREvent。 */
         private final ScheduledThreadTaskJFREvent threadTaskJFREvent;
 
         private CallableWrapper(
@@ -91,6 +102,7 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
             threadTaskJFREvent.begin();
         }
 
+        /** {@inheritDoc} — 执行 Callable 逻辑。 */
         @Override
         public T call() throws Exception {
             threadTaskJFREvent.setTaskRunStartTime(System.currentTimeMillis());
@@ -109,8 +121,11 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
     }
 
     protected static class RunnableWrapper implements Runnable {
+/** observation。 */
         private final Observation observation;
+/** runnable。 */
         private final Runnable runnable;
+/** threadTaskJFREvent。 */
         private final ScheduledThreadTaskJFREvent threadTaskJFREvent;
 
         private RunnableWrapper(UnifiedObservationFactory unifiedObservationFactory, Runnable runnable,
@@ -127,6 +142,7 @@ public class JFRScheduledThreadPoolExecutor extends JFRThreadPoolExecutor implem
             threadTaskJFREvent.begin();
         }
 
+        /** {@inheritDoc} — 执行任务逻辑。 */
         @Override
         public void run() {
             threadTaskJFREvent.setTaskRunStartTime(System.currentTimeMillis());

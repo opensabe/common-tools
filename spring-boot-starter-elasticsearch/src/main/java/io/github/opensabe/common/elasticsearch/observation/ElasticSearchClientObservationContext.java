@@ -19,13 +19,19 @@ import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Elasticsearch 客户端单次请求的 Observation 上下文。
+ */
 @Getter
 @Setter
 public class ElasticSearchClientObservationContext extends Observation.Context {
+/** uri。 */
     private final String uri;
+/** params。 */
     private final String params;
 
     private String response = "";
+/** throwable。 */
     private Throwable throwable;
 
     public ElasticSearchClientObservationContext(String uri, String params) {

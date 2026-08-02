@@ -23,7 +23,12 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+/**
+ * CollectionValidator 类。
+ * <p>Collection校验器。</p>
+ */
 public class CollectionValidator implements Validator {
+/** validator 字段。 */
     private final Validator validator;
 
     public CollectionValidator(LocalValidatorFactoryBean validatorFactory) {
@@ -31,11 +36,17 @@ public class CollectionValidator implements Validator {
     }
 
     @Override
+/**
+ * supports 方法。
+ */
     public boolean supports(Class<?> aClass) {
         return Collection.class.isAssignableFrom(aClass);
     }
 
     @Override
+/**
+ * validate 方法。
+ */
     public void validate(Object o, Errors errors) {
         Collection collection = (Collection) o;
         if (CollectionUtils.isEmpty(collection)) {

@@ -36,8 +36,10 @@ import io.micrometer.observation.Observation;
  * @author maheng
  */
 public class MapperProxy<T> extends org.apache.ibatis.binding.MapperProxy<T> {
+/** mapperInterface。 */
     private final Class<T> mapperInterface;
 
+/** observation 工厂。 */
     private UnifiedObservationFactory observationFactory;
 
     @SuppressWarnings("unchecked")
@@ -47,6 +49,9 @@ public class MapperProxy<T> extends org.apache.ibatis.binding.MapperProxy<T> {
         this.mapperInterface = mapperInterface;
     }
 
+    /**
+     * @return observationFactory
+     */
     public UnifiedObservationFactory getObservationFactory() {
         if (Objects.isNull(observationFactory) && Objects.nonNull(SpringUtil.getApplicationContext())) {
             observationFactory = SpringUtil.getBean(UnifiedObservationFactory.class);
@@ -54,6 +59,7 @@ public class MapperProxy<T> extends org.apache.ibatis.binding.MapperProxy<T> {
         return observationFactory;
     }
 
+    /** {@inheritDoc} — 执行拦截逻辑。 */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         UnifiedObservationFactory observationFactory = getObservationFactory();

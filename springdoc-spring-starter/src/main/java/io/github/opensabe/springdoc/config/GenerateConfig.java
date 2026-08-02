@@ -26,16 +26,26 @@ import io.github.opensabe.springdoc.converters.VoidModelResolver;
  * @author heng.ma
  */
 @Configuration(proxyBeanMethods = false)
+/**
+ * GenerateConfig 类。
+ * <p>Generate Config。</p>
+ */
 public class GenerateConfig {
 
     @Bean
     @ConditionalOnMissingBean
+/**
+ * dateTimeModelConverter 方法。
+ */
     public DateTimeModelConverter dateTimeModelConverter() {
         return new DateTimeModelConverter();
     }
 
     @Bean
     @ConditionalOnMissingBean
+/**
+ * voidModelResolver 方法。
+ */
     public VoidModelResolver voidModelResolver() {
         return new VoidModelResolver();
     }

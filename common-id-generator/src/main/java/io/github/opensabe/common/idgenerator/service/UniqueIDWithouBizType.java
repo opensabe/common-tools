@@ -17,6 +17,9 @@ package io.github.opensabe.common.idgenerator.service;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 返回数值型全局唯一 ID 的生成接口（无业务类型前缀）。
+ */
 public interface UniqueIDWithouBizType {
     /**
      * @param bizType 业务类型编号

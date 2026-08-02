@@ -20,6 +20,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+/**
+ * MQTopic 枚举。
+ * <p>MQ 主题。</p>
+ */
 public enum MQTopic {
 
     BROAD_CAST("opensabe_common_alive_broadcast"),
@@ -28,5 +32,6 @@ public enum MQTopic {
 
     ;
 
+/** MQ 主题名。 */
     private String topic;
 }

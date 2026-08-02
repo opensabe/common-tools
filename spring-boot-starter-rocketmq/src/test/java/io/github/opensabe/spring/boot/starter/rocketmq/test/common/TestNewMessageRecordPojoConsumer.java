@@ -27,6 +27,9 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
+/**
+ * 新版 record 消息体测试消费者。
+ */
 @RocketMQMessageListener(
         consumerGroup = "${spring.application.name}_" + TestDataUtil.TEST_RECORD_TOPIC + "-test-new-consumer",
         topic = TestDataUtil.TEST_RECORD_TOPIC
@@ -36,6 +39,7 @@ public class TestNewMessageRecordPojoConsumer extends AbstractConsumer<MessageRe
     @Getter
     private final List<MessageRecordPojoWrapper> messageRecordPojoWrappers = new CopyOnWriteArrayList<>();
 
+    /** {@inheritDoc} */
     @Override
     protected void onBaseMessage(BaseMessage<MessageRecordPojo> baseMessage) {
         MessageRecordPojo messageRecordPojo = baseMessage.getData();

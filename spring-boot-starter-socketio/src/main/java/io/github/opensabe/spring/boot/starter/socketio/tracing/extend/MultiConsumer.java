@@ -15,6 +15,9 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio.tracing.extend;
 
+/**
+ * 多参数函数式消费接口。
+ */
 @FunctionalInterface
 public interface MultiConsumer<N, S, L, A> {
 

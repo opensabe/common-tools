@@ -57,6 +57,7 @@ import org.springframework.boot.data.redis.autoconfigure.health.DataRedisReactiv
 @Import(WebInterceptorConfiguration.class)
 public class WebFluxRoutingContextTestApplication {
 
+    /** main。 */
     public static void main(String[] args) {
         SpringApplication.run(WebFluxRoutingContextTestApplication.class, args);
     }

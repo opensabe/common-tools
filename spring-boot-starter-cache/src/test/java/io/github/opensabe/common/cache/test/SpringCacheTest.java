@@ -52,6 +52,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith({
         SpringExtension.class, SingleRedisIntegrationTest.class
 })
+/**
+ * SpringCache 测试。
+ */
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "caches.enabled=true",
@@ -73,17 +76,25 @@ public class SpringCacheTest {
     public static final String REDIS_CACHE_KEY_PREFIX = "test_redis::";
     public static final String REDIS_CACHE_KEY_PREFIX2 = "test_redis2::";
     public static final String CAFFEINE_CACHE_NAME = "test_caffeine";
+    /** cache 管理器。 */
     @Autowired
     private CompositeCacheManager cacheManager;
+    /** storage。 */
     @Autowired
     private MockStorage storage;
+    /** service。 */
     @Autowired
     private CacheService service;
+    /** redisTemplate。 */
     @Autowired
     private StringRedisTemplate redisTemplate;
+    /** redisConnection 工厂。 */
     @Autowired
     private RedisConnectionFactory redisConnectionFactory;
 
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleRedisIntegrationTest.setProperties(registry);
@@ -98,8 +109,8 @@ public class SpringCacheTest {
         storage.getData().clear();
     }
 
+    @DisplayName("验证_cacheable_caffeine_without_key_and_field")
     @Test
-    @DisplayName("测试Caffeine缓存 - 无key和field参数")
     public void test_cacheable_caffeine_without_key_and_field() {
 
         ItemObject item = ItemObject.builder().id(999L).name("caffeineCache").value("Test_Caffeine").build();
@@ -112,8 +123,8 @@ public class SpringCacheTest {
         assertTrue(keys.contains("getData"));
     }
 
+    @DisplayName("验证_cacheable_caffeine_without_key_and_have_field")
     @Test
-    @DisplayName("测试Caffeine缓存 - 无key但有field参数")
     public void test_cacheable_caffeine_without_key_and_have_field() {
 
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();
@@ -126,8 +137,8 @@ public class SpringCacheTest {
         assertTrue(keys.contains(String.format("%s:%s", item.getId(), "TEST")));
     }
 
+    @DisplayName("验证_cacheable_caffeine")
     @Test
-    @DisplayName("测试Caffeine缓存 - 基本功能")
     public void test_cacheable_caffeine() {
 
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();
@@ -141,9 +152,10 @@ public class SpringCacheTest {
     //因为暂时不再往 redis 里面存储Key
     //mapRst 一定会错
     //所以忽略
+    /** test_cacheable_redis。 */
     @Disabled
+    @DisplayName("验证_cacheable_redis")
     @Test
-    @DisplayName("测试Redis缓存 - 基本功能")
     public void test_cacheable_redis() {
 
         ItemObject item = ItemObject.builder().id(100L).name("redisCache").value("Test_Redis").build();
@@ -163,8 +175,8 @@ public class SpringCacheTest {
         assertNotNull(mapRst);
     }
 
-    @Test
     @DisplayName("测试Caffeine缓存更新 - CachePut注解")
+    @Test
     public void test_cachePut_caffeine() {
 
         ItemObject item = ItemObject.builder().id(2L).name("caffeineCache").value("Test_Caffeine").build();
@@ -180,8 +192,8 @@ public class SpringCacheTest {
         assertEquals(storage.getItem(item.getId()).getName(), item.getName());
     }
 
-    @Test
     @DisplayName("测试Redis缓存更新 - CachePut注解")
+    @Test
     public void test_cachePut_redis() {
 
         ItemObject item = ItemObject.builder().id(200L).name("redisCache").value("Test_Redis").build();
@@ -201,8 +213,8 @@ public class SpringCacheTest {
         assertEquals(item.getName(), redisRst.replace("\"", ""));
     }
 
-    @Test
     @DisplayName("测试Caffeine缓存删除 - CacheEvict注解")
+    @Test
     public void test_cacheEvict_caffeine() {
 
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();
@@ -214,8 +226,8 @@ public class SpringCacheTest {
         assertNull(cachedItem);
     }
 
-    @Test
     @DisplayName("测试Redis缓存删除 - CacheEvict注解")
+    @Test
     public void test_cacheEvict_redis() {
 
         ItemObject item = ItemObject.builder().id(301L).name("redisCache").value("Test_Redis").build();
@@ -236,8 +248,8 @@ public class SpringCacheTest {
         assertNull(mapRst);
     }
 
+    @DisplayName("验证_cacheable_redis_expire")
     @Test
-    @DisplayName("测试Redis缓存过期时间 - 验证TTL设置")
     public void test_cacheable_redis_expire() throws InterruptedException {
 
         ItemObject item = ItemObject.builder().id(100L).name("redisCache").value("Test_Redis").build();
@@ -261,8 +273,8 @@ public class SpringCacheTest {
 
     }
 
+    @DisplayName("验证_cacheable_caffeine_expire")
     @Test
-    @DisplayName("测试Caffeine缓存过期时间 - 验证过期策略")
     public void test_cacheable_caffeine_expire() {
 
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();

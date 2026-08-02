@@ -62,7 +62,7 @@ class GenericJackson2CacheWireContractTest {
      * 与 starter 裸构造一致：LocalDateTime 序列化应失败。
      */
     @Test
-    @DisplayName("默认 serializer 不支持 LocalDateTime（与 starter 裸构造一致）")
+    @DisplayName("带 JavaTimeModule 的 GenericJackson2：serialize → byte[] → deserialize")
     void bareSerializerRejectsLocalDateTime() {
         RedisSerializer<Object> bare = new GenericJackson2JsonRedisSerializer();
         CacheDtoWithLdt dto = new CacheDtoWithLdt("c1", LocalDateTime.of(2024, 6, 15, 10, 30), List.of("a"));
@@ -73,7 +73,6 @@ class GenericJackson2CacheWireContractTest {
      * 注册 JavaTimeModule 后 LocalDateTime 可 serialize → deserialize round-trip。
      */
     @Test
-    @DisplayName("带 JavaTimeModule 的 GenericJackson2：serialize → byte[] → deserialize")
     void roundTripWithJavaTimeModule() {
         RedisSerializer<Object> serializer = serializerWithJavaTime();
         CacheDtoWithLdt original = new CacheDtoWithLdt(
@@ -97,7 +96,6 @@ class GenericJackson2CacheWireContractTest {
      * 裸构造 serializer 对 {@link Date} 字段可正常 round-trip。
      */
     @Test
-    @DisplayName("默认 serializer：Date 字段 round-trip（裸构造可用路径）")
     void bareSerializerRoundTripWithDate() {
         RedisSerializer<Object> bare = new GenericJackson2JsonRedisSerializer();
         CacheDtoWithDate original = new CacheDtoWithDate("code-2", new Date(1_700_000_000_000L), List.of("x"));
@@ -112,8 +110,11 @@ class GenericJackson2CacheWireContractTest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CacheDtoWithLdt {
+/** code。 */
         private String code;
+/** createdAt。 */
         private LocalDateTime createdAt;
+/** children。 */
         private List<String> children;
     }
 
@@ -121,8 +122,11 @@ class GenericJackson2CacheWireContractTest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CacheDtoWithDate {
+/** code。 */
         private String code;
+/** createdAt。 */
         private Date createdAt;
+/** children。 */
         private List<String> children;
     }
 }

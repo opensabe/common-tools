@@ -21,22 +21,23 @@ import io.github.opensabe.alive.client.impl.ClientConnection;
 import io.github.opensabe.alive.protobuf.Message;
 
 /**
- * Created by jianing on 2016/7/15.
+ * Alive 推送目标值对象（topic、设备/账号与推送类型）。
  */
 public class PushVo {
-    /**
-     * 主题名称
-     */
+
+    /** MQ 主题名。 */
     public final String topic;
-    /**
-     * 设备id(pushType为Special类型时，必传)
-     */
+
+    /** 设备 ID（{@code SPECIAL} 推送时必填）。 */
     public final String deviceId;
+
+    /** 推送类型。 */
     public final Message.PushType pushType;
-    /**
-     * 账户id(pushType为Multi时，必传)
-     */
+
+    /** 账号 ID（{@code MULTI} 推送时必填）。 */
     public final String accountId;
+
+    /** 请求 ID。 */
     public int requestId = 0;
 
     public PushVo(String topic, String deviceId, Message.PushType pushType, String accountId) {
@@ -47,10 +48,10 @@ public class PushVo {
             pushType = Message.PushType.GROUP;
         }
         if (pushType == Message.PushType.SPECIAL && StringUtils.isBlank(deviceId)) {
-            throw new NullPointerException("单推消息时,deviceId不能为空");
+            throw new NullPointerException("deviceId is required for SPECIAL push");
         }
         if (pushType == Message.PushType.MULTI && StringUtils.isBlank(accountId)) {
-            throw new NullPointerException("组推消息时,accountId不能为空");
+            throw new NullPointerException("accountId is required for MULTI push");
         }
 
         this.topic = topic;
@@ -65,14 +66,23 @@ public class PushVo {
         this.requestId = requestId;
     }
 
+/**
+ * 生成线程本地请求 ID。
+ */
     public static int generateRequestId() {
         return ClientConnection.getReqeustId();
     }
 
+/**
+ * getRequestId 方法。
+ */
     public int getRequestId() {
         return requestId;
     }
 
+/**
+ * setRequestId 方法。
+ */
     public void setRequestId(int requestId) {
         this.requestId = requestId;
     }

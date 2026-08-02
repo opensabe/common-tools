@@ -27,6 +27,9 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import io.github.opensabe.common.mybatis.interceptor.DataSourceSwitchInterceptor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * DynamicRoutingDataSource。
+ */
 @Log4j2
 public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
 
@@ -57,6 +60,7 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         afterPropertiesSet();
     }
 
+    /** clear。 */
     public static void clear() {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.clear: removing dataSourceHolder, previous={}", dataSourceHolder.get());
@@ -64,6 +68,7 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         dataSourceHolder.remove();
     }
 
+    /** clearCountryCodeAndRW。 */
     public static void clearCountryCodeAndRW() {
         if (log.isDebugEnabled()) {
             log.debug(
@@ -75,6 +80,7 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         dataSourceCountryCodeHolder.remove();
     }
 
+    /** clearRW。 */
     public static void clearRW() {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.clearRW: previous={}", dataSourceRWHolder.get());
@@ -82,10 +88,12 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         dataSourceRWHolder.remove();
     }
 
+    /** currentDataSource。 */
     public static String currentDataSource() {
         return dataSourceHolder.get();
     }
 
+    /** dataSource。 */
     public static void dataSource(String dataSource) {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.dataSource: set={}", dataSource);
@@ -93,6 +101,9 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         dataSourceHolder.set(dataSource);
     }
 
+    /**
+     * @param dataSourceCountryCode 待设置值
+     */
     public static void setDataSourceCountryCode(String dataSourceCountryCode) {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.setDataSourceCountryCode: {}", dataSourceCountryCode);
@@ -100,14 +111,23 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         dataSourceCountryCodeHolder.set(dataSourceCountryCode);
     }
 
+    /**
+     * @return dataSourceRW
+     */
     public static String getDataSourceRW() {
         return dataSourceRWHolder.get();
     }
 
+    /**
+     * @return dataSourceCountryCode
+     */
     public static String getDataSourceCountryCode() {
         return dataSourceCountryCodeHolder.get();
     }
 
+    /**
+     * @param dataSourceRW 待设置值
+     */
     public static void setDataSourceRW(String dataSourceRW) {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.setDataSourceRW: {}", dataSourceRW);
@@ -170,6 +190,7 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         return index;
     }
 
+    /** resolveDefaultIndex。 */
     private String resolveDefaultIndex(Map<String, Map<String, List<String>>> dataSourceIndexMap,
                                        String defaultClusterName) {
         Map<String, List<String>> rwIndexMap = dataSourceIndexMap.get(defaultClusterName);

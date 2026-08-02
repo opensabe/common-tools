@@ -46,6 +46,7 @@ public final class WebFluxRoutingContext {
         return CONTEXT_VIEW.get();
     }
 
+    /** clear。 */
     public static void clear() {
         CONTEXT_VIEW.remove();
     }

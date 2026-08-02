@@ -18,6 +18,7 @@ package io.github.opensabe.common.idgenerator.test.service;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,14 +26,24 @@ import cn.hutool.core.collection.ConcurrentHashSet;
 import io.github.opensabe.common.idgenerator.service.UniqueID;
 import io.github.opensabe.common.idgenerator.test.common.BaseUniqueIdTest;
 
+/**
+ * {@link UniqueIDImpl} 多线程并发唯一 ID 生成测试。
+ */
+@DisplayName("UniqueID 多线程并发测试")
 public class UniqueIDImplTest extends BaseUniqueIdTest {
 
+    /** 并发线程数。 */
     private static final int THREAD_COUNT = 15;
+    /** 每线程生成 ID 次数。 */
     private static final int GET_COUNT = 100;
     @Autowired
     private UniqueID uniqueID;
 
+    /**
+     * 多线程并发获取标准唯一 ID 应无重复。
+     */
     @Test
+    @DisplayName("多线程并发获取标准唯一ID")
     public void testMultiThreadGetUniqueId() throws InterruptedException {
         Set<String> ids = new ConcurrentHashSet<>();
         Thread[] threads = new Thread[THREAD_COUNT];
@@ -50,7 +61,11 @@ public class UniqueIDImplTest extends BaseUniqueIdTest {
         Assertions.assertEquals(ids.size(), THREAD_COUNT * GET_COUNT);
     }
 
+    /**
+     * 多线程并发获取短唯一 ID 应无重复。
+     */
     @Test
+    @DisplayName("多线程并发获取短唯一ID")
     public void testMultiThreadGetShortUniqueId() throws InterruptedException {
         Set<String> ids = new ConcurrentHashSet<>();
         Thread[] threads = new Thread[THREAD_COUNT];

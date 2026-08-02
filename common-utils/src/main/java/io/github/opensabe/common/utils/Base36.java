@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- *
- */
 package io.github.opensabe.common.utils;
 
 import java.math.BigInteger;
 
 /**
- * @author wangshuli
- *
+ * Base36/Base31 编解码工具，支持标准字母表与去 I/O/L/1/0 字母表。
  */
 public class Base36 {
     static final char[] ALPHABET =
@@ -112,7 +108,7 @@ public class Base36 {
 
     public static String encode(String hexStr, int length, boolean withoutIO) {
         if (length > 64) {
-            throw new RuntimeException("参数错误（length不能超过64）:param length = " + length);
+            throw new RuntimeException("Invalid length (max 64): param length = " + length);
         }
         String str;
         if (withoutIO) {
@@ -135,7 +131,7 @@ public class Base36 {
 
     public static String decode(String base36Str) {
         if (base36Str == null || !isValidBase36Str(base36Str)) {
-            throw new NumberFormatException("base36字符串格式错误:" + base36Str);
+            throw new NumberFormatException("Invalid base36 string:" + base36Str);
         }
         base36Str = base36Str.toUpperCase();
         BigInteger bi = BigInteger.ZERO;
@@ -150,7 +146,7 @@ public class Base36 {
 
     public static String decodeWithoutIO(String base31Str) {
         if (base31Str == null || !isValidBase31Str(base31Str)) {
-            throw new NumberFormatException("base36限制字符串（去IOL10）格式错误:" + base31Str);
+            throw new NumberFormatException("Invalid restricted base36 string (without I/O/L/1/0):" + base31Str);
         }
         base31Str = base31Str.toUpperCase();
         BigInteger bi = BigInteger.ZERO;

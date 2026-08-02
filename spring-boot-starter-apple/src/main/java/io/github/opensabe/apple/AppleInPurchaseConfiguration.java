@@ -32,16 +32,27 @@ import com.apple.itunes.storekit.migration.ReceiptUtility;
 import com.apple.itunes.storekit.model.Environment;
 import com.apple.itunes.storekit.verification.SignedDataVerifier;
 
+/**
+ * Apple 内购（App Store Server API）Spring 配置。
+ * <p>
+ * 在 {@code apple.in-purchase.enable=true} 时注册收据工具、API 客户端与 JWS 校验器。
+ */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "apple.in-purchase.enable", matchIfMissing = false, havingValue = "true")
 @EnableConfigurationProperties(AppleInPurchaseProperties.class)
 public class AppleInPurchaseConfiguration {
 
+    /** Apple 根证书 classpath 路径集合。 */
     public static final Set<String> ROOT_CERTIFICATE_PATH = Set.of("apple/cer/root/AppleComputerRootCertificate.cer",
             "apple/cer/root/AppleIncRootCertificate.cer",
             "apple/cer/root/AppleRootCA-G2.cer",
             "apple/cer/root/AppleRootCA-G3.cer");
 
+    /**
+     * 加载 Apple 根证书输入流集合，供 {@link SignedDataVerifier} 使用。
+     *
+     * @return 根证书 {@link InputStream} 集合
+     */
     public static Set<InputStream> getRootCertificates() {
         Set<InputStream> rootCertificates = ROOT_CERTIFICATE_PATH.stream()
                 .map(path -> {
@@ -56,12 +67,23 @@ public class AppleInPurchaseConfiguration {
         return rootCertificates;
     }
 
+    /**
+     * 收据解析工具 Bean。
+     *
+     * @return {@link ReceiptUtility} 实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public ReceiptUtility receiptUtility() {
         return new ReceiptUtility();
     }
 
+    /**
+     * App Store Server API 客户端 Bean。
+     *
+     * @param appleInPurchaseProperties 内购配置属性
+     * @return {@link AppStoreServerAPIClient} 实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public AppStoreServerAPIClient appStoreServerAPIClient(AppleInPurchaseProperties appleInPurchaseProperties) {
@@ -73,6 +95,12 @@ public class AppleInPurchaseConfiguration {
         return new AppStoreServerAPIClient(signingKey, keyId, issuerId, bundleId, environment);
     }
 
+    /**
+     * 签名数据（JWS）校验器 Bean。
+     *
+     * @param appleInPurchaseProperties 内购配置属性
+     * @return {@link SignedDataVerifier} 实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public SignedDataVerifier signedDataVerifier(AppleInPurchaseProperties appleInPurchaseProperties) {

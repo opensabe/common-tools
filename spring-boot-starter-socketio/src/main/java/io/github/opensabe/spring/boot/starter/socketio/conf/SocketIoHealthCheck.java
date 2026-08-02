@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Socket.IO 服务端健康检查组件。
+ */
 @Log4j2
 public class SocketIoHealthCheck {
     public static volatile long lastDispatchMessage = System.currentTimeMillis();

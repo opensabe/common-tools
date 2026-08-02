@@ -55,12 +55,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith({
         SingleElasticSearchIntegrationTest.class,
         SpringExtension.class
+/**
+ * ElasticClient 测试。
+ */
 })
 @Log4j2
 @DisplayName("Elasticsearch客户端测试")
 public class ElasticClientTest {
     private static final String INDEX = "test_index";
     private static final String SECRET = "secretString";
+    /** elasticsearch 客户端。 */
     @Autowired
     private ElasticsearchClient elasticsearchClient;
 
@@ -72,8 +76,8 @@ public class ElasticClientTest {
     /**
      * 创建索引、upsert 文档、拦截 secret 字段更新，并验证 search 结果。
      */
-    @Test
     @DisplayName("测试Elasticsearch基本操作 - 索引创建、文档更新、搜索和敏感信息过滤")
+    @Test
     public void test() throws IOException, InterruptedException {
         boolean exists = elasticsearchClient.indices().exists(e -> e.index(INDEX)).value();
         assertFalse(exists);
@@ -146,6 +150,7 @@ public class ElasticClientTest {
 
     @SpringBootApplication
     public static class Main {
+        /** testSecretProvider。 */
         @Bean
         public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
             return new TestSecretProvider(globalSecretManager);
@@ -157,21 +162,25 @@ public class ElasticClientTest {
             super(globalSecretManager);
         }
 
+        /** {@inheritDoc} */
         @Override
         protected String name() {
             return "testSecretProvider";
         }
 
+        /** {@inheritDoc} */
         @Override
         protected long reloadTimeInterval() {
             return 1;
         }
 
+        /** {@inheritDoc} */
         @Override
         protected TimeUnit reloadTimeIntervalUnit() {
             return TimeUnit.DAYS;
         }
 
+        /** {@inheritDoc} */
         @Override
         protected Map<String, Set<String>> reload() {
             return Map.of(

@@ -25,22 +25,29 @@ import lombok.Setter;
 import tk.mybatis.mapper.annotation.ColumnType;
 
 
+/**
+ * DynamoDB TypeHandler 测试 PO。
+ */
 @Getter
 @Setter
 @Table(name = "t_dynamodb_type_handler")
 public class DynamodbPO {
 
     @Id
+/** id。 */
     private String id;
 
     @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = DynamoDbTypeHandler.class)
+/** orderInfo。 */
     private OrderInfo orderInfo;
 
     @Getter
     @Setter
     public static class OrderInfo {
+/** stockId。 */
         private String stockId;
 
+/** stake。 */
         private Integer stake;
     }
 }

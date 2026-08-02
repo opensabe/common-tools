@@ -43,8 +43,10 @@ import io.github.opensabe.common.cache.config.CachesProperties;
  */
 public class DynamicCaffeineCacheManager implements ExpireCacheManager {
 
+/** caffeineSpec。 */
     private final Map<String, CaffeineSpec> caffeineSpec;
 
+/** map。 */
     private final Map<String, Map<Duration, Cache>> map;
 
     private boolean allowNullValues = true;
@@ -68,6 +70,7 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
     }
 
 
+    /** resolveCaffeineSpec。 */
     private String resolveCaffeineSpec(String caffeineSpec) {
         return Arrays.stream(caffeineSpec.split(","))
                 .filter(op -> !op.contains("expireAfterWrite"))
@@ -79,6 +82,7 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
     }
 
 
+    /** {@inheritDoc} — 获取缓存实例。 */
     @Override
     public Cache getCache(String name, Duration ttl) {
         CaffeineSpec spec = caffeineSpec.get(name);
@@ -87,6 +91,7 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
                 k -> adapter.apply(name, (spec == null ? Caffeine.newBuilder() : Caffeine.from(spec)).expireAfterWrite(ttl)));
     }
 
+    /** {@inheritDoc} */
     @Override
     public Collection<String> settings(String name) {
         //TODO 后续完善
@@ -110,6 +115,7 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Collection<String> getCacheNames() {
         Set<String> set = new HashSet<>();
@@ -118,14 +124,19 @@ public class DynamicCaffeineCacheManager implements ExpireCacheManager {
         return set;
     }
 
+    /** @return 是否AllowNullValues */
     public boolean isAllowNullValues() {
         return allowNullValues;
     }
 
+    /**
+     * @param allowNullValues 待设置值
+     */
     public void setAllowNullValues(boolean allowNullValues) {
         this.allowNullValues = allowNullValues;
     }
 
+    /** onCaffeine。 */
     public void onCaffeine(BiFunction<String, Caffeine<Object, Object>, CaffeineCache> adapter) {
         this.adapter = adapter;
     }

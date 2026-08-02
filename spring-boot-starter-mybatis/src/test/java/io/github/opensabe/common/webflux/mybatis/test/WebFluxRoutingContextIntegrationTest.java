@@ -47,11 +47,12 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @DisplayName("WebFluxRoutingContext 与 operId 过滤链集成")
 public class WebFluxRoutingContextIntegrationTest {
 
+    /** webTest 客户端。 */
     @Autowired
     private WebTestClient webTestClient;
 
-    @Test
     @DisplayName("subscribeOn(boundedElastic) 时 WebFluxRoutingContext 已含 operId，可解析为期望 header 值")
+    @Test
     public void whenSubscribeOnBoundedElastic_resolvedOperIdMatchesHeader() {
         var expected = "itOperIdBounded";
         webTestClient.get()
@@ -64,8 +65,8 @@ public class WebFluxRoutingContextIntegrationTest {
                 .isEqualTo(expected);
     }
 
+    @DisplayName("验证whenSubscribeOnImmediate_resolvedOperIdMatchesHeader")
     @Test
-    @DisplayName("subscribeOn(immediate) 时同样可解析 operId")
     public void whenSubscribeOnImmediate_resolvedOperIdMatchesHeader() {
         var expected = "itOperIdImmediate";
         webTestClient.get()
@@ -78,8 +79,8 @@ public class WebFluxRoutingContextIntegrationTest {
                 .isEqualTo(expected);
     }
 
+    @DisplayName("验证concurrentRequests_eachResolvedOperIdMatchesItsOwnHeader")
     @Test
-    @DisplayName("多线程并发请求：各 operId 在 subscribeOn 工作线程上解析互不串号")
     public void concurrentRequests_eachResolvedOperIdMatchesItsOwnHeader() {
         int threadPoolSize = 16;
         int roundsPerWorker = 4;

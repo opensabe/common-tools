@@ -19,12 +19,19 @@ import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * S3Operation Observation 上下文。
+ */
 @Getter
 @Setter
 public class S3OperationContext extends Observation.Context {
+/** fileName。 */
     private String fileName;
+/** fileSize。 */
     private long fileSize;
+/** operateType。 */
     private String operateType;
+/** success。 */
     private boolean success;
 
     public S3OperationContext(String fileName, String operateType) {

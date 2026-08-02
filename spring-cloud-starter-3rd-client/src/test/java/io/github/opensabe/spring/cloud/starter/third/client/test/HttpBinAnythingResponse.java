@@ -21,14 +21,31 @@ import java.util.Map;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * HttpBin {@code /anything} 端点响应体（测试用）。
+ */
 @NoArgsConstructor
 @Data
 public class HttpBinAnythingResponse {
+
+    /** 查询参数。 */
     private Map<String, List<String>> args;
+
+    /** 原始请求体。 */
     private String data;
+
+    /** 表单字段。 */
     private Map<String, List<String>> form;
+
+    /** 请求头。 */
     private Map<String, List<String>> headers;
+
+    /** HTTP 方法。 */
     private String method;
+
+    /** 客户端来源地址。 */
     private String origin;
+
+    /** 完整请求 URL。 */
     private String url;
 }

@@ -20,6 +20,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * S3 配置属性。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = S3Properties.PREFIX)

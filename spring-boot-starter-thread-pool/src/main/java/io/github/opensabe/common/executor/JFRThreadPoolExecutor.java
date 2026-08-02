@@ -31,12 +31,17 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 
+/**
+ * JFRThreadPoolExecutor。
+ */
 @Log4j2
 public class JFRThreadPoolExecutor implements ExecutorService {
 
     @Getter
+/** threadPoolExecutor。 */
     protected final ThreadPoolExecutor threadPoolExecutor;
 
+/** unifiedObservation 工厂。 */
     protected final UnifiedObservationFactory unifiedObservationFactory;
 
 
@@ -45,46 +50,55 @@ public class JFRThreadPoolExecutor implements ExecutorService {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shutdown() {
         threadPoolExecutor.shutdown();
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<Runnable> shutdownNow() {
         return threadPoolExecutor.shutdownNow();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isShutdown() {
         return threadPoolExecutor.isShutdown();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isTerminated() {
         return threadPoolExecutor.isTerminated();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
         return threadPoolExecutor.awaitTermination(timeout, unit);
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> Future<T> submit(Callable<T> task) {
         return threadPoolExecutor.submit(new CustomerCallable<>(unifiedObservationFactory, task));
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> Future<T> submit(Runnable task, T result) {
         return threadPoolExecutor.submit(new CustomerRunnable(unifiedObservationFactory, task), result);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Future<?> submit(Runnable task) {
         return threadPoolExecutor.submit(new CustomerRunnable(unifiedObservationFactory, task));
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
         List<CustomerCallable<T>> collect = tasks.stream()
@@ -93,6 +107,7 @@ public class JFRThreadPoolExecutor implements ExecutorService {
         return threadPoolExecutor.invokeAll(collect);
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
         List<CustomerCallable<T>> collect = tasks.stream()
@@ -101,6 +116,7 @@ public class JFRThreadPoolExecutor implements ExecutorService {
         return threadPoolExecutor.invokeAll(collect, timeout, unit);
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
         List<CustomerCallable<T>> collect = tasks.stream()
@@ -109,6 +125,7 @@ public class JFRThreadPoolExecutor implements ExecutorService {
         return threadPoolExecutor.invokeAny(collect);
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         List<CustomerCallable<T>> collect = tasks.stream()
@@ -117,6 +134,7 @@ public class JFRThreadPoolExecutor implements ExecutorService {
         return threadPoolExecutor.invokeAny(collect, timeout, unit);
     }
 
+    /** {@inheritDoc} — 执行任务。 */
     @Override
     public void execute(Runnable command) {
         threadPoolExecutor.execute(new CustomerRunnable(unifiedObservationFactory, command));

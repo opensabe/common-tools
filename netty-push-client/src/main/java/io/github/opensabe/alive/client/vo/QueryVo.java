@@ -30,6 +30,9 @@ public class QueryVo extends PushVo {
         super(topic, deviceId, pushType, accountId, requestId);
     }
 
+/**
+ * build 方法。
+ */
     public Object build(int requestId, int productCode) {
         Message.Query.Builder builder = Message.Query.newBuilder()
                 .setRequestId(requestId)
@@ -47,6 +50,9 @@ public class QueryVo extends PushVo {
     }
 
     @Override
+/**
+ * 返回调试字符串。
+ */
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("topic: ").append(topic);

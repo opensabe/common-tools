@@ -22,7 +22,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
+/**
+ * C400Exception 类。
+ * <p>C400异常。</p>
+ */
 public class C400Exception extends RESTFull4xxBaseException implements Serializable {
+/** serialVersionUID 字段。 */
     private static final long serialVersionUID = -2312393803704717855L;
 
     public C400Exception(String message) {

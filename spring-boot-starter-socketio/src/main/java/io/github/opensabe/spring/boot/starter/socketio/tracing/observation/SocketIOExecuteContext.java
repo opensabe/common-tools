@@ -24,12 +24,18 @@ import io.netty.handler.codec.http.HttpHeaders;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * SocketIOExecute Observation 上下文。
+ */
 @Getter
 @Setter
 public class SocketIOExecuteContext extends Observation.Context implements SocketIOParam {
 
+/** socketIO 客户端。 */
     private SocketIOClient socketIOClient;
+/** eventName。 */
     private String eventName;
+/** eventEnum。 */
     private EventEnum eventEnum;
 
     public SocketIOExecuteContext(SocketIOClient socketIOClient, String eventName, EventEnum eventEnum) {
@@ -38,11 +44,13 @@ public class SocketIOExecuteContext extends Observation.Context implements Socke
         this.eventEnum = eventEnum;
     }
 
+    /** {@inheritDoc} */
     @Override
     public SocketIOClient currentSocketIOClient() {
         return socketIOClient;
     }
 
+    /** {@inheritDoc} */
     @Override
     public HttpHeaders currentHttpHeaders() {
         return socketIOClient.getHandshakeData().getHttpHeaders();

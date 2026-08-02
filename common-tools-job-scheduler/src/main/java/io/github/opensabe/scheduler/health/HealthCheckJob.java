@@ -18,6 +18,9 @@ package io.github.opensabe.scheduler.health;
 import io.github.opensabe.scheduler.conf.SimpleTask;
 import io.github.opensabe.scheduler.job.SimpleJob;
 
+/**
+ * HealthCheckJob 调度任务。
+ */
 @SimpleTask(cron = "0/10 * * * * ? ")
 public class HealthCheckJob implements SimpleJob {
     private final SimpleJobHealthService simpleJobHealthService;

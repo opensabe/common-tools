@@ -27,24 +27,33 @@ import io.github.opensabe.common.executor.resilience4j.BulkheadThreadPoolConfig;
 import io.github.opensabe.common.executor.scheduler.ThreadPoolStatScheduler;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 
+/**
+ * 线程池 Starter 公共自动配置。
+ */
 @AutoConfiguration
 @Import({UndertowThreadConfiguration.class, BulkheadThreadPoolConfig.class})
 public class ThreadPoolCommonConfiguration {
+    /**
+     * @return threadPoolFactory
+     */
     @Bean
     public ThreadPoolFactory getThreadPoolFactory() {
         return new ThreadPoolFactory();
     }
 
+    /** threadPoolStatScheduler。 */
     @Bean
     public ThreadPoolStatScheduler threadPoolStatScheduler(ThreadPoolFactory threadPoolFactory) {
         return new ThreadPoolStatScheduler(threadPoolFactory);
     }
 
+    /** forkJoinPoolFactory。 */
     @Bean
     public ForkJoinPoolFactory forkJoinPoolFactory(UnifiedObservationFactory unifiedObservationFactory, ThreadPoolFactory threadPoolFactory) {
         return new ForkJoinPoolFactory(threadPoolFactory, unifiedObservationFactory);
     }
 
+    /** forkjoinTaskFactory。 */
     @Bean
     public ForkjoinTaskFactory forkjoinTaskFactory(UnifiedObservationFactory unifiedObservationFactory) {
         return new ForkjoinTaskFactory(unifiedObservationFactory);

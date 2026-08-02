@@ -28,6 +28,9 @@ import jdk.jfr.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * 调度线程池任务执行 JFR 事件，记录 traceId 与调度/运行耗时。
+ */
 @Category({"Executor Service"})
 @Label("Scheduled Thread Task JFR")
 @Description("it manages to record the traceid and the start time of the task and the time-consuming of the end")
@@ -35,16 +38,27 @@ import lombok.Setter;
 @SuppressFBWarnings("URF_UNREAD_FIELD")
 public class ScheduledThreadTaskJFREvent extends Event {
 
+    /** 链路 traceId。 */
     @Getter
     private final String traceId;
 
+    /** 链路 spanId。 */
     @Getter
     private final String spanId;
+
+    /** 初始延迟。 */
     private final long initialDelay;
+
+    /** 固定周期（固定速率调度）。 */
     private final long period;
+
+    /** 单次延迟（一次性或 fixedDelay）。 */
     private final long delay;
+
+    /** 时间单位。 */
     private final TimeUnit unit;
 
+    /** 任务开始运行的时间戳（毫秒）。 */
     @Setter
     @Getter
     @Label("taskRunStartTime")
@@ -52,6 +66,7 @@ public class ScheduledThreadTaskJFREvent extends Event {
     @Description("the time when the task starts to run")
     private long taskRunStartTime;
 
+    /** 任务运行结束的时间戳（毫秒）。 */
     @Setter
     @Getter
     @Label("taskRunEndTime")
@@ -59,11 +74,20 @@ public class ScheduledThreadTaskJFREvent extends Event {
     @Description("the time when the task has finished")
     private long taskRunEndTime;
 
+    /** 实际运行耗时（毫秒）。 */
     @Setter
     @Timespan(value = Timespan.MILLISECONDS)
     @Description("the time-consuming of the span of the task with the lifecycle of queuing")
     private long taskRunTimeDuration;
 
+    /**
+     * @param traceId      traceId
+     * @param spanId       spanId
+     * @param initialDelay 初始延迟
+     * @param period       周期
+     * @param delay        延迟
+     * @param unit         时间单位
+     */
     public ScheduledThreadTaskJFREvent(String traceId, String spanId, long initialDelay, long period, long delay, TimeUnit unit) {
         this.traceId = traceId;
         this.spanId = spanId;

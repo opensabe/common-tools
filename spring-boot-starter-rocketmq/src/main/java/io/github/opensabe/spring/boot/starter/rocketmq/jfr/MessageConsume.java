@@ -22,17 +22,26 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * RocketMQ 消息消费 JFR 事件。
+ */
 @Getter
 @Setter
 @Category({"RocketMQ"})
 @Label("Message Consume")
 @StackTrace(false)
 public class MessageConsume extends Event {
+/** originTraceId。 */
     private final String originTraceId;
+/** topic。 */
     private final String topic;
+/** traceId。 */
     private String traceId;
+/** spanId。 */
     private String spanId;
+/** successful。 */
     private Boolean successful;
+/** throwable。 */
     private Throwable throwable;
 
 

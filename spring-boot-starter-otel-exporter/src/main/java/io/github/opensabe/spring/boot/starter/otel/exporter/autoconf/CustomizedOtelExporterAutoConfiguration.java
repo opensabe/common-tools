@@ -22,6 +22,10 @@ import io.github.opensabe.spring.boot.starter.otel.exporter.configuration.Custom
 
 @Import(CustomizedOtelConfiguration.class)
 @AutoConfiguration
+/**
+ * CustomizedOtelExporterAutoConfiguration 类。
+ * <p>CustomizedOpenTelemetryExporterAutoConfiguration。</p>
+ */
 public class CustomizedOtelExporterAutoConfiguration {
 }
 

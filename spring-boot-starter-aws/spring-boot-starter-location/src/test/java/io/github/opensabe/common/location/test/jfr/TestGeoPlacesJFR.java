@@ -52,8 +52,10 @@ public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
     private final String address = "Samuel Asabia House 35 Marina,Lagos,Nigeria";
     private final List<Double> position = List.of(11.196417, 5.605130);
     public JfrEvents jfrEvents = new JfrEvents();
+    /** unifiedObservation 工厂。 */
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
+    /** geocode 服务。 */
     @Autowired
     private GeocodeService geocodeService;
 
@@ -119,6 +121,9 @@ public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
         }
     }
 
+    /**
+     * @return locationJFREvents
+     */
     private List<RecordedEvent> getLocationJFREvents(String methodName) {
         return jfrEvents.events()
                 .filter(event -> event.getEventType().getName().equals("io.github.opensabe.common.location.jfr.LocationJFREvent"))

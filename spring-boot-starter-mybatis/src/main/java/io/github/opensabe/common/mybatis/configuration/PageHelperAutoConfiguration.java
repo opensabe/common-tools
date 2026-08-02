@@ -37,12 +37,15 @@ import static io.github.opensabe.common.mybatis.configuration.PageHelperProperti
  */
 @Configuration(proxyBeanMethods = false)
 public class PageHelperAutoConfiguration {
+    /** sqlSessionFactories。 */
     @Autowired
     private List<SqlSessionFactory> sqlSessionFactories;
 
+    /** properties。 */
     @Autowired
     private PageHelperProperties properties;
 
+    /** dataSourceSwitchInterceptor。 */
     @Autowired(required = false)
     private DataSourceSwitchInterceptor dataSourceSwitchInterceptor;
 
@@ -57,6 +60,7 @@ public class PageHelperAutoConfiguration {
         return new Properties();
     }
 
+    /** addPageInterceptor。 */
     @PostConstruct
     public void addPageInterceptor() {
         if (dataSourceSwitchInterceptor != null) {
@@ -72,6 +76,7 @@ public class PageHelperAutoConfiguration {
         }
     }
 
+    /** containsInterceptor。 */
     private boolean containsInterceptor(org.apache.ibatis.session.Configuration configuration, Interceptor interceptor) {
         try {
             return configuration.getInterceptors().contains(interceptor);

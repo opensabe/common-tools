@@ -22,11 +22,17 @@ import java.nio.charset.StandardCharsets;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * 脚本化 ES 搜索抽象基类，子类提供 wrapper query 脚本。
+ */
 public abstract class AbstractElasticSearchScript {
+/** script。 */
     private String script;
 
+    /** file。 */
     protected abstract String file();
 
+    /** init。 */
     @PostConstruct
     private void init() throws IOException {
         try (InputStream resourceAsStream = AbstractElasticSearchScript.class.getResourceAsStream(file())) {
@@ -34,6 +40,9 @@ public abstract class AbstractElasticSearchScript {
         }
     }
 
+    /**
+     * @return script
+     */
     public String getScript(Object... objects) {
         return String.format(script, objects);
     }

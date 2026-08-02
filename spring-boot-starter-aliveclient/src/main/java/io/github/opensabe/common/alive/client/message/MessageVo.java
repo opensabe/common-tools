@@ -21,9 +21,16 @@ import java.util.Base64;
 
 import io.github.opensabe.common.alive.client.message.enumeration.PushType;
 
+/**
+ * MessageVo 类。
+ * <p>消息Vo。</p>
+ */
 public class MessageVo extends PushVo {
+/** 消息体。 */
     public final String body;
+/** 消息 ID。 */
     public final String id;
+/** 过期时间戳。 */
     public final long expiry;
 
     public MessageVo(String topic, String body, String id) {
@@ -52,10 +59,16 @@ public class MessageVo extends PushVo {
         this.id = id;
     }
 
+/**
+ * 本地调试入口（非生产使用）。
+ */
     public static void main(String[] args) {
         (new MessageVo("aa", "", "")).buildPublish(1, 1);
     }
 
+/**
+ * 构建 Publish 消息。
+ */
     public Publish buildPublish(int requestId, int productCode) {
         Publish builder = new Publish();
         builder.setRequestId(requestId);
@@ -75,6 +88,9 @@ public class MessageVo extends PushVo {
         return builder;
     }
 
+/**
+ * 返回调试字符串。
+ */
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("topic: ").append(this.topic);

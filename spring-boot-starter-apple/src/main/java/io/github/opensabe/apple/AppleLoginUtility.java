@@ -30,17 +30,33 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Sign In with Apple 用户校验工具。
+ * <p>
+ * 使用授权码换取 token，并校验 id_token 的 issuer、audience 与过期时间。
+ */
 @Log4j2
 public class AppleLoginUtility {
 
+    /** Apple ID token 期望的 issuer 前缀。 */
     public static final String ISSUER_CONTENT = "https://appleid.apple.com";
 
+    /** Apple 登录 HTTP 客户端。 */
     private final AppleLoginAPIClient appleLoginAPIClient;
 
+    /**
+     * @param appleLoginAPIClient Apple 登录 API 客户端
+     */
     public AppleLoginUtility(AppleLoginAPIClient appleLoginAPIClient) {
         this.appleLoginAPIClient = appleLoginAPIClient;
     }
 
+    /**
+     * 使用授权码校验 Apple 登录用户并解析 id_token。
+     *
+     * @param code OAuth 授权码
+     * @return 校验结果；失败时 {@link VerifyUserResult#error} 非空
+     */
     public VerifyUserResult verifyUser(String code) {
         AppleLoginAPIClient.AuthKeys authKeys;
         try {
@@ -101,20 +117,30 @@ public class AppleLoginUtility {
         return VerifyUserResult.builder().sub(subject).email(email).build();
     }
 
+    /** Apple 登录客户端平台枚举。 */
     public enum AppleLoginPlafromEnum {
-        WEB, IOS
+        /** Web 端。 */
+        WEB,
+        /** iOS 端。 */
+        IOS
     }
 
+    /**
+     * Apple 用户校验结果（Lombok 生成访问器）。
+     */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class VerifyUserResult {
 
+        /** Apple 用户 subject（唯一标识）。 */
         private String sub;
 
+        /** 用户邮箱（可能为空）。 */
         private String email;
 
+        /** 校验失败时的英文错误描述。 */
         private String error;
     }
 }

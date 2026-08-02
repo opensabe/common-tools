@@ -17,6 +17,9 @@ package io.github.opensabe.common.utils.mapstruct.vo;
 
 import io.github.opensabe.mapstruct.core.Binding;
 
+/**
+ * ActivityDto 数据传输对象。
+ */
 @Binding
 public class ActivityDto extends Activity {
 

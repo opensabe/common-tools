@@ -24,7 +24,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+/**
+ * HeartBeat 类。
+ * <p>心跳。</p>
+ */
 public class HeartBeat extends MqMessage {
+/** 请求 ID。 */
     private Integer requestId;
 
 

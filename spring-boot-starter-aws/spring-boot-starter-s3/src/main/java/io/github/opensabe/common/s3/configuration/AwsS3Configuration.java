@@ -60,10 +60,12 @@ public class AwsS3Configuration {
     private final S3Properties s3Properties;
 
     /** 异步任务线程池工厂。 */
+    /** threadPool 工厂。 */
     @Autowired
     private ThreadPoolFactory threadPoolFactory;
 
     /** 可选本地/兼容 S3 端点 URL（{@code awsS3LocalUrl}）。 */
+    /** awsS3LocalUrl。 */
     @Value("${awsS3LocalUrl:}")
     private String awsS3LocalUrl;
 

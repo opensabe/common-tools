@@ -49,10 +49,14 @@ import lombok.Getter;
 public class CacheEndpoint {
 
     private static final Pattern COMPILE = Pattern.compile("::");
+/** cache 管理器。 */
     private final CompositeCacheManager cacheManager;
+/** context。 */
     private final ApplicationContext context;
+/** caches 配置属性。 */
     private final CachesProperties cachesProperties;
 
+    /** allCacheNames。 */
     @ReadOperation
     public CacheReport allCacheNames() {
         return CacheReport.builder()
@@ -80,6 +84,7 @@ public class CacheEndpoint {
                 ).build();
     }
 
+    /** cacheKeys。 */
     @ReadOperation
     public CacheReport cacheKeys(@Selector String cacheName, @Selector Long pageSize, @Selector Long pageNumber) {
         Cache cache = cacheManager.getCache(cacheName);
@@ -117,6 +122,7 @@ public class CacheEndpoint {
         return cacheReport(cacheName, cache.getClass().getSimpleName(), msg, rst);
     }
 
+    /** cacheValue。 */
     @ReadOperation
     public CacheReport cacheValue(@Selector String cacheName, @Selector String key) {
         Cache cache = cacheManager.getCache(cacheName);
@@ -132,6 +138,7 @@ public class CacheEndpoint {
         return cacheReport(cacheName, cache.getClass().getSimpleName(), null, Collections.singleton(cacheValue.get()));
     }
 
+    /** invalidateKey。 */
     @DeleteOperation
     public CacheReport invalidateKey(@Selector String cacheName, @Selector String key) {
         Cache cache = cacheManager.getCache(cacheName);
@@ -147,6 +154,7 @@ public class CacheEndpoint {
         return cacheReport(cacheName, cache.getClass().getSimpleName(), null, Collections.singleton(key));
     }
 
+    /** evictCache。 */
     @DeleteOperation
     @SuppressWarnings("unchecked")
     public CacheReport evictCache(@Selector String cacheName) {
@@ -163,14 +171,17 @@ public class CacheEndpoint {
         return cacheReport(cacheName, cache.getClass().getSimpleName(), null, Collections.emptySet());
     }
 
+    /** cacheReport。 */
     private CacheReport cacheReport(String cacheName, String cacheType, String msg, Object body) {
         return new CacheReport.CacheReportBuilder().cacheType(cacheType).cacheName(cacheName).success(Boolean.TRUE).message(msg).data(body).build();
     }
 
+    /** errorCacheReport。 */
     private CacheReport errorCacheReport(String cacheName, String error) {
         return new CacheReport.CacheReportBuilder().cacheType("Unknown").cacheName(cacheName).success(Boolean.FALSE).message(error).data(null).build();
     }
 
+    /** redisOrCaffeineKey。 */
     private String redisOrCaffeineKey(String oKey) {
         return oKey.contains("::") ? COMPILE.split(oKey)[1] : oKey;
     }
@@ -178,10 +189,15 @@ public class CacheEndpoint {
     @Builder
     @Getter
     public static class CacheReport {
+/** cacheType。 */
         private String cacheType;
+/** cacheName。 */
         private String cacheName;
+/** success。 */
         private Boolean success;
+/** message。 */
         private String message;
+/** data。 */
         private Object data;
     }
 }

@@ -20,6 +20,9 @@ import java.util.concurrent.CountDownLatch;
 
 import com.github.javafaker.Faker;
 
+/**
+ * RocketMQ 测试数据构造工具。
+ */
 public class TestDataUtil {
 
     private static final Faker FAKER = new Faker(Locale.CHINA);
@@ -29,6 +32,9 @@ public class TestDataUtil {
     public static final String TEST_RECORD_TOPIC = "rocketmq-test-record-topic";
     public static final String TEST_CLASS_TOPIC = "rocketmq-test-class-topic";
 
+    /**
+     * @return normalMessageRecordPojo
+     */
     public static MessageRecordPojoWrapper getNormalMessageRecordPojo() {
         return MessageRecordPojoWrapper.builder().messageRecordPojo(
                 new MessageRecordPojo(
@@ -40,6 +46,9 @@ public class TestDataUtil {
         ).countDownLatch(new CountDownLatch(1)).build();
     }
 
+    /**
+     * @return normalMessageClassPojo
+     */
     public static MessageClassPojoWrapper getNormalMessageClassPojo() {
         return MessageClassPojoWrapper.builder().messageClassPojo(
                 new MessageClassPojo(
@@ -51,6 +60,9 @@ public class TestDataUtil {
         ).countDownLatch(new CountDownLatch(1)).build();
     }
 
+    /**
+     * @return secretMessageRecordPojo
+     */
     public static MessageRecordPojoWrapper getSecretMessageRecordPojo() {
         return MessageRecordPojoWrapper.builder().messageRecordPojo(
                 new MessageRecordPojo(
@@ -62,6 +74,9 @@ public class TestDataUtil {
         ).countDownLatch(new CountDownLatch(1)).build();
     }
 
+    /**
+     * @return secretMessageClassPojo
+     */
     public static MessageClassPojoWrapper getSecretMessageClassPojo() {
         return MessageClassPojoWrapper.builder().messageClassPojo(
                 new MessageClassPojo(
@@ -73,6 +88,9 @@ public class TestDataUtil {
         ).countDownLatch(new CountDownLatch(1)).build();
     }
 
+    /**
+     * @return largeMessageRecordPojo
+     */
     public static MessageRecordPojoWrapper getLargeMessageRecordPojo() {
         return MessageRecordPojoWrapper.builder().messageRecordPojo(
                 new MessageRecordPojo(
@@ -85,6 +103,9 @@ public class TestDataUtil {
         ).countDownLatch(new CountDownLatch(1)).build();
     }
 
+    /**
+     * @return largeMessageClassPojo
+     */
     public static MessageClassPojoWrapper getLargeMessageClassPojo() {
         return MessageClassPojoWrapper.builder().messageClassPojo(
                 new MessageClassPojo(
@@ -97,6 +118,7 @@ public class TestDataUtil {
         ).countDownLatch(new CountDownLatch(1)).build();
     }
 
+    /** generateLargeMessage。 */
     private static String generateLargeMessage(int size) {
         StringBuilder stringB = new StringBuilder(size);
         String paddingString = "abcdefghijklmnopqrs";

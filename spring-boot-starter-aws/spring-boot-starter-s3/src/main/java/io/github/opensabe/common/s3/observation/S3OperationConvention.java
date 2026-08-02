@@ -19,15 +19,20 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
+/**
+ * S3Operation Observation 约定。
+ */
 public class S3OperationConvention implements ObservationConvention<S3OperationContext> {
 
     public static S3OperationConvention defaultConvention = new S3OperationConvention();
 
+    /** {@inheritDoc} */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof S3OperationContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getLowCardinalityKeyValues(S3OperationContext context) {
         return KeyValues.of(
@@ -36,6 +41,7 @@ public class S3OperationConvention implements ObservationConvention<S3OperationC
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getHighCardinalityKeyValues(S3OperationContext context) {
         return KeyValues.of(

@@ -17,6 +17,9 @@ package io.github.opensabe.scheduler.job;
 
 import java.io.Serializable;
 
+/**
+ * SimpleJob 实现类。
+ */
 public interface SimpleJob extends Serializable {
     void execute();
 }

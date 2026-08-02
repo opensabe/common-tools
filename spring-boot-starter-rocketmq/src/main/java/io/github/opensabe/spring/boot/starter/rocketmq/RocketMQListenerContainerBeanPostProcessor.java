@@ -33,6 +33,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  */
 public class RocketMQListenerContainerBeanPostProcessor implements BeanPostProcessor {
 
+    /** {@inheritDoc} — Bean 初始化后处理。 */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DefaultRocketMQListenerContainer container) {

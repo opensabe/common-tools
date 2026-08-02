@@ -24,6 +24,9 @@ import java.lang.annotation.Target;
 
 import org.springframework.stereotype.Component;
 
+/**
+ * Socket.IO 事件异常处理切面。
+ */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

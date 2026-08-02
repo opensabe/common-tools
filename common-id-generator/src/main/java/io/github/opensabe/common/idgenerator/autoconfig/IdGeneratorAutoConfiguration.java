@@ -20,6 +20,9 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.idgenerator.config.IdGeneratorConfiguration;
 
+/**
+ * 唯一 ID 生成器 Spring Boot 自动配置入口。
+ */
 @Configuration(proxyBeanMethods = false)
 @Import({IdGeneratorConfiguration.class})
 public class IdGeneratorAutoConfiguration {

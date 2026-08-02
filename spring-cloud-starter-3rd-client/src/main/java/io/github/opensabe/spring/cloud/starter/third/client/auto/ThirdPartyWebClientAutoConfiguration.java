@@ -22,5 +22,9 @@ import io.github.opensabe.spring.cloud.starter.third.client.conf.ThirdPartyWebCl
 
 @Import(ThirdPartyWebClientConfiguration.class)
 @Configuration(proxyBeanMethods = false)
+/**
+ * ThirdPartyWebClientAutoConfiguration 类。
+ * <p>Third Party Web Client Auto Configuration。</p>
+ */
 public class ThirdPartyWebClientAutoConfiguration {
 }

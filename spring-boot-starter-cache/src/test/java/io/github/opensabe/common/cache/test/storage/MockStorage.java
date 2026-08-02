@@ -23,23 +23,34 @@ import org.springframework.stereotype.Component;
 import io.github.opensabe.common.cache.test.entity.ItemObject;
 
 
+/**
+ * 缓存测试用模拟存储。
+ */
 @Component
 public class MockStorage {
 
     private final Map<Long, ItemObject> data = new ConcurrentHashMap<>(16);
 
+    /** addItem。 */
     public void addItem(ItemObject item) {
         data.put(item.getId(), item);
     }
 
+    /**
+     * @return item
+     */
     public ItemObject getItem(Long id) {
         return data.get(id);
     }
 
+    /** deleteItem。 */
     public void deleteItem(Long id) {
         data.remove(id);
     }
 
+    /**
+     * @return data
+     */
     public Map<Long, ItemObject> getData() {
         return data;
     }

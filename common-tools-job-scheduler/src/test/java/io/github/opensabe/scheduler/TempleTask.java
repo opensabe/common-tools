@@ -21,10 +21,14 @@ import io.github.opensabe.scheduler.conf.SimpleTask;
 import io.github.opensabe.scheduler.job.SimpleJob;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 调度器集成测试用示例定时任务（每秒执行一次）。
+ */
 @Log4j2
 @Component
 @SimpleTask(cron = "0/1 * * * * ?")
 public class TempleTask implements SimpleJob {
+    /** 是否至少执行过一次（供测试断言）。 */
     public volatile boolean run = false;
 
     @Override

@@ -27,6 +27,9 @@ import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
 import io.github.opensabe.scheduler.job.SchedulerJob;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * MonitorServer 调度服务端组件。
+ */
 @Log4j2
 public class MonitorServer implements Runnable {
 

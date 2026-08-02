@@ -38,6 +38,9 @@ import lombok.extern.log4j.Log4j2;
  * @time 2023/9/26 14:54
  */
 @Log4j2
+/**
+ * LogoutConsumer。
+ */
 @RocketMQMessageListener(
         consumerGroup = "${spring.application.name}_" + ForceDisconnectProducer.MQ_TOPIC_LOGOUT + "_SuperKickForceDisconnect",
         consumeMode = ConsumeMode.CONCURRENTLY,
@@ -46,12 +49,14 @@ import lombok.extern.log4j.Log4j2;
 )
 public class LogoutConsumer extends AbstractMQConsumer {
 
+/** socketIoMessageTemplate。 */
     private final SocketIoMessageTemplate socketIoMessageTemplate;
 
     public LogoutConsumer(SocketIoMessageTemplate socketIoMessageTemplate) {
         this.socketIoMessageTemplate = socketIoMessageTemplate;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
         var dto = JSONObject.parseObject(baseMQMessage.getData(), ForceDisconnectProducer.ForceDisconnectDTO.class);

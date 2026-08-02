@@ -25,11 +25,16 @@ import org.springframework.transaction.annotation.Transactional;
 import io.github.opensabe.common.mybatis.test.po.User;
 import io.github.opensabe.common.mybatis.test.service.UserMapperService;
 
+/**
+ * UserManager。
+ */
 @Service
 public class UserManager {
+    /** userMapper 服务。 */
     @Autowired
     private UserMapperService userMapperService;
 
+    /** testTransactionRollback。 */
     @Transactional(rollbackFor = Exception.class)
     public void testTransactionRollback(String id) {
         //插入一个记录
@@ -42,6 +47,7 @@ public class UserManager {
         throw new IllegalArgumentException();
     }
 
+    /** queryMuiltple。 */
     public void queryMuiltple(String id) {
         User user = User.builder().id(id).firstName("foo").lastName("bar").createTime(new Timestamp(System.currentTimeMillis())).build();
         userMapperService.insertSelective(user);
@@ -49,6 +55,7 @@ public class UserManager {
         userMapperService.selectById(id);
     }
 
+    /** testCommit。 */
     @Transactional
     public void testCommit(String id) {
         User user = User.builder().id(id).firstName("foo").lastName("bar").createTime(new Timestamp(System.currentTimeMillis())).build();

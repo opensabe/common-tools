@@ -27,5 +27,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @ConditionalOnExpression("!'${spring.application.name}'.contains('-frontend')")
-public @interface EnabledOnlyForBackend {
+public @/**
+ * EnabledOnlyForBackend 接口。
+ */
+interface EnabledOnlyForBackend {
 }

@@ -20,6 +20,9 @@ import org.springframework.stereotype.Component;
 import io.github.opensabe.common.mybatis.base.BaseService;
 import io.github.opensabe.common.mybatis.test.po.User;
 
+/**
+ * 用户 Mapper 服务测试类。
+ */
 @Component
 public class UserMapperService extends BaseService<User> {
 

@@ -23,6 +23,9 @@ import org.springframework.web.client.RestTemplate;
 
 import io.github.opensabe.common.location.vo.IpLocation;
 
+/**
+ * AbstractHttpFetchIpInfoService 服务接口/实现。
+ */
 public abstract class AbstractHttpFetchIpInfoService<T> {
     protected final RestTemplate restTemplate = new RestTemplate();
 

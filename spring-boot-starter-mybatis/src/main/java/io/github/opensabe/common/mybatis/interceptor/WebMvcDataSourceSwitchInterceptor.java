@@ -33,6 +33,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 
 
+/**
+ * WebMvcDataSourceSwitch 拦截器。
+ */
 @Intercepts({
         @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class,
                 RowBounds.class, ResultHandler.class}),
@@ -47,6 +50,9 @@ public class WebMvcDataSourceSwitchInterceptor extends DataSourceSwitchIntercept
 //        super( defaultOperId, countryProperties);
     }
 
+    /**
+     * @return request
+     */
     private static HttpServletRequest getRequest() {
         try {
             RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
@@ -71,6 +77,7 @@ public class WebMvcDataSourceSwitchInterceptor extends DataSourceSwitchIntercept
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void configureDataSourceContext(BoundSql boundSql) {
         var request = getRequest();

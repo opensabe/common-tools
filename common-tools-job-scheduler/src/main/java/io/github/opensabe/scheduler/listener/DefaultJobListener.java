@@ -26,6 +26,9 @@ import io.github.opensabe.scheduler.conf.SchedulerServerConfiguration;
 import io.github.opensabe.scheduler.job.SchedulerJob;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * DefaultJobListener 任务监听器。
+ */
 @Log4j2
 public class DefaultJobListener implements JobStartedListener, JobSuccessListener, JobFinishedListener, JobRetryListener {
 

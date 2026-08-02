@@ -19,9 +19,13 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
+/**
+ * MessageConsumeObservation Observation 约定。
+ */
 public class MessageConsumeObservationConvention implements ObservationConvention<MessageConsumeContext> {
     public static final MessageConsumeObservationConvention DEFAULT = new MessageConsumeObservationConvention();
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getLowCardinalityKeyValues(MessageConsumeContext context) {
         return KeyValues.of(
@@ -30,6 +34,7 @@ public class MessageConsumeObservationConvention implements ObservationConventio
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getHighCardinalityKeyValues(MessageConsumeContext context) {
         return KeyValues.of(
@@ -40,6 +45,7 @@ public class MessageConsumeObservationConvention implements ObservationConventio
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof MessageConsumeContext;

@@ -15,6 +15,9 @@
  */
 package io.github.opensabe.common.utils.exception;
 
+/**
+ * BusinessException 异常类型。
+ */
 @SuppressWarnings("serial")
 public class BusinessException extends RuntimeException {
 

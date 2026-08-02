@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 import io.github.opensabe.scheduler.job.JobBriefInfo;
 import io.github.opensabe.scheduler.server.SchedulerServer;
 
+/**
+ * JobStatisticsAPI 调度任务。
+ */
 public class JobStatisticsAPI {
 
     private final SchedulerServer schedulerServer;

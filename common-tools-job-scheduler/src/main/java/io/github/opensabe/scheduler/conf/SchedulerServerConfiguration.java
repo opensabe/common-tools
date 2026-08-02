@@ -15,6 +15,9 @@
  */
 package io.github.opensabe.scheduler.conf;
 
+/**
+ * SchedulerServerConfiguration Spring 配置类。
+ */
 public class SchedulerServerConfiguration {
 
     public static final long DEFAULT_MONITOR_SERVER_INTERVAL_IN_SECONDS = 5L;

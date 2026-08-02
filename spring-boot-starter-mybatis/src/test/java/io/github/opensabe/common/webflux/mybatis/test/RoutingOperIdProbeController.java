@@ -38,6 +38,7 @@ import reactor.core.scheduler.Schedulers;
 @RequestMapping("/internal/probe")
 public class RoutingOperIdProbeController {
 
+    /** readOperIdOnBoundedElastic。 */
     @GetMapping(value = "/oper/bounded-elastic", produces = MediaType.TEXT_PLAIN_VALUE)
     public Mono<String> readOperIdOnBoundedElastic() {
         return Mono.deferContextual(
@@ -47,6 +48,7 @@ public class RoutingOperIdProbeController {
                 }).subscribeOn(Schedulers.boundedElastic()));
     }
 
+    /** readOperIdOnImmediate。 */
     @GetMapping(value = "/oper/immediate", produces = MediaType.TEXT_PLAIN_VALUE)
     public Mono<String> readOperIdOnImmediate() {
         return Mono.deferContextual(

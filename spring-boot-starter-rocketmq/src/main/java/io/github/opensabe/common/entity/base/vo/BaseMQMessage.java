@@ -43,6 +43,7 @@ public class BaseMQMessage extends BaseMessage<String> {
 
     /** 业务载荷；V1 为 JSON 字符串，V2 对象经反序列化器压平后亦存于此字段。 */
     @JsonDeserialize(using = StringDeserializer.class)
+/** data。 */
     private String data;
 
     /** 无参构造，供 Jackson 反序列化。 */

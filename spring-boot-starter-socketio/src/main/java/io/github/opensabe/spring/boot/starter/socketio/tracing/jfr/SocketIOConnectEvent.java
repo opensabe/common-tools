@@ -23,6 +23,9 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Socket.IO 连接事件 JFR 记录。
+ */
 @Getter
 @Setter
 @Category({"observation", "Socket-Connect"})
@@ -30,12 +33,16 @@ import lombok.Setter;
 @StackTrace(value = false)
 public class SocketIOConnectEvent extends Event {
 
+/** traceId。 */
     private String traceId;
 
+/** spanId。 */
     private String spanId;
 
+/** sessionId。 */
     private String sessionId;
 
+/** headers。 */
     private String headers;
 
     public SocketIOConnectEvent(SocketIOExecuteContext context) {

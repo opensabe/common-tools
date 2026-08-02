@@ -51,6 +51,9 @@ import lombok.extern.log4j.Log4j2;
         SingleRedisIntegrationTest.class,
         SingleWriteMySQLIntegrationTest.class
 })
+/**
+ * MessageSave 测试。
+ */
 @SpringBootTest(
         properties = {
                 "eureka.client.enabled=false",
@@ -62,13 +65,19 @@ public class MessageSaveTest {
 
     private static final String COUNT_SQL = "select count(1) from t_common_mq_fail_log";
     private static final String QUERY_SQL = "select * from t_common_mq_fail_log";
+    /** sqlSession 工厂。 */
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
+    /** producer。 */
     @Autowired
     private io.github.opensabe.spring.boot.starter.rocketmq.MQProducer producer;
+    /** mqFailLogEntity Mapper。 */
     @Autowired
     private MqFailLogEntityMapper mqFailLogEntityMapper;
 
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleRedisIntegrationTest.setProperties(registry);
@@ -114,6 +123,7 @@ public class MessageSaveTest {
         Assertions.assertEquals(0, list.size());
     }
 
+    /** fromResultSet。 */
     private MqFailLogEntity fromResultSet(ResultSet resultSet) throws SQLException {
         MqFailLogEntity entity = new MqFailLogEntity();
         entity.setId(resultSet.getString("id"));
@@ -129,10 +139,12 @@ public class MessageSaveTest {
     @SpringBootApplication
     public static class Config {
 
+        /** rocketMQTemplate。 */
         @Bean
         public RocketMQTemplate rocketMQTemplate() {
             var r = new RocketMQTemplate() {
 
+                /** {@inheritDoc} */
                 @Override
                 public SendResult syncSend(String destination, Message<?> message) {
                     return new SendResult(SendStatus.FLUSH_DISK_TIMEOUT, "id3", "id1", null, 100);

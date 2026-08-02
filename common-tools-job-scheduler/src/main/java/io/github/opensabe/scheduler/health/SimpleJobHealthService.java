@@ -24,6 +24,9 @@ import io.github.opensabe.common.utils.AlarmUtil;
 import io.github.opensabe.scheduler.conf.SchedulerProperties;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * SimpleJobHealthService 实现类。
+ */
 @Log4j2
 public class SimpleJobHealthService {
     private static final long HEALTH_TIMEOUT_IN_MINUTE = 1;

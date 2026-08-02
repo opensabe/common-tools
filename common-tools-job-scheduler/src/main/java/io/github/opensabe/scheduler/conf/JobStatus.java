@@ -15,6 +15,9 @@
  */
 package io.github.opensabe.scheduler.conf;
 
+/**
+ * JobStatus 调度任务。
+ */
 public enum JobStatus {
     READY,
 

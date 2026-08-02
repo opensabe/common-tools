@@ -19,23 +19,38 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.apple.itunes.storekit.model.Environment;
 
+/**
+ * Apple 内购配置属性（兼容旧版绑定）。
+ * <p>
+ * 绑定前缀 {@code apple.in-purchase}；新代码请优先使用 {@link AppleInPurchaseProperties}。
+ *
+ * @see AppleInPurchaseProperties
+ */
 @ConfigurationProperties("apple.in-purchase")
 public class AppleProperties {
 
+    /** 是否启用内购自动配置。 */
     private boolean enable = false;
 
+    /** App Store Connect 私钥。 */
     private String signingKey;
 
+    /** 私钥 ID。 */
     private String keyId;
 
+    /** 发行者 ID。 */
     private String issuerId;
 
+    /** 应用 Bundle ID。 */
     private String bundleId;
 
+    /** 运行环境。 */
     private Environment environment;
 
+    /** App Store 应用 numeric ID。 */
     private Long appAppleId;
 
+    /** 是否启用 Apple 在线 JWS 校验。 */
     private Boolean enableOnlineChecks = true;
 
     public boolean isEnable() {

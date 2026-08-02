@@ -32,6 +32,9 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 
 import lombok.SneakyThrows;
 
+/**
+ * CustomizedMySQLContainer Testcontainers 容器封装。
+ */
 public class CustomizedMySQLContainer extends GenericContainer<CustomizedMySQLContainer> {
     public static final int MYSQL_PORT = 3306;
     public static final String MYSQL_ROOT_PASSWORD = "123456";

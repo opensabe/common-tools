@@ -22,9 +22,16 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
+/**
+ * ProtoBufEncoder 类。
+ * <p>ProtoBuf编码器。</p>
+ */
 public class ProtoBufEncoder extends MessageToByteEncoder<GeneratedMessageV3> {
 
     @Override
+/**
+ * encode 方法。
+ */
     protected void encode(ChannelHandlerContext ctx, GeneratedMessageV3 message, ByteBuf out) throws Exception {
         String className = message.getClass().getName();
         short methodId = MessageType.requestNameToMethodId.get(className);

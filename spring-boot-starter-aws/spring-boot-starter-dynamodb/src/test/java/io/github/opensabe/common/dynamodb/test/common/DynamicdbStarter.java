@@ -41,19 +41,27 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 @Log4j2
 @JfrEventTest
 @ExtendWith({SpringExtension.class, SingleDynamoDbIntegrationTest.class})
+/**
+ * DynamicdbStarter。
+ */
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "spring.application.name=aws-dynamo-db-test"
 }, classes = App.class)
-@DisplayName("DynamoDB Starter 集成测试基类")
 public abstract class DynamicdbStarter {
+    /** services。 */
     @Autowired
     private List<DynamoDbBaseService> services;
+    /** aws_env。 */
     @Value("${aws_env}")
     private String aws_env;
+    /** defaultOperId。 */
     @Value("${defaultOperId}")
     private String defaultOperId;
 
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleDynamoDbIntegrationTest.setProperties(registry);

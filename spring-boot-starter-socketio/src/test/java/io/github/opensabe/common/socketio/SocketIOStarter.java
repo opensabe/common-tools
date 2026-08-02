@@ -35,6 +35,9 @@ import lombok.extern.log4j.Log4j2;
 @SpringBootTest(classes = SocketIOStarter.App.class, properties = "eureka.client.enabled=false")
 @ExtendWith(SingleRedisIntegrationTest.class)
 public class SocketIOStarter {
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleRedisIntegrationTest.setProperties(registry);
@@ -43,6 +46,7 @@ public class SocketIOStarter {
     @SpringBootApplication(scanBasePackages = "io.github.opensabe.spring.boot.starter.socketio",
             exclude = RocketMQAutoConfiguration.class)
     public static class App {
+        /** main。 */
         public static void main(String[] args) {
             SpringApplication.run(App.class, args);
         }

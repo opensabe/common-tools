@@ -33,9 +33,12 @@ import lombok.extern.log4j.Log4j2;
 @ExtendWith({SpringExtension.class})
 @SpringBootTest(classes = GeoPlacesBaseTest.App.class)
 //@JfrEventTest
-@DisplayName("GeoPlaces 集成测试基类")
+/**
+ * GeoPlacesBase 测试。
+ */
 public abstract class GeoPlacesBaseTest {
 
+    /** geoPlaces 配置属性。 */
     @Autowired
     private GeoPlacesProperties geoPlacesProperties;
 

@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- *
- */
 package io.github.opensabe.common.utils;
 
 /*
@@ -41,15 +38,10 @@ package io.github.opensabe.common.utils;
 import java.security.SecureRandom;
 
 /**
- * random UUIDs. This implementation uses the JDK's java.security.SecureRandom
- * to generate sufficiently random values for the UUIDs.
- * <br><br>
- * This class is a singleton, so it must be constructed through the static
- * getInstance() method.
- *
- * @author Dan Jemiolo (danj)
+ * 基于 {@link SecureRandom} 的随机 UUID/十六进制字符串工厂（单例）。
+ * <p>
+ * 通过 {@link #getInstance()} 获取实例。
  */
-
 public class RandomUuidFactory {
     private static final RandomUuidFactory _SINGLETON = new RandomUuidFactory();
 

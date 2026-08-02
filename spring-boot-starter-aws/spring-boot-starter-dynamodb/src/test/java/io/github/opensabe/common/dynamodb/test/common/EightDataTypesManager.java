@@ -22,6 +22,9 @@ import io.github.opensabe.common.dynamodb.service.DynamoDbBaseService;
 import io.github.opensabe.common.dynamodb.test.po.EightDataTypesPo;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 
+/**
+ * DynamoDB 八种数据类型测试管理器。
+ */
 @Service
 public class EightDataTypesManager extends DynamoDbBaseService<EightDataTypesPo> {
 

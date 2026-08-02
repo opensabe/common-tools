@@ -30,11 +30,13 @@ public enum SQLExecuteDocumentation implements ObservationDocumentation {
      * 监控mapper执行SQL
      */
     SQL_EXECUTE_MAPPER {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "sql.execute.mapper";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return SQLExecuteObservationConvention.class;
@@ -46,11 +48,13 @@ public enum SQLExecuteDocumentation implements ObservationDocumentation {
      * 监控service执行事务
      */
     SQL_EXECUTE_TRANSACTION {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "sql.execute.transaction";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return SQLExecuteObservationConvention.class;

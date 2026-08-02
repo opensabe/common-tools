@@ -26,9 +26,13 @@ import org.springframework.util.StringUtils;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * MyBatis 字符串加解密 TypeHandler 抽象基类，写入前加密、读取后解密。
+ */
 @Log4j2
 public abstract class CryptTypeHandler extends BaseTypeHandler<String> {
 
+    /** {@inheritDoc} */
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, String parameter, JdbcType jdbcType)
             throws SQLException {
@@ -43,6 +47,7 @@ public abstract class CryptTypeHandler extends BaseTypeHandler<String> {
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNullableResult(ResultSet rs, String columnName) throws SQLException {
         var s = rs.getString(columnName);
@@ -57,6 +62,7 @@ public abstract class CryptTypeHandler extends BaseTypeHandler<String> {
         return r;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         var s = rs.getString(columnIndex);
@@ -71,6 +77,7 @@ public abstract class CryptTypeHandler extends BaseTypeHandler<String> {
         return r;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         var s = cs.getString(columnIndex);
@@ -85,8 +92,10 @@ public abstract class CryptTypeHandler extends BaseTypeHandler<String> {
         return r;
     }
 
+    /** 加密明文。 */
     protected abstract String encrypt(String origin);
 
+    /** 解密密文。 */
     protected abstract String decrypt(String origin);
 
 }

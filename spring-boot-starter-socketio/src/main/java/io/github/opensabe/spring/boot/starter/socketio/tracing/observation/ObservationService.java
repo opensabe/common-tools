@@ -28,15 +28,20 @@ import io.github.opensabe.spring.boot.starter.socketio.tracing.extend.MultiConsu
 import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * ObservationService。
+ */
 @Log4j2
 public class ObservationService {
 
+/** unifiedObservation 工厂。 */
     private UnifiedObservationFactory unifiedObservationFactory;
 
     public ObservationService(UnifiedObservationFactory unifiedObservationFactory) {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    /** observation。 */
     public void observation(SocketIOClient socketIOClient, SocketIOExecuteDocumentation socketIOExecuteDocumentation, String eventName, String annotationName, Consumer<SocketIOClient> consumer) {
         SocketIOExecuteContext context = new SocketIOExecuteContext(socketIOClient, eventName, EventEnum.getInstance(annotationName));
         Observation observation = socketIOExecuteDocumentation.observation(
@@ -55,6 +60,7 @@ public class ObservationService {
         }
     }
 
+    /** observationEvent。 */
     public void observationEvent(NamespaceClient socketIOClient, SocketIOExecuteDocumentation socketIOExecuteDocumentation, String eventName, String annotationName, List<Object> args, AckRequest ackRequest, MultiConsumer<NamespaceClient, String, List<Object>, AckRequest> consumer) {
         SocketIOExecuteContext context = new SocketIOExecuteContext(socketIOClient, eventName, EventEnum.getInstance(annotationName));
         Observation observation = socketIOExecuteDocumentation.observation(

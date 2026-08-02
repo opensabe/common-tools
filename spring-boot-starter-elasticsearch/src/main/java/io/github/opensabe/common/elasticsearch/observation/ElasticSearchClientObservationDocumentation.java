@@ -20,13 +20,18 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
 
+/**
+ * Elasticsearch 客户端 Observation 指标与标签文档。
+ */
 public enum ElasticSearchClientObservationDocumentation implements ObservationDocumentation {
     CLIENT_REQUEST {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "elastic.search.client.request";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return ElasticSearchClientConvention.class;
@@ -36,24 +41,28 @@ public enum ElasticSearchClientObservationDocumentation implements ObservationDo
 
     public enum ClientRequestTag implements KeyName {
         URI {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "elastic.search.client.request.uri";
             }
         },
         PARAMS {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "elastic.search.client.request.params";
             }
         },
         RESPONSE {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "elastic.search.client.response";
             }
         },
         THROWABLE {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "elastic.search.client.throwable";

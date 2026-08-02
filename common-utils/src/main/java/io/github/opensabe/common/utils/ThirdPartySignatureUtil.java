@@ -23,6 +23,9 @@ import org.apache.commons.lang3.StringUtils;
 import cn.hutool.crypto.digest.MD5;
 import io.github.opensabe.common.utils.json.JsonUtil;
 
+/**
+ * ThirdPartySignatureUtil 工具类。
+ */
 public class ThirdPartySignatureUtil {
 
     private static final char SPLIT = '|';

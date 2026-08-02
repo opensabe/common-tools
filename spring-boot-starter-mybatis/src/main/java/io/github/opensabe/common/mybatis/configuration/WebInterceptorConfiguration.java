@@ -61,6 +61,7 @@ public class WebInterceptorConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     static class WebfluxSupportConfiguration {
 
+        /** operatorEventFilter。 */
         @Bean
         public WebFilter operatorEventFilter() {
             return (exchange, chain) -> {
@@ -92,6 +93,7 @@ public class WebInterceptorConfiguration {
             };
         }
 
+        /** webfluxInterceptor。 */
         @Bean
         public DataSourceSwitchInterceptor webfluxInterceptor() {
             return new WebfluxDataSourceSwitchInterceptor();

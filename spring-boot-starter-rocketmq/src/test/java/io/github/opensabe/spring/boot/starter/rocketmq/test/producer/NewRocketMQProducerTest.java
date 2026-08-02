@@ -32,13 +32,16 @@ public class NewRocketMQProducerTest extends BaseRocketMQTest {
     /**
      * 验证 MQProducer 注入且实现类为 {@link MQProducerImpl}。
      */
+    @DisplayName("验证mQProducerBeanInject")
     @Test
-    @DisplayName("验证MQProducer Bean 注入")
     public void testMQProducerBeanInject() {
         Assertions.assertNotNull(mqProducer);
         Assertions.assertInstanceOf(MQProducerImpl.class, mqProducer);
     }
 
+    /**
+     * @param extra 待设置值
+     */
     @DynamicPropertySource
     public static void setExtra(DynamicPropertyRegistry registry) {
         registry.add("rocketmq.extend.use-new-producer", () -> true);

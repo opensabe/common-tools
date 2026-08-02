@@ -17,17 +17,20 @@ package io.github.opensabe.common.location.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * WorldCityData 记录类型。
+ */
 public record WorldCityData(
-        @Schema(description = "城市Unicode码", example = "艑saka") String unicode,
-        @Schema(description = "ascii码", example = "Osaka") String ascii,
-        @Schema(description = "经度", example = "34.752") String lat,
-        @Schema(description = "维度", example = "135.4582") String lng,
-        @Schema(description = "所在国家名称", example = "Japan") String country,
-        @Schema(description = "国家ISO2编码", example = "JP") String iso2,
-        @Schema(description = "国家ISO3编码", example = "JPN") String iso3,
-        @Schema(description = "上一级行政级别，例如，保定的admin name是河北", example = "艑saka") String adminName,
-        @Schema(description = "Primary 首都，admin，第一行政级别（省），minor 低级行政级别例如城市或者县等") String capital,
-        @Schema(description = "估算的城市人口") String population,
+        @Schema(description = "City Unicode name", example = "Osaka") String unicode,
+        @Schema(description = "ASCII name", example = "Osaka") String ascii,
+        @Schema(description = "Latitude", example = "34.752") String lat,
+        @Schema(description = "Longitude", example = "135.4582") String lng,
+        @Schema(description = "Country name", example = "Japan") String country,
+        @Schema(description = "Country ISO2 code", example = "JP") String iso2,
+        @Schema(description = "Country ISO3 code", example = "JPN") String iso3,
+        @Schema(description = "Parent admin region name", example = "Osaka") String adminName,
+        @Schema(description = "Capital type: primary, admin, minor") String capital,
+        @Schema(description = "Estimated city population") String population,
         String id
 ) {
 

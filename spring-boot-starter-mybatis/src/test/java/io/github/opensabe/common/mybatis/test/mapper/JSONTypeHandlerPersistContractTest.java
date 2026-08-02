@@ -88,7 +88,6 @@ class JSONTypeHandlerPersistContractTest {
      * 模拟升级前已落库的 ISO 字串仍可读。
      */
     @Test
-    @DisplayName("旧库 ISO 字串可读（模拟升级前已落库）")
     void legacyIsoColumnReadable() throws Exception {
         String legacy = """
                 {"windowStart":"2026-01-15T10:30:00","windowEnd":"2026-01-15T11:00:00","options":{"enabled":true,"tier":2}}
@@ -105,8 +104,11 @@ class JSONTypeHandlerPersistContractTest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ConfigBlob {
+/** windowStart。 */
         private LocalDateTime windowStart;
+/** windowEnd。 */
         private LocalDateTime windowEnd;
+/** options。 */
         private Map<String, Object> options;
     }
 }

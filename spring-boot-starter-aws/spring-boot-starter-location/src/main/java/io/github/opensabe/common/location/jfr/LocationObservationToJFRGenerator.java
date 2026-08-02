@@ -32,23 +32,27 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class LocationObservationToJFRGenerator extends ObservationToJFRGenerator<LocationContext> {
 
+    /** {@inheritDoc} */
     @Override
     public Class<LocationContext> getContextClazz() {
         return LocationContext.class;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(LocationContext context) {
         // 判断是否需要在 Observation 停止时提交 JFR 事件
         return context.containsKey(LocationJFREvent.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(LocationContext context) {
         // 始终生成 JFR 事件
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(LocationContext context) {
         // 从上下文中获取 JFR 事件
@@ -83,6 +87,7 @@ public class LocationObservationToJFRGenerator extends ObservationToJFRGenerator
         locationJFREvent.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(LocationContext context) {
         // 创建新的 LocationJFREvent

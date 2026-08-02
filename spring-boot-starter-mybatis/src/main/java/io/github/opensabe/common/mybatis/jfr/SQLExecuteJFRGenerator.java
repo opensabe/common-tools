@@ -22,22 +22,29 @@ import io.github.opensabe.common.mybatis.observation.SQLExecuteContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
+/**
+ * Observation 到 JFR 的桥接生成器（SQLExecuteJFRGenerator）。
+ */
 public class SQLExecuteJFRGenerator extends ObservationToJFRGenerator<SQLExecuteContext> {
+    /** {@inheritDoc} */
     @Override
     public Class<SQLExecuteContext> getContextClazz() {
         return SQLExecuteContext.class;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(SQLExecuteContext context) {
         return context.containsKey(SQLExecuteEvent.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(SQLExecuteContext context) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(SQLExecuteContext context) {
         SQLExecuteEvent event = context.get(SQLExecuteEvent.class);
@@ -50,6 +57,7 @@ public class SQLExecuteJFRGenerator extends ObservationToJFRGenerator<SQLExecute
         event.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(SQLExecuteContext context) {
         SQLExecuteEvent event = new SQLExecuteEvent(context.getMethod(), context.getTransactionName(), context.isSuccess());

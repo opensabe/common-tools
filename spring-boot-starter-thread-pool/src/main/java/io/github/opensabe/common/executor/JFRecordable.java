@@ -17,6 +17,9 @@ package io.github.opensabe.common.executor;
 
 import io.github.opensabe.common.executor.jfr.ThreadTaskJFREvent;
 
+/**
+ * 可记录 JFR 线程池任务的标记接口。
+ */
 public interface JFRecordable<V> {
 
     ThreadTaskJFREvent getEvent();

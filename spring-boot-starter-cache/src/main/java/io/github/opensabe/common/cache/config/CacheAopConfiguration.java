@@ -35,12 +35,14 @@ import io.github.opensabe.common.cache.api.ExpireCacheInterceptor;
 public class CacheAopConfiguration {
 
 
+    /** expireCachingConfigurer。 */
     @Bean
     @ConditionalOnMissingBean
     public ExpireCachingConfigurer expireCachingConfigurer() {
         return new ExpireCachingConfigurer();
     }
 
+    /** expireCacheInterceptor。 */
     @Bean
     @ConditionalOnMissingBean
     public ExpireCacheInterceptor expireCacheInterceptor(ExpireCachingConfigurer configurer,
@@ -52,6 +54,7 @@ public class CacheAopConfiguration {
     }
 
 
+    /** cacheAdvisor。 */
     @Bean(name = CacheManagementConfigUtils.CACHE_ADVISOR_BEAN_NAME)
     public BeanFactoryCacheOperationSourceAdvisor cacheAdvisor(
             CacheOperationSource cacheOperationSource, ExpireCacheInterceptor cacheInterceptor,
@@ -66,6 +69,7 @@ public class CacheAopConfiguration {
         return advisor;
     }
 
+    /** cacheOperationSource。 */
     @Bean
     @ConditionalOnMissingBean
     public CacheOperationSource cacheOperationSource() {

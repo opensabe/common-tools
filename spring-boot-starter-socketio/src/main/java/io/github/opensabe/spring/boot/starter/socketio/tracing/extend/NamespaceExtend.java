@@ -31,6 +31,9 @@ import io.github.opensabe.spring.boot.starter.socketio.tracing.observation.Obser
 import io.github.opensabe.spring.boot.starter.socketio.tracing.observation.SocketIOExecuteDocumentation;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 扩展 Socket.IO 命名空间行为。
+ */
 @Log4j2
 public class NamespaceExtend extends Namespace {
 
@@ -38,17 +41,20 @@ public class NamespaceExtend extends Namespace {
         super(name, configuration);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onEvent(NamespaceClient client, String eventName, List<Object> args, AckRequest ackRequest) {
         MultiConsumer<NamespaceClient, String, List<Object>, AckRequest> multiConsumer = (n, s, l, a) -> super.onEvent(n, s, l, a);
         SpringUtil.getBean(ObservationService.class).observationEvent(client, SocketIOExecuteDocumentation.SOCKET_EXECUTE_ON_EVENT, eventName, OnEvent.class.getName(), args, ackRequest, multiConsumer);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onDisconnect(SocketIOClient client) {
         SpringUtil.getBean(ObservationService.class).observation(client, SocketIOExecuteDocumentation.SOCKET_EXECUTE_DISCONNECT, null, OnDisconnect.class.getName(), t -> super.onDisconnect(t));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onConnect(SocketIOClient client) {
         SpringUtil.getBean(ObservationService.class).observation(client, SocketIOExecuteDocumentation.SOCKET_EXECUTE_CONNECT, null, OnConnect.class.getName(), t -> super.onConnect(t));

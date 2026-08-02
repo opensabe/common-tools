@@ -24,6 +24,9 @@ import io.github.opensabe.common.location.config.AwsGeoPlacesConfiguration;
 import io.github.opensabe.common.location.properties.GeoPlacesProperties;
 
 
+/**
+ * AWS GeoPlaces Starter 自动配置入口。
+ */
 @Import({AwsGeoPlacesConfiguration.class})
 //@Configuration(proxyBeanMethods = false)
 @AutoConfiguration

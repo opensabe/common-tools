@@ -21,6 +21,9 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
+/**
+ * DynamodbExecuteObservation Observation 约定。
+ */
 public class DynamodbExecuteObservationConvention implements ObservationConvention<DynamodbExecuteContext> {
 
     public static DynamodbExecuteObservationConvention defaultConvention = new DynamodbExecuteObservationConvention();
@@ -30,16 +33,19 @@ public class DynamodbExecuteObservationConvention implements ObservationConventi
     private final String tagHashKey = "hashKey";
     private final String tagExpression = "expression";
 
+    /** {@inheritDoc} */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof DynamodbExecuteContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getLowCardinalityKeyValues(DynamodbExecuteContext context) {
         return KeyValues.of(tagMethod, context.getMethod());
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getHighCardinalityKeyValues(DynamodbExecuteContext context) {
         KeyValues keyValues = KeyValues.of(tagMethod, context.getMethod());

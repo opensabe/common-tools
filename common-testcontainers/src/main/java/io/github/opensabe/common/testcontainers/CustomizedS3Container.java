@@ -24,6 +24,9 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 
 import lombok.SneakyThrows;
 
+/**
+ * CustomizedS3Container Testcontainers 容器封装。
+ */
 public class CustomizedS3Container extends GenericContainer<CustomizedS3Container> {
     public static final int S3_PORT = 4566;
 

@@ -24,27 +24,32 @@ import io.github.opensabe.common.mybatis.observation.ConnectionContext;
  * @author maheng
  */
 public class ConnectionJFRGenerator extends ObservationToJFRGenerator<ConnectionContext> {
+    /** {@inheritDoc} */
     @Override
     public Class<ConnectionContext> getContextClazz() {
         return ConnectionContext.class;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(ConnectionContext context) {
         return context.containsKey(ConnectionEvent.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(ConnectionContext context) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(ConnectionContext context) {
         ConnectionEvent event = context.get(ConnectionEvent.class);
         event.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(ConnectionContext context) {
         ConnectionEvent event = new ConnectionEvent(context);

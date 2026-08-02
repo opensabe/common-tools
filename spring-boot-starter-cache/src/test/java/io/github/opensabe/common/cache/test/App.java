@@ -18,6 +18,9 @@ package io.github.opensabe.common.cache.test;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * 集成测试最小 Spring Boot 启动类。
+ */
 @SpringBootApplication(scanBasePackages = "io.github.opensabe.common.cache.test")
 public class App {
 }

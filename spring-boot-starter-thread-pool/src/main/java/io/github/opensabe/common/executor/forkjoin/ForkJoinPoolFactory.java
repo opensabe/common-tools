@@ -24,9 +24,14 @@ import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.ThreadUnCaughtExceptionHandler;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 
+/**
+ * ForkJoinPoolFactory。
+ */
 public class ForkJoinPoolFactory {
+/** threadPool 工厂。 */
     private final ThreadPoolFactory threadPoolFactory;
 
+/** unifiedObservation 工厂。 */
     private final UnifiedObservationFactory unifiedObservationFactory;
 
     public ForkJoinPoolFactory(ThreadPoolFactory threadPoolFactory, UnifiedObservationFactory unifiedObservationFactory) {
@@ -34,6 +39,7 @@ public class ForkJoinPoolFactory {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    /** createForkJoinTaskThreadPool。 */
     public TraceableForkJoinExecutorService createForkJoinTaskThreadPool(String threadNamePrefix, int size) {
         NamedForkJoinWorkerThreadFactory namedForkJoinWorkerThreadFactory = new NamedForkJoinWorkerThreadFactory(threadNamePrefix);
         TraceableForkJoinExecutorService traceableForkJoinExecutorService = new TraceableForkJoinExecutorService(size,
@@ -57,6 +63,7 @@ public class ForkJoinPoolFactory {
         }
 
 
+        /** newThread。 */
         public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
             var thread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             thread.setName(name + "-" + counter.getAndIncrement());

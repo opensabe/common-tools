@@ -17,6 +17,9 @@ package io.github.opensabe.spring.boot.starter.socketio.tracing.observation;
 
 import io.micrometer.observation.ObservationConvention;
 
+/**
+ * Socket.IO Observation 命名约定。
+ */
 public interface ObservationCov {
     ObservationConvention getConvention();
 }

@@ -33,6 +33,9 @@ import io.github.opensabe.common.cache.config.CaffeineConfiguration;
         CacheAopConfiguration.class,
         CacheManagerConfiguration.class,
         CaffeineConfiguration.class
+/**
+ * Cache Starter 自动配置入口。
+ */
 })
 @EnableConfigurationProperties(CachesProperties.class)
 public class CacheAutoConfiguration {

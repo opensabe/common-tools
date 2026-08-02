@@ -24,6 +24,9 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 
 import lombok.SneakyThrows;
 
+/**
+ * CustomizedRocketMQContainer Testcontainers 容器封装。
+ */
 public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRocketMQContainer> {
     public static final int NAMESRV_PORT = 9876;
     public static final int BROKER_PORT = 10911;

@@ -26,10 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.github.opensabe.common.s3.service.FileService;
 import io.github.opensabe.common.s3.test.common.S3BaseTest;
 
+/**
+ * TestFileService。
+ */
 @DisplayName("S3文件服务测试")
 public class TestFileService extends S3BaseTest {
 
+/** bytes。 */
     private final byte[] bytes;
+    /** file 服务。 */
     @Autowired
     private FileService fileService;
 

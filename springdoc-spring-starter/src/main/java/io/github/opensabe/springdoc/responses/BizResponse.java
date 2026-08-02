@@ -48,7 +48,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(BizResponses.class)
-@ApiResponse(description = "请求成功", responseCode = "10000", useReturnTypeSchema = true)
+@ApiResponse(description = "Request succeeded", responseCode = "10000", useReturnTypeSchema = true)
 public @interface BizResponse {
 
     /**

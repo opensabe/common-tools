@@ -21,12 +21,22 @@ import lombok.Data;
 
 @Data
 @Builder
+/**
+ * Response 类。
+ * <p>响应。</p>
+ */
 public class Response extends MqMessage {
+/** 请求 ID。 */
     private Integer requestId;
+/** retCode 字段。 */
     private RetCode retCode;
+/** rightHost 字段。 */
     private String rightHost;
+/** messageId 字段。 */
     private long messageId;
+/** sendNum 字段。 */
     private Integer sendNum;
+/** extra 字段。 */
     private String extra;
 
     public Response() {

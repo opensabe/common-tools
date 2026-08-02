@@ -27,11 +27,16 @@ import io.github.opensabe.common.executor.ThreadPoolFactory;
 import jakarta.annotation.Nonnull;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * RocketMQTemplateBeanPostProcessor。
+ */
 @Log4j2
 public class RocketMQTemplateBeanPostProcessor implements BeanPostProcessor {
+    /** threadPool 工厂。 */
     @Autowired
     private ThreadPoolFactory threadPoolFactory;
 
+    /** {@inheritDoc} — Bean 初始化后处理。 */
     @Override
     public Object postProcessAfterInitialization(@Nonnull Object bean, @Nonnull String beanName) throws BeansException {
         if (bean instanceof RocketMQTemplate rocketMQTemplate) {

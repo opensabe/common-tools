@@ -22,6 +22,9 @@ import java.util.function.Function;
 
 import io.micrometer.observation.Observation;
 
+/**
+ * 分段递归任务基类。
+ */
 public abstract class SegmentRecursiveTask<T, R> extends ListableRecursiveTask<T, R> {
 
     protected SegmentRecursiveTask(int capacity, List<T> list, Function<T, R> transformer, Function<List<R>, R> combiner, BinaryOperator<R> reducer, Observation observation) {
@@ -36,8 +39,10 @@ public abstract class SegmentRecursiveTask<T, R> extends ListableRecursiveTask<T
         super(capacity, list, transformer, reducer, observation);
     }
 
+    /** clone。 */
     protected abstract SegmentRecursiveTask<T, R> clone(List<T> current);
 
+    /** {@inheritDoc} */
     @Override
     protected List<ListableRecursiveTask<T, R>> segmentation() {
         if (list.size() > capacity) {

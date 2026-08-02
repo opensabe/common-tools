@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.util.Converter;
  */
 public class BeanDescriptionDecorator extends BeanDescription {
 
+/** delegate 字段。 */
     private final BeanDescription delegate;
 
     protected BeanDescriptionDecorator(BeanDescription delegate) {
@@ -49,21 +50,33 @@ public class BeanDescriptionDecorator extends BeanDescription {
     }
 
     @Override
+/**
+ * getType 方法。
+ */
     public JavaType getType() {
         return delegate.getType();
     }
 
     @Override
+/**
+ * getBeanClass 方法。
+ */
     public Class<?> getBeanClass() {
         return delegate.getBeanClass();
     }
 
     @Override
+/**
+ * isNonStaticInnerClass 方法。
+ */
     public boolean isNonStaticInnerClass() {
         return delegate.isNonStaticInnerClass();
     }
 
     @Override
+/**
+ * findJsonKeyAccessor 方法。
+ */
     public AnnotatedMember findJsonKeyAccessor() {
         return delegate.findJsonKeyAccessor();
     }
@@ -79,21 +92,33 @@ public class BeanDescriptionDecorator extends BeanDescription {
 //    }
 
     @Override
+/**
+ * findClassDescription 方法。
+ */
     public String findClassDescription() {
         return delegate.findClassDescription();
     }
 
     @Override
+/**
+ * getClassInfo 方法。
+ */
     public AnnotatedClass getClassInfo() {
         return delegate.getClassInfo();
     }
 
     @Override
+/**
+ * getObjectIdInfo 方法。
+ */
     public ObjectIdInfo getObjectIdInfo() {
         return delegate.getObjectIdInfo();
     }
 
     @Override
+/**
+ * hasKnownClassAnnotations 方法。
+ */
     public boolean hasKnownClassAnnotations() {
         return delegate.hasKnownClassAnnotations();
     }
@@ -109,21 +134,33 @@ public class BeanDescriptionDecorator extends BeanDescription {
 //    }
 
     @Override
+/**
+ * getClassAnnotations 方法。
+ */
     public Annotations getClassAnnotations() {
         return delegate.getClassAnnotations();
     }
 
     @Override
+/**
+ * findProperties 方法。
+ */
     public List<BeanPropertyDefinition> findProperties() {
         return delegate.findProperties();
     }
 
     @Override
+/**
+ * getIgnoredPropertyNames 方法。
+ */
     public Set<String> getIgnoredPropertyNames() {
         return delegate.getIgnoredPropertyNames();
     }
 
     @Override
+/**
+ * findBackReferences 方法。
+ */
     public List<BeanPropertyDefinition> findBackReferences() {
         return delegate.findBackReferences();
     }
@@ -134,6 +171,9 @@ public class BeanDescriptionDecorator extends BeanDescription {
 //    }
 
     @Override
+/**
+ * getConstructors 方法。
+ */
     public List<AnnotatedConstructor> getConstructors() {
         return delegate.getConstructors();
     }
@@ -144,6 +184,9 @@ public class BeanDescriptionDecorator extends BeanDescription {
     }
 
     @Override
+/**
+ * getFactoryMethods 方法。
+ */
     public List<AnnotatedMethod> getFactoryMethods() {
         return delegate.getFactoryMethods();
     }
@@ -154,11 +197,17 @@ public class BeanDescriptionDecorator extends BeanDescription {
     }
 
     @Override
+/**
+ * findDefaultConstructor 方法。
+ */
     public AnnotatedConstructor findDefaultConstructor() {
         return delegate.findDefaultConstructor();
     }
 
     @Override
+/**
+ * getPotentialCreators 方法。
+ */
     public PotentialCreators getPotentialCreators() {
         return delegate.getPotentialCreators();
     }
@@ -174,21 +223,33 @@ public class BeanDescriptionDecorator extends BeanDescription {
 //    }
 
     @Override
+/**
+ * findJsonValueAccessor 方法。
+ */
     public AnnotatedMember findJsonValueAccessor() {
         return delegate.findJsonValueAccessor();
     }
 
     @Override
+/**
+ * findAnyGetter 方法。
+ */
     public AnnotatedMember findAnyGetter() {
         return delegate.findAnyGetter();
     }
 
     @Override
+/**
+ * findAnySetterAccessor 方法。
+ */
     public AnnotatedMember findAnySetterAccessor() {
         return delegate.findAnySetterAccessor();
     }
 
     @Override
+/**
+ * findMethod 方法。
+ */
     public AnnotatedMethod findMethod(String name, Class<?>[] paramTypes) {
         return delegate.findMethod(name, paramTypes);
     }
@@ -199,16 +260,25 @@ public class BeanDescriptionDecorator extends BeanDescription {
 //    }
 
     @Override
+/**
+ * findPropertyInclusion 方法。
+ */
     public JsonInclude.Value findPropertyInclusion(JsonInclude.Value defValue) {
         return delegate.findPropertyInclusion(defValue);
     }
 
     @Override
+/**
+ * findExpectedFormat 方法。
+ */
     public JsonFormat.Value findExpectedFormat() {
         return delegate.findExpectedFormat();
     }
 
     @Override
+/**
+ * findExpectedFormat 方法。
+ */
     public JsonFormat.Value findExpectedFormat(JsonFormat.Value defValue) {
         return delegate.findExpectedFormat(defValue);
     }
@@ -229,21 +299,33 @@ public class BeanDescriptionDecorator extends BeanDescription {
     }
 
     @Override
+/**
+ * findPOJOBuilder 方法。
+ */
     public Class<?> findPOJOBuilder() {
         return delegate.findPOJOBuilder();
     }
 
     @Override
+/**
+ * findPOJOBuilderConfig 方法。
+ */
     public JsonPOJOBuilder.Value findPOJOBuilderConfig() {
         return delegate.findPOJOBuilderConfig();
     }
 
     @Override
+/**
+ * instantiateBean 方法。
+ */
     public Object instantiateBean(boolean fixAccess) {
         return delegate.instantiateBean(fixAccess);
     }
 
     @Override
+/**
+ * findDefaultViews 方法。
+ */
     public Class<?>[] findDefaultViews() {
         return delegate.findDefaultViews();
     }

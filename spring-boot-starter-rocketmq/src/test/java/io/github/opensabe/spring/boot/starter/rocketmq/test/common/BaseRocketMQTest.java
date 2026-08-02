@@ -55,6 +55,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 })
 //必须要这个，否则会导致测试方法之间的消费者状态互相影响，同一个类有多个消费者 bean 实例导致消费异常
 @DirtiesContext
+/**
+ * BaseRocketMQ 测试。
+ */
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "spring.application.name=rocketmq-test",
@@ -62,6 +65,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 }, classes = BaseRocketMQTest.App.class)
 @DisplayName("RocketMQ集成测试基类")
 public abstract class BaseRocketMQTest {
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleRocketMQIntegrationTest.setProperties(registry);
@@ -71,44 +77,54 @@ public abstract class BaseRocketMQTest {
 
     @SpringBootApplication
     public static class App {
+        /** testSecretProvider。 */
         @Bean
         public SecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
             return new TestSecretProvider(globalSecretManager);
         }
 
+        /** testNewMessageClassPojoConsumer。 */
         @Bean
         public TestNewMessageClassPojoConsumer testNewMessageClassPojoConsumer() {
             return new TestNewMessageClassPojoConsumer();
         }
 
+        /** testNewMessageRecordPojoConsumer。 */
         @Bean
         public TestNewMessageRecordPojoConsumer testNewMessageRecordPojoConsumer() {
             return new TestNewMessageRecordPojoConsumer();
         }
 
+        /** testOldMessageClassPojoConsumer。 */
         @Bean
         public TestOldMessageClassPojoConsumer testOldMessageClassPojoConsumer() {
             return new TestOldMessageClassPojoConsumer();
         }
 
+        /** testOldMessageRecordPojoConsumer。 */
         @Bean
         public TestOldMessageRecordPojoConsumer testOldMessageRecordPojoConsumer() {
             return new TestOldMessageRecordPojoConsumer();
         }
     }
 
+    /** mqProducer。 */
     @Autowired
     protected MQProducer mqProducer;
 
+    /** testNewMessageClassPojoConsumer。 */
     @Autowired
     protected TestNewMessageClassPojoConsumer testNewMessageClassPojoConsumer;
 
+    /** testNewMessageRecordPojoConsumer。 */
     @Autowired
     protected TestNewMessageRecordPojoConsumer testNewMessageRecordPojoConsumer;
 
+    /** testOldMessageClassPojoConsumer。 */
     @Autowired
     protected TestOldMessageClassPojoConsumer testOldMessageClassPojoConsumer;
 
+    /** testOldMessageRecordPojoConsumer。 */
     @Autowired
     protected TestOldMessageRecordPojoConsumer testOldMessageRecordPojoConsumer;
 
@@ -117,21 +133,25 @@ public abstract class BaseRocketMQTest {
             super(globalSecretManager);
         }
 
+        /** {@inheritDoc} */
         @Override
         protected String name() {
             return "testSecretProvider";
         }
 
+        /** {@inheritDoc} */
         @Override
         protected long reloadTimeInterval() {
             return 1;
         }
 
+        /** {@inheritDoc} */
         @Override
         protected TimeUnit reloadTimeIntervalUnit() {
             return TimeUnit.DAYS;
         }
 
+        /** {@inheritDoc} */
         @Override
         protected Map<String, Set<String>> reload() {
             return Map.of(
@@ -140,6 +160,9 @@ public abstract class BaseRocketMQTest {
         }
     }
 
+    /**
+     * @param up 待设置值
+     */
     @BeforeEach
     public void setup() {
         // 清空消费者的消息列表
@@ -150,8 +173,8 @@ public abstract class BaseRocketMQTest {
         log.info("Setup completed, cleared consumer message lists.");
     }
 
-    @Test
     @DisplayName("测试消息发送和消费 - 验证消息传递功能")
+    @Test
     public void testSend() throws InterruptedException {
         MessageRecordPojoWrapper normalMessageRecordPojoForOld = TestDataUtil.getNormalMessageRecordPojo();
         MessageClassPojoWrapper normalMessageClassPojoForOld = TestDataUtil.getNormalMessageClassPojo();
@@ -180,8 +203,8 @@ public abstract class BaseRocketMQTest {
         assertTrue(awaitClassOld);
     }
 
-    @Test
     @DisplayName("测试敏感信息过滤 - 验证敏感信息被拒绝发送")
+    @Test
     public void testSendSecret() {
         MessageRecordPojoWrapper normalMessageRecordPojoForOld = TestDataUtil.getSecretMessageRecordPojo();
         MessageClassPojoWrapper normalMessageClassPojoForOld = TestDataUtil.getSecretMessageClassPojo();
@@ -202,8 +225,8 @@ public abstract class BaseRocketMQTest {
         });
     }
 
-    @Test
     @DisplayName("测试大负载消息发送 - 验证压缩和消息大小限制")
+    @Test
     public void testSend_largePayload() throws Exception {
         MessageRecordPojoWrapper normalMessageRecordPojoForOld = TestDataUtil.getLargeMessageRecordPojo();
         MessageClassPojoWrapper normalMessageClassPojoForOld = TestDataUtil.getLargeMessageClassPojo();

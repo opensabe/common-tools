@@ -21,9 +21,17 @@ import org.springframework.context.annotation.Configuration;
 
 import okhttp3.OkHttpClient;
 
+/**
+ * YouTube Data API 使用的 OkHttp 客户端自动配置。
+ */
 @Configuration
 public class OkHttpClientAutoConfig {
 
+    /**
+     * 注册默认 {@link OkHttpClient} Bean。
+     *
+     * @return OkHttp 客户端实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public OkHttpClient okHttpClient() {

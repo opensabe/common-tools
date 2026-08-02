@@ -18,6 +18,7 @@ package io.github.opensabe.paypal.service;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.api.SimulateEventApi;
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 //todo 在 github action 里面加入 secret，之后通过环境变量读取
 @Disabled
 @Ignore
+@DisplayName("PayPal SimulateEvent API 测试")
 public class SimulateEventApiTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
@@ -44,6 +46,7 @@ public class SimulateEventApiTest {
             .withConfiguration(AutoConfigurations.of(PayPalAutoConfig.class));
 
     @Test
+    @DisplayName("验证 PayPal 自动配置属性绑定")
     public void payPalAutoConfigurationPropertiesTest() {
         contextRunner
                 .run(context -> {
@@ -57,6 +60,7 @@ public class SimulateEventApiTest {
     }
 
     @Test
+    @DisplayName("验证 SimulateEventApi Bean 与令牌获取")
     public void payPalAutoConfigurationSimulateEventApiTest() {
         contextRunner
                 .run(context -> {

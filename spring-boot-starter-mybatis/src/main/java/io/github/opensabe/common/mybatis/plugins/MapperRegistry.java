@@ -34,6 +34,7 @@ import lombok.Getter;
  */
 public class MapperRegistry extends org.apache.ibatis.binding.MapperRegistry {
     @Getter
+/** config。 */
     private final Configuration config;
     @Getter
     private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
@@ -43,6 +44,7 @@ public class MapperRegistry extends org.apache.ibatis.binding.MapperRegistry {
         this.config = config;
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> void addMapper(Class<T> type) {
         if (type.isInterface()) {
@@ -55,16 +57,19 @@ public class MapperRegistry extends org.apache.ibatis.binding.MapperRegistry {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> boolean hasMapper(Class<T> type) {
         return getKnownMappers().containsKey(type);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Collection<Class<?>> getMappers() {
         return Collections.unmodifiableCollection(getKnownMappers().keySet());
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
         final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) getKnownMappers().get(type);

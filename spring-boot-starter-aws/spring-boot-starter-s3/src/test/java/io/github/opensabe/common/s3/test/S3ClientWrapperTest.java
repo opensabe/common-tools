@@ -27,10 +27,14 @@ import java.io.InputStream;
 import java.util.Base64;
 import java.util.Objects;
 
+/**
+ * S3ClientWrapper 测试。
+ */
 @DisplayName("S3客户端包装器测试")
 public class S3ClientWrapperTest extends S3BaseTest {
 
     byte[] bytes;
+    /** s3ClientWrapper。 */
     @Autowired
     private S3ClientWrapper s3ClientWrapper;
 
@@ -38,8 +42,8 @@ public class S3ClientWrapperTest extends S3BaseTest {
         bytes = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("funny-cat.jpeg")).readAllBytes();
     }
 
-    @Test
     @DisplayName("测试文件上传和下载 - 验证数据完整性")
+    @Test
     public void testUploadFile() throws IOException {
         String upload = s3ClientWrapper.upload(bytes);
         try (InputStream download = s3ClientWrapper.download(upload.replaceAll(FOLDER_NAME + "/", ""))) {
@@ -48,8 +52,8 @@ public class S3ClientWrapperTest extends S3BaseTest {
         }
     }
 
-    @Test
     @DisplayName("测试指定文件名上传 - 验证原始文件名保存")
+    @Test
     public void testUploadFileWithName() throws IOException {
         s3ClientWrapper.uploadWithOriginName(bytes, "funny-cat.jpeg", "image/jpeg", null);
         try (InputStream download = s3ClientWrapper.download("funny-cat.jpeg")) {
@@ -58,8 +62,8 @@ public class S3ClientWrapperTest extends S3BaseTest {
         }
     }
 
+    @DisplayName("验证doesObjectExistsAndCopy")
     @Test
-    @DisplayName("测试对象存在性检查和复制 - 验证文件操作")
     public void testDoesObjectExistsAndCopy() throws IOException {
         String fileName = "funny-cat-" + System.currentTimeMillis() + ".jpeg";
         boolean doesObjectExists = s3ClientWrapper.doesObjectExists(fileName);

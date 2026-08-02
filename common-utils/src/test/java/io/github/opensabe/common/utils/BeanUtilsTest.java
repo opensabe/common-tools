@@ -23,6 +23,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * BeanUtilsTest 单元/集成测试。
+ */
 @DisplayName("Bean工具类测试")
 public class BeanUtilsTest {
 
@@ -101,11 +104,17 @@ public class BeanUtilsTest {
         System.out.println("Spring BeanUtils copyProperties 100000 times cost: %d".formatted(System.currentTimeMillis() - s2));
     }
 
-    public record RU(String name, Integer age) {
+    /**
+ * RU 记录类型。
+ */
+public record RU(String name, Integer age) {
     }
 
     @Data
-    public static class CT {
+    /**
+ * CT。
+ */
+public static class CT {
         private String name;
         private Integer age;
     }
@@ -113,7 +122,10 @@ public class BeanUtilsTest {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class CU {
+    /**
+ * CU。
+ */
+public static class CU {
         private String name;
         private int age;
     }
@@ -121,7 +133,10 @@ public class BeanUtilsTest {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class CC {
+    /**
+ * CC。
+ */
+public static class CC {
         private CU cu;
     }
 }

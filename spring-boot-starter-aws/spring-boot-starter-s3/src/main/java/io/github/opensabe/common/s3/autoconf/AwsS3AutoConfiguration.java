@@ -25,6 +25,9 @@ import io.github.opensabe.common.s3.properties.S3Properties;
 
 //https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.7-Release-Notes#changes-to-auto-configuration
 
+/**
+ * AWS S3 Starter 自动配置入口。
+ */
 @Import({AwsS3Configuration.class, SpringDataS3ConverterConfig.class})
 @AutoConfiguration
 @EnableConfigurationProperties(S3Properties.class)

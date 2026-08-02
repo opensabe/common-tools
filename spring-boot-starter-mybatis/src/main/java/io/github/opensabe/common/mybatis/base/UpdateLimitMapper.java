@@ -24,6 +24,9 @@ import tk.mybatis.mapper.mapperhelper.MapperHelper;
 import tk.mybatis.mapper.mapperhelper.MapperTemplate;
 import tk.mybatis.mapper.mapperhelper.SqlHelper;
 
+/**
+ * UpdateLimit MyBatis Mapper。
+ */
 @RegisterMapper
 public interface UpdateLimitMapper<T> {
 
@@ -40,6 +43,7 @@ public interface UpdateLimitMapper<T> {
         }
 
 
+        /** updateByExampleSelectiveLimit。 */
         public String updateByExampleSelectiveLimit(MappedStatement ms) {
             Class<?> entityClass = getEntityClass(ms);
             StringBuilder sql = new StringBuilder();
@@ -57,6 +61,7 @@ public interface UpdateLimitMapper<T> {
             return sql.toString();
         }
 
+        /** updateByExampleLimit。 */
         public String updateByExampleLimit(MappedStatement ms) {
             Class<?> entityClass = getEntityClass(ms);
             StringBuilder sql = new StringBuilder();

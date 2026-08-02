@@ -19,6 +19,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openapitools.client.ApiClient;
@@ -41,11 +42,13 @@ import lombok.extern.log4j.Log4j2;
 @Disabled
 @Log4j2
 @SpringBootTest(classes = App.class)
+@DisplayName("PayPal Subscriptions API 测试")
 public class SubscriptionsApiTest {
     @Autowired
     private PayPalService payPalService;
 
     @Test
+    @DisplayName("查询订阅详情")
     public void subscriptionGetTest() throws ApiException {
         ApiClient apiClient = new ApiClient();
         String token = payPalService.getToken();
@@ -56,6 +59,7 @@ public class SubscriptionsApiTest {
     }
 
     @Test
+    @DisplayName("验证 Webhook 签名")
     public void verifyTest() throws ApiException, JsonProcessingException {
         ApiClient apiClient = new ApiClient();
         ObjectMapper objectMapper = apiClient.getObjectMapper();

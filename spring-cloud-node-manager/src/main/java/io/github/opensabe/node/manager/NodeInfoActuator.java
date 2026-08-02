@@ -24,9 +24,15 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Endpoint(id = NodeInfoActuator.PATH)
+/**
+ * NodeInfoActuator 类。
+ * <p>节点InfoActuator。</p>
+ */
 public class NodeInfoActuator {
+/** PATH 字段。 */
     public static final String PATH = "node-id";
 
+/** nodeManager 字段。 */
     private final NodeManager nodeManager;
 
     public NodeInfoActuator(NodeManager nodeManager) {
@@ -34,6 +40,9 @@ public class NodeInfoActuator {
     }
 
     @ReadOperation
+/**
+ * getNodeId 方法。
+ */
     public BaseRsp<Integer> getNodeId() {
         log.info("NodeInfoActuator-getNodeId {}", nodeManager.getNodeId());
         return RespUtil.succ(nodeManager.getNodeId());

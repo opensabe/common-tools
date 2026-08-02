@@ -18,6 +18,9 @@ package io.github.opensabe.common.core;
 /**
  * @author musaxi on 2017/9/29.
  */
+/**
+ * FormatUtil 工具类。
+ */
 public class FormatUtil {
 
     public static String format(String template, Object... args) {

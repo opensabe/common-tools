@@ -25,6 +25,9 @@ import lombok.Setter;
 /**
  * @author Sjaak Derksen
  */
+/**
+ * CustomerDto 数据传输对象。
+ */
 @Getter
 @Setter
 @Binding(value = Customer.class)

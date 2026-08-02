@@ -34,21 +34,26 @@ import io.github.opensabe.common.cache.api.ExpireCacheResolver;
  */
 public class ExpireCachingConfigurer implements CachingConfigurer, JCacheConfigurer, BeanFactoryAware {
 
+/** bean 工厂。 */
     private BeanFactory beanFactory;
 
+    /** {@inheritDoc} */
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ExpireCacheResolver cacheResolver() {
         return new ExpireCacheResolver(beanFactory);
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyGenerator keyGenerator() {
         return new SimpleKeyGenerator() {
+            /** {@inheritDoc} */
             @Override
             public Object generate(Object target, Method method, Object... params) {
                 if (params.length == 0) {

@@ -29,11 +29,19 @@ import com.corundumstudio.socketio.store.pubsub.PubSubType;
 
 import io.netty.util.internal.PlatformDependent;
 
+/**
+ * RedissonPubSubStore。
+ */
 public class RedissonPubSubStore implements PubSubStore {
+/** redissonPub。 */
     private final RedissonClient redissonPub;
+/** redissonSub。 */
     private final RedissonClient redissonSub;
+/** nodeId。 */
     private final Long nodeId;
+/** serviceName。 */
     private final String serviceName;
+/** socketIoServer 配置属性。 */
     private final SocketIoServerProperties socketIoServerProperties;
 
     private final ConcurrentMap<String, Queue<Integer>> map = PlatformDependent.newConcurrentHashMap();
@@ -46,12 +54,14 @@ public class RedissonPubSubStore implements PubSubStore {
         this.socketIoServerProperties = socketIoServerProperties;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void publish(PubSubType type, PubSubMessage msg) {
         msg.setNodeId(nodeId);
         redissonPub.getTopic(getTopicName(type.toString())).publish(msg);
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T extends PubSubMessage> void subscribe(PubSubType type, final PubSubListener<T> listener, Class<T> clazz) {
         String name = getTopicName(type.toString());
@@ -69,6 +79,7 @@ public class RedissonPubSubStore implements PubSubStore {
         list.add(regId);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void unsubscribe(PubSubType type) {
         String name = getTopicName(type.toString());
@@ -79,10 +90,14 @@ public class RedissonPubSubStore implements PubSubStore {
         }
     }
 
+    /**
+     * @return topicName
+     */
     private String getTopicName(String name) {
         return serviceName + '-' + name;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shutdown() {
     }

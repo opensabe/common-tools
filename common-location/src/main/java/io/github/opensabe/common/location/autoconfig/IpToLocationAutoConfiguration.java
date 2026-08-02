@@ -20,7 +20,10 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.location.config.IpToLocationConfiguration;
 
-//@Configuration(proxyBeanMethods = false)
+///**
+ * IpToLocationAutoConfiguration Spring Boot 自动配置。
+ */
+@Configuration(proxyBeanMethods = false)
 @AutoConfiguration
 @Import({IpToLocationConfiguration.class})
 public class IpToLocationAutoConfiguration {

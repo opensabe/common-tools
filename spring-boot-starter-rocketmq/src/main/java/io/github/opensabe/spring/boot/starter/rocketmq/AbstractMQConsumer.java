@@ -23,15 +23,21 @@ import org.apache.rocketmq.common.message.MessageExt;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.entity.base.vo.BaseMessage;
 
+/**
+ * AbstractMQConsumer。
+ */
 public abstract class AbstractMQConsumer extends AbstractConsumer<String> {
 
+    /** onBaseMQMessage。 */
     protected abstract void onBaseMQMessage(BaseMQMessage baseMQMessage);
 
+    /** {@inheritDoc} */
     @Override
     protected void onBaseMessage(BaseMessage<String> baseMessage) {
         onBaseMQMessage((BaseMQMessage) baseMessage);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected BaseMessage<String> convert(MessageExt ext) {
         String payload = new String(ext.getBody(), Charset.defaultCharset());

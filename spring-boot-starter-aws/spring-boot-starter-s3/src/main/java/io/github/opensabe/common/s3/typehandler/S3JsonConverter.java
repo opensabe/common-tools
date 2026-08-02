@@ -137,6 +137,9 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
                     return information.getType();
                 }
 
+                /**
+                 * @return ownerType
+                 */
                 public Type getOwnerType() {
                     return null;
                 }

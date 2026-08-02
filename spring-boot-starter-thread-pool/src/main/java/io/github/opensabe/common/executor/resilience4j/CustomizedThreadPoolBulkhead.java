@@ -36,11 +36,18 @@ import io.github.resilience4j.bulkhead.event.BulkheadOnCallRejectedEvent;
 import io.github.resilience4j.core.ContextPropagator;
 import io.github.resilience4j.core.EventConsumer;
 
+/**
+ * CustomizedThreadPoolBulkhead。
+ */
 public class CustomizedThreadPoolBulkhead implements ThreadPoolBulkhead {
 
+/** name。 */
     private final String name;
+/** tags。 */
     private final Map<String, String> tags;
+/** executor 服务。 */
     private final ExecutorService executorService;
+/** config。 */
     private final ThreadPoolBulkheadConfig config;
 
     public CustomizedThreadPoolBulkhead(String name, Map<String, String> tags, ThreadPoolBulkheadConfig config, ExecutorService executorService) {
@@ -50,6 +57,7 @@ public class CustomizedThreadPoolBulkhead implements ThreadPoolBulkhead {
         this.config = config;
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> CompletionStage<T> submit(Callable<T> task) {
         final CompletableFuture<T> promise = new CompletableFuture<>();
@@ -75,6 +83,7 @@ public class CustomizedThreadPoolBulkhead implements ThreadPoolBulkhead {
         return promise;
     }
 
+    /** {@inheritDoc} */
     @Override
     public CompletionStage<Void> submit(Runnable task) {
         final CompletableFuture<Void> promise = new CompletableFuture<>();
@@ -98,55 +107,66 @@ public class CustomizedThreadPoolBulkhead implements ThreadPoolBulkhead {
         return promise;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ThreadPoolBulkheadConfig getBulkheadConfig() {
         return config;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Metrics getMetrics() {
         ThreadPoolExecutor threadPoolExecutor = ((JFRThreadPoolExecutor) executorService).getThreadPoolExecutor();
         return new Metrics() {
+            /** {@inheritDoc} */
             @Override
             public int getCoreThreadPoolSize() {
                 return threadPoolExecutor.getCorePoolSize();
             }
 
+            /** {@inheritDoc} */
             @Override
             public int getThreadPoolSize() {
                 return threadPoolExecutor.getPoolSize();
             }
 
+            /** {@inheritDoc} */
             @Override
             public int getMaximumThreadPoolSize() {
                 return threadPoolExecutor.getMaximumPoolSize();
             }
 
+            /** {@inheritDoc} */
             @Override
             public int getQueueDepth() {
                 return threadPoolExecutor.getQueue().size();
             }
 
+            /** {@inheritDoc} */
             @Override
             public int getRemainingQueueCapacity() {
                 return threadPoolExecutor.getQueue().remainingCapacity();
             }
 
+            /** {@inheritDoc} */
             @Override
             public int getQueueCapacity() {
                 return config.getQueueCapacity();
             }
 
+            /** {@inheritDoc} */
             @Override
             public int getActiveThreadCount() {
                 return threadPoolExecutor.getActiveCount();
             }
 
+            /** {@inheritDoc} */
             @Override
             public int getAvailableThreadCount() {
                 return threadPoolExecutor.getMaximumPoolSize() - threadPoolExecutor.getActiveCount();
@@ -154,29 +174,35 @@ public class CustomizedThreadPoolBulkhead implements ThreadPoolBulkhead {
         };
     }
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, String> getTags() {
         return tags;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ThreadPoolBulkheadEventPublisher getEventPublisher() {
         return new ThreadPoolBulkheadEventPublisher() {
+            /** {@inheritDoc} */
             @Override
             public ThreadPoolBulkheadEventPublisher onCallRejected(EventConsumer<BulkheadOnCallRejectedEvent> eventConsumer) {
                 return this;
             }
 
+            /** {@inheritDoc} */
             @Override
             public ThreadPoolBulkheadEventPublisher onCallPermitted(EventConsumer<BulkheadOnCallPermittedEvent> eventConsumer) {
                 return this;
             }
 
+            /** {@inheritDoc} */
             @Override
             public ThreadPoolBulkheadEventPublisher onCallFinished(EventConsumer<BulkheadOnCallFinishedEvent> eventConsumer) {
                 return this;
             }
 
+            /** {@inheritDoc} */
             @Override
             public void onEvent(EventConsumer<BulkheadEvent> onEventConsumer) {
 
@@ -184,6 +210,7 @@ public class CustomizedThreadPoolBulkhead implements ThreadPoolBulkhead {
         };
     }
 
+    /** {@inheritDoc} — 关闭资源。 */
     @Override
     public void close() {
         executorService.shutdown();

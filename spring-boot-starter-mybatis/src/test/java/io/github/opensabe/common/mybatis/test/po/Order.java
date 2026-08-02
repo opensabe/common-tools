@@ -25,22 +25,29 @@ import lombok.Setter;
 import tk.mybatis.mapper.annotation.ColumnType;
 
 
+/**
+ * 订单测试 PO。
+ */
 @Getter
 @Setter
 @Table(name = "t_order")
 public class Order {
 
     @Id
+/** id。 */
     private String id;
 
     @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = S3TypeHandler.class)
+/** orderInfo。 */
     private OrderInfo orderInfo;
 
     @Getter
     @Setter
     public static class OrderInfo {
+/** stockId。 */
         private String stockId;
 
+/** stake。 */
         private Integer stake;
     }
 }

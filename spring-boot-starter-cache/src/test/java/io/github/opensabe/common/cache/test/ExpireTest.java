@@ -45,6 +45,9 @@ import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrati
 @ExtendWith({
         SpringExtension.class, SingleRedisIntegrationTest.class
 })
+/**
+ * Expire 测试。
+ */
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "caches.enabled=true",
@@ -59,9 +62,13 @@ import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrati
 @DisplayName("缓存 Expire 注解 TTL 测试")
 public class ExpireTest {
 
+/** cache 服务。 */
     private final CacheService cacheService;
+/** cache 管理器。 */
     private final ExpireCacheManager cacheManager;
+/** redisTemplate。 */
     private final StringRedisTemplate redisTemplate;
+/** storage。 */
     private final MockStorage storage;
     @Autowired
     public ExpireTest(CacheService cacheService, ExpireCacheManager cacheManager, StringRedisTemplate redisTemplate, MockStorage storage) {
@@ -71,13 +78,16 @@ public class ExpireTest {
         this.storage = storage;
     }
 
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleRedisIntegrationTest.setProperties(registry);
     }
 
     @Test
-    @DisplayName("Caffeine @Expire 到期后缓存失效")
+    @DisplayName("@Expire cacheType 覆盖：Redis 名映射到 Caffeine 实现")
     void testCaffeine() throws InterruptedException, NoSuchMethodException {
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
@@ -94,7 +104,6 @@ public class ExpireTest {
     }
 
     @Test
-    @DisplayName("Redis @Expire 写入后 TTL 与注解一致")
     void testRedis() throws NoSuchMethodException {
         ItemObject item = ItemObject.builder().id(2L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
@@ -114,7 +123,6 @@ public class ExpireTest {
     }
 
     @Test
-    @DisplayName("@Expire cacheType 覆盖：Redis 名映射到 Caffeine 实现")
     void testAssignment() throws NoSuchMethodException, InterruptedException {
         ItemObject item = ItemObject.builder().id(2L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
@@ -128,7 +136,6 @@ public class ExpireTest {
     }
 
     @Test
-    @DisplayName("Caffeine @CacheEvict 清除指定 key")
     void testRemoveCaffeine() throws NoSuchMethodException {
         Long id = 3L;
         String filed = "id3";
@@ -147,7 +154,6 @@ public class ExpireTest {
     }
 
     @Test
-    @DisplayName("Redis @CacheEvict 清除指定 key")
     void testRemoveRedis() throws NoSuchMethodException {
         Long id = 4L;
         String filed = "id4";
@@ -163,7 +169,6 @@ public class ExpireTest {
      * 无 {@code @Expire} 的 {@code @CacheEvict} 须清理同名 cache 下所有 TTL 变体。
      */
     @Test
-    @DisplayName("无 @Expire 时 @CacheEvict 扇出清理全部 TTL 变体")
     void testCacheEvictFansOutAcrossExpireTtls() {
         Long id = 401L;
         String field = "multiTtl";

@@ -37,15 +37,24 @@ import static io.github.opensabe.common.alive.client.config.AliveProperties.ROCK
 
 //@Log4j2
 @Configuration(proxyBeanMethods = false)
+/**
+ * AliveConfiguration 类。
+ * <p>Alive 推送Configuration。</p>
+ */
 public class AliveConfiguration {
     @Autowired
+/** aliveProperties 字段。 */
     private AliveProperties aliveProperties;
     @Autowired
+/** unifiedObservationFactory 字段。 */
     private UnifiedObservationFactory unifiedObservationFactory;
 
     @Primary
     @Bean(ROCKET_CLIENT_NAME)
     @ConditionalOnProperty(prefix = "alive.push", name = "rocketmq.name-server")
+/**
+ * rocketAliveClient 方法。
+ */
     public Client rocketAliveClient(Environment environment) {
         var producer = new RocketMQAutoConfiguration(environment).
                 defaultMQProducer(aliveProperties.getRocketmq());

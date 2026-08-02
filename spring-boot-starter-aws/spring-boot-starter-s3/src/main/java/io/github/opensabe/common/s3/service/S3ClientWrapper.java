@@ -39,6 +39,10 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
 
+/** S3ClientWrapper。 */
+/**
+ * S3ClientWrapper。
+ */
 @Log4j2
 public record S3ClientWrapper(S3Client s3Client, String folderName, String bucketName,
                               UnifiedObservationFactory unifiedObservationFactory) {
@@ -72,23 +76,28 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
         return upload(inputStream, null, null, null);
     }
 
+    /** upload。 */
     public String upload(byte[] bytes) {
         return upload(bytes, null, null, null);
     }
 
+    /** upload。 */
     public String upload(InputStream inputStream, String suffix) throws IOException {
         return upload(inputStream, suffix, null, null);
     }
 
+    /** upload。 */
     public String upload(byte[] bytes, String suffix) {
         return upload(bytes, suffix, null, null);
     }
 
+    /** upload。 */
     public String upload(InputStream inputStream, String suffix, String contentType, String folder) throws IOException {
         byte[] bytes = convert(inputStream);
         return upload(bytes, suffix, contentType, folder);
     }
 
+    /** upload。 */
     public String upload(byte[] bytes, String suffix, String contentType, String folder) {
         MessageDigest md5;
         try {
@@ -125,12 +134,14 @@ public record S3ClientWrapper(S3Client s3Client, String folderName, String bucke
 
     }
 
+    /** uploadWithOriginName。 */
     public String uploadWithOriginName(InputStream inputStream, String fileName, String contentType, String folder)
             throws IOException {
         byte[] bytes = convert(inputStream);
         return uploadWithOriginName(bytes, fileName, contentType, folder);
     }
 
+    /** uploadWithOriginName。 */
     public String uploadWithOriginName(byte[] bytes, String name, String contentType, String folder) {
         String fileName = folderName + "/" + (StringUtils.isEmpty(folder) ? "" : folder + "/") + name;
         PutObjectRequest.Builder builder = PutObjectRequest.builder();

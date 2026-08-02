@@ -26,36 +26,48 @@ import java.util.List;
  */
 public abstract class BucketS3FileService implements FileService {
 
+/** defaultBucket。 */
     private String defaultBucket;
 
+    /** {@inheritDoc} */
     @Override
     public String putObject(File file, String profile) {
         return putObject(file, defaultBucket, profile);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String putObject(byte[] source, String profile, String fileName) {
         return putObject(source, defaultBucket, profile, fileName);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getObject(String key) {
         return getObject(key, defaultBucket);
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<String> listObjects(String basePath) {
         return listObjects(basePath, defaultBucket);
     }
 
+    /**
+     * @return defaultBucket
+     */
     public String getDefaultBucket() {
         return defaultBucket;
     }
 
+    /**
+     * @param defaultBucket 待设置值
+     */
     public void setDefaultBucket(String defaultBucket) {
         this.defaultBucket = defaultBucket;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void deleteObject(String key) {
         deleteObject(key, defaultBucket);

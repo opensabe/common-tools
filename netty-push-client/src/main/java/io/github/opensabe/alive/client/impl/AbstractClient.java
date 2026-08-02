@@ -31,14 +31,22 @@ import io.github.opensabe.alive.client.vo.MessageVo;
 import io.github.opensabe.alive.client.vo.QueryVo;
 import io.github.opensabe.alive.protobuf.Message;
 
+/**
+ * AbstractClient 类。
+ * <p>Abstract客户端。</p>
+ */
 public abstract class AbstractClient implements Client {
 
+/** 产品代码。 */
     protected final int productCode;
 
+/** authToken 字段。 */
     protected final String authToken;
 
+/** 连接超时。 */
     protected final long connectTimeout;
 
+/** authTimeout 字段。 */
     protected final long authTimeout;
 
     public AbstractClient(int productCode, String authToken, long connectTimeout, long authTimeout) {
@@ -58,22 +66,34 @@ public abstract class AbstractClient implements Client {
     }
 
     @Override
+/**
+ * query 方法。
+ */
     public Response query(QueryVo queryVo) throws AliveClientExecutionException, InterruptedException, AliveClientException {
         return query(queryVo, 0, TimeUnit.SECONDS);
     }
 
     @Override
+/**
+ * query 方法。
+ */
     public Response query(QueryVo queryVo, long timeout, TimeUnit unit)
             throws AliveClientExecutionException, InterruptedException, AliveClientException {
         return queryAsync(queryVo).get();
     }
 
     @Override
+/**
+ * queryAsync 方法。
+ */
     public ResponseFuture queryAsync(QueryVo queryVo) throws AliveClientException {
         final BaseResponseFutureImpl baseFuture = new BaseResponseFutureImpl();
         ResponseFuture future = new ResponseFutureImpl(baseFuture);
         queryAsync(queryVo, new ClientCallback() {
             @Override
+/**
+ * 推送完成回调。
+ */
             public void opComplete(Set<Message.Response> response) {
                 if (response == null || response.size() == 0) {
                     baseFuture.set(Response.ERR);
@@ -96,12 +116,18 @@ public abstract class AbstractClient implements Client {
 
 
     @Override
+/**
+ * push 方法。
+ */
     public Response push(MessageVo messageVo)
             throws AliveClientExecutionException, AliveClientTimeoutException, InterruptedException, AliveClientException {
         return push(messageVo, 0, TimeUnit.SECONDS);
     }
 
     @Override
+/**
+ * push 方法。
+ */
     public Response push(MessageVo messageVo, long timeout, TimeUnit unit)
             throws AliveClientExecutionException, AliveClientTimeoutException, InterruptedException, AliveClientException {
         return pushAsync(messageVo).get(timeout, unit);

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.introspect.ClassIntrospector;
  */
 public class ClassIntrospectorDecorator extends ClassIntrospector {
 
+/** delegate 字段。 */
     private final ClassIntrospector delegate;
 
     public ClassIntrospectorDecorator(ClassIntrospector delegate) {
@@ -34,21 +35,33 @@ public class ClassIntrospectorDecorator extends ClassIntrospector {
     }
 
     @Override
+/**
+ * copy 方法。
+ */
     public ClassIntrospector copy() {
         return new ClassIntrospectorDecorator(delegate);
     }
 
     @Override
+/**
+ * forSerialization 方法。
+ */
     public BeanDescription forSerialization(SerializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forSerialization(cfg, type, r);
     }
 
     @Override
+/**
+ * forDeserialization 方法。
+ */
     public BeanDescription forDeserialization(DeserializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forDeserialization(cfg, type, r);
     }
 
     @Override
+/**
+ * forDeserializationWithBuilder 方法。
+ */
     public BeanDescription forDeserializationWithBuilder(DeserializationConfig cfg, JavaType builderType, MixInResolver r, BeanDescription valueTypeDesc) {
         return delegate.forDeserializationWithBuilder(cfg, builderType, r, valueTypeDesc);
     }
@@ -56,16 +69,25 @@ public class ClassIntrospectorDecorator extends ClassIntrospector {
 //
 
     @Override
+/**
+ * forCreation 方法。
+ */
     public BeanDescription forCreation(DeserializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forCreation(cfg, type, r);
     }
 
     @Override
+/**
+ * forClassAnnotations 方法。
+ */
     public BeanDescription forClassAnnotations(MapperConfig<?> cfg, JavaType type, MixInResolver r) {
         return delegate.forClassAnnotations(cfg, type, r);
     }
 
     @Override
+/**
+ * forDirectClassAnnotations 方法。
+ */
     public BeanDescription forDirectClassAnnotations(MapperConfig<?> cfg, JavaType type, MixInResolver r) {
         return delegate.forDirectClassAnnotations(cfg, type, r);
     }

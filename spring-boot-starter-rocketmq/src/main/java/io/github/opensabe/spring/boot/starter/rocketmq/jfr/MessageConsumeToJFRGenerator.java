@@ -20,23 +20,30 @@ import io.github.opensabe.spring.boot.starter.rocketmq.observation.MessageConsum
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
+/**
+ * Observation 到 JFR 的桥接生成器（MessageConsumeToJFRGenerator）。
+ */
 public class MessageConsumeToJFRGenerator extends ObservationToJFRGenerator<MessageConsumeContext> {
 
+    /** {@inheritDoc} */
     @Override
     public Class<MessageConsumeContext> getContextClazz() {
         return MessageConsumeContext.class;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(MessageConsumeContext context) {
         return context.containsKey(MessageConsume.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(MessageConsumeContext context) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(MessageConsumeContext context) {
         MessageConsume messageConsume = context.get(MessageConsume.class);
@@ -51,6 +58,7 @@ public class MessageConsumeToJFRGenerator extends ObservationToJFRGenerator<Mess
         messageConsume.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(MessageConsumeContext context) {
         MessageConsume messageConsume = new MessageConsume(context.getOriginTraceId(), context.getTopic());

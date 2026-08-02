@@ -44,6 +44,9 @@ import io.github.opensabe.scheduler.listener.JobListeners;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * SchedulerServer 调度服务端组件。
+ */
 @Log4j2
 public class SchedulerServer {
 

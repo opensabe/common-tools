@@ -26,6 +26,9 @@ import io.github.opensabe.common.idgenerator.service.UniqueIDImpl;
 import io.github.opensabe.common.idgenerator.service.UniqueIDWithouBizType;
 import io.github.opensabe.common.idgenerator.service.UniqueIDWithoutBizTypeImpl;
 
+/**
+ * 注册 {@link UniqueID} 与 {@link UniqueIDWithouBizType} Bean。
+ */
 @Configuration(proxyBeanMethods = false)
 public class IdGeneratorConfiguration {
     @Bean

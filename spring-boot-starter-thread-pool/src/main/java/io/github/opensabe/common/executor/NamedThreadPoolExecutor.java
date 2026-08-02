@@ -23,8 +23,12 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 
+/**
+ * 带命名前缀的线程池执行器。
+ */
 public class NamedThreadPoolExecutor extends ThreadPoolExecutor {
     @Getter
+/** name。 */
     private final String name;
 
     public NamedThreadPoolExecutor(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {

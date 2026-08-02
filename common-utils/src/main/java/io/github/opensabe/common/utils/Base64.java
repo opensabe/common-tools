@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+/**
+ * Base64 编解码工具（含 Deflater/Inflater 压缩扩展）。
+ */
 public class Base64 {
     private static final byte[] ENCODING_TABLE = {(byte) 'A', (byte) 'B',
             (byte) 'C', (byte) 'D', (byte) 'E', (byte) 'F', (byte) 'G',

@@ -20,13 +20,18 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
 
+/**
+ * S3OperationObservation Observation 文档。
+ */
 public enum S3OperationObservationDocumentation implements ObservationDocumentation {
     S3_OPERATION {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "s3.operate";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return S3OperationConvention.class;
@@ -35,24 +40,28 @@ public enum S3OperationObservationDocumentation implements ObservationDocumentat
 
     public enum S3FileOperateTag implements KeyName {
         FILE_NAME {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "s3.file.name";
             }
         },
         FILE_SIZE {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "s3.file.size";
             }
         },
         OPERATE_TYPE {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "s3.file.operate_type";
             }
         },
         OPERATE_SUCCESSFULLY {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "s3.file.operate_successfully";

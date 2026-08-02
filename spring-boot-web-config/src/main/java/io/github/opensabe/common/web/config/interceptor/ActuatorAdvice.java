@@ -28,14 +28,24 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestControllerAdvice
+/**
+ * ActuatorAdvice 类。
+ * <p>Actuator 端点Advice。</p>
+ */
 public class ActuatorAdvice implements ResponseBodyAdvice<Object> {
     @Override
+/**
+ * supports 方法。
+ */
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         String name = returnType.getMethod().toString().toLowerCase();
         return name.contains("actuate.endpoint");
     }
 
     @Override
+/**
+ * beforeBodyWrite 方法。
+ */
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         String name = returnType.getMethod().toString().toLowerCase();
         if (log.isDebugEnabled()) {

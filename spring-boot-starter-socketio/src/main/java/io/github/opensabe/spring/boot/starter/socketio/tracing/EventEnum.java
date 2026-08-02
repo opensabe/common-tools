@@ -17,6 +17,9 @@ package io.github.opensabe.spring.boot.starter.socketio.tracing;
 
 import java.util.Map;
 
+/**
+ * Socket.IO 可观测事件类型枚举。
+ */
 public enum EventEnum {
     OnEvent,
     OnConnect,
@@ -25,6 +28,9 @@ public enum EventEnum {
             com.corundumstudio.socketio.annotation.OnEvent.class.getName(), OnEvent,
             com.corundumstudio.socketio.annotation.OnDisconnect.class.getName(), OnDisconnect);
 
+    /**
+     * @return instance
+     */
     public static EventEnum getInstance(String event) {
         return map.get(event);
     }

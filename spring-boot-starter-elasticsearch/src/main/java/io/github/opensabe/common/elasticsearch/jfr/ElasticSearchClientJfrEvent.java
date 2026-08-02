@@ -22,19 +22,28 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Elasticsearch 客户端 HTTP 请求的 JFR 事件。
+ */
 @Getter
 @Setter
 @Category({"ElasticSearch"})
 @Label("Client Request")
 @StackTrace(value = false)
 public class ElasticSearchClientJfrEvent extends Event {
+/** uri。 */
     private final String uri;
+/** params。 */
     private final String params;
 
+/** traceId。 */
     private String traceId;
+/** spanId。 */
     private String spanId;
 
+/** response。 */
     private String response;
+/** throwable。 */
     private Throwable throwable;
 
     public ElasticSearchClientJfrEvent(String uri, String params) {

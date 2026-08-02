@@ -35,6 +35,9 @@ import tk.mybatis.mapper.autoconfigure.MybatisProperties;
         SqlSessionFactoryConfiguration.class,
         WebInterceptorConfiguration.class,
         MonitorConfiguration.class
+/**
+ * MyBatis Starter 自动配置入口。
+ */
 })
 @EnableConfigurationProperties({MybatisProperties.class, PageHelperProperties.class, CountryProperties.class})
 public class MyBatisAutoConfiguration {

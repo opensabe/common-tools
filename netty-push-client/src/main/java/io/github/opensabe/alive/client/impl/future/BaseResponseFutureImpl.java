@@ -25,12 +25,19 @@ import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;
 import io.github.opensabe.alive.client.exception.AliveClientTimeoutException;
 
+/**
+ * BaseResponseFutureImpl 类。
+ * <p>Base响应FutureImpl。</p>
+ */
 public class BaseResponseFutureImpl extends FutureTask<Response> implements BaseResponseFuture {
 
     public BaseResponseFutureImpl() {
         super(new Callable<Response>() {
 
             @Override
+/**
+ * call 方法。
+ */
             public Response call() throws Exception {
                 return null;
             }
@@ -38,16 +45,25 @@ public class BaseResponseFutureImpl extends FutureTask<Response> implements Base
     }
 
     @Override
+/**
+ * set 方法。
+ */
     public void set(Response resp) {
         super.set(resp);
     }
 
     @Override
+/**
+ * setException 方法。
+ */
     public void setException(Throwable t) {
         super.setException(t);
     }
 
     @Override
+/**
+ * get0 方法。
+ */
     public Response get0() throws InterruptedException, AliveClientExecutionException {
         try {
             return super.get();
@@ -61,6 +77,9 @@ public class BaseResponseFutureImpl extends FutureTask<Response> implements Base
     }
 
     @Override
+/**
+ * get0 方法。
+ */
     public Response get0(long timeout, TimeUnit unit)
             throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         if (timeout <= 0) {

@@ -20,13 +20,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by jianing on 11/3/16.
+ * Socket.IO 集成测试消息编解码工具（注册/鉴权 JSON 构造）。
  */
 public class CodecUtils {
 
+    /** Base64 编解码器。 */
     public static Base64 base64 = new Base64();
 
-
+    /**
+     * 构造设备注册 JSON。
+     *
+     * @param reqId       请求 ID
+     * @param productCode 产品码
+     * @param deviceId    设备 ID
+     * @return 注册消息 JSON
+     */
     public static JSONObject getRegJSON(int reqId, int productCode, String deviceId) {
         try {
             JSONObject data = new JSONObject();
@@ -44,6 +52,16 @@ public class CodecUtils {
         }
     }
 
+    /**
+     * 构造聊天鉴权请求 JSON。
+     *
+     * @param reqId    请求 ID
+     * @param deviceId 设备 ID
+     * @param to       目标用户
+     * @param authStr  鉴权串
+     * @param sign     签名
+     * @return 鉴权请求 JSON
+     */
     public static JSONObject getChatRequestJSON(int reqId, String deviceId, String to, String authStr, String sign) {
         try {
             JSONObject data = new JSONObject();
@@ -62,6 +80,13 @@ public class CodecUtils {
         }
     }
 
+    /**
+     * 构造默认 productCode=1 的注册 JSON。
+     *
+     * @param reqId    请求 ID
+     * @param deviceId 设备 ID
+     * @return 注册消息 JSON
+     */
     public static JSONObject getRegJSON(int reqId, String deviceId) {
         return getRegJSON(reqId, 1, deviceId);
     }

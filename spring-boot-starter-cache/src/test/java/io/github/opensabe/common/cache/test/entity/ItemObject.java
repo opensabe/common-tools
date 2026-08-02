@@ -20,13 +20,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 缓存测试用实体对象。
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemObject {
 
+/** id。 */
     private Long id;
+/** name。 */
     private String name;
+/** value。 */
     private String value;
 }

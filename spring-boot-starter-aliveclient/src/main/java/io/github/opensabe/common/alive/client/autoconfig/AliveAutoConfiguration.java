@@ -25,5 +25,9 @@ import io.github.opensabe.common.alive.client.config.AliveProperties;
 @AutoConfiguration
 @Import({AliveConfiguration.class})
 @EnableConfigurationProperties(AliveProperties.class)
+/**
+ * AliveAutoConfiguration 类。
+ * <p>Alive 推送AutoConfiguration。</p>
+ */
 public class AliveAutoConfiguration {
 }

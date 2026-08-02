@@ -20,6 +20,11 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.apple.appstoreconnectapi.AppleStoreConnectConfiguration;
 
+/**
+ * Apple Starter 根自动配置。
+ * <p>
+ * 聚合内购、App Store Connect API 与 Sign In with Apple 三类子配置。
+ */
 @AutoConfiguration
 @Import({AppleInPurchaseConfiguration.class, AppleStoreConnectConfiguration.class, AppleLoginConfiguration.class})
 public class AppleAutoConfiguration {

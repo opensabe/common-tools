@@ -27,8 +27,18 @@ import io.github.opensabe.node.manager.NodeInfoActuator;
 import io.github.opensabe.node.manager.NodeManager;
 
 @Configuration(proxyBeanMethods = false)
+/**
+ * NodeManagerConfiguration 类。
+ * <p>节点ManagerConfiguration。</p>
+ */
 public class NodeManagerConfiguration {
+/**
+ * getNodeManager 方法。
+ */
     @Bean
+/**
+ * getNodeManager 方法。
+ */
     public NodeManager getNodeManager(
             RedissonClient redissonClient,
             StringRedisTemplate redisTemplate,
@@ -38,12 +48,24 @@ public class NodeManagerConfiguration {
         return new NodeManager(redissonClient, redisTemplate, serviceId, instanceId);
     }
 
+/**
+ * getNodeInfoActuator 方法。
+ */
     @Bean
+/**
+ * getNodeInfoActuator 方法。
+ */
     public NodeInfoActuator getNodeInfoActuator(NodeManager nodeManager) {
         return new NodeInfoActuator(nodeManager);
     }
 
+/**
+ * getInstanceCandidateManager 方法。
+ */
     @Bean
+/**
+ * getInstanceCandidateManager 方法。
+ */
     public CurrentCandidateManager getInstanceCandidateManager(
             DiscoveryClient discoveryClient,
             @Value("${spring.application.name}") String serviceId,

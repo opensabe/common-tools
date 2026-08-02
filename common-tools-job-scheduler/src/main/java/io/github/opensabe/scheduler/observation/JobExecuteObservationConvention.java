@@ -19,6 +19,9 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
+/**
+ * JobExecuteObservationConvention 调度任务。
+ */
 public class JobExecuteObservationConvention implements ObservationConvention<JobExecuteContext> {
     public static final JobExecuteObservationConvention DEFAULT = new JobExecuteObservationConvention();
 

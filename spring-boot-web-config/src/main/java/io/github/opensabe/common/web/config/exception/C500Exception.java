@@ -22,7 +22,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+/**
+ * C500Exception 类。
+ * <p>C500异常。</p>
+ */
 public class C500Exception extends RESTFull5xxBaseException implements Serializable {
+/** serialVersionUID 字段。 */
     private static final long serialVersionUID = -2312393803704717855L;
 
     public C500Exception(String message) {

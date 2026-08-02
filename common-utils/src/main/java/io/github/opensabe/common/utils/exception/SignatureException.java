@@ -19,6 +19,9 @@ package io.github.opensabe.common.utils.exception;
  * Author: duchaoqun
  * Date: 2021/4/1 7:48
  */
+/**
+ * SignatureException 异常类型。
+ */
 public class SignatureException extends RuntimeException {
 
     public static final SignatureException INSTANCE = new SignatureException();

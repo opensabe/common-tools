@@ -22,25 +22,32 @@ import org.springframework.messaging.Message;
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 import io.github.opensabe.common.utils.json.JsonUtil;
 
+/**
+ * UniqueRocketMQLocalTransactionListener。
+ */
 public abstract class UniqueRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
     /**
      * 名称，通过这个标识用哪个 UniqueRocketMQLocalTransactionListener 处理对应的事务消息发送回调
      */
     public abstract String name();
 
+    /** {@inheritDoc} */
     @Override
     public RocketMQLocalTransactionState executeLocalTransaction(Message message, Object o) {
         BaseMQMessage baseMQMessage = JsonUtil.parseObject(new String((byte[]) message.getPayload()), BaseMQMessage.class);
         return executeLocalTransaction(baseMQMessage, o);
     }
 
+    /** executeLocalTransaction。 */
     public abstract RocketMQLocalTransactionState executeLocalTransaction(BaseMQMessage message, Object o);
 
+    /** {@inheritDoc} */
     @Override
     public RocketMQLocalTransactionState checkLocalTransaction(Message message) {
         BaseMQMessage baseMQMessage = JsonUtil.parseObject(new String((byte[]) message.getPayload()), BaseMQMessage.class);
         return checkLocalTransaction(baseMQMessage);
     }
 
+    /** checkLocalTransaction。 */
     protected abstract RocketMQLocalTransactionState checkLocalTransaction(BaseMQMessage baseMQMessage);
 }

@@ -48,30 +48,42 @@ public class MessageTypeReference<T> extends TypeReference<T> {
     private MessageTypeReference(final TypeInformation<T> information) {
         final List<TypeInformation<?>> arguments = information.getTypeArguments();
         this.type = new ParameterizedType() {
+            /**
+             * @return actualTypeArguments
+             */
             public Type[] getActualTypeArguments() {
                 return arguments.stream().map(i -> i.toTypeDescriptor().getResolvableType().getType()).toArray(Type[]::new);
             }
 
+            /**
+             * @return rawType
+             */
             public Type getRawType() {
                 return information.getType();
             }
 
+            /**
+             * @return ownerType
+             */
             public Type getOwnerType() {
                 return null;
             }
         };
         if (!TypeInformation.of(BaseMessage.class).isAssignableFrom(information)) {
             this.baseMessageType = new ParameterizedType() {
+                /** {@inheritDoc} */
                 @Override
                 public Type[] getActualTypeArguments() {
                     return new Type[]{information.toTypeDescriptor().getResolvableType().getType()};
                 }
 
+                /** {@inheritDoc} */
                 @Override
                 public Type getRawType() {
                     return BaseMessage.class;
                 }
 
+                /** {@inheritDoc} */
                 @Override
                 public Type getOwnerType() {
                     return null;
@@ -111,6 +123,7 @@ public class MessageTypeReference<T> extends TypeReference<T> {
             return (TypeReference<BaseMessage<T>>) this;
         }
         return new TypeReference<>() {
+            /** {@inheritDoc} */
             @Override
             public Type getType() {
                 return baseMessageType;

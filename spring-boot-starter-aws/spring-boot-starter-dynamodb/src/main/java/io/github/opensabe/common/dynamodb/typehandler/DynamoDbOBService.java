@@ -24,20 +24,26 @@ import io.github.opensabe.common.typehandler.OBSService;
 import io.github.opensabe.common.typehandler.OBSTypeEnum;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * DynamoDbOBService。
+ */
 @Log4j2
 public class DynamoDbOBService implements OBSService {
 
+/** dynamoDbUpdate 服务。 */
     private final KeyValueDynamoDbService dynamoDbUpdateService;
 
     public DynamoDbOBService(KeyValueDynamoDbService dynamoDbBaseService) {
         this.dynamoDbUpdateService = dynamoDbBaseService;
     }
 
+    /** {@inheritDoc} */
     @Override
     public OBSTypeEnum type() {
         return OBSTypeEnum.DYNAMODB;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void insert(String key, String json) {
         KeyValueDynamoDbService.KeyValueMap map = new KeyValueDynamoDbService.KeyValueMap();
@@ -47,6 +53,7 @@ public class DynamoDbOBService implements OBSService {
         dynamoDbUpdateService.save(map);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String select(String key) {
         if (Objects.isNull(key)

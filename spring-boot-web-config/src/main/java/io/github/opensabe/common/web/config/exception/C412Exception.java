@@ -25,7 +25,12 @@ import io.github.opensabe.common.web.config.base.ErrResponse;
 import io.github.opensabe.common.web.config.base.ErrorUtil;
 
 @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+/**
+ * C412Exception 类。
+ * <p>C412异常。</p>
+ */
 public class C412Exception extends RESTFull4xxBaseException implements Serializable {
+/** serialVersionUID 字段。 */
     private static final long serialVersionUID = -2312393803704717855L;
 
     public C412Exception(String message) {

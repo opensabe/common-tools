@@ -20,6 +20,9 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+/**
+ * AlarmUtilTest 单元/集成测试。
+ */
 @DisplayName("告警工具类测试")
 public class AlarmUtilTest {
 

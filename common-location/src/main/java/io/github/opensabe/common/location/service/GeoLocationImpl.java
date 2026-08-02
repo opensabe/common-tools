@@ -36,6 +36,9 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.opensabe.common.location.vo.GeoLocationData;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * GeoLocationImpl 实现类。
+ */
 @Log4j2
 public class GeoLocationImpl implements GeoLocation {
     private final Cache<String, GeoLocationData> cache = Caffeine.newBuilder().maximumSize(102400).build();

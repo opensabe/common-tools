@@ -20,22 +20,29 @@ import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
+/**
+ * 将 Elasticsearch 客户端 Micrometer Observation 桥接为 JFR 事件。
+ */
 public class ElasticSearchClientObservationToJFRGenerator extends ObservationToJFRGenerator<ElasticSearchClientObservationContext> {
+    /** {@inheritDoc} */
     @Override
     public Class<ElasticSearchClientObservationContext> getContextClazz() {
         return ElasticSearchClientObservationContext.class;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(ElasticSearchClientObservationContext context) {
         return context.containsKey(ElasticSearchClientJfrEvent.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(ElasticSearchClientObservationContext context) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(ElasticSearchClientObservationContext context) {
         ElasticSearchClientJfrEvent elasticSearchClientJfrEvent = context.get(ElasticSearchClientJfrEvent.class);
@@ -50,6 +57,7 @@ public class ElasticSearchClientObservationToJFRGenerator extends ObservationToJ
         elasticSearchClientJfrEvent.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(ElasticSearchClientObservationContext context) {
         ElasticSearchClientJfrEvent elasticSearchClientJfrEvent = new ElasticSearchClientJfrEvent(context.getUri(), context.getParams());

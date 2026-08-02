@@ -20,24 +20,31 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
 
+/**
+ * RocketMQObservation Observation 文档。
+ */
 public enum RocketMQObservationDocumentation implements ObservationDocumentation {
     PRODUCE {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "rocketmq.message.produce";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return MessageProduceObservationConvention.class;
         }
     },
     CONSUME {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "rocketmq.message.consume";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return MessageConsumeObservationConvention.class;
@@ -46,24 +53,28 @@ public enum RocketMQObservationDocumentation implements ObservationDocumentation
 
     public enum MessageProduceTag implements KeyName {
         TOPIC {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "message.produce.topic";
             }
         },
         MSG_LENGTH {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "message.produce.msg.length";
             }
         },
         SEND_RESULT {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "message.produce.send.result";
             }
         },
         THROWABLE {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "message.produce.throwable";
@@ -74,24 +85,28 @@ public enum RocketMQObservationDocumentation implements ObservationDocumentation
 
     public enum MessageConsumeTag implements KeyName {
         ORIGIN_TRACE_ID {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "message.consume.origin.trace.id";
             }
         },
         TOPIC {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "message.consume.topic";
             }
         },
         SUCCESSFUL {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "message.consume.successful";
             }
         },
         THROWABLE {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "message.consume.throwable";

@@ -25,10 +25,14 @@ import io.github.opensabe.spring.boot.starter.socketio.CommonAttribute;
 import io.netty.handler.codec.http.HttpHeaders;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * SocketConnectionUtil。
+ */
 @Log4j2
 public class SocketConnectionUtil {
 
 
+/** forceDisconnectProducer。 */
     private ForceDisconnectProducer forceDisconnectProducer;
 
     public SocketConnectionUtil(ForceDisconnectProducer forceDisconnectProducer) {
@@ -64,6 +68,7 @@ public class SocketConnectionUtil {
         forceDisconnectProducer.sendForceDisconnectMsg(userId, sessionId, checkPlatformRoom);
     }
 
+    /** logout。 */
     public void logout(String userId) {
         forceDisconnectProducer.logout(userId);
     }

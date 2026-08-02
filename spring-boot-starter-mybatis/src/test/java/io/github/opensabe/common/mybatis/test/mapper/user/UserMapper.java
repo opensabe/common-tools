@@ -28,11 +28,21 @@ import io.github.opensabe.common.mybatis.base.BaseMapper;
 import io.github.opensabe.common.mybatis.test.po.User;
 import io.github.opensabe.common.mybatis.types.JSONTypeHandler;
 
+/**
+ * 用户 MyBatis Mapper 测试接口。
+ */
 public interface UserMapper extends BaseMapper<User> {
 
+    /** 清空 {@code t_user} 表（测试用）。 */
     @Update("truncate table t_user")
     void truncateTable();
 
+    /**
+     * 按 ID 查询用户（{@code properties} 经 {@link JSONTypeHandler}）。
+     *
+     * @param id 用户 ID
+     * @return 用户 PO
+     */
     @Select("select id, first_name, last_name, create_time, properties from t_user where id = #{id,jdbcType=VARCHAR}")
     @Results(id = "findUserById", value = {
             @Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR),
@@ -43,6 +53,7 @@ public interface UserMapper extends BaseMapper<User> {
     })
     User findUserById(String id);
 
+    /** 只读模式查询全部用户（SQL hint {@code mode=readonly}）。 */
     @Select("select /*# mode=readonly */ * from t_user")
     List<User> selectReadOnly();
 }

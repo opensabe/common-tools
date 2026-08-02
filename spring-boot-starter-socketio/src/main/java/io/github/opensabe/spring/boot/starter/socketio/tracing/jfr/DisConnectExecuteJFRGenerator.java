@@ -23,22 +23,29 @@ import io.github.opensabe.spring.boot.starter.socketio.tracing.observation.Socke
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
+/**
+ * Observation 到 JFR 的桥接生成器（DisConnectExecuteJFRGenerator）。
+ */
 public class DisConnectExecuteJFRGenerator extends ObservationToJFRGenerator<SocketIOExecuteContext> {
+    /** {@inheritDoc} */
     @Override
     public Class<SocketIOExecuteContext> getContextClazz() {
         return SocketIOExecuteContext.class;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(SocketIOExecuteContext context) {
         return context.containsKey(SocketIODisConnectEvent.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(SocketIOExecuteContext context) {
         return context.getEventEnum() == EventEnum.OnDisconnect;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(SocketIOExecuteContext context) {
         SocketIODisConnectEvent event = context.get(SocketIODisConnectEvent.class);
@@ -51,6 +58,7 @@ public class DisConnectExecuteJFRGenerator extends ObservationToJFRGenerator<Soc
         event.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(SocketIOExecuteContext context) {
         SocketIODisConnectEvent event = new SocketIODisConnectEvent(context);

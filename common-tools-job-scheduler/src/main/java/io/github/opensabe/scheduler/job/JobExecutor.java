@@ -41,6 +41,9 @@ import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 
+/**
+ * JobExecutor 调度任务。
+ */
 @Log4j2
 @NoArgsConstructor
 public class JobExecutor implements Runnable {

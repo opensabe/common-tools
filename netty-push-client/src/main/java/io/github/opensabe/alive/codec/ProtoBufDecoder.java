@@ -29,13 +29,21 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
+/**
+ * ProtoBufDecoder 类。
+ * <p>ProtoBuf解码器。</p>
+ */
 public class ProtoBufDecoder extends ByteToMessageDecoder {
 
+/** log 字段。 */
     private static Logger log = LoggerFactory.getLogger(ProtoBufDecoder.class);
     private static ConcurrentHashMap<String, Class<? extends GeneratedMessageV3>> name2classMap = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<String, Method> name2methodMap = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
+/**
+ * decode 方法。
+ */
     public static GeneratedMessageV3 decode(short methodId, byte[] message) {
 
         String classNameStr = MessageType.methodIdToRequestName.get(methodId);
@@ -58,6 +66,9 @@ public class ProtoBufDecoder extends ByteToMessageDecoder {
     }
 
     @Override
+/**
+ * decode 方法。
+ */
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 
         if (in.readableBytes() > 2) {

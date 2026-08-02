@@ -44,30 +44,46 @@ import io.github.opensabe.common.mybatis.plugins.DynamicRoutingDataSource;
 import io.github.opensabe.common.mybatis.properties.CountryProperties;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * DataSourceSwitch 拦截器。
+ */
 @Log4j2
 public abstract class DataSourceSwitchInterceptor implements Interceptor {
 
 
     protected Cache<String, MappedStatement> msCountMap = null;
+/** dialect。 */
     private volatile Dialect dialect;
     private String countSuffix = "_COUNT";
     private String defaultDialectClass = "com.github.pagehelper.PageHelper";
 
 
+    /**
+     * @return defaultOperId
+     */
     private static String getDefaultOperId() {
         return SqlSessionFactoryConfiguration.defaultOperId;
     }
 
+    /**
+     * @return countryProperties
+     */
     private static CountryProperties getCountryProperties() {
         return SqlSessionFactoryConfiguration.countryProperties;
     }
 
 
+    /**
+     * @return defaultCountryCode
+     */
     public static String getDefaultCountryCode() {
         return getCountryProperties().getMap().get(getDefaultOperId());
     }
 
 
+    /**
+     * @return currentOperCode
+     */
     public String getCurrentOperCode(String operId) {
         if (StringUtils.isBlank(operId)) {
             String def = getDefaultOperId();
@@ -117,8 +133,10 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
 //            DynamicRoutingDataSource.setDataSourceRW("write");
 //        }
 //    }
+    /** configureDataSourceContext。 */
     public abstract void configureDataSourceContext(BoundSql boundSql);
 
+    /** count。 */
     @SuppressWarnings("rawtypes")
     private Long count(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds,
                        ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
@@ -154,6 +172,7 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
         return count;
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("rawtypes")
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -249,11 +268,13 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object plugin(Object target) {
         return Plugin.wrap(target, this);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setProperties(Properties properties) {
         // 缓存 count ms
@@ -276,6 +297,7 @@ public abstract class DataSourceSwitchInterceptor implements Interceptor {
         }
     }
 
+    /** clear。 */
     protected void clear() {
         if (log.isDebugEnabled()) {
             log.debug("DataSourceSwitchInterceptor.clear: invoke DynamicRoutingDataSource.clearCountryCodeAndRW");

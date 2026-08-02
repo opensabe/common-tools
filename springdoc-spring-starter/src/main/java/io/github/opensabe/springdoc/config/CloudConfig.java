@@ -31,10 +31,17 @@ import io.github.opensabe.springdoc.responses.SpringdocResponseService;
  */
 @ConditionalOnClass({ErrorMessage.class, OperationService.class})
 @Configuration(proxyBeanMethods = false)
+/**
+ * CloudConfig 类。
+ * <p>Cloud Config。</p>
+ */
 public class CloudConfig {
 
     @Bean
     @ConditionalOnMissingBean
+/**
+ * springdocResponseService 方法。
+ */
     public SpringdocResponseService springdocResponseService(OperationService operationService, SpringDocConfigProperties springDocConfigProperties, PropertyResolverUtils propertyResolverUtils) {
         return new SpringdocResponseService(operationService, springDocConfigProperties, propertyResolverUtils);
     }

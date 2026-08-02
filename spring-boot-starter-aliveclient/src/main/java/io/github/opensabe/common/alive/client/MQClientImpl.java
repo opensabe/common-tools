@@ -41,11 +41,20 @@ import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 
 @Component
+/**
+ * MQClientImpl 类。
+ * <p>MQClient实现。</p>
+ */
 public class MQClientImpl implements Client {
+/** log 字段。 */
     private static final Logger log = LogManager.getLogger(MQClientImpl.class);
+/** producer 字段。 */
     private RocketMQTemplate producer;
+/** 产品代码。 */
     private Integer productCode;
+/** unifiedObservationFactory 字段。 */
     private UnifiedObservationFactory unifiedObservationFactory;
+/** 请求 ID。 */
     private AtomicInteger requestId = new AtomicInteger(1);
 
     public MQClientImpl(RocketMQTemplate producer, Integer productCode, UnifiedObservationFactory unifiedObservationFactory) {
@@ -54,6 +63,9 @@ public class MQClientImpl implements Client {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+/**
+ * 异步推送消息。
+ */
     public int pushAsync(MessageVo messageVo, ClientCallback callback) {
         final Publish message = this.build(messageVo);
         BaseMQMessage baseMQMessage = wrapMessage(message);
@@ -71,12 +83,18 @@ public class MQClientImpl implements Client {
         baseMQMessage.setSpanId(spanId);
 
         this.producer.asyncSend(topic, baseMQMessage, new SendCallback() {
+/**
+ * onSuccess 方法。
+ */
             public void onSuccess(SendResult sendResult) {
                 messageProduceContext.setSendResult(sendResult.getSendStatus().name());
                 observation.stop();
                 callback.opComplete(Set.of(Response.builder().retCode(RetCode.SUCCESS).requestId(message.getRequestId()).build()));
             }
 
+/**
+ * onException 方法。
+ */
             public void onException(Throwable throwable) {
                 MQClientImpl.log.error(throwable);
                 messageProduceContext.setSendResult("Throwable");
@@ -88,14 +106,23 @@ public class MQClientImpl implements Client {
         return 0;
     }
 
+/**
+ * build 方法。
+ */
     private Publish build(MessageVo messageVo) {
         return messageVo.buildPublish(messageVo.getRequestId() == 0 ? this.requestId.incrementAndGet() : messageVo.getRequestId(), this.productCode);
     }
 
+/**
+ * getTopic 方法。
+ */
     private String getTopic(MessageVo message) {
         return PushType.GROUP.equals(message.pushType) ? MQTopic.BROAD_CAST.getTopic() : MQTopic.SIMPLE.getTopic();
     }
 
+/**
+ * wrapMessage 方法。
+ */
     private BaseMQMessage wrapMessage(Publish message) {
         final BaseMQMessage baseMQMessage = new BaseMQMessage();
         baseMQMessage.setTs(System.currentTimeMillis());

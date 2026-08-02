@@ -20,23 +20,30 @@ import io.github.opensabe.common.s3.observation.S3OperationContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
+/**
+ * Observation 到 JFR 的桥接生成器（S3OperationObservationToJFRGenerator）。
+ */
 public class S3OperationObservationToJFRGenerator extends ObservationToJFRGenerator<S3OperationContext> {
 
+    /** {@inheritDoc} */
     @Override
     public Class<S3OperationContext> getContextClazz() {
         return S3OperationContext.class;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(S3OperationContext context) {
         return context.containsKey(S3OperationJFREvent.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(S3OperationContext context) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(S3OperationContext context) {
         S3OperationJFREvent s3OperationJFREvent = context.get(S3OperationJFREvent.class);
@@ -51,6 +58,7 @@ public class S3OperationObservationToJFRGenerator extends ObservationToJFRGenera
         s3OperationJFREvent.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(S3OperationContext context) {
         S3OperationJFREvent jfrEvent = new S3OperationJFREvent(context);

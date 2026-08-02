@@ -15,6 +15,10 @@
  */
 package io.github.opensabe.alive.client;
 
+/**
+ * Response 枚举。
+ * <p>响应。</p>
+ */
 public enum Response {
     SUCEESS, FAIL, CACHED, ERR
 }

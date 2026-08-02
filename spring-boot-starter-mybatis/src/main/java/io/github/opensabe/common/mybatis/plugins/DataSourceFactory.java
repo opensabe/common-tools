@@ -51,6 +51,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class DataSourceFactory {
+    /** addDataSourceToIndexAndReturn。 */
     private static void addDataSourceToIndexAndReturn(Map<String, DataSource> dataSourceMap,
                                                       Map<String, List<String>> rwIndexMap, DataSourceProperties properties, DataSource dataSource,
                                                       String rwKeyword, int num) {
@@ -113,6 +114,7 @@ public class DataSourceFactory {
                     .expireAfterWrite(properties.getAlarmIntervalInSeconds(), TimeUnit.SECONDS)
                     .build(k -> new AtomicInteger());
 
+            /** {@inheritDoc} */
             @Override
             protected void handleSlowSql(StatementProxy statementProxy) {
                 /**
@@ -157,6 +159,7 @@ public class DataSourceFactory {
 //        return atomikosDataSourceBean;
     }
 
+    /** createDynamicRoutingDataSource。 */
     public static DynamicRoutingDataSource createDynamicRoutingDataSource(String defaultClusterName,
                                                                           List<DataSourceProperties> dataSourceProperties) {
         if (log.isDebugEnabled()) {

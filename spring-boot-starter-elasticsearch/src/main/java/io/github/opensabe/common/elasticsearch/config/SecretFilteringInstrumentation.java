@@ -58,6 +58,7 @@ final class SecretFilteringInstrumentation implements Instrumentation {
     @Override
     public <TRequest> Context newContext(TRequest request, Endpoint<TRequest, ?, ?> endpoint) {
         return new Context() {
+            /** {@inheritDoc} */
             @Override
             public ThreadScope makeCurrent() {
                 return () -> {
@@ -92,10 +93,12 @@ final class SecretFilteringInstrumentation implements Instrumentation {
                 }
             }
 
+            /** {@inheritDoc} */
             @Override
             public void afterReceivingHttpResponse(TransportHttpClient.Response response) {
             }
 
+            /** {@inheritDoc} */
             @Override
             public <TResponse> void afterDecodingApiResponse(TResponse response) {
             }
@@ -108,6 +111,7 @@ final class SecretFilteringInstrumentation implements Instrumentation {
             public void recordException(Throwable throwable) {
             }
 
+            /** {@inheritDoc} — 关闭资源。 */
             @Override
             public void close() {
             }

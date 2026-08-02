@@ -21,6 +21,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * BaseAck。
+ */
 @Data
 @Builder
 @NoArgsConstructor

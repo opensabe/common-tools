@@ -24,10 +24,15 @@ import io.github.opensabe.common.executor.NamedThreadPoolExecutor;
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.jfr.ThreadPoolStatJFREvent;
 
+/**
+ * ThreadPoolStatScheduler。
+ */
 @SuppressFBWarnings("EI_EXPOSE_REP2")
 public class ThreadPoolStatScheduler {
 
+/** threadPool 工厂。 */
     private final ThreadPoolFactory threadPoolFactory;
+/** executor。 */
     private final ScheduledExecutorService executor;
 
 
@@ -37,6 +42,7 @@ public class ThreadPoolStatScheduler {
         executor.scheduleWithFixedDelay(this::recordStat, 0, 1, TimeUnit.MINUTES);
     }
 
+    /** recordStat。 */
     public void recordStat() {
         threadPoolFactory.getAllExecutors().forEach(executorServiceWeakReference -> {
             ExecutorService executorService = executorServiceWeakReference.get();

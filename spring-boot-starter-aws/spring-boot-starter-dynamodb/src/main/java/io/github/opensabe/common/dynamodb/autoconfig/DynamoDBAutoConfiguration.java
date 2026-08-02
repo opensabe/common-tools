@@ -21,6 +21,9 @@ import org.springframework.context.annotation.Import;
 import io.github.opensabe.common.dynamodb.config.DynamoDBConfiguration;
 import io.github.opensabe.common.dynamodb.config.MonitorConfiguration;
 
+/**
+ * DynamoDB Starter 自动配置入口。
+ */
 @AutoConfiguration
 @Import({DynamoDBConfiguration.class, MonitorConfiguration.class})
 public class DynamoDBAutoConfiguration {

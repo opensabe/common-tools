@@ -205,11 +205,17 @@ public class BatchBufferQueueTest {
     }
 
     @SpringBootApplication
-    public static class App {
+    /**
+ * App。
+ */
+public static class App {
 
         @Log4j2
         @Component
-        public static class Queue1 extends BatchBufferedQueue<Event> {
+        /**
+ * Queue1。
+ */
+public static class Queue1 extends BatchBufferedQueue<Event> {
 
             @Override
             protected Comparator<Event> comparator() {
@@ -280,7 +286,10 @@ public class BatchBufferQueueTest {
         }
 
         @Component
-        public static class Queue2 extends BatchBufferedCountDownQueue<CountDownEvent> {
+        /**
+ * Queue2。
+ */
+public static class Queue2 extends BatchBufferedCountDownQueue<CountDownEvent> {
             @Override
             protected Comparator<CountDownEvent> comparator() {
                 return Comparator.comparing(CountDownEvent::getId);
@@ -296,7 +305,10 @@ public class BatchBufferQueueTest {
 
     }
 
-    @Getter
+    /**
+ * Event JFR 事件。
+ */
+@Getter
     static class Event extends BufferedElement {
         private String id;
         private volatile boolean beforeExecute;
@@ -315,7 +327,10 @@ public class BatchBufferQueueTest {
         }
     }
 
-    @Getter
+    /**
+ * CountDownEvent JFR 事件。
+ */
+@Getter
     static class CountDownEvent extends BufferedCountDownLatchElement {
         private String id;
         private volatile int value = 0;

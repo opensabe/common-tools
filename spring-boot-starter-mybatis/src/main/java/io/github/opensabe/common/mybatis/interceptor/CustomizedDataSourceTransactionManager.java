@@ -26,6 +26,9 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * CustomizedDataSourceTransactionManager。
+ */
 @Log4j2
 public class CustomizedDataSourceTransactionManager extends DataSourceTransactionManager {
     public CustomizedDataSourceTransactionManager(DataSource dataSource) {

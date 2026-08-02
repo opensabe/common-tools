@@ -17,11 +17,18 @@ package io.github.opensabe.spring.boot.starter.rocketmq.test.common;
 
 import com.github.javafaker.Faker;
 
+/** MessageRecordPojo。 */
+/**
+ * MQ 测试 record 消息体。
+ */
 public record MessageRecordPojo(
     String text, Integer number, Long timestamp, Double cost
 ) {
 
 
+    /**
+     * @return secretMessageRecordPojo
+     */
     public static MessageRecordPojo getSecretMessageRecordPojo() {
         return new MessageRecordPojo(
                 "this is a secret message",

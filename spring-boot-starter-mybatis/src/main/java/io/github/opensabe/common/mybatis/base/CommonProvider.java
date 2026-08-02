@@ -22,6 +22,9 @@ import com.google.common.base.CaseFormat;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+/**
+ * MyBatis 动态 SQL 辅助工具：驼峰/下划线转换与 IN 子句拼接。
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CommonProvider<T> {
     private static final int CACHE_SIZE = 2 << 16;
@@ -31,6 +34,7 @@ public class CommonProvider<T> {
     private static final ThreadLocal<StringBuilder> STRING_BUILDER_THREAD_LOCAL = ThreadLocal.withInitial(() -> new StringBuilder());
     private static final ThreadLocal<CommonProvider> COMMON_PROVIDER_THREAD_LOCAL = ThreadLocal.withInitial(() -> new CommonProvider<>());
 
+    /** 驼峰转下划线命名。 */
     public static String camelToUnderScore(String name) {
         try {
             return CAMEL_TO_UNDER_SCORE_CACHE.get(name, () -> CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
@@ -39,6 +43,7 @@ public class CommonProvider<T> {
         }
     }
 
+    /** 下划线转驼峰命名。 */
     public static String underScoreToCamel(String name) {
         try {
             return UNDER_SCORE_TO_CAMEL_CACHE.get(name, () -> CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name));
@@ -47,6 +52,9 @@ public class CommonProvider<T> {
         }
     }
 
+    /**
+     * @return fieldsFromStrCollection
+     */
     public static String getFieldsFromStrCollection(Collection<String> strings) {
         StringBuilder stringBuilder = STRING_BUILDER_THREAD_LOCAL.get();
         stringBuilder.setLength(0);
@@ -57,6 +65,9 @@ public class CommonProvider<T> {
         return stringBuilder.toString();
     }
 
+    /**
+     * @return inStrFromStrCollection
+     */
     public static String getInStrFromStrCollection(Collection objects) {
         if (objects.isEmpty()) {
             return "('')";
@@ -72,6 +83,7 @@ public class CommonProvider<T> {
         return stringBuilder.toString();
     }
 
+    /** 获取线程本地 CommonProvider 实例。 */
     public static <T> CommonProvider<T> common() {
         return COMMON_PROVIDER_THREAD_LOCAL.get();
     }
