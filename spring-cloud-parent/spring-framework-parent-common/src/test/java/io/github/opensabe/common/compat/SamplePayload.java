@@ -27,14 +27,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Anonymized fixture DTO for persist/wire compat tests (no business identifiers).
+ * 持久化/线格式兼容测试用的匿名化 fixture DTO（不含业务标识）。
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-/**
- * 持久化/线格式兼容测试用的匿名化 fixture DTO（不含业务标识）。
- */
 public class SamplePayload {
     private String id;
     private LocalDateTime updatedAt;
