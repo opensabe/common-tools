@@ -21,6 +21,12 @@ import org.springframework.context.annotation.Import;
 import io.github.opensabe.common.config.JacksonCustomizedConfiguration;
 import io.github.opensabe.common.config.SpringCommonUtilConfiguration;
 
+/**
+ * 通用 Spring 定制自动配置入口。
+ * <p>
+ * 聚合 {@link SpringCommonUtilConfiguration} 与 {@link JacksonCustomizedConfiguration}，
+ * 注册工具类 Bean、密钥管理与 Jackson 模块等基础设施。
+ */
 @AutoConfiguration
 @Import({
         SpringCommonUtilConfiguration.class,

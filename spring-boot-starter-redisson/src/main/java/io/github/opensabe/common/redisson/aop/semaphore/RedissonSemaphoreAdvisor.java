@@ -18,9 +18,13 @@ package io.github.opensabe.common.redisson.aop.semaphore;
 import io.github.opensabe.common.redisson.aop.AbstractRedissonAdvisor;
 
 /**
- * redisson 切点通知
+ * {@link io.github.opensabe.common.redisson.annotation.RedissonSemaphore} 信号量 AOP Advisor。
  */
 public class RedissonSemaphoreAdvisor extends AbstractRedissonAdvisor<RedissonSemaphoreProperties> {
+
+    /**
+     * @param redissonSemaphoreCachedPointcut 信号量切点
+     */
     public RedissonSemaphoreAdvisor(RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut) {
         super(redissonSemaphoreCachedPointcut);
     }

@@ -37,6 +37,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Log4jAppenderCheckSecretCheckFilter implements CommandLineRunner {
 
+    /**
+     * 递归检查 Filter 树是否包含指定类型的子 Filter。
+     *
+     * @param filter      当前 Filter
+     * @param filterClass 目标 Filter 类型
+     * @return 是否包含
+     */
     private static boolean containsFilter(Filter filter, Class<?> filterClass) {
         if (filter == null) {
             return false;
@@ -46,7 +53,7 @@ public class Log4jAppenderCheckSecretCheckFilter implements CommandLineRunner {
             return true;
         }
 
-        // 检查子过滤器
+        // Check nested filters in CompositeFilter
         if (filter instanceof CompositeFilter compositeFilter) {
             for (Filter subFilter : compositeFilter.getFiltersArray()) {
                 if (containsFilter(subFilter, filterClass)) {
@@ -57,6 +64,12 @@ public class Log4jAppenderCheckSecretCheckFilter implements CommandLineRunner {
         return false;
     }
 
+    /**
+     * 检查单个 LoggerConfig 下各 Appender 是否挂载 {@link Log4j2SecretCheckFilter}。
+     *
+     * @param loggerConfig Logger 配置
+     * @param filterClass  期望的 Filter 类型
+     */
     private static void checkFilter(LoggerConfig loggerConfig, Class<?> filterClass) {
         if (!StringUtils.containsIgnoreCase(loggerConfig.getName(), AlarmUtil.class.getName())) {
             for (Map.Entry<String, Appender> entry : loggerConfig.getAppenders().entrySet()) {
@@ -75,19 +88,21 @@ public class Log4jAppenderCheckSecretCheckFilter implements CommandLineRunner {
         }
     }
 
+    /**
+     * 应用启动后校验所有 Logger/Appender 是否配置密钥检查 Filter。
+     *
+     * @param args 命令行参数（未使用）
+     */
     @Override
     public void run(String... args) throws Exception {
         LoggerContext context = (LoggerContext) LogManager.getContext(false);
         Configuration config = context.getConfiguration();
 
-        // 要检查的 Filter 类
         Class<?> filterClass = Log4j2SecretCheckFilter.class;
 
-        // 检查根 Logger
         LoggerConfig rootLoggerConfig = config.getRootLogger();
         checkFilter(rootLoggerConfig, filterClass);
 
-        // 检查所有其他 Logger
         for (LoggerConfig loggerConfig : config.getLoggers().values()) {
             checkFilter(loggerConfig, filterClass);
         }

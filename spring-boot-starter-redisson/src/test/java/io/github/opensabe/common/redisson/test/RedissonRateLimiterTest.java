@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateLimiterConfig;
@@ -39,11 +40,16 @@ import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.Getter;
 
 @Import(RedissonRateLimiterTest.Config.class)
+/**
+ * Redisson 限流器 AOP 集成测试：阻塞 acquire、tryAcquire 与动态限流名。
+ */
+@DisplayName("Redisson 限流器集成测试")
 public class RedissonRateLimiterTest extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     @Autowired
     private TestRedissonRateLimiterClass testRedissonRateLimiterClass;
 
+    @DisplayName("阻塞 acquire 限流约 1 秒")
     @Test
     public void testRateLimiterBlockAcquire() throws InterruptedException {
         List<Long> list = testRedissonRateLimiterClass.getList();
@@ -69,6 +75,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
         Assertions.assertTrue(testRedissonRateLimiterClass.getResult().get());
     }
 
+    @DisplayName("带参数阻塞 acquire 限流")
     @Test
     public void testRateLimiterBlockAcquireWithParams() throws InterruptedException {
         List<Long> list = testRedissonRateLimiterClass.getList();
@@ -94,6 +101,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
         Assertions.assertTrue(testRedissonRateLimiterClass.getResult().get());
     }
 
+    @DisplayName("带参数阻塞 acquire 限流（变体）")
     @Test
     public void testRateLimiterBlockAcquireWithParams1() throws InterruptedException {
         List<Long> list = testRedissonRateLimiterClass.getList();
@@ -119,6 +127,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
         Assertions.assertTrue(testRedissonRateLimiterClass.getResult().get());
     }
 
+    @DisplayName("tryAcquire 不等待路径")
     @Test
     public void testRateLimiterTryAcquireNoWait() throws InterruptedException {
         List<Long> list = testRedissonRateLimiterClass.getList();
@@ -149,6 +158,7 @@ public class RedissonRateLimiterTest extends BaseRedissonTest {
         Assertions.assertTrue(testRedissonRateLimiterClass.getResult().get());
     }
 
+    @DisplayName("tryAcquire 带等待时间路径")
     @Test
     public void testRateLimiterTryAcquireWithWaitTime() throws InterruptedException {
         List<Long> list = testRedissonRateLimiterClass.getList();

@@ -23,13 +23,20 @@ import io.github.opensabe.common.redisson.annotation.RedissonRateLimiter;
 import io.github.opensabe.common.redisson.aop.old.ExtraNamePointcut;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 
+/**
+ * {@link RedissonRateLimiter} 切点，缓存方法级限流属性。
+ */
 public class RedissonRateLimiterCachedPointcut extends ExtraNamePointcut<RedissonRateLimiterProperties> {
 
 
+    /**
+     * @param evaluator 方法参数 SpEL 求值器
+     */
     public RedissonRateLimiterCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
         super(evaluator);
     }
 
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("removal")
     protected RedissonRateLimiterProperties computeRedissonProperties(Method method, Class<?> clazz) {

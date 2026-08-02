@@ -30,34 +30,50 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * 将 secretPropertySource 中的配置脱敏。
+ * Secret 属性源脱敏 Provider。
+ * <p>
+ * 从已解密的 {@link org.springframework.core.env.MapPropertySource} 收集敏感值，
+ * 供 {@link io.github.opensabe.common.secret.GlobalSecretManager} 过滤日志与告警。
+ *
  * @author maheng
  */
 @Log4j2
 public class SecretPropertySourceProvider extends SecretProvider implements EnvironmentAware {
 
+    /** 当前应用 Environment。 */
     private ConfigurableEnvironment environment;
 
+    /**
+     * @param globalSecretManager 全局密钥管理器
+     */
     public SecretPropertySourceProvider(GlobalSecretManager globalSecretManager) {
         super(globalSecretManager);
     }
 
 
+    /** {@inheritDoc} */
     @Override
     protected String name() {
         return "secretPropertiesTablePropertiesProvider";
     }
 
+    /** {@inheritDoc}；Secret 属性变更频率低，间隔 99 分钟。 */
     @Override
     protected long reloadTimeInterval() {
         return 99;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected TimeUnit reloadTimeIntervalUnit() {
         return TimeUnit.MINUTES;
     }
 
+    /**
+     * 从已解密的 MapPropertySource 收集敏感值集合。
+     *
+     * @return 属性源名称 → 敏感值集合
+     */
     @Override
     protected Map<String, Set<String>> reload() {
         Map<String, Set<String>> map = new HashMap<>(2);
@@ -84,6 +100,7 @@ public class SecretPropertySourceProvider extends SecretProvider implements Envi
         return map;
     }
 
+    /** 注入 ConfigurableEnvironment。 */
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment instanceof ConfigurableEnvironment configurableEnvironment ? configurableEnvironment : null;

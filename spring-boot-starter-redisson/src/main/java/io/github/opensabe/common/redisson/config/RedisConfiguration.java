@@ -23,13 +23,30 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import io.github.opensabe.common.redisson.util.LuaLimitCache;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 
+/**
+ * Redisson 模块通用 Redis Bean 配置（Lua 限流缓存、序列化密钥过滤等）。
+ */
 @Configuration(proxyBeanMethods = false)
 public class RedisConfiguration {
+
+    /**
+     * 基于 Lua 脚本的 Redis 限流缓存。
+     *
+     * @param redisTemplate String Redis 模板
+     * @param redissonClient Redisson 客户端
+     * @return Lua 限流缓存实例
+     */
     @Bean
     public LuaLimitCache luaLimitCache(StringRedisTemplate redisTemplate, RedissonClient redissonClient) {
         return new LuaLimitCache(redisTemplate, redissonClient);
     }
 
+    /**
+     * 为 {@link org.springframework.data.redis.core.RedisTemplate} 序列化链注入密钥泄露检测。
+     *
+     * @param globalSecretManager 全局密钥管理器
+     * @return Bean 后处理器
+     */
     @Bean
     public RedisTemplateSecretFilter redisTemplateSecretFilter(GlobalSecretManager globalSecretManager) {
         return new RedisTemplateSecretFilter(globalSecretManager);

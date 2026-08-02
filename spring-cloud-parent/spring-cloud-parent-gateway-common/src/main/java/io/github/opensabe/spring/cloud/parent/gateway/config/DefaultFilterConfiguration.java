@@ -18,6 +18,9 @@ package io.github.opensabe.spring.cloud.parent.gateway.config;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Gateway 默认 GlobalFilter 组件扫描配置。
+ */
 @Configuration(proxyBeanMethods = false)
 @ComponentScan({"io.github.opensabe.spring.cloud.parent.gateway.filter"})
 public class DefaultFilterConfiguration {

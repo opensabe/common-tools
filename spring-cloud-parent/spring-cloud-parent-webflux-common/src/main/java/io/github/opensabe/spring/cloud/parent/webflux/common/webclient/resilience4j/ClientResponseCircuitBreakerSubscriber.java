@@ -81,6 +81,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
     }
 
     @Override
+    /** {@inheritDoc} */
     protected void hookOnNext(ClientResponse clientResponse) {
         if (!isDisposed()) {
             if (singleProducer && successSignaled.compareAndSet(false, true)) {
@@ -130,6 +131,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
     }
 
     @Override
+    /** {@inheritDoc} */
     protected void hookOnComplete() {
         if (successSignaled.compareAndSet(false, true)) {
             circuitBreaker.onSuccess(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit());
@@ -139,6 +141,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
     }
 
     @Override
+    /** {@inheritDoc} */
     public void hookOnCancel() {
         if (!successSignaled.get()) {
             if (eventWasEmitted.get()) {
@@ -150,6 +153,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
     }
 
     @Override
+    /** {@inheritDoc} */
     protected void hookOnError(Throwable e) {
         circuitBreaker.onError(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit(), e);
         downstreamSubscriber.onError(e);

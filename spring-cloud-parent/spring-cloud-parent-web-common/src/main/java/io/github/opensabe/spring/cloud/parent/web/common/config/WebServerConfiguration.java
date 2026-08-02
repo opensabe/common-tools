@@ -57,11 +57,13 @@ public class WebServerConfiguration {
     @Bean
     public GracefulShutdownHandler defaultGracefulShutdownHandler() {
         return new GracefulShutdownHandler() {
+            /** {@inheritDoc} */
             @Override
             public int getOrder() {
                 return Ordered.LOWEST_PRECEDENCE;
             }
 
+            /** {@inheritDoc} */
             @Override
             public void gracefullyShutdown() {
                 // do nothing

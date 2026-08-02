@@ -20,8 +20,16 @@ import org.springframework.context.annotation.Configuration;
 
 import io.github.opensabe.spring.cloud.parent.webflux.common.TracedPublisherFactory;
 
+/**
+ * Traced Publisher 工厂配置。
+ */
 @Configuration(proxyBeanMethods = false)
 public class TracedPublisherConfiguration {
+    /**
+     * 注册 Traced Publisher 工厂 Bean。
+     *
+     * @return TracedPublisherFactory 实例
+     */
     @Bean
     public TracedPublisherFactory tracedPublisherFactory() {
         return new TracedPublisherFactory();

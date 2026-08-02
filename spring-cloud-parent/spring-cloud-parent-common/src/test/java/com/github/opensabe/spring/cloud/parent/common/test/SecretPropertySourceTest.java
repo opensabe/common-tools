@@ -41,13 +41,20 @@ import java.util.HexFormat;
 import java.util.Set;
 
 
-@DisplayName("测试从解密config server properties")
+/**
+ * Secret 属性源解密与脱敏集成测试。
+ * <p>
+ * 验证 Config Server 加密属性在 Environment、{@code @ConfigurationProperties}
+ * 与 refresh 后的解密行为，以及自定义 Decryptor 与日志脱敏。
+ */
+@DisplayName("Secret 属性源解密与脱敏")
 @SpringBootTest(classes = SecretPropertySourceTest.App.class,properties = {
         "eureka.client.enabled=false"
 })
 @EnableConfigurationProperties(SecretPropertySourceTest.FooProperties.class)
 public class SecretPropertySourceTest {
 
+    /** 最小 Spring Boot 测试应用。 */
     @SpringBootApplication
     public static class App {
 
@@ -57,13 +64,16 @@ public class SecretPropertySourceTest {
     @Autowired
     private MockConfigServerPropertySourceLocator propertySourceLocator;
 
+    /** 绑定 foo.* 配置的测试属性类。 */
     @Getter
     @Setter
     @ConfigurationProperties(prefix = "foo")
     public static class FooProperties {
 
+        /** 测试 bar 属性。 */
         private String bar;
 
+        /** 测试 par 属性。 */
         private String par;
     }
 
@@ -97,21 +107,21 @@ public class SecretPropertySourceTest {
     private CustomerDecrptor customerDecrptor;
 
     @Test
-    @DisplayName("测试Environment中的属性是解密后的")
+    @DisplayName("Environment 中属性已解密")
     void testEnvironment () {
         Assertions.assertEquals("foobar", environment.getProperty("foo.bar"));
         Assertions.assertEquals("foopar", environment.getProperty("foo.par"));
     }
 
     @Test
-    @DisplayName("测试@ConfigurationProperties中的属性是解密后的")
+    @DisplayName("@ConfigurationProperties 中属性已解密")
     void testProperties () {
         Assertions.assertEquals("foobar", fooProperties.getBar());
         Assertions.assertEquals("foopar", fooProperties.getPar());
     }
 
     @Test
-    @DisplayName("测试/actuator/env/refresh以后能更新")
+    @DisplayName("refresh 后属性可更新")
     void testRefresh () {
         Assertions.assertEquals("foobar", environment.getProperty("ping.pong"));
         MockConfigServerPropertySourceLocator.put("ping.pong", "TJoYhg9kjpzWIG/HXMugMQ==", "tNYjSk4o1A3aeKAV2NZliO36AsV84VNcak5jAW6l+bs=");
@@ -122,14 +132,14 @@ public class SecretPropertySourceTest {
 
 
     @Test
-    @DisplayName("测试spring.factories中定义的Decryptor能正常执行")
+    @DisplayName("SPI Decryptor 可正常执行")
     void testCustomDecryptor () {
         org.assertj.core.api.Assertions.assertThat(customerDecrptor.getRun())
                 .isGreaterThan(0);
     }
 
     @Test
-    @DisplayName("测试敏感信息可以脱敏")
+    @DisplayName("敏感信息可脱敏")
     void testSensitivity() {
        String value  = "this is a log " + fooProperties.getBar();
         FilterSecretStringResult result = globalSecretManager.filterSecretStringAndAlarm(value);

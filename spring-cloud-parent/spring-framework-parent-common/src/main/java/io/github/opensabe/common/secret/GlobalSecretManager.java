@@ -26,19 +26,33 @@ import com.google.common.collect.Sets;
 
 import io.github.opensabe.common.utils.AlarmUtil;
 
+/**
+ * 全局敏感信息缓存与日志/输出过滤管理器。
+ * <p>
+ * 各 {@link SecretProvider} 定期将密钥快照写入本管理器；检测到敏感子串时会掩码并触发 {@link AlarmUtil#fatal} 告警。
+ */
 public class GlobalSecretManager {
+    /** 各 {@link SecretProvider#name()} 到密钥快照的缓存。 */
     private final Cache<String, Map<String, Set<String>>> cache = Caffeine.newBuilder().build();
 
+    /** 敏感子串替换掩码。 */
+    public static final String MASKER = "******";
+
+    /**
+     * 将指定 Provider 的密钥快照写入缓存。
+     *
+     * @param secretName Provider 名称
+     * @param secret     密钥名到敏感值集合的映射
+     */
     void putSecret(String secretName, Map<String, Set<String>> secret) {
         cache.put(secretName, secret);
     }
 
-    public static final String MASKER = "******";
     /**
-     * Filter sensitive string in content, and alarm if found
+     * 扫描内容中的敏感子串，命中时替换为 {@link #MASKER} 并触发 fatal 告警。
      *
-     * @param content
-     * @return
+     * @param content 待检查文本
+     * @return 是否命中敏感信息及掩码后的内容
      */
     public FilterSecretStringResult filterSecretStringAndAlarm(String content) {
         boolean foundSensitiveString = false;

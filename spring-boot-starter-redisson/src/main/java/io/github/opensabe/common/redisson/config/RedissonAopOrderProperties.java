@@ -22,10 +22,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Redisson AOP Advisor 顺序配置，绑定前缀 {@code spring.redis.redisson.aop}。
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "spring.redis.redisson.aop")
 public class RedissonAopOrderProperties {
+
+    /** Advisor 顺序，默认 {@link Ordered#LOWEST_PRECEDENCE}。 */
     private int order = Ordered.LOWEST_PRECEDENCE;
 }

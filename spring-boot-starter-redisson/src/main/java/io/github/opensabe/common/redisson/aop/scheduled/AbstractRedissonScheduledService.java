@@ -17,7 +17,9 @@ package io.github.opensabe.common.redisson.aop.scheduled;
 
 
 /**
- * 为了兼容旧版本，该抽象类继续保留，但是抽象方法定义在接口里面
+ * {@link RedissonScheduledService} 的兼容抽象基类（旧版 API）。
+ * <p>
+ * 抽象方法已迁移至 {@link RedissonScheduledService} 接口，保留此类仅为向后兼容。
  */
 public abstract class AbstractRedissonScheduledService implements RedissonScheduledService {
 

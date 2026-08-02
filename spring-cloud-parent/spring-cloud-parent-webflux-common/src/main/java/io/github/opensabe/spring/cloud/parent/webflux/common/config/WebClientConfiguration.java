@@ -34,21 +34,35 @@ import io.github.opensabe.spring.cloud.parent.webflux.common.jfr.WebClientObserv
 import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
 import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientRequestCircuitBreakerExtractor;
 
+/**
+ * WebClient 通用配置。
+ * <p>
+ * 注册命名上下文工厂、断路器提取器、负载均衡过滤器与 JFR 观测生成器。
+ */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({
         WebClientConfigurationProperties.class, WebClientJFRConfigurationProperties.class, HttpServerJFRProperties.class
 })
 public class WebClientConfiguration {
+    /** @return WebClient 命名上下文工厂 */
     @Bean
     public WebClientNamedContextFactory getWebClientNamedContextFactory() {
         return new WebClientNamedContextFactory();
     }
 
+    /** @return WebClient 断路器提取器 */
     @Bean
     public CircuitBreakerExtractor webClientRequestCircuitBreakerExtractor() {
         return new WebClientRequestCircuitBreakerExtractor();
     }
 
+    /**
+     * 注册带断路器感知的 Reactor 负载均衡 Exchange 过滤器。
+     *
+     * @param loadBalancerFactory 响应式负载均衡工厂
+     * @param transformers        请求转换器（可选）
+     * @return 负载均衡过滤器
+     */
     @Bean
     public CustomizedReactorLoadBalancerExchangeFilterFunction customizedReactorLoadBalancerExchangeFilterFunction(
             ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
@@ -59,6 +73,7 @@ public class WebClientConfiguration {
         );
     }
 
+    /** @return WebClient JFR 观测生成器 */
     @Bean
     public WebClientObservationToJFRGenerator webClientObservationToJFRGenerator(
             WebClientJFRConfigurationProperties properties
@@ -66,6 +81,7 @@ public class WebClientConfiguration {
         return new WebClientObservationToJFRGenerator(properties);
     }
 
+    /** @return WebFlux HTTP 服务器 JFR 观测生成器 */
     @Bean
     public HttpServerRequestObservationToJFRGenerator httpServerRequestObservationToJFRGenerator(
             HttpServerJFRProperties properties

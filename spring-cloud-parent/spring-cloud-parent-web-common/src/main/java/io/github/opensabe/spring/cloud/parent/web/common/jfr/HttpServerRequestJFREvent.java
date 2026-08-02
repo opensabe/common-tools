@@ -23,6 +23,11 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Servlet HTTP 入站请求的 JFR 事件。
+ * <p>
+ * 由 {@link HttpServerRequestObservationToJFRGenerator} 在 Observation 生命周期内填充并提交。
+ */
 @Category({"observation", "servlet"})
 @Label("Http Server Request")
 @StackTrace(false)

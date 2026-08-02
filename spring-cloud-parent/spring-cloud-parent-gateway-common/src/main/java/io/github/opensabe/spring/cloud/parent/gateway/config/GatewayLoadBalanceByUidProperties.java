@@ -23,6 +23,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Gateway 按 UID 亲和负载均衡配置属性。
+ * <p>
+ * 绑定前缀 {@code spring.cloud.gateway.uid-load-balance}。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties("spring.cloud.gateway.uid-load-balance")

@@ -18,8 +18,9 @@ package io.github.opensabe.common.secret;
 import java.lang.annotation.*;
 
 /**
- * 标记敏感属性，在属性上添加@SecretProperty注解,即可
- * @author hengma
+ * 标记敏感配置属性，供 {@link ConfigurationPropertiesSecretProvider} 等扫描并纳入脱敏过滤。
+ * <p>
+ * 可标注在字段、类型或 Record 组件上；类型级标注表示该类型下所有字符串字段均视为敏感。
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

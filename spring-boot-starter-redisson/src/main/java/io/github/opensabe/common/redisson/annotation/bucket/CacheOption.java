@@ -19,57 +19,39 @@ package io.github.opensabe.common.redisson.annotation.bucket;
 import java.time.Duration;
 import java.time.Instant;
 
+/**
+ * {@link RedissonBucket} 注解对应的 {@link org.redisson.api.RBucket} 写操作策略。
+ */
 public enum CacheOption {
 
-    /**
-     * @see org.redisson.api.RBucket#set(Object, Duration)
-     */
+    /** 直接写入并设置 TTL。 @see org.redisson.api.RBucket#set(Object, Duration) */
     SET,
 
-    /**
-     * @see org.redisson.api.RBucket#getAndSet(Object, Duration)
-     */
+    /** 读取旧值后写入并设置 TTL。 @see org.redisson.api.RBucket#getAndSet(Object, Duration) */
     GET_AND_SET,
 
-    /**
-     * @see org.redisson.api.RBucket#getAndDelete()
-     */
+    /** 读取后删除键。 @see org.redisson.api.RBucket#getAndDelete() */
     GET_AND_DELETE,
 
-    /**
-     * @see org.redisson.api.RBucket#getAndExpire(Duration)
-     * @see org.redisson.api.RBucket#getAndExpire(Instant)
-     */
+    /** 读取后更新过期时间。 @see org.redisson.api.RBucket#getAndExpire(Duration) */
     GET_AND_EXPIRE,
 
-    /**
-     * @see org.redisson.api.RBucket#expire(Duration)
-     * @see org.redisson.api.RBucket#expire(Instant)
-     */
+    /** 仅更新过期时间。 @see org.redisson.api.RBucket#expire(Duration) */
     EXPIRE,
-    /**
-     * @see org.redisson.api.RBucket#getAndClearExpire()
-     */
+
+    /** 读取后清除过期时间（持久化）。 @see org.redisson.api.RBucket#getAndClearExpire() */
     GET_AND_CLEAR_EXPIRE,
 
-    /**
-     * @see org.redisson.api.RBucket#setIfAbsent(Object, Duration)
-     */
+    /** 键不存在时写入。 @see org.redisson.api.RBucket#setIfAbsent(Object, Duration) */
     SET_IF_ABSENT,
 
-    /**
-     * @see org.redisson.api.RBucket#setIfExists(Object, Duration)
-     */
+    /** 键存在时覆盖写入。 @see org.redisson.api.RBucket#setIfExists(Object, Duration) */
     SET_IF_EXISTS,
 
-    /**
-     * @see org.redisson.api.RBucket#setAndKeepTTL(Object)
-     */
+    /** 写入但保留原有 TTL。 @see org.redisson.api.RBucket#setAndKeepTTL(Object) */
     KEEP_TTL,
 
-    /**
-     * @see org.redisson.api.RBucket#delete()
-     */
+    /** 删除键。 @see org.redisson.api.RBucket#delete() */
     DELETE,
 
 }

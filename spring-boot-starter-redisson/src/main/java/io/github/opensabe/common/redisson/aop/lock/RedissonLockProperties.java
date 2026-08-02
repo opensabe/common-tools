@@ -20,15 +20,32 @@ import io.github.opensabe.common.redisson.aop.old.ExtraNameProperties;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 
 
+/**
+ * 旧版 {@link io.github.opensabe.common.redisson.annotation.RedissonLock} 注解运行时属性。
+ */
 public class RedissonLockProperties extends ExtraNameProperties {
 
+    /** 原始锁注解。 */
     private final RedissonLock redissonLock;
 
+    /**
+     * 通过注解 {@link #name()} SpEL 解析锁名。
+     *
+     * @param evaluator SpEL 求值器
+     * @param redissonLock 锁注解
+     */
     public RedissonLockProperties(MethodArgumentsExpressEvaluator evaluator, RedissonLock redissonLock) {
         super(evaluator, redissonLock.prefix(), redissonLock.name());
         this.redissonLock = redissonLock;
     }
 
+    /**
+     * 通过已废弃的 {@link io.github.opensabe.common.redisson.annotation.RedissonLockName} 参数解析锁名。
+     *
+     * @param redissonLock 锁注解
+     * @param redissonLockName 参数上的名称注解
+     * @param pamaterIndex 参数索引
+     */
     @SuppressWarnings("removal")
     public RedissonLockProperties(RedissonLock redissonLock,
                                   io.github.opensabe.common.redisson.annotation.RedissonLockName redissonLockName,
@@ -37,6 +54,9 @@ public class RedissonLockProperties extends ExtraNameProperties {
         this.redissonLock = redissonLock;
     }
 
+    /**
+     * @return 锁注解实例
+     */
     public RedissonLock getRedissonLock() {
         return redissonLock;
     }

@@ -39,12 +39,16 @@ import lombok.extern.log4j.Log4j2;
 
 
 /**
- * 内存监控，用于指导内存分配
+ * 内存与 OOM 分数定时监控。
+ * <p>
+ * 应用就绪后每 30 秒采集 /proc smaps、cgroup memory.stat、memsw 与 OOM score，写入 JFR 事件。
  */
 @Log4j2
 public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationReadyEvent> {
+    /** 单线程定时采集执行器。 */
     private static final ScheduledThreadPoolExecutor SCHEDULED_THREAD_POOL_EXECUTOR = new ScheduledThreadPoolExecutor(1);
 
+    /** 应用就绪后启动定时采集任务。 */
     @Override
     protected void onlyOnce(ApplicationReadyEvent event) {
         SCHEDULED_THREAD_POOL_EXECUTOR.scheduleAtFixedRate(() -> {
@@ -61,6 +65,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
         }, 0, 30, TimeUnit.SECONDS);
     }
 
+    /** 读取 smaps_rollup 并提交 SmapsJfrEvent。 */
     private void smapsProcess(long pid) throws IOException {
         //smaps 中是实际内存映射占用
         List<String> strings = FileUtils.readLines(new File("/proc/" + pid + "/smaps_rollup"), Charset.defaultCharset());
@@ -79,6 +84,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
         log.info("MonitorMemoryRSS, smapsRollup: {}", StringUtils.join(strings, "\n"));
     }
 
+    /** 读取 memsw cgroup 指标并提交 MemorySwStatJfrEvent。 */
     private void memorySwStatProcess() throws IOException {
         List<String> usageInBytes = FileUtils.readLines(new File("/sys/fs/cgroup/memory/memory.memsw.usage_in_bytes"), Charset.defaultCharset());
         List<String> maxUsageInBytes = FileUtils.readLines(new File("/sys/fs/cgroup/memory/memory.memsw.max_usage_in_bytes"), Charset.defaultCharset());
@@ -88,6 +94,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
         log.info("MonitorMemoryRSS, memorySwStat: {}", JsonUtil.toJSONString(event));
     }
 
+    /** 读取 memory.stat 并提交 MemoryStatJfrEvent。 */
     private void memoryStatProcess() throws IOException {
         List<String> strings = FileUtils.readLines(new File("/sys/fs/cgroup/memory/memory.stat"), Charset.defaultCharset());
         MemoryStatJfrEvent event = new MemoryStatJfrEvent();
@@ -106,6 +113,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
         log.info("MonitorMemoryRSS, memoryStat: {}", StringUtils.join(strings, "\n"));
     }
 
+    /** 读取 oom_adj/score/score_adj 并提交 OOMScoreJfrEvent。 */
     private void oomScoreRecording(long pid) {
         //oom 三个分数  /proc/<pid>/oom_adj, /proc/<pid>/oom_score, /proc/<pid>/oom_score_adj 由于与memory都有关，合并到这个方法
         //oom_adj
@@ -127,6 +135,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
         }
     }
 
+    /** 提交 OOM Score JFR 事件。 */
     private void oomScoreJfrEventProcess(long oomAdj, long oomScore, long oomScoreAdj) {
         try {
             OOMScoreJfrEvent oomScoreJfrEvent = new OOMScoreJfrEvent(oomAdj, oomScore, oomScoreAdj);
@@ -136,6 +145,7 @@ public class MonitorMemoryRSS extends OnlyOnceApplicationListener<ApplicationRea
         }
     }
 
+    /** 反射调用 JFR 事件 setter。 */
     private void dynamicSetter(Object targetClass, Method method, long value) {
         try {
             method.invoke(targetClass, value);

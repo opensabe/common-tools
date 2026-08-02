@@ -20,6 +20,11 @@ import java.util.List;
 import org.apache.logging.log4j.core.pattern.TextRenderer;
 import org.apache.logging.log4j.util.Strings;
 
+/**
+ * 定制 ThrowableProxy 堆栈渲染器。
+ * <p>
+ * 基于 Log4j2 默认渲染逻辑，支持扩展堆栈与包白名单过滤。
+ */
 public class CustomizedThrowableProxyRenderer {
     private static final String TAB = "\t";
     private static final String CAUSED_BY_LABEL = "Caused by: ";

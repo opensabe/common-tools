@@ -20,6 +20,11 @@ import org.redisson.api.RReadWriteLock;
 import org.springframework.lang.NonNull;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+/**
+ * 带 Micrometer 观测的 {@link org.redisson.api.RReadWriteLock} 装饰器。
+ *
+ * <p>读/写锁均包装为 {@link ObservedRLock}。
+ */
 
 public class ObservedRReadWriteLock implements RReadWriteLock {
     private final RReadWriteLock delegate;

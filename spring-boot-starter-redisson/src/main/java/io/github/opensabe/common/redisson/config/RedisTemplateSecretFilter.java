@@ -25,13 +25,22 @@ import org.springframework.data.redis.serializer.SerializationException;
 import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 
+/**
+ * {@link RedisTemplate} Bean 后处理器：在序列化出站 Redis 值前检测敏感字符串。
+ */
 public class RedisTemplateSecretFilter implements BeanPostProcessor {
+
+    /** 全局密钥管理器。 */
     private final GlobalSecretManager globalSecretManager;
 
+    /**
+     * @param globalSecretManager 密钥检测与告警
+     */
     public RedisTemplateSecretFilter(GlobalSecretManager globalSecretManager) {
         this.globalSecretManager = globalSecretManager;
     }
 
+    /** {@inheritDoc} — 为各序列化器包装 {@link SecretCheckRedisSerializer}。 */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Object postProcessAfterInitialization(Object bean, String beanName) {
@@ -64,9 +73,17 @@ public class RedisTemplateSecretFilter implements BeanPostProcessor {
         return bean;
     }
 
+    /**
+     * 装饰 {@link RedisSerializer}：serialize 前扫描 UTF-8 明文是否含敏感串。
+     *
+     * @param delegate 底层序列化器
+     * @param globalSecretManager 密钥管理器
+     * @param <T> 值类型
+     */
     private record SecretCheckRedisSerializer<T>(RedisSerializer<T> delegate,
                                                  GlobalSecretManager globalSecretManager) implements RedisSerializer<T> {
 
+        /** {@inheritDoc} — 命中敏感串时抛出 {@link SerializationException}。 */
         @Override
         public byte[] serialize(T o) throws SerializationException {
             byte[] serialize = delegate.serialize(o);
@@ -80,10 +97,10 @@ public class RedisTemplateSecretFilter implements BeanPostProcessor {
             return serialize;
         }
 
+        /** {@inheritDoc} */
         @Override
         public T deserialize(byte[] bytes) throws SerializationException {
             return delegate.deserialize(bytes);
         }
     }
 }
-

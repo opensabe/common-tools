@@ -34,7 +34,7 @@ import java.util.Objects;
 
 
 /**
- * 全局异常处理
+ * 全局业务异常处理器：将 {@link FrontendException}、{@link BackendException} 及校验绑定异常转换为 {@link BaseRsp}。
  *
  * @author heng.ma
  */
@@ -44,11 +44,21 @@ public class GexceptionHandler implements PriorityOrdered {
 
     private final I18nMessageResolver i18nMessageResolver;
 
+    /**
+     * @param i18nMessageResolver 国际化消息解析器
+     */
     public GexceptionHandler(I18nMessageResolver i18nMessageResolver) {
         super();
         this.i18nMessageResolver = i18nMessageResolver;
     }
 
+    /**
+     * 处理 {@link FrontendException}，用户消息经 i18n 解析。
+     *
+     * @param e    前端业务异常
+     * @param path 请求路径
+     * @return 错误响应
+     */
     @ExceptionHandler(FrontendException.class)
     public BaseRsp<?> onFrontendException(FrontendException e, @Path String path) {
         log.info("{} error inner message {} return message {}", path, e.getInnerMessage(), e.getMessage());
@@ -62,6 +72,13 @@ public class GexceptionHandler implements PriorityOrdered {
 
 
 
+    /**
+     * 处理 {@link BackendException}，直接返回异常中的消息。
+     *
+     * @param e    后台业务异常
+     * @param path 请求路径
+     * @return 错误响应
+     */
     @ExceptionHandler(BackendException.class)
     public BaseRsp<?> onBackendException(BackendException e, @Path String path) {
         log.info("{} error {}", path, e.getMessage());
@@ -73,11 +90,23 @@ public class GexceptionHandler implements PriorityOrdered {
                 .build();
     }
 
+    /**
+     * 处理 Jakarta Bean Validation 约束违反异常。
+     *
+     * @param e 约束违反异常
+     * @return 参数非法响应
+     */
     @ExceptionHandler(ConstraintViolationException.class)
     public BaseRsp<Void> onConstraintViolationException(ConstraintViolationException e) {
         return BaseRsp.<Void>builder().bizCode(BizCodeEnum.INVALID.getVal()).message(e.getMessage()).build();
     }
 
+    /**
+     * 处理 WebFlux 绑定异常。
+     *
+     * @param e 绑定异常
+     * @return 参数非法响应
+     */
     @ExceptionHandler(WebExchangeBindException.class)
     public BaseRsp<Void> webExchangeBindException(WebExchangeBindException e) {
         return resolveBindingResult(e, e.getMessage());
@@ -85,6 +114,12 @@ public class GexceptionHandler implements PriorityOrdered {
 
 
 
+    /**
+     * 处理 Servlet MVC 绑定异常。
+     *
+     * @param e 绑定异常
+     * @return 参数非法响应
+     */
     @ExceptionHandler(BindException.class)
     public BaseRsp<Void> onBindException(BindException e) {
         return resolveBindingResult(e, e.getMessage());
@@ -97,6 +132,13 @@ public class GexceptionHandler implements PriorityOrdered {
 //        return RespUtil.invalid(null);
 //    }
 
+    /**
+     * 从 {@link BindingResult} 提取字段或全局错误消息。
+     *
+     * @param bindingResult  绑定结果
+     * @param fallbackMessage 无字段/全局错误时的回退消息
+     * @return 参数非法响应
+     */
     private BaseRsp<Void> resolveBindingResult (BindingResult bindingResult, String fallbackMessage) {
         FieldError fieldError = bindingResult.getFieldError();
         String message = fallbackMessage;
@@ -108,12 +150,24 @@ public class GexceptionHandler implements PriorityOrdered {
         return BaseRsp.<Void>builder().bizCode(BizCodeEnum.INVALID.getVal()).message(message).build();
     }
 
+    /**
+     * 格式化字段级校验错误为 {@code objectName.field message}。
+     *
+     * @param fieldError 字段错误
+     * @return 格式化消息
+     */
     private  String resolveFieldError (FieldError fieldError) {
         String objectName = fieldError.getObjectName();
         String nestedPath = fieldError.getField();
         String defaultMessage = fieldError.getDefaultMessage();
         return objectName+"."+nestedPath +" "+defaultMessage;
     }
+    /**
+     * 格式化全局校验错误为 {@code objectName.code message}。
+     *
+     * @param objectError 全局错误
+     * @return 格式化消息
+     */
     private  String resolveGlobalError (ObjectError objectError) {
         String objectName = objectError.getObjectName();
         String nestedPath = objectError.getCode();
@@ -123,6 +177,7 @@ public class GexceptionHandler implements PriorityOrdered {
 
 
 
+    /** {@inheritDoc} */
     @Override
     public int getOrder() {
         return Ordered.LOWEST_PRECEDENCE - 1;

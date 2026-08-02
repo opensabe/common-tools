@@ -31,6 +31,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * {@link AzBalanceUtils} 可用区感知负载均衡比例计算的参数化测试。
+ */
+@DisplayName("可用区负载均衡比例计算")
 class AzBalanceUtilsTest {
 
     /**
@@ -48,7 +52,7 @@ class AzBalanceUtilsTest {
      */
     @ParameterizedTest
     @MethodSource("testDataProvider")
-    @DisplayName("Comprehensive test scenarios")
+    @DisplayName("多场景综合验证负载均衡比例")
     void testLoadBalancingRatio(TestScenario scenario) {
         Map<String, List<Integer>> sourceMap = createSourceMap(scenario.sourceAzConfig);
         Map<String, List<Integer>> targetMap = createTargetMap(scenario.targetAzConfig);
@@ -85,7 +89,7 @@ class AzBalanceUtilsTest {
         
         // 断言：总分配数等于总请求数
         assertEquals(totalRequests, totalAllocated, 
-                String.format("总分配数(%d)应该等于总请求数(%d)", totalAllocated, totalRequests));
+                String.format("total allocated (%d) must equal total requests (%d)", totalAllocated, totalRequests));
         
         // 3. 断言：result 中没有任何分配值为负数
         for (Map.Entry<String, Map<String, Integer>> sourceEntry : result.entrySet()) {
@@ -95,7 +99,7 @@ class AzBalanceUtilsTest {
                 String targetAz = targetEntry.getKey();
                 int allocation = targetEntry.getValue();
                 assertTrue(allocation >= 0, 
-                        String.format("源可用区 %s 到目标可用区 %s 的分配值(%d)不应该为负数", 
+                        String.format("allocation from source AZ %s to target AZ %s (%d) must be non-negative", 
                                 sourceAz, targetAz, allocation));
             }
         }
@@ -343,24 +347,24 @@ class AzBalanceUtilsTest {
                                       Map<String, List<Integer>> sourceMap, 
                                       Map<String, List<Integer>> targetMap) {
         System.out.println("\n" + "=".repeat(80));
-        System.out.println("测试场景: " + scenario.name);
+        System.out.println("Scenario: " + scenario.name);
         System.out.println("=".repeat(80));
         
-        System.out.println("\n【拓扑结构图】");
-        System.out.println("源服务实例分布:");
+        System.out.println("\n[Topology]");
+        System.out.println("Source instance distribution:");
         for (Map.Entry<String, List<Integer>> entry : sourceMap.entrySet()) {
             String az = entry.getKey();
             int count = entry.getValue().size();
             int requests = count * EACH_INSTANCE_REQUEST_COUNT;
-            System.out.println(String.format("  %s: [%s] (%d实例, %d请求)", 
+            System.out.println(String.format("  %s: [%s] (%d instances, %d requests)", 
                     az, "●".repeat(Math.min(count, 20)), count, requests));
         }
         
-        System.out.println("\n目标服务实例分布:");
+        System.out.println("\nTarget instance distribution:");
         for (Map.Entry<String, List<Integer>> entry : targetMap.entrySet()) {
             String az = entry.getKey();
             int count = entry.getValue().size();
-            System.out.println(String.format("  %s: [%s] (%d实例)", 
+            System.out.println(String.format("  %s: [%s] (%d instances)", 
                     az, "○".repeat(Math.min(count, 20)), count));
         }
     }
@@ -372,7 +376,7 @@ class AzBalanceUtilsTest {
     private void printResultWithDiagram(Map<String, List<Integer>> sourceMap,
                                        Map<String, List<Integer>> targetMap,
                                        Map<String, Map<String, Integer>> result) {
-        System.out.println("\n【负载均衡结果图】");
+        System.out.println("\n[Load balancing result]");
         
         for (Map.Entry<String, Map<String, Integer>> entry : result.entrySet()) {
             String sourceAz = entry.getKey();
@@ -384,12 +388,12 @@ class AzBalanceUtilsTest {
             int sameAzRequests = targetAzMap.getOrDefault(sourceAz, 0);
             int crossAzRequests = allocatedTotal - sameAzRequests;
             
-            System.out.println(String.format("\n源可用区 %s (%d实例, %d请求):", 
+            System.out.println(String.format("\nSource AZ %s (%d instances, %d requests):", 
                     sourceAz, sourceInstanceCount, sourceTotalRequests));
             
             // 同可用区调用
             if (sameAzRequests > 0) {
-                System.out.println(String.format("  ┌─> %s (同可用区): %d请求 [%s]", 
+                System.out.println(String.format("  ┌─> %s (same AZ): %d requests [%s]", 
                         sourceAz, sameAzRequests, "█".repeat(Math.min(sameAzRequests / 10, 50))));
             }
             
@@ -398,12 +402,12 @@ class AzBalanceUtilsTest {
                 String targetAz = targetEntry.getKey();
                 int requests = targetEntry.getValue();
                 if (!targetAz.equals(sourceAz) && requests > 0) {
-                    System.out.println(String.format("  └─> %s (跨可用区): %d请求 [%s]", 
+                    System.out.println(String.format("  └─> %s (cross AZ): %d requests [%s]", 
                             targetAz, requests, "▓".repeat(Math.min(requests / 10, 50))));
                 }
             }
             
-            System.out.println(String.format("  统计: 同可用区=%d, 跨可用区=%d, 同可用区比例=%.2f%%", 
+            System.out.println(String.format("  Stats: same-AZ=%d, cross-AZ=%d, same-AZ ratio=%.2f%%", 
                     sameAzRequests, crossAzRequests,
                     sourceTotalRequests > 0 ? (double) sameAzRequests / sourceTotalRequests * 100 : 0));
         }
@@ -431,34 +435,34 @@ class AzBalanceUtilsTest {
                 ? (double) reduction / roundRobinCrossAzCalls * 100 
                 : 0;
         
-        System.out.println("\n【算法对比图】");
+        System.out.println("\n[Algorithm comparison]");
         System.out.println("┌" + "─".repeat(78) + "┐");
-        System.out.println("│ 对比项                    │ 可用区感知负载均衡 │ 纯轮询算法        │");
+        System.out.println("| Metric                    | AZ-aware LB        | Round-robin      |");
         System.out.println("├" + "─".repeat(78) + "┤");
-        System.out.println(String.format("│ 跨可用区调用数            │ %-18d │ %-16d │", 
+        System.out.println(String.format("| Cross-AZ calls            | %-18d | %-16d |", 
                 azBalanceCrossAzCalls, roundRobinCrossAzCalls));
-        System.out.println(String.format("│ 同可用区调用数            │ %-18d │ %-16d │", 
+        System.out.println(String.format("| Same-AZ calls             | %-18d | %-16d |", 
                 azBalanceSameAzCalls, roundRobinSameAzCalls));
-        System.out.println(String.format("│ 总请求数                 │ %-18d │ %-16d │", 
+        System.out.println(String.format("| Total requests            | %-18d | %-16d |", 
                 totalRequests, totalRequests));
-        System.out.println(String.format("│ 跨可用区调用减少          │ %-18d │ %-16s │", 
+        System.out.println(String.format("| Cross-AZ reduction        | %-18d | %-16s |", 
                 reduction, "-"));
-        System.out.println(String.format("│ 跨可用区调用减少比例      │ %-18.2f%% │ %-16s │", 
+        System.out.println(String.format("| Cross-AZ reduction %%     | %-18.2f%% | %-16s |", 
                 reductionPercentage, "-"));
         System.out.println("└" + "─".repeat(78) + "┘");
         
         // 可视化对比
-        System.out.println("\n【跨可用区调用对比可视化】");
+        System.out.println("\n[Cross-AZ call visualization]");
         int maxCalls = Math.max(azBalanceCrossAzCalls, roundRobinCrossAzCalls);
         if (maxCalls > 0) {
             int azBalanceBarLength = (int) ((double) azBalanceCrossAzCalls / maxCalls * 60);
             int roundRobinBarLength = (int) ((double) roundRobinCrossAzCalls / maxCalls * 60);
             
-            System.out.println("可用区感知: " + "█".repeat(azBalanceBarLength) + 
+            System.out.println("AZ-aware: " + "█".repeat(azBalanceBarLength) + 
                     String.format(" %d", azBalanceCrossAzCalls));
-            System.out.println("纯轮询算法: " + "█".repeat(roundRobinBarLength) + 
+            System.out.println("Round-robin: " + "█".repeat(roundRobinBarLength) + 
                     String.format(" %d", roundRobinCrossAzCalls));
-            System.out.println("减少量:     " + "▓".repeat(Math.max(0, roundRobinBarLength - azBalanceBarLength)) + 
+            System.out.println("Reduction:  " + "▓".repeat(Math.max(0, roundRobinBarLength - azBalanceBarLength)) + 
                     String.format(" %d (%.2f%%)", reduction, reductionPercentage));
         }
         
@@ -567,7 +571,7 @@ class AzBalanceUtilsTest {
      */
     private void printTargetInstanceAllocation(Map<String, List<Integer>> targetMap,
                                               Map<String, Map<String, Integer>> result) {
-        System.out.println("\n【目标实例请求分配详情】");
+        System.out.println("\n[Target instance allocation]");
         
         // 计算每个目标可用区接收到的总请求数
         Map<String, Integer> targetAzTotalRequests = new HashMap<>();
@@ -583,10 +587,10 @@ class AzBalanceUtilsTest {
         int totalRequests = calculateTotalAllocated(result);
         int averageRequestsPerInstance = totalTargetInstances > 0 ? totalRequests / totalTargetInstances : 0;
         
-        System.out.println(String.format("总请求数: %d, 目标实例数: %d, 平均每实例: %d", 
+        System.out.println(String.format("Total requests: %d, target instances: %d, avg per instance: %d", 
                 totalRequests, totalTargetInstances, averageRequestsPerInstance));
         
-        System.out.println("\n各目标可用区请求分配:");
+        System.out.println("\nPer target AZ allocation:");
         for (Map.Entry<String, List<Integer>> entry : targetMap.entrySet()) {
             String az = entry.getKey();
             int instanceCount = entry.getValue().size();
@@ -594,27 +598,27 @@ class AzBalanceUtilsTest {
             int requestsPerInstance = instanceCount > 0 ? totalRequestsForAz / instanceCount : 0;
             int remainder = instanceCount > 0 ? totalRequestsForAz % instanceCount : 0;
             
-            System.out.println(String.format("  %s: %d实例, 总请求=%d, 平均每实例=%d", 
+            System.out.println(String.format("  %s: %d instances, total=%d, avg per instance=%d", 
                     az, instanceCount, totalRequestsForAz, requestsPerInstance));
             
             if (remainder > 0) {
-                System.out.println(String.format("    (余数: %d, 将分配给部分实例)", remainder));
+                System.out.println(String.format("    (remainder: %d, distributed to some instances)", remainder));
             }
             
             // 显示每个实例的请求数（假设均匀分配，余数分配给前几个实例）
             if (instanceCount > 0 && instanceCount <= 10) {
                 // 如果实例数不多，显示每个实例的请求数
-                System.out.print("    实例请求分布: ");
+                System.out.print("    Per-instance distribution: ");
                 for (int i = 0; i < instanceCount; i++) {
                     int instanceRequests = requestsPerInstance + (i < remainder ? 1 : 0);
-                    System.out.print(String.format("实例%d=%d ", i + 1, instanceRequests));
+                    System.out.print(String.format("inst%d=%d ", i + 1, instanceRequests));
                 }
                 System.out.println();
             } else if (instanceCount > 10) {
                 // 如果实例数很多，只显示统计信息
                 int minRequests = requestsPerInstance;
                 int maxRequests = requestsPerInstance + (remainder > 0 ? 1 : 0);
-                System.out.println(String.format("    实例请求范围: %d - %d", minRequests, maxRequests));
+                System.out.println(String.format("    Instance request range: %d - %d", minRequests, maxRequests));
             }
         }
         

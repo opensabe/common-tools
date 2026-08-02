@@ -24,6 +24,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * WebClient 出站请求的 JFR 事件。
+ * <p>
+ * 由 {@link WebClientObservationToJFRGenerator} 在 Observation 生命周期内填充并提交。
+ */
 @Getter
 @Setter
 @NoArgsConstructor

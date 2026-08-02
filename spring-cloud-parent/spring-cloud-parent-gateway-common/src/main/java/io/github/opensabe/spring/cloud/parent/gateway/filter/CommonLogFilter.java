@@ -97,6 +97,7 @@ public class CommonLogFilter extends AbstractTracedFilter {
     @Autowired
     private GatewayLogProperties gatewayLogProperties;
 
+    /** {@inheritDoc} */
     @Override
     public Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
         Observation observation = TraceIdFilter.getObservation(exchange);
@@ -135,11 +136,13 @@ public class CommonLogFilter extends AbstractTracedFilter {
             return dataBuffer;
         });
         return chain.filter(exchange.mutate().request(new ServerHttpRequestDecorator(request) {
+            /** {@inheritDoc} */
             @Override
             public Flux<DataBuffer> getBody() {
                 return dataBufferFlux;
             }
         }).response(new ServerHttpResponseDecorator(response) {
+            /** {@inheritDoc} */
             @Override
             public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
                 HttpHeaders responseHeaders = super.getHeaders();
@@ -276,6 +279,7 @@ public class CommonLogFilter extends AbstractTracedFilter {
     }
 
     @Override
+    /** {@inheritDoc} */
     public int ordered() {
         return ORDER;
     }

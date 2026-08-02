@@ -24,11 +24,17 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+/**
+ * 应用预热配置属性。
+ * <p>
+ * 绑定 {@code preheating.*} 前缀配置。
+ */
 @ConfigurationProperties(prefix = "preheating")
 public class PreheatingProperties {
     /**
      * 预热是否启动
      */
     private boolean enabled;
+    /** 预热阶段最长等待时间。 */
     private Duration delayReadyTime;
 }

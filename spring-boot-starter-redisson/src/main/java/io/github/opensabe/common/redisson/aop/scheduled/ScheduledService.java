@@ -17,10 +17,15 @@ package io.github.opensabe.common.redisson.aop.scheduled;
 
 
 /**
- *
- * @author hengma
+ * 分布式定时任务执行体函数式接口。
  */
 @FunctionalInterface
 public interface ScheduledService {
+
+    /**
+     * 执行定时任务逻辑。
+     *
+     * @throws Throwable 业务异常
+     */
     void run() throws Throwable;
 }

@@ -20,6 +20,11 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.common.config.ShutdownOptimizeConfiguration;
 
+/**
+ * 优雅关闭优化自动配置入口。
+ * <p>
+ * 注册 Eureka 下线后的延迟缓冲监听器，减少关闭窗口内的 503 与线程池拒绝。
+ */
 @AutoConfiguration
 @Import(ShutdownOptimizeConfiguration.class)
 public class ShutdownOptimizeAutoConfiguration {

@@ -20,16 +20,40 @@ import java.util.concurrent.TimeUnit;
 import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * 可过期信号量许可获取操作的 Observation 上下文。
+ */
 
 @Getter
 @Setter
 public class RPermitSemaphoreAcquiredContext extends Observation.Context {
+    /**
+     * 信号量名称
+     */
     private final String semaphoreName;
+    /**
+     * 当前线程名
+     */
     private final String threadName;
+    /**
+     * 是否为 tryAcquire 路径
+     */
     private final boolean tryAcquire;
+    /**
+     * 等待时间
+     */
     private final long waitTime;
+    /**
+     * 许可租约时间
+     */
     private final long leaseTime;
+    /**
+     * 时间单位
+     */
     private final TimeUnit unit;
+    /**
+     * 获取到的许可 ID
+     */
     private String permitId;
 
     public RPermitSemaphoreAcquiredContext(String semaphoreName, boolean tryAcquire, long waitTime, long leaseTime, TimeUnit unit) {

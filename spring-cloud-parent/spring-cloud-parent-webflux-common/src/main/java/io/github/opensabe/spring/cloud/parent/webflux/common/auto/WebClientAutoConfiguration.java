@@ -21,6 +21,11 @@ import org.springframework.context.annotation.Import;
 import io.github.opensabe.spring.cloud.parent.webflux.common.config.TracedPublisherConfiguration;
 import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientConfiguration;
 
+/**
+ * WebClient 自动配置入口。
+ * <p>
+ * 导入 WebClient 命名上下文、负载均衡过滤器、JFR 观测与 Traced Publisher 等配置。
+ */
 @Import({WebClientConfiguration.class, TracedPublisherConfiguration.class})
 @AutoConfiguration
 public class WebClientAutoConfiguration {

@@ -20,9 +20,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * OpenFeign 请求 JFR 事件配置属性。
+ * <p>
+ * 绑定前缀 {@code spring.cloud.openfeign.jfr}。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "spring.cloud.openfeign.jfr")
 public class FeignJFRProperties {
+    /**
+     * 是否启用 Feign 请求 JFR 事件生成，默认 {@code true}。
+     */
     private boolean enabled = true;
 }

@@ -18,6 +18,7 @@ package io.github.opensabe.spring.cloud.parent.common.test.config;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -34,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(
         classes = OnlyOnceApplicationListenerTest.TestConfig.class
 )
+@DisplayName("OnlyOnceApplicationListener 只执行一次测试")
 class OnlyOnceApplicationListenerTest {
 
     private static final AtomicInteger executionCount = new AtomicInteger(0);
@@ -46,10 +48,8 @@ class OnlyOnceApplicationListenerTest {
         executionCount.set(0);
     }
 
-    /**
-     * 测试继承 OnlyOnceApplicationListener 的 ApplicationReadyEvent 监听器只执行一次
-     */
     @Test
+    @DisplayName("ApplicationReadyEvent监听器仅执行一次")
     void testOnlyOnceApplicationReadyEvent() {
         // 发布 TestOnlyOnceSpringApplicationEvent 事件两次
         applicationEventPublisher.publishEvent(new TestOnlyOnceSpringApplicationEvent(
@@ -59,7 +59,7 @@ class OnlyOnceApplicationListenerTest {
                 new SpringApplication(), new String[0])
         );
         // 验证只执行了一次
-        assertEquals(1, executionCount.get(), "ApplicationReadyEvent 监听器应该只执行一次");
+        assertEquals(1, executionCount.get(), "ApplicationReadyEvent listener should run only once");
     }
 
     @SpringBootApplication

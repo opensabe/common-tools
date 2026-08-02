@@ -20,6 +20,11 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.common.config.Resilience4jConfiguration;
 
+/**
+ * Resilience4j 组件自动配置入口。
+ * <p>
+ * 以 Caffeine 后端 Registry 替代默认 InMemory 实现，避免组件实例无限增长。
+ */
 @AutoConfiguration
 @Import({
         Resilience4jConfiguration.RetryConfiguration.class,

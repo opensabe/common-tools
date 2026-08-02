@@ -32,17 +32,26 @@ import org.springframework.context.support.ResourceBundleMessageSource;
  */
 public class I18nMessageResolver {
 
+    /** 当前 Locale 供应器。 */
     private final Supplier<Locale> localeSupplier;
 
+    /** Spring 消息源。 */
     private final MessageSource messageSource;
 
+    /**
+     * 使用 {@link LocaleContextHolder} 作为默认 Locale 来源。
+     *
+     * @param messageSource Spring 消息源
+     */
     public I18nMessageResolver(MessageSource messageSource) {
         this(LocaleContextHolder::getLocale, messageSource);
     }
 
     /**
-     * @param localeSupplier 怎样获取语言
-     * @param messageSource  国际化消息集合
+     * 使用 {@link MessageSource} 解析 i18n 消息模板；找不到 key 时原样返回模板。
+     *
+     * @param localeSupplier 当前 Locale 供应器
+     * @param messageSource  消息源
      */
     public I18nMessageResolver(Supplier<Locale> localeSupplier, MessageSource messageSource) {
         this.localeSupplier = localeSupplier;

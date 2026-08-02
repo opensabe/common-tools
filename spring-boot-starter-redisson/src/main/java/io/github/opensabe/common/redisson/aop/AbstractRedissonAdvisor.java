@@ -19,13 +19,24 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
 import org.springframework.lang.NonNull;
 
+/**
+ * Redisson AOP Advisor 抽象基类，绑定 {@link AbstractRedissonCachePointcut} 作为切点。
+ *
+ * @param <RedissonProp> 注解属性类型
+ */
 public abstract class AbstractRedissonAdvisor<RedissonProp extends AbstractRedissonProperties> extends AbstractBeanFactoryPointcutAdvisor {
+
+    /** 缓存注解解析结果的切点实现。 */
     private final AbstractRedissonCachePointcut<RedissonProp> abstractRedissonCachePointcut;
 
+    /**
+     * @param abstractRedissonCachePointcut 切点
+     */
     protected AbstractRedissonAdvisor(AbstractRedissonCachePointcut<RedissonProp> abstractRedissonCachePointcut) {
         this.abstractRedissonCachePointcut = abstractRedissonCachePointcut;
     }
 
+    /** {@inheritDoc} */
     @Override
     @NonNull
     public Pointcut getPointcut() {

@@ -120,6 +120,7 @@ public class RetryGatewayFilter extends AbstractTracedFilter {
     }
 
     @Override
+    /** {@inheritDoc} */
     public Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
         var request = exchange.getRequest();
         String path = request.getPath().value();
@@ -133,6 +134,7 @@ public class RetryGatewayFilter extends AbstractTracedFilter {
     }
 
     @Override
+    /** {@inheritDoc} */
     public int ordered() {
         //必须在RouteToRequestUrlFilter还有LoadBalancerClientFilter之前
         return ORDER;

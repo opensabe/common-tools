@@ -20,13 +20,18 @@ import java.io.IOException;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.ToxiproxyContainer;
+import org.junit.jupiter.api.DisplayName;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 
+/**
+ * WebFlux 模块集成测试基类。
+ */
 @Testcontainers
+@DisplayName("WebFlux模块微服务集成测试基类")
 public class CommonMicroServiceTest {
 
     public static final String GOOD_HOST;

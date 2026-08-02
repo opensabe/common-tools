@@ -17,17 +17,23 @@ package io.github.opensabe.common.redisson.test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.github.opensabe.common.redisson.util.LuaLimitCache;
 
+/**
+ * LuaLimitCache 多线程限流计数集成测试。
+ */
+@DisplayName("LuaLimitCache 集成测试")
 public class LuaLimitCacheTest extends BaseRedissonTest {
 
     @Autowired
     private LuaLimitCache luaLimitCache;
 
+    @DisplayName("多线程 Lua 限流计数")
     @Test
     public void testMultiThread() throws InterruptedException {
         Thread[] threads = new Thread[10];

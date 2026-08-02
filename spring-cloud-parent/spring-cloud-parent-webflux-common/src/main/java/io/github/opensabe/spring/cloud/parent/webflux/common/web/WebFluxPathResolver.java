@@ -25,12 +25,19 @@ import reactor.core.publisher.Mono;
 /**
  * @author maheng
  */
+/**
+ * WebFlux 请求路径参数解析器。
+ * <p>
+ * 支持 Controller 方法参数直接注入 {@link org.springframework.http.server.RequestPath}。
+ */
 public class WebFluxPathResolver implements HandlerMethodArgumentResolver {
+    /** {@inheritDoc} */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(Path.class) && String.class.isAssignableFrom(parameter.getParameterType());
     }
 
+    /** {@inheritDoc} */
     @Override
     public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
         return Mono.just(exchange.getRequest().getURI().getPath());

@@ -41,23 +41,27 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 将 secret properties 解密。
- * 整个config value格式：
+ * Config Server Secret 属性源解密器。
  * <p>
- *    base64 (AES_GCM_128 (cipher.length(4字节) + cipher(字节)  + payload(字节)))
- * </p>
+ * 配置值格式：{@code base64(AES_GCM_128([4字节密钥长度] + [AES密钥] + [MySQL AES 密文]))}。
+ * 解密后将 {@link org.springframework.cloud.bootstrap.config.BootstrapPropertySource}
+ * 替换为 {@link org.springframework.core.env.MapPropertySource}，避免重复解密。
+ *
  * @author maheng
  */
 @Log4j2
 public class SecretPropertySourceResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ApplicationEvent>, InitializingBean {
 
+    /** Bootstrap Secret 属性源名称前缀。 */
     public static final String SECRET_PROPERTY_SOURCE_NAME = PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME+"-secretPropertySource";
 
 
 
+    /** 复合解密器。 */
     private CompositeDecryptor decryptor;
 
     @Autowired(required = false)
+    /** Spring 注入的可选 SPI 解密器列表。 */
     private List<Decryptor> decrypters;
 
 //
@@ -71,11 +75,13 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
 //        }
 //    }
 
+    /** ApplicationContext 初始化阶段解密 Secret 属性源。 */
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         decrypt(applicationContext);
     }
 
+    /** Context 刷新或 Environment 变更时重新解密。 */
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ContextRefreshedEvent contextRefreshedEvent) {
@@ -157,6 +163,7 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
         }
     }
 
+    /** 装配 CompositeDecryptor。 */
     @Override
     public void afterPropertiesSet() throws Exception {
         this.decryptor = new CompositeDecryptor(decrypters);

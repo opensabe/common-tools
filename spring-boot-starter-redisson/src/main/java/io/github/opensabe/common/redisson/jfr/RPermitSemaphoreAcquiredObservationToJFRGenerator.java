@@ -18,6 +18,9 @@ package io.github.opensabe.common.redisson.jfr;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.common.redisson.observation.rsemaphore.RPermitSemaphoreAcquiredContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
+/**
+ * 将信号量许可获取 Observation 转换为 {@link RPermitSemaphoreAcquiredJFREvent}。
+ */
 
 public class RPermitSemaphoreAcquiredObservationToJFRGenerator extends ObservationToJFRGenerator<RPermitSemaphoreAcquiredContext> {
 

@@ -26,8 +26,12 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 
+/**
+ * {@link IntegerEnumedValue} 约束校验器：值必须为注解 {@link IntegerEnumedValue#value()} 之一，{@code null} 视为通过。
+ */
 public class IntegerEnumedValidator implements ConstraintValidator<IntegerEnumedValue, Integer> {
 
+    /** 允许的整型枚举值集合。 */
     private Set<Integer> set = new HashSet<>();
 
     @Override

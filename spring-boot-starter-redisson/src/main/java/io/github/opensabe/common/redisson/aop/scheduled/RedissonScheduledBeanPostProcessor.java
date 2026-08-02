@@ -29,21 +29,33 @@ import io.github.opensabe.common.redisson.config.RedissonScheduleProperties;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 扫描带 {@link io.github.opensabe.common.redisson.annotation.RedissonScheduled} 或 {@link RedissonScheduledService} 的 Bean。
+ */
 @Log4j2
 public class RedissonScheduledBeanPostProcessor implements BeanPostProcessor {
 
+    /** 定时任务开关配置。 */
     private final RedissonScheduleProperties redissonProperties;
 
+    /** Bean 名称 → 待调度实例。 */
     private final Map<String, Object> beanMap = Maps.newConcurrentMap();
 
+    /**
+     * @param redissonProperties 定时任务配置
+     */
     public RedissonScheduledBeanPostProcessor(RedissonScheduleProperties redissonProperties) {
         this.redissonProperties = redissonProperties;
     }
 
+    /**
+     * @return 已注册的待调度 Bean 映射
+     */
     public Map<String, Object> getBeanMap() {
         return beanMap;
     }
 
+    /** {@inheritDoc} — 收集带 {@link io.github.opensabe.common.redisson.annotation.RedissonScheduled} 的方法或 {@link RedissonScheduledService} Bean。 */
     @SneakyThrows
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {

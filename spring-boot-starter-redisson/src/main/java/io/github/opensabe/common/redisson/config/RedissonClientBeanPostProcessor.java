@@ -27,19 +27,22 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.observation.ObservedRedissonClient;
 
 /**
- * 将默认的RedissonClient替换为ObservedRedissonClient，
- * 因为RedissonClient创建比较早，因此这里必须调整一order，否则不经过BeanPostProcessor
- *
- * @author heng.ma
+ * 将容器中的 {@link RedissonClient} 替换为带 Micrometer 观测的 {@link ObservedRedissonClient}。
+ * <p>
+ * Redisson 客户端创建较早，须通过 {@link Ordered} 确保本后处理器先于依赖方执行。
  */
 public class RedissonClientBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware, Ordered {
+
+    /** Spring 应用上下文，延迟获取 {@link UnifiedObservationFactory}。 */
     private ApplicationContext applicationContext;
 
+    /** {@inheritDoc} */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
+    /** {@inheritDoc} — 包装 {@link RedissonClient} 为 {@link ObservedRedissonClient}。 */
     @Override
     public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
         if (bean instanceof RedissonClient delegate) {
@@ -48,6 +51,7 @@ public class RedissonClientBeanPostProcessor implements BeanPostProcessor, Appli
         return bean;
     }
 
+    /** {@inheritDoc} — 尽早执行以覆盖早期创建的 RedissonClient。 */
     @Override
     public int getOrder() {
         return 0;

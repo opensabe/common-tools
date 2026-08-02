@@ -25,8 +25,20 @@ import lombok.extern.log4j.Log4j2;
 
 import static feign.FeignException.errorStatus;
 
+/**
+ * OpenFeign 默认错误解码器。
+ * <p>
+ * 对可重试请求或特定状态码抛出 {@link RetryableException}，其余走标准 Feign 异常。
+ */
 @Log4j2
 public class DefaultErrorDecoder implements ErrorDecoder {
+    /**
+     * 解码 Feign 错误响应，判断是否应重试。
+     *
+     * @param methodKey 方法标识
+     * @param response  HTTP 响应
+     * @return 待抛出的异常
+     */
     @Override
     public Exception decode(String methodKey, Response response) {
         boolean queryRequest = OpenfeignUtil.isRetryableRequest(response.request());

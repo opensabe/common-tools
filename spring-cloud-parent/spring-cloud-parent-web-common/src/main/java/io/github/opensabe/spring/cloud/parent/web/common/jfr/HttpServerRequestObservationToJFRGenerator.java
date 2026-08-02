@@ -26,6 +26,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 将 Servlet HTTP 服务器 {@link ServerRequestObservationContext} Observation 转换为 {@link HttpServerRequestJFREvent}。
+ */
 @Log4j2
 public class HttpServerRequestObservationToJFRGenerator extends ObservationToJFRGenerator<ServerRequestObservationContext> {
     private final HttpServerJFRProperties properties;
@@ -34,6 +37,7 @@ public class HttpServerRequestObservationToJFRGenerator extends ObservationToJFR
         this.properties = properties;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Class<ServerRequestObservationContext> getContextClazz() {
         return ServerRequestObservationContext.class;
@@ -54,11 +58,13 @@ public class HttpServerRequestObservationToJFRGenerator extends ObservationToJFR
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(ServerRequestObservationContext context) {
         return shouldCommit(context);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(ServerRequestObservationContext context) {
         return shouldGenerate(context);
@@ -110,11 +116,13 @@ public class HttpServerRequestObservationToJFRGenerator extends ObservationToJFR
         httpServerRequestJFREvent.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(ServerRequestObservationContext context) {
         commit(context);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(ServerRequestObservationContext context) {
         generate(context);

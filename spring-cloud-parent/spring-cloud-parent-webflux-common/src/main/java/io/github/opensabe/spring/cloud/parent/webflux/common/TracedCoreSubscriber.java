@@ -20,6 +20,9 @@ import org.reactivestreams.Subscription;
 
 import io.micrometer.observation.Observation;
 
+/**
+ * 在 Observation 作用域内转发 Reactive Streams 事件的订阅者。
+ */
 public class TracedCoreSubscriber<T> implements Subscriber<T> {
     private final Subscriber<T> delegate;
     private final Observation observation;
@@ -29,6 +32,7 @@ public class TracedCoreSubscriber<T> implements Subscriber<T> {
         this.observation = observation;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onSubscribe(Subscription s) {
         observation.scoped(() -> {
@@ -36,6 +40,7 @@ public class TracedCoreSubscriber<T> implements Subscriber<T> {
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onError(Throwable t) {
         observation.scoped(() -> {
@@ -43,6 +48,7 @@ public class TracedCoreSubscriber<T> implements Subscriber<T> {
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onComplete() {
         observation.scoped(() -> {
@@ -50,6 +56,7 @@ public class TracedCoreSubscriber<T> implements Subscriber<T> {
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onNext(T o) {
         observation.scoped(() -> {

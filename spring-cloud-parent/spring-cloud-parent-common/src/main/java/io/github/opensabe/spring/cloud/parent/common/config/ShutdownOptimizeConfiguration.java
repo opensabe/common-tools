@@ -22,9 +22,21 @@ import org.springframework.context.annotation.Configuration;
 import io.github.opensabe.spring.cloud.parent.common.shutdown.GracefulShutdownDelayBuffer;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 优雅关闭优化配置。
+ * <p>
+ * 注册 {@link io.github.opensabe.spring.cloud.parent.common.shutdown.GracefulShutdownDelayBuffer}，
+ * 在 Eureka 下线后等待客户端缓存刷新。
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 public class ShutdownOptimizeConfiguration {
+
+    /**
+     * 注册优雅关闭延迟缓冲监听器。
+     *
+     * @return 延迟缓冲监听器
+     */
     @Bean
     public GracefulShutdownDelayBuffer gracefulShutdownDelayBuffer() {
         return new GracefulShutdownDelayBuffer();

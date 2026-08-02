@@ -20,6 +20,11 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.common.config.PreheatingConfiguration;
 
+/**
+ * 应用预热自动配置入口。
+ * <p>
+ * 在 {@code preheating.enabled=true} 时注册就绪延迟预热监听器。
+ */
 @AutoConfiguration
 @Import(PreheatingConfiguration.class)
 public class PreheatingAutoConfiguration {

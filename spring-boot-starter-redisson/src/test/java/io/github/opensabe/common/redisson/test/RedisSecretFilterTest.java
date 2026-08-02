@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,12 +34,17 @@ import io.github.opensabe.common.secret.SecretProvider;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Import(RedisSecretFilterTest.TestConfig.class)
+/**
+ * RedisTemplate 密钥过滤集成测试：写入含密钥值时抛异常且不落库。
+ */
+@DisplayName("Redis 密钥过滤集成测试")
 public class RedisSecretFilterTest extends BaseRedissonTest {
 
     private static final String SECRET = "secretString";
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @DisplayName("各 Redis 数据结构密钥过滤")
     @Test
     public void test() {
         assertThrows(

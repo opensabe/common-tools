@@ -31,15 +31,30 @@ import io.github.opensabe.common.redisson.aop.AbstractRedissonProperties;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 
 /**
- * @author heng.ma
+ * 支持参数级 {@code *Name} 注解的 Redisson 切点基类（旧版 API）。
+ * <p>
+ * 在方法、类及父类/接口上查找注解，并解析参数上的动态名称注解。
+ *
+ * @param <T> 属性类型
  */
 public abstract class ExtraNamePointcut<T extends AbstractRedissonProperties> extends AbstractRedissonCachePointcut<T> {
 
 
+    /**
+     * @param evaluator SpEL 求值器
+     */
     protected ExtraNamePointcut(MethodArgumentsExpressEvaluator evaluator) {
         super(evaluator);
     }
 
+    /**
+     * 查找方法参数上第一个指定类型的名称注解。
+     *
+     * @param method 目标方法
+     * @param annotationClass 名称注解类型
+     * @param <A> 注解类型
+     * @return 注解实例与参数索引；未找到返回 {@code null}
+     */
     protected static <A extends Annotation> Pair<A, Integer> findParameterAnnotation(Method method, Class<A> annotationClass) {
         Annotation[][] as = method.getParameterAnnotations();
         for (int i = 0; i < as.length; i++) {
@@ -48,7 +63,6 @@ public abstract class ExtraNamePointcut<T extends AbstractRedissonProperties> ex
                 continue;
             }
             @SuppressWarnings("unchecked")
-            //获取第一个 RedissonLockName 注解的参数
             Optional<A> op = Arrays.stream(ar)
                     .filter(annotationClass::isInstance)
                     .map(a -> (A) a)
@@ -60,6 +74,7 @@ public abstract class ExtraNamePointcut<T extends AbstractRedissonProperties> ex
         return null;
     }
 
+    /** {@inheritDoc} — 沿类继承链与接口链查找注解。 */
     @Override
     protected T findProperties(Method method, Class<?> targetClass) {
         T redissonProp = computeRedissonProperties(method, targetClass);
@@ -75,6 +90,13 @@ public abstract class ExtraNamePointcut<T extends AbstractRedissonProperties> ex
         return optional.orElse(null);
     }
 
+    /**
+     * 沿父类/接口列表查找首个匹配的 Redisson 属性。
+     *
+     * @param list 待搜索的类型列表
+     * @param method 原始方法（用于反射同名方法）
+     * @return 首个非空属性
+     */
     private Optional<T> fromClasses(List<Class<?>> list, Method method) {
         return list.stream()
                 .map(i -> {
@@ -88,5 +110,12 @@ public abstract class ExtraNamePointcut<T extends AbstractRedissonProperties> ex
                 .findFirst();
     }
 
+    /**
+     * 从方法或类注解构建 Redisson 属性。
+     *
+     * @param method 目标方法
+     * @param clazz 声明类
+     * @return 属性实例，无注解时 {@code null}
+     */
     protected abstract T computeRedissonProperties(Method method, Class<?> clazz);
 }

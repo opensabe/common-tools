@@ -45,7 +45,9 @@ public class UnifiedObservationFactory {
      * 参考代码：io.micrometer.tracing.brave.bridge.W3CPropagation
      * TraceContext.Injector<R> injector(Setter<R, String> setter)
      */
+    /** W3C traceparent 头字段名。 */
     public static final String TRACE_PARENT = "traceparent";
+    /** traceparent 各段分隔符。 */
     public static final char TRACEPARENT_DELIMITER = '-';
     private static final VarHandle OBSERVATION_REGISTRY_HANDLE;
 
@@ -59,9 +61,13 @@ public class UnifiedObservationFactory {
     }
 
     private final ObjectProvider<ObservationRegistry> objectProvider;
+    /** 延迟初始化的 ObservationRegistry 引用。 */
     private ObservationRegistry observationRegistry;
 
 
+    /**
+     * @param objectProvider 延迟提供的 {@link ObservationRegistry}
+     */
     public UnifiedObservationFactory(ObjectProvider<ObservationRegistry> objectProvider) {
         this.objectProvider = objectProvider;
     }
@@ -71,8 +77,8 @@ public class UnifiedObservationFactory {
      * 没有提供返回 Span 的方法，因为基本用不上，
      * 如果要保持链路不能像之前使用 Span 而是要用 Observation，所以不提供 Span 的方法，只提供了 Observation
      *
-     * @param observation
-     * @return
+     * @param observation 当前 Observation
+     * @return 追踪上下文，无 tracing 时为 {@code null}
      */
     @Nullable
     public static TraceContext getTraceContext(Observation observation) {
@@ -91,7 +97,7 @@ public class UnifiedObservationFactory {
      * 使用 VarHandle 的 release/acquire 内存屏障，保证 observationRegistry 的可见性
      * 比使用 volatile 更轻量级，参考：https://zhuanlan.zhihu.com/p/499524262
      *
-     * @return
+     * @return 延迟初始化后的 {@link ObservationRegistry}
      */
     public ObservationRegistry getObservationRegistry() {
         if (observationRegistry == null) {
@@ -108,7 +114,9 @@ public class UnifiedObservationFactory {
     }
 
     /**
-     * 获取当前的 Observation
+     * 获取当前的 Observation。
+     *
+     * @return 当前 Observation，无活跃观测时为 {@code null}
      */
     @Nullable
     public Observation getCurrentObservation() {
@@ -118,7 +126,7 @@ public class UnifiedObservationFactory {
     /**
      * 创建新的Observation, task center,mq consumer等场景不需要继承parent，需要新起一个
      *
-     * @return
+     * @return 新的空 Observation
      */
     public Observation createEmptyObservation() {
         return DefaultEmptyObservationDocumentation.EMPTY_OBSERVATION_DOCUMENTATION.start(getObservationRegistry());
@@ -131,7 +139,7 @@ public class UnifiedObservationFactory {
      * 如果你本身想单独记录一个 Observation，那么请使用标准的 ObservationConvention + ObservationContext + ObservationDocumentation 的方式
      * 可以参考：FeignContext，FeignObservationConvention，FeignObservationDocumentation
      *
-     * @return
+     * @return 当前或新创建的空 Observation
      */
     @NotNull
     public Observation getCurrentOrCreateEmptyObservation() {

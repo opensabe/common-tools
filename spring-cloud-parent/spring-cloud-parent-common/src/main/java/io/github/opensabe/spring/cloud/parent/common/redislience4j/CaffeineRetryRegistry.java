@@ -29,6 +29,10 @@ import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 
 /**
+ * 基于 Caffeine 存储的 RetryRegistry 实现。
+ * <p>
+ * 替代默认 InMemory 实现，支持条目过期与 AutoCloseable 资源回收。
+ *
  * @author maheng
  * @see io.github.resilience4j.retry.internal.InMemoryRetryRegistry
  */

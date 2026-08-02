@@ -35,10 +35,21 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 
 import io.github.opensabe.common.utils.SpringUtil;
 
+/**
+ * Log4j2 核心 Filter：在日志落盘前检测并拦截含敏感信息的输出。
+ * <p>
+ * 异步日志场景下 filter 在单线程执行，故对相同格式化消息使用 1 分钟本地缓存以降低重复扫描开销。
+ */
 @Plugin(name = "SecretCheckFilter", category = "Core", elementType = "filter", printObject = true)
 public class Log4j2SecretCheckFilter extends AbstractFilter {
+    /** 按格式化消息缓存是否含敏感信息，避免每条日志全量扫描。 */
     private final Cache<String, Boolean> hasSecretCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(1)).build();
 
+    /**
+     * Log4j2 插件工厂方法。
+     *
+     * @return Filter 实例
+     */
     @PluginFactory
     public static Log4j2SecretCheckFilter createFilter() {
         return new Log4j2SecretCheckFilter();
@@ -46,7 +57,6 @@ public class Log4j2SecretCheckFilter extends AbstractFilter {
 
     @Override
     public Result filter(LogEvent event) {
-        //对于异步日志，这里是单线程执行的，所以不能有太大消耗，不能每次都检查
         String format = event.getMessage().getFormattedMessage();
         if (format == null) {
             return Result.NEUTRAL;
@@ -64,6 +74,12 @@ public class Log4j2SecretCheckFilter extends AbstractFilter {
         return check;
     }
 
+    /**
+     * 对单条消息文本执行敏感信息检查。
+     *
+     * @param message 日志消息
+     * @return {@link Result#DENY} 含敏感信息；否则 {@link Result#NEUTRAL}
+     */
     private Result check(String message) {
         if (StringUtils.isEmpty(message)) {
             return Result.NEUTRAL;
@@ -113,4 +129,3 @@ public class Log4j2SecretCheckFilter extends AbstractFilter {
         return super.filter(logger, level, marker, msg, t);
     }
 }
-

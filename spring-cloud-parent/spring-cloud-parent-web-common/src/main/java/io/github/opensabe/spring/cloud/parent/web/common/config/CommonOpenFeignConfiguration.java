@@ -52,6 +52,12 @@ import io.github.opensabe.spring.cloud.parent.web.common.jfr.FeignObservationToJ
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 
+/**
+ * OpenFeign 全局配置。
+ * <p>
+ * 通过 {@link BeanPostProcessor} 为 {@link org.springframework.cloud.openfeign.FeignClientFactory} 注入
+ * {@link DefaultOpenFeignConfiguration}，并注册 HTTP 客户端、负载均衡委托与 JFR 生成器等 Bean。
+ */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(FeignJFRProperties.class)
 public class CommonOpenFeignConfiguration implements BeanPostProcessor {
@@ -111,11 +117,21 @@ public class CommonOpenFeignConfiguration implements BeanPostProcessor {
         return bean;
     }
 
+    /**
+     * 注册 Feign 请求断路器提取器。
+     *
+     * @return 断路器提取器
+     */
     @Bean
     public CircuitBreakerExtractor feignCircuitBreakerExtractor() {
         return new FeignRequestCircuitBreakerExtractor();
     }
 
+    /**
+     * 注册 Apache HttpClient，配置连接池与 Keep-Alive 策略。
+     *
+     * @return 共享 HttpClient 实例
+     */
     @Bean
     public HttpClient getHttpClient() {
         // 长连接保持5分钟
@@ -132,6 +148,12 @@ public class CommonOpenFeignConfiguration implements BeanPostProcessor {
         return httpClientBuilder.build();
     }
 
+    /**
+     * 注册 Feign 使用的 Apache HTTP 客户端（无自定义 Bean 时）。
+     *
+     * @param httpClient 底层 HttpClient
+     * @return Feign ApacheHttpClient 适配器
+     */
     @Bean
     @ConditionalOnMissingBean
     public ApacheHttpClient internalApacheHttpClient(HttpClient httpClient) {
@@ -174,6 +196,12 @@ public class CommonOpenFeignConfiguration implements BeanPostProcessor {
         );
     }
 
+    /**
+     * 注册 Feign Observation 到 JFR 事件的生成器。
+     *
+     * @param feignJFRProperties Feign JFR 配置
+     * @return JFR 生成器
+     */
     @Bean
     public FeignObservationToJFRGenerator feignObservationToJFRGenerator(FeignJFRProperties feignJFRProperties) {
         return new FeignObservationToJFRGenerator(feignJFRProperties);

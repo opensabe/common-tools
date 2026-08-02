@@ -27,8 +27,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * @author heng.ma
- * @see org.redisson.api.RedissonClient#getFairLock(String)
+ * 声明 Redisson 公平锁（{@link org.redisson.api.RedissonClient#getFairLock(String)}）。
+ * <p>
+ * 组合 {@link SLock}，固定 {@link SLock.LockFeature#FAIR}。
  */
 @Documented
 @Inherited
@@ -45,6 +46,7 @@ public @interface FairLock {
     @AliasFor(annotation = SLock.class)
     String[] name();
 
+    /** 锁键前缀。 */
     @AliasFor(annotation = SLock.class)
     String prefix() default RedissonLock.DEFAULT_PREFIX;
 
@@ -67,6 +69,7 @@ public @interface FairLock {
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
 
+    /** 加锁策略。 */
     @AliasFor(annotation = SLock.class)
     SLock.LockType lockType() default SLock.LockType.BLOCK_LOCK;
 

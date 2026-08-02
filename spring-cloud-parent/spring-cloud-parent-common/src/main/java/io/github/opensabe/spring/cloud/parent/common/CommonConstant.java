@@ -15,6 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common;
 
+/**
+ * Spring Cloud Parent 公共常量。
+ */
 public interface CommonConstant {
+
+    /** Socket.IO 默认路径前缀。 */
     String SOCKET_IO_PATH = "socket.io";
 }

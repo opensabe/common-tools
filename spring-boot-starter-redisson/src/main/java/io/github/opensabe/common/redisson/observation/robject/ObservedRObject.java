@@ -13,3 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.opensabe.common.redisson.observation.robject;
+
+/**
+ * Redisson {@link org.redisson.api.RObject} 观测包装预留占位；当前无具体实现。
+ *
+ * @author heng.ma
+ */
+public final class ObservedRObject {
+    private ObservedRObject() {
+    }
+}

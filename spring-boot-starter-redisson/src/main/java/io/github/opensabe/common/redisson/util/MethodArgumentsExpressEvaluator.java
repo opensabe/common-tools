@@ -30,16 +30,23 @@ import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.SpelParseException;
-
 /**
+ * 基于 Spring SpEL 的方法参数表达式求值器，用于解析 Redisson 注解中的动态锁名/限流名等。
+ *
+ * <p>无 {@code #} 占位符的表达式在解析失败时原样返回。
+ *
  * @author heng.ma
  */
+
 public class MethodArgumentsExpressEvaluator extends CachedExpressionEvaluator {
 
     private final Map<ExpressionKey, Expression> cache = new ConcurrentHashMap<>();
 
     private final BeanFactory beanFactory;
 
+    /**
+     * @param beanFactory Spring Bean 工厂，用于 SpEL 中解析 Bean 引用；可为 null
+     */
     public MethodArgumentsExpressEvaluator(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
@@ -49,6 +56,15 @@ public class MethodArgumentsExpressEvaluator extends CachedExpressionEvaluator {
     }
 
 
+    /**
+     * 解析方法级 SpEL 表达式为字符串。
+     *
+     * @param method 目标方法
+     * @param target 调用目标（可为代理）
+     * @param arguments 方法参数
+     * @param expression SpEL 表达式或字面量
+     * @return 解析结果；无 {@code #} 且解析失败时返回原表达式
+     */
     public String resolve(Method method, Object target, Object[] arguments, String expression) {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
         try {

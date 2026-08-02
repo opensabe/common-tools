@@ -18,13 +18,28 @@ package io.github.opensabe.common.redisson.observation.rsemaphore;
 import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * 信号量许可释放操作的 Observation 上下文。
+ */
 
 @Setter
 @Getter
 public class RPermitSemaphoreReleasedContext extends Observation.Context {
+    /**
+     * 信号量名称
+     */
     private final String semaphoreName;
+    /**
+     * 当前线程名
+     */
     private final String threadName;
+    /**
+     * 释放的许可 ID
+     */
     private final String permitId;
+    /**
+     * 是否释放成功
+     */
     private boolean permitReleasedSuccessfully;
 
     public RPermitSemaphoreReleasedContext(String semaphoreName, String permitId) {

@@ -38,17 +38,34 @@ import java.util.Objects;
 import java.util.concurrent.*;
 
 
+/**
+ * 应用启动后注册 Redisson 选主定时任务，并在 RefreshScope 刷新时热更新调度参数。
+ */
 @Log4j2
 public class RedissonScheduledListener {
 
+    /** 待调度 Bean 扫描器。 */
     private final RedissonScheduledBeanPostProcessor processor;
+
+    /** 统一观测工厂。 */
     private final UnifiedObservationFactory unifiedObservationFactory;
+
+    /** Redisson 客户端（选主锁）。 */
     private final RedissonClient redissonClient;
+
+    /** Micrometer 指标注册表。 */
     private final MeterRegistry meterRegistry;
 
+    /** 任务名称 → 执行器包装。 */
     private final Map<String, ExecutorWrapper> map = Maps.newConcurrentMap();
 
 
+    /**
+     * @param processor Bean 扫描器
+     * @param unifiedObservationFactory 观测工厂
+     * @param redissonClient Redisson 客户端
+     * @param meterRegistry 指标注册表
+     */
     public RedissonScheduledListener(RedissonScheduledBeanPostProcessor processor, UnifiedObservationFactory unifiedObservationFactory, RedissonClient redissonClient, MeterRegistry meterRegistry) {
         this.processor = processor;
         this.unifiedObservationFactory = unifiedObservationFactory;
@@ -57,6 +74,11 @@ public class RedissonScheduledListener {
     }
 
 
+    /**
+     * 应用启动完成后初始化所有定时任务。
+     *
+     * @param event 启动事件（未使用）
+     */
     @EventListener(ApplicationStartedEvent.class)
     public void init() {
 
@@ -84,16 +106,36 @@ public class RedissonScheduledListener {
         });
     }
 
+    /**
+     * 为 {@link RedissonScheduledService} 实例创建执行器。
+     *
+     * @param service 定时任务服务
+     * @return 执行器包装
+     */
     private ExecutorWrapper wrapper (RedissonScheduledService service) {
         return new ExecutorWrapper(redissonClient, unifiedObservationFactory,
                 service, service.name(), service.initialDelay(),
                 service.fixedDelay(), service.stopOnceShutdown(), meterRegistry);
     }
+    /**
+     * 为 {@link io.github.opensabe.common.redisson.annotation.RedissonScheduled} 方法创建执行器。
+     *
+     * @param name 任务名称
+     * @param annotation 注解实例
+     * @param method 目标方法
+     * @param bean 目标 Bean
+     * @return 执行器包装
+     */
     private ExecutorWrapper wrapper (String name, RedissonScheduled annotation, Method method, Object bean) {
         return new ExecutorWrapper(redissonClient, unifiedObservationFactory, () -> method.invoke(bean), name, annotation.initialDelay(),
                 annotation.fixedDelay(), annotation.stopOnceShutdown(), meterRegistry);
     }
 
+    /**
+     * RefreshScope 刷新后更新任务调度参数与 service 引用。
+     *
+     * @param service 刷新后的服务实例
+     */
     public void refresh (RedissonScheduledService service) {
         ExecutorWrapper wrapper = map.get(service.name());
         if (Objects.isNull(wrapper)) {
@@ -103,33 +145,57 @@ public class RedissonScheduledListener {
         wrapper.refresh(service);
     }
 
+    /** 关闭所有定时任务执行器与选主线程。 */
     public void close() {
         log.info("closing RedissonScheduledListener...");
         map.values().parallelStream().forEach(ExecutorWrapper::close);
         log.info("RedissonScheduledListener closed...");
     }
 
+    /** 单任务执行器：选主锁 + 调度线程池 + 耗时指标。 */
     private static class ExecutorWrapper {
+        /** 选主锁持有线程。 */
         private final Thread leaderLatch;
+        /** 单线程调度器。 */
         private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+        /** 任务耗时分布指标。 */
         private final DistributionSummary distributionSummary;
+        /** 任务名称。 */
         private final String name;
+        /** 包装观测的任务 Runnable。 */
         private final Runnable task;
 
         /**
-         * 如果service是RefreshScope，其他属性刷新，但是fixedDelay属性没刷新，此时线程池保存的还是旧的bean
-         * 因此需要把service做成本地变量，bean刷新时，即使不重新启动定时任务，也要更新一下service
+         * 可刷新的任务执行体；RefreshScope 刷新时需更新引用，即使 fixedDelay 未变。
          */
         private volatile ScheduledService service;
 
+        /** 当前初始延迟（毫秒）。 */
         private volatile long initialDelay;
+        /** 当前固定间隔（毫秒）。 */
         private volatile long fixedDelay;
+        /** 当前调度 Future。 */
         private volatile ScheduledFuture<?> future;
 
+        /** 关闭时是否立即中断。 */
         private volatile boolean stopOnceShutdown;
+        /** 当前实例是否为集群 leader。 */
         private volatile boolean isLeader;
+        /** 是否已停止。 */
         private volatile boolean isStopped = false;
 
+        /**
+         * 创建执行器并启动选主与调度。
+         *
+         * @param redissonClient Redisson 客户端
+         * @param unifiedObservationFactory 观测工厂
+         * @param runnable 任务执行体
+         * @param name 任务名称
+         * @param initialDelay 初始延迟
+         * @param fixedDelay 固定间隔
+         * @param stopOnceShutdown 关闭策略
+         * @param meterRegistry 指标注册表
+         */
         ExecutorWrapper(RedissonClient redissonClient, UnifiedObservationFactory unifiedObservationFactory,
                                ScheduledService runnable,
                                String name, long initialDelay,
@@ -208,17 +274,22 @@ public class RedissonScheduledListener {
         }
 
 
+        /**
+         * 热更新调度参数；间隔变化时取消旧 Future 并重新 schedule（不中断进行中的任务）。
+         *
+         * @param service 刷新后的服务
+         */
         void refresh (RedissonScheduledService service) {
             if (Objects.equals(this.name, service.name())) {
                 if (isStopped || this.scheduledThreadPoolExecutor.isShutdown()) {
                     log.info("RedissonScheduledBeanPostProcessor executor {} is stopped, ignore refresh", name);
                     return;
                 }
-                //即使fixedDelay和initialDelay没有修改，也要更新service,否则其他关键配置还是旧的
+                // Always refresh service reference even when delays unchanged (other config may have changed)
                 setService(service);
                 if (this.fixedDelay != service.fixedDelay() || this.initialDelay != service.initialDelay()) {
                     if (this.future != null) {
-                        //不强制中断进行中的任务，等执行完当前的任务，下次生效
+                        // Do not interrupt in-flight task; new schedule takes effect on next run
                         this.future.cancel(false);
                     }
                     this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task, (initialDelay = service.initialDelay()), (fixedDelay = service.fixedDelay()), TimeUnit.MILLISECONDS);
@@ -228,6 +299,7 @@ public class RedissonScheduledListener {
             }
         }
 
+        /** 停止选主线程与调度线程池。 */
         void close() {
             log.info("closing RedissonScheduledBeanPostProcessor executor {} ...", name);
             isStopped = true;
@@ -245,10 +317,12 @@ public class RedissonScheduledListener {
             log.info("RedissonScheduledBeanPostProcessor executor {} closed...", name);
         }
 
+        /** @return 当前任务执行体 */
         public ScheduledService getService() {
             return service;
         }
 
+        /** @param service 刷新后的任务执行体 */
         public void setService(ScheduledService service) {
             this.service = service;
         }

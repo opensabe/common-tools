@@ -70,6 +70,11 @@ import reactor.netty.http.client.HttpClient;
  * 组装带负载均衡、重试、实例级断路器与 Observation 链路透传的 {@link WebClient}。
  */
 @Log4j2
+/**
+ * 单个 WebClient 命名上下文的默认配置。
+ * <p>
+ * 注册 Resilience4j 断路器/重试 Operator 与 Observation 过滤器等。
+ */
 @Configuration(proxyBeanMethods = false)
 public class WebClientDefaultConfiguration {
 

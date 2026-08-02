@@ -16,34 +16,41 @@
 package io.github.opensabe.common.redisson.aop.scheduled;
 
 /**
- * 由于单继承的限制，抽象类改为接口，写代码时可以更灵活，
+ * 基于 Redisson 选主的分布式定时任务服务接口。
+ * <p>
+ * 相比抽象类，接口形式便于与 Spring 代理及多继承场景组合。
  *
- * @author hengma
  * @since 1.2.0
  */
 public interface RedissonScheduledService extends ScheduledService {
+
     /**
-     * 定时任务名称，如果为空则取方法名加类名称
+     * 定时任务唯一名称；默认 {@code 类简单名#run()}。
+     *
+     * @return 任务名称
      */
     default String name() {
         return this.getClass().getSimpleName() + "#run()";
     }
 
-    ;
-
     /**
-     * 执行间隔
+     * 上次执行结束与下次开始之间的固定间隔（毫秒）。
      *
-     * @return
+     * @return 间隔毫秒数
      */
     long fixedDelay();
 
     /**
-     * 初始延迟
+     * 首次调度前的初始延迟（毫秒）。
      *
-     * @return
+     * @return 延迟毫秒数
      */
     long initialDelay();
 
+    /**
+     * 容器关闭时是否立即中断进行中的任务。
+     *
+     * @return {@code true} 表示 {@code shutdownNow}
+     */
     boolean stopOnceShutdown();
 }

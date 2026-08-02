@@ -20,13 +20,18 @@ import java.io.IOException;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.ToxiproxyContainer;
+import org.junit.jupiter.api.DisplayName;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 
+/**
+ * Web 模块集成测试基类，提供 Toxiproxy 与 httpbin 容器网络。
+ */
 @Testcontainers
+@DisplayName("Web模块微服务集成测试基类")
 public class CommonMicroServiceTest {
 
     public static final String GOOD_HOST;

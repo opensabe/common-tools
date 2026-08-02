@@ -24,8 +24,20 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.ConfigurationNotFoundException;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 从 WebClient 请求上下文中提取 Resilience4j {@link CircuitBreaker}。
+ */
 @Log4j2
 public class WebClientRequestCircuitBreakerExtractor implements CircuitBreakerExtractor {
+    /**
+     * 根据 WebClient 请求与目标实例解析断路器。
+     *
+     * @param circuitBreakerRegistry 断路器注册表
+     * @param context                负载均衡请求上下文
+     * @param host                   目标主机
+     * @param port                   目标端口
+     * @return 对应实例方法的断路器
+     */
     @Override
     public CircuitBreaker getCircuitBreaker(CircuitBreakerRegistry circuitBreakerRegistry, RequestDataContext context, String host, int port) {
         //这里 host 就是微服务名称，对于 webClient 使用微服务名称配置的 resilience4j 相关的元素

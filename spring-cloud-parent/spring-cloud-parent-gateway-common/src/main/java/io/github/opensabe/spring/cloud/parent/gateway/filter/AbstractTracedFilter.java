@@ -44,14 +44,23 @@ import reactor.core.publisher.Mono;
 public abstract class AbstractTracedFilter implements GlobalFilter, Ordered {
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
+    /** {@inheritDoc} */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         Observation observation = TraceIdFilter.getObservation(exchange);
         return observation.scoped(() -> traced(exchange, chain));
     }
 
+    /**
+     * 在 Observation 作用域内执行的过滤器逻辑，由子类实现。
+     *
+     * @param exchange 当前交换
+     * @param chain    过滤器链
+     * @return 过滤结果
+     */
     protected abstract Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain);
 
+    /** {@inheritDoc} */
     @Override
     public int getOrder() {
         //验证顺序一定在 TraceIdFilter 之后
@@ -63,8 +72,21 @@ public abstract class AbstractTracedFilter implements GlobalFilter, Ordered {
         return order0;
     }
 
+    /**
+     * 子类声明的过滤器顺序，必须大于 {@link TraceIdFilter#ORDER}。
+     *
+     * @return 顺序值
+     */
     protected abstract int ordered();
 
+    /**
+     * 判断当前请求是否命中路径模式集合（带缓存）。
+     *
+     * @param filterCache  路径命中结果缓存
+     * @param exchange     当前交换
+     * @param pathPatterns Ant 风格或正则路径模式
+     * @return 是否命中
+     */
     public Boolean isHitPathPatterns(Cache<String, Boolean> filterCache, ServerWebExchange exchange, Set<String> pathPatterns) {
         ServerHttpRequest request = exchange.getRequest();
         RequestPath path = request.getPath();
@@ -84,6 +106,12 @@ public abstract class AbstractTracedFilter implements GlobalFilter, Ordered {
         });
     }
 
+    /**
+     * 额外命中条件，子类可覆盖；默认不额外命中。
+     *
+     * @param exchange 当前交换
+     * @return 是否满足额外条件
+     */
     protected boolean extraCondition(ServerWebExchange exchange) {
         return false;
     }

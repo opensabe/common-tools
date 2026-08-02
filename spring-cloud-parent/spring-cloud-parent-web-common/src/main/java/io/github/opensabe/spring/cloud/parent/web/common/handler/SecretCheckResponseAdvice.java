@@ -39,6 +39,11 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Set;
 
+/**
+ * 响应体与响应头密钥泄露检查 {@link ResponseBodyAdvice}。
+ * <p>
+ * 在序列化前扫描并掩码敏感信息，防止密钥通过 HTTP 响应泄露。
+ */
 @Log4j2
 @ControllerAdvice
 public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
@@ -49,6 +54,13 @@ public class SecretCheckResponseAdvice implements ResponseBodyAdvice<Object> {
         this.globalSecretManager = globalSecretManager;
     }
 
+    /**
+     * 对所有响应类型启用密钥检查。
+     *
+     * @param returnType    返回值参数
+     * @param converterType 消息转换器类型
+     * @return 始终 {@code true}
+     */
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return true;

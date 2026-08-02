@@ -19,6 +19,11 @@ import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebServerCon
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 
+/**
+ * WebFlux 服务器自动配置入口。
+ * <p>
+ * 导入 WebFlux 路径解析与 HTTP 服务器 JFR 观测等配置。
+ */
 @Import(WebServerConfiguration.class)
 @AutoConfiguration
 public class WebServerAutoConfiguration {

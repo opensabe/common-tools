@@ -19,6 +19,9 @@ import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
+/**
+ * Redisson 分布式锁相关 Observation 名称与标签定义。
+ */
 
 public enum RLockObservationDocumentation implements ObservationDocumentation {
     LOCK_ACQUIRE {

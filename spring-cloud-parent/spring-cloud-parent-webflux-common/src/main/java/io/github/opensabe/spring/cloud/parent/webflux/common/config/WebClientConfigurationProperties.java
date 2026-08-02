@@ -30,11 +30,19 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * WebClient 全局配置属性。
+ * <p>
+ * 绑定前缀 {@code webclient}，按 client 名称提供连接池、超时与可重试路径等配置。
+ */
 @SuppressFBWarnings({"EI_EXPOSE_REP2", "EI_EXPOSE_REP"})
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "webclient")
 public class WebClientConfigurationProperties {
+    /**
+     * 按 client 名称索引的 WebClient 配置映射。
+     */
     private Map<String, WebClientProperties> configs;
 
     @SuppressFBWarnings("EI_EXPOSE_REP")

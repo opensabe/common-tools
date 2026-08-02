@@ -20,6 +20,12 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.web.common.config.FeignClientPreheatingConfiguration;
 
+/**
+ * Feign 客户端预热自动配置入口。
+ * <p>
+ * 导入 {@link io.github.opensabe.spring.cloud.parent.web.common.config.FeignClientPreheatingConfiguration}，
+ * 在应用就绪后触发继承 {@link io.github.opensabe.spring.cloud.parent.web.common.feign.preheating.FeignPreheatingBase} 的客户端预热。
+ */
 @Configuration(proxyBeanMethods = false)
 @Import(FeignClientPreheatingConfiguration.class)
 public class FeignClientPreheatingAutoConfiguration {

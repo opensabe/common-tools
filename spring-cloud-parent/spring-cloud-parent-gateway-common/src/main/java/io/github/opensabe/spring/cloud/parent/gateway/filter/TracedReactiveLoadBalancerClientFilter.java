@@ -107,6 +107,7 @@ public class TracedReactiveLoadBalancerClientFilter extends ReactiveLoadBalancer
     }
 
     //为了有 traceId
+    /** {@inheritDoc} */
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         Observation observation = TraceIdFilter.getObservation(exchange);
         URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);

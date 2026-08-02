@@ -22,6 +22,9 @@ import jdk.jfr.Label;
 import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * 分布式锁正常释放操作的 JFR 事件。
+ */
 
 @Setter
 @Getter

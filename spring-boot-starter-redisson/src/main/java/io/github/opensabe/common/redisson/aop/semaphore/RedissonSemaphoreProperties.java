@@ -21,15 +21,33 @@ import io.github.opensabe.common.redisson.aop.old.ExtraNameProperties;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import lombok.Getter;
 
+/**
+ * {@link RedissonSemaphore} 注解运行时属性。
+ */
 public class RedissonSemaphoreProperties extends ExtraNameProperties {
+
+    /** 原始信号量注解。 */
     @Getter
     private final RedissonSemaphore redissonSemaphore;
 
+    /**
+     * 通过已废弃的 {@link RedissonSemaphoreName} 参数解析名称。
+     *
+     * @param redissonSemaphore 信号量注解
+     * @param redissonSemaphoreName 参数名称注解
+     * @param parameterIndex 参数索引
+     */
     public RedissonSemaphoreProperties(RedissonSemaphore redissonSemaphore, RedissonSemaphoreName redissonSemaphoreName, int parameterIndex) {
         super(redissonSemaphoreName.prefix(), redissonSemaphore.name(), parameterIndex, redissonSemaphoreName.expression());
         this.redissonSemaphore = redissonSemaphore;
     }
 
+    /**
+     * 通过注解 {@link RedissonSemaphore#name()} SpEL 解析名称。
+     *
+     * @param evaluator SpEL 求值器
+     * @param redissonSemaphore 信号量注解
+     */
     public RedissonSemaphoreProperties(MethodArgumentsExpressEvaluator evaluator, RedissonSemaphore redissonSemaphore) {
         super(evaluator, redissonSemaphore.prefix(), redissonSemaphore.name());
         this.redissonSemaphore = redissonSemaphore;

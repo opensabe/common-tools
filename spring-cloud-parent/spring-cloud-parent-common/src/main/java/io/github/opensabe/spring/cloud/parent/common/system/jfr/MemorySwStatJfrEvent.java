@@ -21,12 +21,20 @@ import jdk.jfr.Label;
 
 @Category({"Native Memory Tracking"})
 @Label("Memory Sw Stat")
+/**
+ * cgroup memory.memsw 交换内存指标的 JFR 事件。
+ */
 public class MemorySwStatJfrEvent extends Event {
 
     private long usageInBytes;
     private long maxUsageInBytes;
     private long limitInBytes;
 
+    /**
+     * @param usageInBytes 当前使用量（字节）
+     * @param maxUsageInBytes 历史最大使用量（字节）
+     * @param limitInBytes 限制（字节）
+     */
     public MemorySwStatJfrEvent(long usageInBytes, long maxUsageInBytes, long limitInBytes) {
         this.usageInBytes = usageInBytes;
         this.maxUsageInBytes = maxUsageInBytes;

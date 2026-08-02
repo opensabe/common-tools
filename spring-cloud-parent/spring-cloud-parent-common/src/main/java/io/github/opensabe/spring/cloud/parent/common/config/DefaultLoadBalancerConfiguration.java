@@ -42,9 +42,20 @@ import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitB
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 
+/**
+ * 默认负载均衡配置。
+ * <p>
+ * 按是否存在 Spring MVC 选择同步或响应式 Discovery 客户端，组装
+ * SameZone → Cache → LastOrNotEmpty Supplier 链，并注册断路器感知 LoadBalancer。
+ */
 @Configuration(proxyBeanMethods = false)
 public class DefaultLoadBalancerConfiguration {
 
+    /**
+     * 同步 Discovery 客户端下的服务实例列表 Supplier。
+     *
+     * @return 服务实例列表 Supplier
+     */
     @Bean
     //有这个类代表有 spring-mvc 依赖
     //对于有 spring-mvc 依赖我们使用同步 Discovery 客户端
@@ -77,6 +88,11 @@ public class DefaultLoadBalancerConfiguration {
         );
     }
 
+    /**
+     * 响应式 Discovery 客户端下的服务实例列表 Supplier。
+     *
+     * @return 服务实例列表 Supplier
+     */
     @Bean
     //没有这个类代表没有 spring-mvc 依赖
     @ConditionalOnMissingClass("org.springframework.web.servlet.DispatcherServlet")
@@ -111,6 +127,11 @@ public class DefaultLoadBalancerConfiguration {
         );
     }
 
+    /**
+     * 注册带链路追踪与断路器感知的 Reactor LoadBalancer 为 Primary。
+     *
+     * @return 主 LoadBalancer 实现
+     */
     @Bean
     @Primary
     public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(

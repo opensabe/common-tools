@@ -23,6 +23,9 @@ import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 将 OpenFeign {@link FeignContext} Observation 转换为 {@link FeignRequestJFREvent}。
+ */
 @Log4j2
 public class FeignObservationToJFRGenerator extends ObservationToJFRGenerator<FeignContext> {
     private final FeignJFRProperties properties;
@@ -31,6 +34,7 @@ public class FeignObservationToJFRGenerator extends ObservationToJFRGenerator<Fe
         this.properties = properties;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Class<FeignContext> getContextClazz() {
         return FeignContext.class;
@@ -51,11 +55,13 @@ public class FeignObservationToJFRGenerator extends ObservationToJFRGenerator<Fe
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(FeignContext context) {
         return shouldCommit(context);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(FeignContext context) {
         return shouldGenerate(context);
@@ -95,11 +101,13 @@ public class FeignObservationToJFRGenerator extends ObservationToJFRGenerator<Fe
         feignRequestJFREvent.begin();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(FeignContext context) {
         commit(context);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(FeignContext context) {
         generate(context);

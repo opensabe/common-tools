@@ -26,7 +26,17 @@ import org.springframework.context.event.ApplicationContextEvent;
 
 import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
+/**
+ * 保证同一 ApplicationContext 内只执行一次的监听器基类。
+ * <p>
+ * 用于规避 Spring Cloud {@code RestartListener} 与多次 refresh 导致的重复触发；
+ * 同时跳过 Bootstrap 上下文中的事件。
+ *
+ * @param <T> 监听的 Spring 应用事件类型
+ */
 public abstract class OnlyOnceApplicationListener<T extends ApplicationEvent> implements ApplicationListener<T> {
+
+    /** 是否已执行过 {@link #onlyOnce(ApplicationEvent)}。 */
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     @Override
@@ -34,8 +44,6 @@ public abstract class OnlyOnceApplicationListener<T extends ApplicationEvent> im
         if (isBootstrapContext(event)) {
             return;
         }
-        //由于spring-cloud的org.springframework.cloud.context.restart.RestartListener导致同一个context触发多次
-        //以及 ApplicationContext 的 refresh 也会触发，虽然我们基本不用，为了保证全局只加载一次，使用这个
         synchronized (initialized) {
             if (initialized.get()) {
                 return;
@@ -45,6 +53,12 @@ public abstract class OnlyOnceApplicationListener<T extends ApplicationEvent> im
         }
     }
 
+    /**
+     * 判断事件是否来自 Bootstrap 上下文。
+     *
+     * @param applicationEvent 应用事件
+     * @return 若为 Bootstrap 上下文则返回 {@code true}
+     */
     protected boolean isBootstrapContext(T applicationEvent) {
         if (applicationEvent instanceof ApplicationContextEvent) {
             ApplicationContext applicationContext = ((ApplicationContextEvent) applicationEvent).getApplicationContext();
@@ -60,5 +74,10 @@ public abstract class OnlyOnceApplicationListener<T extends ApplicationEvent> im
         return false;
     }
 
+    /**
+     * 子类实现的一次性处理逻辑。
+     *
+     * @param event 应用事件
+     */
     protected abstract void onlyOnce(T event);
 }

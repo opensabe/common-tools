@@ -27,6 +27,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+/**
+ * cgroup memory.stat 指标的 JFR 事件。
+ */
 public class MemoryStatJfrEvent extends Event {
 
     private long cache;

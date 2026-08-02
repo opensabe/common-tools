@@ -40,8 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Upgrade gate: BaseBatchLoadingRedisCache writes with JsonUtil and reads with Fastjson.
- * Round-trip must remain stable across Jackson / Fastjson upgrades.
+ * BaseBatchLoadingRedisCache 序列化契约测试：写入走 JsonUtil、读取走 Fastjson，升级后往返须保持稳定。
  */
 @Import(BaseBatchLoadingRedisCacheContractTest.Config.class)
 @DisplayName("BaseBatchLoadingRedisCache JsonUtil/Fastjson 契约")

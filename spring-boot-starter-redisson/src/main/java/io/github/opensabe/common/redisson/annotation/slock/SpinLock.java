@@ -26,11 +26,14 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 
+/**
+ * 声明 Redisson 自旋锁（{@link org.redisson.api.RedissonClient#getSpinLock(String, LockOptions.BackOff)}）。
+ */
 @Documented
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@SLock(name = "", lockFeature = SLock.LockFeature.DEFAULT)
+@SLock(name = "", lockFeature = SLock.LockFeature.SPIN)
 public @interface SpinLock {
 
     /**
@@ -41,6 +44,7 @@ public @interface SpinLock {
     @AliasFor(annotation = SLock.class)
     String[] name();
 
+    /** 锁键前缀。 */
     @AliasFor(annotation = SLock.class)
     String prefix() default RedissonLock.DEFAULT_PREFIX;
 
@@ -62,27 +66,27 @@ public @interface SpinLock {
     @AliasFor(annotation = SLock.class)
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
+    /** 加锁策略。 */
     @AliasFor(annotation = SLock.class)
     SLock.LockType lockType() default SLock.LockType.BLOCK_LOCK;
 
+    /** 自旋退避算法。 */
     @AliasFor(annotation = SLock.class)
     SLock.BackOffType backOffType() default SLock.BackOffType.EXPONENTIAL;
 
-    /**
-     * 这个参数在 LockFeature = SPIN， BackOffType = CONSTANT 使用
-     */
+    /** 固定退避间隔（毫秒）。 */
     @AliasFor(annotation = SLock.class)
     long backOffDelay() default 64L;
 
-    /**
-     * 以下三个参数在 LockFeature = SPIN， BackOffType = EXPONENTIAL 使用
-     */
+    /** 指数退避最大间隔（毫秒）。 */
     @AliasFor(annotation = SLock.class)
     long backOffMaxDelay() default 128;
 
+    /** 指数退避初始间隔（毫秒）。 */
     @AliasFor(annotation = SLock.class)
     long backOffInitialDelay() default 1;
 
+    /** 指数退避乘数。 */
     @AliasFor(annotation = SLock.class)
     int backOffMultiplier() default 2;
 

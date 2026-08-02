@@ -17,7 +17,18 @@ package io.github.opensabe.common.redisson.aop;
 
 import java.lang.reflect.Method;
 
+/**
+ * 将方法上下文解析为 Redisson 资源键（锁名、限流器名等）。
+ */
 public interface RedissonNameResolver {
 
+    /**
+     * 解析最终 Redis 键。
+     *
+     * @param method 被拦截方法
+     * @param target 目标对象
+     * @param args 方法参数
+     * @return 完整键名（含前缀）
+     */
     String resolve(Method method, Object target, Object[] args);
 }

@@ -26,6 +26,11 @@ import org.springframework.context.ApplicationContext;
 import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 应用就绪后执行 Feign 客户端预热。
+ * <p>
+ * 扫描所有 {@link FeignClient} Bean，对实现了 {@link FeignPreheatingBase} 的代理调用 {@link FeignPreheatingBase#heartbeat()}。
+ */
 @Log4j2
 public class FeignClientPreheatingApplicationReadyEventListener extends OnlyOnceApplicationListener<ApplicationReadyEvent> {
     @Autowired
@@ -55,6 +60,11 @@ public class FeignClientPreheatingApplicationReadyEventListener extends OnlyOnce
         }
     }
 
+    /**
+     * 应用就绪且仅执行一次时触发 Feign 预热。
+     *
+     * @param event 应用就绪事件
+     */
     @Override
     protected void onlyOnce(ApplicationReadyEvent event) {
         //feign client preheating

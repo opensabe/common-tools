@@ -23,6 +23,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * 声明方法执行后驱逐 Redisson {@link org.redisson.api.RBucket} 缓存条目。
+ */
 @Documented
 @Inherited
 @Target(ElementType.METHOD)
@@ -30,12 +33,12 @@ import java.lang.annotation.Target;
 public @interface RedissonBucketEvict {
 
     /**
-     * 锁的名称表达式，锁的名称表达式。如果为空，则为类名+方法名
+     * 待驱逐缓存键 SpEL 表达式；为空则使用 {@code 类简单名#方法名}。
      *
      * @see org.springframework.cache.annotation.Cacheable#cacheNames()
      */
-
     String name() default "";
 
+    /** 缓存键前缀，默认 {@link RedissonBucket#DEFAULT_PREFIX}。 */
     String prefix() default RedissonBucket.DEFAULT_PREFIX;
 }

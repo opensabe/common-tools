@@ -43,10 +43,17 @@ public class TraceIdFilter implements GlobalFilter, Ordered {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    /**
+     * 从 Exchange 属性中获取当前 Observation。
+     *
+     * @param exchange 当前交换
+     * @return Observation，可能为 {@code null}
+     */
     public static Observation getObservation(ServerWebExchange exchange) {
         return exchange.getAttribute(TracedCircuitBreakerRoundRobinLoadBalancer.OBSERVATION_KEY);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         return Mono.deferContextual(contextView -> {
@@ -65,6 +72,7 @@ public class TraceIdFilter implements GlobalFilter, Ordered {
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getOrder() {
         return ORDER;

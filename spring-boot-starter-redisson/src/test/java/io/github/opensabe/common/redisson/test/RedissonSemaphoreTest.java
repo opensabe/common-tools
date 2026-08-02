@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +33,16 @@ import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import lombok.Getter;
 
 @Import(RedissonSemaphoreTest.Config.class)
+/**
+ * Redisson 信号量 AOP 集成测试：阻塞 acquire 与最大许可数限制。
+ */
+@DisplayName("Redisson 信号量集成测试")
 public class RedissonSemaphoreTest extends BaseRedissonTest {
     private static final int THREAD_COUNT = 16;
     @Autowired
     private TestRedissonRateLimiterClass testRedissonRateLimiterClass;
 
+    @DisplayName("信号量阻塞 acquire 最大许可数")
     @Test
     public void testBlockAcquire() throws InterruptedException {
         testRedissonRateLimiterClass.getResult().set(true);

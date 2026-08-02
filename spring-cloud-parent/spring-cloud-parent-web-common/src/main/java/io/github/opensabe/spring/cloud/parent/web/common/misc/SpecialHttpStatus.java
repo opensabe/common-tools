@@ -16,7 +16,9 @@
 package io.github.opensabe.spring.cloud.parent.web.common.misc;
 
 /**
- * 一些特殊的
+ * 框架内部使用的特殊 HTTP 状态码。
+ * <p>
+ * 用于在 Feign 客户端层表达断路器、Bulkhead 与 IO 异常等语义，供 {@link io.github.opensabe.spring.cloud.parent.web.common.feign.DefaultErrorDecoder} 判定是否重试。
  */
 public enum SpecialHttpStatus {
     /**
@@ -36,12 +38,20 @@ public enum SpecialHttpStatus {
      */
     BULKHEAD_FULL(584),
     ;
+    /**
+     * 对应的 HTTP 状态码数值。
+     */
     private int value;
 
     SpecialHttpStatus(int value) {
         this.value = value;
     }
 
+    /**
+     * 返回状态码数值。
+     *
+     * @return HTTP 状态码
+     */
     public int getValue() {
         return value;
     }

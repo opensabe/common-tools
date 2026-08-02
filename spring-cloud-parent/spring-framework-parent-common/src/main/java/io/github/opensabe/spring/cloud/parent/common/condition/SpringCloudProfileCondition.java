@@ -23,6 +23,10 @@ import org.springframework.core.env.Profiles;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.MultiValueMap;
 
+/**
+ * 评估 {@link ConditionOnSpringCloudConfigProfile}：读取 {@code spring.cloud.config.profile}
+ * 并按注解 {@link ConditionOnSpringCloudConfigProfile.Predicate} 与 {@link ConditionOnSpringCloudConfigProfile#value()} 匹配。
+ */
 public class SpringCloudProfileCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {

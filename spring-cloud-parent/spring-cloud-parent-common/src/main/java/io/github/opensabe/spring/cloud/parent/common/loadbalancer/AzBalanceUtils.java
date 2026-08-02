@@ -20,12 +20,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 可用区感知负载均衡比例计算工具。
+ * <p>
+ * 优先满足同可用区调用，不足时按容量从其他可用区扣减。
+ */
 public class AzBalanceUtils {
     /**
      * 计算负载均衡比例，优先满足同可用区调用
-     * @param sourceserviceInstanceMap
-     * @param targetServiceInstanceMap
-     * @return
+     * @param sourceserviceInstanceMap 源可用区 → 实例列表
+     * @param targetServiceInstanceMap 目标可用区 → 实例列表
+     * @return 源可用区 → (目标可用区 → 分配请求数)
      */
     public static Map<String, Map<String, Integer>> getLoadBalancingRatio(
             Map<String, List> sourceserviceInstanceMap,

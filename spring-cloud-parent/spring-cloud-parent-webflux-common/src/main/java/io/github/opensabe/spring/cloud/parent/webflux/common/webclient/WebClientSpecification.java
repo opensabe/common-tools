@@ -22,6 +22,9 @@ import org.springframework.cloud.context.named.NamedContextFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressFBWarnings("EI_EXPOSE_REP")
+/**
+ * WebClient 命名上下文规格，类似 OpenFeign 的 {@code FeignClientSpecification}。
+ */
 public class WebClientSpecification implements NamedContextFactory.Specification {
 
     private final String name;
@@ -34,6 +37,7 @@ public class WebClientSpecification implements NamedContextFactory.Specification
         this.configuration = configuration;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "WebClientSpecification{" +
@@ -42,6 +46,7 @@ public class WebClientSpecification implements NamedContextFactory.Specification
                 '}';
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;

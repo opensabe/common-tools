@@ -21,8 +21,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
+/**
+ * Spring MVC 通用配置。
+ * <p>
+ * 注册 {@link io.github.opensabe.spring.cloud.parent.common.web.ServletPathResolver}，
+ * 支持 Controller 方法参数直接注入请求路径。
+ */
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    /**
+     * 追加自定义参数解析器。
+     *
+     * @param resolvers 已有解析器列表
+     */
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new ServletPathResolver());

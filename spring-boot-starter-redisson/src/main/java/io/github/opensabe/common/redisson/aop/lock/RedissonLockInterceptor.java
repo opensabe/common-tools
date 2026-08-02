@@ -31,22 +31,28 @@ import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * redisson 锁核心实现类
+ * 旧版 {@link io.github.opensabe.common.redisson.annotation.RedissonLock} 方法拦截器，负责加锁与释放。
  */
 @Log4j2
 public class RedissonLockInterceptor implements MethodInterceptor {
+
+    /** Redisson 客户端。 */
     private final RedissonClient redissonClient;
+
+    /** 锁属性切点。 */
     private final RedissonLockCachedPointcut redissonLockCachedPointcut;
 
 
+    /**
+     * @param redissonClient Redisson 客户端
+     * @param redissonLockCachedPointcut 锁切点
+     */
     public RedissonLockInterceptor(RedissonClient redissonClient, RedissonLockCachedPointcut redissonLockCachedPointcut) {
         this.redissonClient = redissonClient;
         this.redissonLockCachedPointcut = redissonLockCachedPointcut;
     }
 
-    /**
-     * 新的 local name支持前缀及el表达式
-     */
+    /** {@inheritDoc} — 解析锁名、加锁、执行业务方法并在 finally 中释放。 */
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Method method = invocation.getMethod();
@@ -59,7 +65,6 @@ public class RedissonLockInterceptor implements MethodInterceptor {
         String lockName = redissonLockProperties.resolve(method, invocation.getThis(), invocation.getArguments());
         RedissonLock redissonLock = redissonLockProperties.getRedissonLock();
         log.debug("RedissonLockInterceptor-invoke begin to try redisson lockName {}, method: {}, thread: {}", lockName, method.getName(), Thread.currentThread().getName());
-        //创建锁
         RLock lock = redissonLock.lockFeature().getLock(lockName, redissonLock, redissonClient);
         try {
             boolean getLock = RedissonLock.LockType.lockType(redissonLock.lockType()).lock(redissonLock, lock);
@@ -69,17 +74,18 @@ public class RedissonLockInterceptor implements MethodInterceptor {
                 log.info("RedissonLockInterceptor-invoke successfully locked lockName {}, method: {}, threadId: {}",
                         lockName, method.getName(), Thread.currentThread().threadId());
             }
-            //执行方法
             return invocation.proceed();
         } finally {
-            //释放锁
             release(lock, method);
         }
 
     }
 
     /**
-     * 释放锁，如果释放失败，重试
+     * 释放锁；若 Redisson 内部线程池拒绝则退避重试。
+     *
+     * @param lock 待释放锁
+     * @param method 被拦截方法（仅用于日志）
      */
     private void release(RLock lock, Method method) {
         boolean locked = lock.isLocked() && lock.isHeldByCurrentThread();
@@ -91,7 +97,7 @@ public class RedissonLockInterceptor implements MethodInterceptor {
                 break;
             } catch (Throwable e) {
                 log.fatal("error during release redisson lock {}, {}, count: {}", lock.getName(), e.getMessage(), count, e);
-                //如果是线程池拒绝（Redisson 的线程池可能会满，可能用的是 common ForkJoinPool，而你又刚好使用 common ForkJoinPool 提交了很多 io 任务，例如 parallelStream 里面有 io），则重试
+                // Retry on thread-pool rejection (Redisson may use a saturated common ForkJoinPool)
                 if (e instanceof RejectedExecutionException) {
                     locked = lock.isLocked() && lock.isHeldByCurrentThread();
                     count++;

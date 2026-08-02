@@ -20,6 +20,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebClientDefaultConfiguration;
 
+/**
+ * WebClient 命名上下文工厂，按 client 名称隔离配置。
+ */
 public class WebClientNamedContextFactory extends NamedContextFactory<WebClientSpecification> {
     public static final String NAMESPACE = "webclient";
     public static final String PROPERTY_NAME = NAMESPACE + ".name";

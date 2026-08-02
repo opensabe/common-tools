@@ -43,6 +43,12 @@ import io.github.resilience4j.core.ConfigurationNotFoundException;
 import io.micrometer.observation.Observation;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 集成 Resilience4j 线程池隔离与断路器的 Feign {@link Client} 实现。
+ * <p>
+ * 按 Feign {@code contextId} + 实例 + 方法维度应用 Bulkhead 与 CircuitBreaker，
+ * 并在 Observation 作用域内执行底层 HTTP 调用。
+ */
 @Slf4j
 public class Resilience4jFeignClient implements Client {
     private final ThreadPoolBulkheadRegistry threadPoolBulkheadRegistry;
@@ -66,6 +72,14 @@ public class Resilience4jFeignClient implements Client {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    /**
+     * 在线程池隔离与断路器保护下执行 Feign 请求。
+     *
+     * @param request HTTP 请求
+     * @param options 请求选项
+     * @return HTTP 响应；Bulkhead 满或断路器打开时返回框架自定义状态码
+     * @throws IOException 底层 IO 异常
+     */
     @Override
     public Response execute(Request request, Request.Options options) throws IOException {
         //目前这个改动主要用于从feignClient 的proxy实体中获取其contextId 而不是从FeignClient的接口中的declaredMethod中获取contextId，原因是

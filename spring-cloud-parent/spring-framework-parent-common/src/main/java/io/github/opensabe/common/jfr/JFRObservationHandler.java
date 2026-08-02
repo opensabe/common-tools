@@ -25,26 +25,32 @@ import lombok.extern.log4j.Log4j2;
 
 
 /**
- * 全局 ObservationHandler 用于将 Micrometer 的 Observation 转换为 JFR 事件
- * 数据收集通过 ObservationHandler 来实现完成。该handler会通过其回调方法(supportsContext、onStart、onStop、onError)收到有关观察生命周期事件的通知。
+ * 全局 {@link ObservationHandler}：将 Micrometer Observation 生命周期事件分派给 {@link ObservationToJFRGenerator}。
+ * <p>
+ * 使用方式：实现 {@link ObservationToJFRGenerator} 并注册为 Bean 即可。
  *
  * @see ObservationHandler
- * <p>
- * 使用方法：
- * 1. 实现 ObservationToJFRGenerator 接口，实现将 Observation 转换为 JFR 事件
- * 2. 注册为一个 Bean 即可
  */
 @Log4j2
 public class JFRObservationHandler<T extends Observation.Context> implements ObservationHandler<T> {
 
+    /** 按上下文类型分组的 JFR 生成器列表。 */
     private final Map<Class<? extends Observation.Context>, List<ObservationToJFRGenerator<? extends Observation.Context>>> generatorMap;
 
+    /**
+     * @param generators 容器中所有 {@link ObservationToJFRGenerator} Bean
+     */
     public JFRObservationHandler(List<ObservationToJFRGenerator<T>> generators) {
         this.generatorMap = generators.stream().collect(
                 Collectors.groupingBy(ObservationToJFRGenerator::getContextClazz)
         );
     }
 
+    /**
+     * Observation 启动时调用匹配的生成器 {@link ObservationToJFRGenerator#onStart(Observation.Context)}。
+     *
+     * @param context 当前上下文
+     */
     @Override
     public void onStart(Observation.Context context) {
         List<ObservationToJFRGenerator<? extends Observation.Context>> observationToJFRGenerators = generatorMap.get(context.getClass());
@@ -60,6 +66,11 @@ public class JFRObservationHandler<T extends Observation.Context> implements Obs
         }
     }
 
+    /**
+     * Observation 停止时调用匹配的生成器 {@link ObservationToJFRGenerator#onStop(Observation.Context)}。
+     *
+     * @param context 当前上下文
+     */
     @Override
     public void onStop(Observation.Context context) {
         List<ObservationToJFRGenerator<? extends Observation.Context>> observationToJFRGenerators = generatorMap.get(context.getClass());
@@ -75,6 +86,12 @@ public class JFRObservationHandler<T extends Observation.Context> implements Obs
         }
     }
 
+    /**
+     * 接受所有 Observation 上下文（具体过滤由生成器 {@link ObservationToJFRGenerator#getContextClazz()} 完成）。
+     *
+     * @param context 当前上下文
+     * @return 恒为 {@code true}
+     */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return true;

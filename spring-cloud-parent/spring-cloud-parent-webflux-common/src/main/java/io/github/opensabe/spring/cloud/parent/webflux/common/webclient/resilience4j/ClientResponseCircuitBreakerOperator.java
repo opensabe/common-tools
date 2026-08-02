@@ -43,10 +43,19 @@ public class ClientResponseCircuitBreakerOperator implements UnaryOperator<Publi
         this.webClientProperties = webClientProperties;
     }
 
+    /**
+     * 创建 ClientResponse 断路器 Operator。
+     *
+     * @param circuitBreaker      断路器实例
+     * @param serviceInstance     目标服务实例
+     * @param webClientProperties WebClient 配置
+     * @return Operator 实例
+     */
     public static ClientResponseCircuitBreakerOperator of(CircuitBreaker circuitBreaker, ServiceInstance serviceInstance, WebClientConfigurationProperties.WebClientProperties webClientProperties) {
         return new ClientResponseCircuitBreakerOperator(circuitBreaker, serviceInstance, webClientProperties);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Publisher<ClientResponse> apply(Publisher<ClientResponse> clientResponsePublisher) {
         if (clientResponsePublisher instanceof Mono) {

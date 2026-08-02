@@ -37,21 +37,33 @@ import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * redisson 限流器核心实现类
+ * {@link RedissonRateLimiter} 方法拦截器：配置 {@link org.redisson.api.RRateLimiter} 并获取 permit。
  */
 @Log4j2
 public class RedissonRateLimiterInterceptor implements MethodInterceptor {
 
+    /** Redisson 客户端。 */
     private final RedissonClient redissonClient;
+
+    /** 限流属性切点。 */
     private final RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut;
+
+    /** 参数 SpEL 解析器（预留）。 */
     private final SpelExpressionParser parser = new SpelExpressionParser();
+
+    /** SpEL 模板上下文（预留）。 */
     private final ParserContext context = new TemplateParserContext();
 
+    /**
+     * @param redissonClient Redisson 客户端
+     * @param redissonRateLimiterCachedPointcut 限流切点
+     */
     public RedissonRateLimiterInterceptor(RedissonClient redissonClient, RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut) {
         this.redissonClient = redissonClient;
         this.redissonRateLimiterCachedPointcut = redissonRateLimiterCachedPointcut;
     }
 
+    /** {@inheritDoc} — 初始化限流器、对齐配置并 acquire permit。 */
     @Nullable
     @Override
     public Object invoke(@Nonnull MethodInvocation invocation) throws Throwable {

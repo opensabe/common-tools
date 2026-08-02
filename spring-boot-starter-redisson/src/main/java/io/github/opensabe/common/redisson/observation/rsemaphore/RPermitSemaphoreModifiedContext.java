@@ -18,14 +18,29 @@ package io.github.opensabe.common.redisson.observation.rsemaphore;
 import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * 信号量许可数变更操作的 Observation 上下文。
+ */
 
 @Getter
 @Setter
 public class RPermitSemaphoreModifiedContext extends Observation.Context {
+    /**
+     * 信号量名称
+     */
     private final String semaphoreName;
+    /**
+     * 当前线程名
+     */
     private final String threadName;
+    /**
+     * 变更操作描述
+     */
     private final String modified;
 
+    /**
+     * 是否变更成功
+     */
     private boolean modifiedSuccessfully;
 
     public RPermitSemaphoreModifiedContext(String semaphoreName, String modified) {

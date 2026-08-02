@@ -18,6 +18,9 @@ package io.github.opensabe.common.redisson.observation.rsemaphore;
 import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
+/**
+ * 信号量许可变更 Observation 的低/高基数 KeyValues 约定。
+ */
 
 public class RPermitSemaphoreModifiedObservationConvention implements ObservationConvention<RPermitSemaphoreModifiedContext> {
     public static final RPermitSemaphoreModifiedObservationConvention DEFAULT = new RPermitSemaphoreModifiedObservationConvention();

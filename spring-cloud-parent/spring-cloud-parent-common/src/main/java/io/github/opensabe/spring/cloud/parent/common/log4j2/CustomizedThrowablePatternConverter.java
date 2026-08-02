@@ -24,6 +24,12 @@ import org.apache.logging.log4j.core.pattern.ConverterKeys;
 import org.apache.logging.log4j.core.pattern.PatternConverter;
 import org.apache.logging.log4j.core.pattern.ThrowablePatternConverter;
 
+/**
+ * 定制 Log4j2 异常堆栈 Pattern 转换器。
+ * <p>
+ * 使用 {@link org.apache.logging.log4j.core.impl.CustomizedThrowableProxyRenderer}
+ * 输出扩展堆栈信息；Pattern 关键字：{@code %cusEx}、{@code %cusThrowable}、{@code %cusException}。
+ */
 @Plugin(name = "CustomizedThrowablePatternConverter", category = PatternConverter.CATEGORY)
 @ConverterKeys({"cusEx", "cusThrowable", "cusException"})
 public class CustomizedThrowablePatternConverter extends ThrowablePatternConverter {
@@ -31,10 +37,18 @@ public class CustomizedThrowablePatternConverter extends ThrowablePatternConvert
         super("CustomizedThrowable", "throwable", options, config);
     }
 
+    /**
+     * Log4j2 Plugin 工厂方法。
+     *
+     * @param config Log4j2 配置
+     * @param options Pattern 选项
+     * @return 转换器实例
+     */
     public static CustomizedThrowablePatternConverter newInstance(final Configuration config, final String[] options) {
         return new CustomizedThrowablePatternConverter(config, options);
     }
 
+    /** 格式化异常堆栈至日志缓冲区。 */
     @Override
     public void format(final LogEvent event, final StringBuilder toAppendTo) {
         final ThrowableProxy proxy = event.getThrownProxy();

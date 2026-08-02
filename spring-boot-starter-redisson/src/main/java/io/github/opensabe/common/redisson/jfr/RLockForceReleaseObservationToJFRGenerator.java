@@ -18,6 +18,9 @@ package io.github.opensabe.common.redisson.jfr;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.common.redisson.observation.rlock.RLockForceReleaseContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
+/**
+ * 将锁强制释放 Observation 转换为 {@link RLockForceReleaseJFREvent}。
+ */
 
 public class RLockForceReleaseObservationToJFRGenerator extends ObservationToJFRGenerator<RLockForceReleaseContext> {
     @Override

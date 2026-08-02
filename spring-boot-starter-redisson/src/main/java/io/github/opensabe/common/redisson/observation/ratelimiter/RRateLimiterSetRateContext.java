@@ -24,17 +24,35 @@ import org.redisson.api.RateType;
 import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * 限流器 setRate/updateRate 操作的 Observation 上下文。
+ */
 
 @Getter
 @Setter
 public class RRateLimiterSetRateContext extends Observation.Context {
+    /**
+     * 限流器名称
+     */
     private final String rateLimiterName;
+    /**
+     * 当前线程名
+     */
     private final String threadName;
     private final RateType mode;
+    /**
+     * 设置的速率
+     */
     private final long rate;
+    /**
+     * 速率时间窗口
+     */
     private final long rateInterval;
     private final RateIntervalUnit rateIntervalUnit;
     private final long keepAlive;
+    /**
+     * 是否设置成功
+     */
     private boolean setRateSuccessfully;
 
     public RRateLimiterSetRateContext(String rateLimiterName, String threadName, RateType mode, long rate, long rateInterval, RateIntervalUnit rateIntervalUnit) {

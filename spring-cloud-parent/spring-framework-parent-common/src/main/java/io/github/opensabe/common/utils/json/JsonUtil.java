@@ -45,7 +45,7 @@ public final class JsonUtil {
     private static ObjectMapper objectMapper;
 
     static {
-        // 非 Spring 环境亦可独立使用
+        // Standalone mapper for non-Spring usage
         objectMapper = JsonMapper.builder()
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES)
