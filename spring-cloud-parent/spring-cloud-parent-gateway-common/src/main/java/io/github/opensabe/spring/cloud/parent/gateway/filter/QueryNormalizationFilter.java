@@ -34,9 +34,9 @@ import reactor.core.publisher.Mono;
 @Log4j2
 @Component
 public class QueryNormalizationFilter extends AbstractTracedFilter {
+    /** {@inheritDoc} */
     @Override
     @SneakyThrows
-    /** {@inheritDoc} */
     protected Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
         String originUriString = exchange.getRequest().getURI().toString();
         if (originUriString.contains("%23")) {
@@ -73,8 +73,8 @@ public class QueryNormalizationFilter extends AbstractTracedFilter {
         }
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     protected int ordered() {
         return TraceIdFilter.ORDER + 1;
     }

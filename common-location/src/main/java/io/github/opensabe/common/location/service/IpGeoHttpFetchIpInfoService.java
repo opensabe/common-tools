@@ -62,11 +62,11 @@ public class IpGeoHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<
                 .build();
     }
 
-    @NoArgsConstructor
-    @Data
     /**
  * Response。
  */
+    @NoArgsConstructor
+    @Data
 public static class Response {
         @JsonProperty("ip")
         private String ip;
@@ -121,11 +121,11 @@ public static class Response {
         @JsonProperty("time_zone")
         private TimeZoneDTO timeZone;
 
-        @NoArgsConstructor
-        @Data
         /**
  * CurrencyDTO 数据传输对象。
  */
+        @NoArgsConstructor
+        @Data
 public static class CurrencyDTO {
             @JsonProperty("code")
             private String code;
@@ -135,11 +135,11 @@ public static class CurrencyDTO {
             private String symbol;
         }
 
-        @NoArgsConstructor
-        @Data
         /**
  * TimeZoneDTO 数据传输对象。
  */
+        @NoArgsConstructor
+        @Data
 public static class TimeZoneDTO {
             @JsonProperty("name")
             private String name;

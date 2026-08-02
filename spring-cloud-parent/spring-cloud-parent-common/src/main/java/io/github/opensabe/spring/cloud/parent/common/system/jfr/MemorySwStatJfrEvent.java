@@ -19,11 +19,11 @@ import jdk.jfr.Category;
 import jdk.jfr.Event;
 import jdk.jfr.Label;
 
-@Category({"Native Memory Tracking"})
-@Label("Memory Sw Stat")
 /**
  * cgroup memory.memsw 交换内存指标的 JFR 事件。
  */
+@Category({"Native Memory Tracking"})
+@Label("Memory Sw Stat")
 public class MemorySwStatJfrEvent extends Event {
 
     private long usageInBytes;

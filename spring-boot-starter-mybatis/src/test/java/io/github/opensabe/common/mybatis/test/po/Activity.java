@@ -37,20 +37,20 @@ import tk.mybatis.mapper.annotation.ColumnType;
 @Table(name = "t_activity")
 public class Activity {
 
-    @Id
 /** activityId。 */
+    @Id
     private String activityId;
 
-    @ColumnType(typeHandler = JSONTypeHandler.class)
 /** displaySetting。 */
+    @ColumnType(typeHandler = JSONTypeHandler.class)
     private Display displaySetting;
 
-    @ColumnType(typeHandler = JSONTypeHandler.class)
 /** bizType。 */
+    @ColumnType(typeHandler = JSONTypeHandler.class)
     private List<Integer> bizType;
 
-    @ColumnType(typeHandler = JSONTypeHandler.class)
 /** configSetting。 */
+    @ColumnType(typeHandler = JSONTypeHandler.class)
     private Configs configSetting;
 
     @Getter

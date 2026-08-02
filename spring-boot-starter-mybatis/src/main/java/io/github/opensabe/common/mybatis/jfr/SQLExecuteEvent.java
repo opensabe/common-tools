@@ -38,11 +38,10 @@ public class SQLExecuteEvent extends Event {
      * 执行sql的方法（mybatis mapper）
      */
     @Label("SQL Executed Method")
-/** method。 */
     private final String method;
 
-    @Label("Transaction Id")
 /** transactionName。 */
+    @Label("Transaction Id")
     private final String transactionName;
 /** success。 */
     private final boolean success;

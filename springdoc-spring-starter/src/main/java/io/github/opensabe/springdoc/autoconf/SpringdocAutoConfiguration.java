@@ -30,14 +30,14 @@ import io.swagger.v3.core.converter.ModelConverter;
 /**
  * @author heng.ma
  */
-@Import({GenerateConfig.class, FrameworkConfig.class, CloudConfig.class})
-@ConditionalOnBean(SpringDocConfiguration.class)
-@ConditionalOnClass(ModelConverter.class)
-@AutoConfiguration(before = SpringDocConfiguration.class)
 /**
  * SpringdocAutoConfiguration 类。
  * <p>Springdoc Auto Configuration。</p>
  */
+@Import({GenerateConfig.class, FrameworkConfig.class, CloudConfig.class})
+@ConditionalOnBean(SpringDocConfiguration.class)
+@ConditionalOnClass(ModelConverter.class)
+@AutoConfiguration(before = SpringDocConfiguration.class)
 public class SpringdocAutoConfiguration {
     static {
         PageModelConverter.config();

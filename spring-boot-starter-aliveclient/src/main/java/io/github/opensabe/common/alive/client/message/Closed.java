@@ -21,15 +21,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * Closed 类。
+ * <p>连接关闭。</p>
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-/**
- * Closed 类。
- * <p>连接关闭。</p>
- */
 public class Closed extends MqMessage {
 /** 设备 ID。 */
     private String deviceId;

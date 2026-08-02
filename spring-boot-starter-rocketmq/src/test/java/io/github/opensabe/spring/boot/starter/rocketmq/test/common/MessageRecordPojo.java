@@ -17,7 +17,6 @@ package io.github.opensabe.spring.boot.starter.rocketmq.test.common;
 
 import com.github.javafaker.Faker;
 
-/** MessageRecordPojo。 */
 /**
  * MQ 测试 record 消息体。
  */

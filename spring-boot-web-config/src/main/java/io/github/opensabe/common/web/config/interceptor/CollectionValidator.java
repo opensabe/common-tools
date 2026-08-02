@@ -35,18 +35,18 @@ public class CollectionValidator implements Validator {
         this.validator = validatorFactory;
     }
 
-    @Override
 /**
  * supports 方法。
  */
+    @Override
     public boolean supports(Class<?> aClass) {
         return Collection.class.isAssignableFrom(aClass);
     }
 
-    @Override
 /**
  * validate 方法。
  */
+    @Override
     public void validate(Object o, Errors errors) {
         Collection collection = (Collection) o;
         if (CollectionUtils.isEmpty(collection)) {

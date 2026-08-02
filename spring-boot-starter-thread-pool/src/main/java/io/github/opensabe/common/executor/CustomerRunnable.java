@@ -30,8 +30,8 @@ public class CustomerRunnable implements JFRecordable<Void>, Traceable<Void>, Ru
 /** runnable。 */
     private final Runnable runnable;
 
-    @Getter
 /** observation。 */
+    @Getter
     private final Observation observation;
 /** threadTaskJFREvent。 */
     private final ThreadTaskJFREvent threadTaskJFREvent;

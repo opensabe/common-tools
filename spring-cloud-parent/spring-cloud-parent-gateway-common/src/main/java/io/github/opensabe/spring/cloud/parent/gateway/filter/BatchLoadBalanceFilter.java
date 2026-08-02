@@ -48,8 +48,8 @@ public class BatchLoadBalanceFilter extends AbstractTracedFilter {
     @Autowired
     private GatewayBatchLoadBalanceProperties gatewayBatchLoadBalanceProperties;
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     protected Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         RequestPath path = request.getPath();
@@ -60,8 +60,8 @@ public class BatchLoadBalanceFilter extends AbstractTracedFilter {
         return chain.filter(exchange);
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     protected int ordered() {
         //顺序需要在负载均衡之前
         return ReactiveLoadBalancerClientFilter.LOAD_BALANCER_CLIENT_FILTER_ORDER - 1;

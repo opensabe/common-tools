@@ -33,8 +33,8 @@ import lombok.Getter;
  * @author maheng
  */
 public class MapperRegistry extends org.apache.ibatis.binding.MapperRegistry {
-    @Getter
 /** config。 */
+    @Getter
     private final Configuration config;
     @Getter
     private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();

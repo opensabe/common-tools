@@ -23,13 +23,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
-@Getter
-@Builder
 /**
  * RetMsg 类。
  * <p>返回消息。</p>
  */
+@Setter
+@Getter
+@Builder
 public class RetMsg extends MqMessage {
 /** 消息体。 */
     private String body;

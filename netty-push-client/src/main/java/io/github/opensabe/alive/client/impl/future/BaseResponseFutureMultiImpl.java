@@ -43,10 +43,10 @@ public class BaseResponseFutureMultiImpl implements BaseResponseFuture {
         futureList.add(future);
     }
 
-    @Override
 /**
  * get0 方法。
  */
+    @Override
     public Response get0() throws InterruptedException, AliveClientExecutionException {
         Response ans = Response.FAIL;
         for (ResponseFuture future : futureList) {
@@ -60,10 +60,10 @@ public class BaseResponseFutureMultiImpl implements BaseResponseFuture {
         return ans;
     }
 
-    @Override
 /**
  * get0 方法。
  */
+    @Override
     public Response get0(long timeout, TimeUnit unit)
             throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         if (timeout <= 0) {

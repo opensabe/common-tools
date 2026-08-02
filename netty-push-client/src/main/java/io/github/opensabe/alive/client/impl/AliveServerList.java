@@ -79,10 +79,10 @@ public class AliveServerList implements Watcher {
 
         curator.getConnectionStateListenable().addListener(new ConnectionStateListener() {
 
-            @Override
 /**
  * stateChanged 方法。
  */
+            @Override
             public void stateChanged(CuratorFramework client, ConnectionState newState) {
                 logger.info("stateChanged client {},state{}", client, newState);
                 if (newState == ConnectionState.RECONNECTED || newState == ConnectionState.CONNECTED) {
@@ -189,10 +189,10 @@ public class AliveServerList implements Watcher {
         }
     }
 
-    @Override
 /**
  * process 方法。
  */
+    @Override
     public void process(WatchedEvent event) {
         logger.info("zookeeper trigger event, " + event);
         if (StringUtils.equals(event.getPath(), zkPath)

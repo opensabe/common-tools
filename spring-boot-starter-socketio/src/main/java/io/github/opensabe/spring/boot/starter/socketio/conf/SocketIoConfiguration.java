@@ -251,7 +251,7 @@ public class SocketIoConfiguration {
         private final OrderedSpringAnnotationScanner scanner;
 
         /**
-         * Socket.IO 服务端。
+         * 托管的 Socket.IO 服务端。
          */
         private final SocketIOServer server;
 

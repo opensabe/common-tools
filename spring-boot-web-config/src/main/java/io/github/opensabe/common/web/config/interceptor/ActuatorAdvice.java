@@ -26,26 +26,26 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 
-@Log4j2
-@RestControllerAdvice
 /**
  * ActuatorAdvice 类。
  * <p>Actuator 端点Advice。</p>
  */
+@Log4j2
+@RestControllerAdvice
 public class ActuatorAdvice implements ResponseBodyAdvice<Object> {
-    @Override
 /**
  * supports 方法。
  */
+    @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         String name = returnType.getMethod().toString().toLowerCase();
         return name.contains("actuate.endpoint");
     }
 
-    @Override
 /**
  * beforeBodyWrite 方法。
  */
+    @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         String name = returnType.getMethod().toString().toLowerCase();
         if (log.isDebugEnabled()) {

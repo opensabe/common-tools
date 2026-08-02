@@ -33,12 +33,12 @@ import tk.mybatis.mapper.annotation.ColumnType;
 @Table(name = "t_order")
 public class Order {
 
-    @Id
 /** id。 */
+    @Id
     private String id;
 
-    @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = S3TypeHandler.class)
 /** orderInfo。 */
+    @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = S3TypeHandler.class)
     private OrderInfo orderInfo;
 
     @Getter

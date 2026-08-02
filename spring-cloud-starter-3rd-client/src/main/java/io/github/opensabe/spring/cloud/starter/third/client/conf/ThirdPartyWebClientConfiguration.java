@@ -21,20 +21,20 @@ import org.springframework.context.annotation.Configuration;
 
 import io.github.opensabe.spring.cloud.starter.third.client.webclient.ThirdPartyWebClientNamedContextFactory;
 
-@Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(ThirdPartyWebClientConfigurationProperties.class)
 /**
  * ThirdPartyWebClientConfiguration 类。
  * <p>Third Party Web Client Configuration。</p>
  */
+@Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(ThirdPartyWebClientConfigurationProperties.class)
 public class ThirdPartyWebClientConfiguration {
 /**
  * getThirdPartyWebClientNamedContextFactory 方法。
  */
-    @Bean
 /**
  * getThirdPartyWebClientNamedContextFactory 方法。
  */
+    @Bean
     public ThirdPartyWebClientNamedContextFactory getThirdPartyWebClientNamedContextFactory() {
         return new ThirdPartyWebClientNamedContextFactory();
     }

@@ -34,36 +34,36 @@ public class BaseResponseFutureImpl extends FutureTask<Response> implements Base
     public BaseResponseFutureImpl() {
         super(new Callable<Response>() {
 
-            @Override
 /**
  * call 方法。
  */
+            @Override
             public Response call() throws Exception {
                 return null;
             }
         });
     }
 
-    @Override
 /**
  * set 方法。
  */
+    @Override
     public void set(Response resp) {
         super.set(resp);
     }
 
-    @Override
 /**
  * setException 方法。
  */
+    @Override
     public void setException(Throwable t) {
         super.setException(t);
     }
 
-    @Override
 /**
  * get0 方法。
  */
+    @Override
     public Response get0() throws InterruptedException, AliveClientExecutionException {
         try {
             return super.get();
@@ -76,10 +76,10 @@ public class BaseResponseFutureImpl extends FutureTask<Response> implements Base
         }
     }
 
-    @Override
 /**
  * get0 方法。
  */
+    @Override
     public Response get0(long timeout, TimeUnit unit)
             throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         if (timeout <= 0) {

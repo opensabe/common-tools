@@ -104,8 +104,8 @@ public class CustomizedReactorLoadBalancerExchangeFilterFunction implements Load
         this.transformers = transformers;
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction next) {
         URI originalUrl = clientRequest.url();
         String serviceId = originalUrl.getHost();

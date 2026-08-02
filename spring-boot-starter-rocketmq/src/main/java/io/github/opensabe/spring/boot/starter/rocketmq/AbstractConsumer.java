@@ -63,7 +63,6 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
     private final MessageTypeReference<T> typeReference;
 
     /** Spring 环境，用于解析 {@link RocketMQMessageListener#topic()} 占位符。 */
-    /** environment。 */
     @Autowired
     protected Environment environment;
 
@@ -71,7 +70,6 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
     protected String topic;
 
     /** 统一观测工厂。 */
-    /** unifiedObservation 工厂。 */
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 

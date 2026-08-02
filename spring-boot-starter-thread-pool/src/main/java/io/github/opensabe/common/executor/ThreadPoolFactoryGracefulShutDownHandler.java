@@ -45,7 +45,6 @@ public class ThreadPoolFactoryGracefulShutDownHandler implements GracefulShutdow
      * 是否正在执行优雅关闭。
      */
     @Getter
-/** isShuttingDown。 */
     private volatile boolean isShuttingDown;
 
     /**

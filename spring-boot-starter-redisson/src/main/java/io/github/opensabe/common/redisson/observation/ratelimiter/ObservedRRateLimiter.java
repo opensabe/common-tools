@@ -605,9 +605,6 @@ public class ObservedRRateLimiter extends ObservedRExpirable<RRateLimiter> imple
     }
 
     /**
-     * 限流器操作：None。
-     */
-    /**
      * 同步 acquire 操作的函数式回调。
      */
     private interface AcquireCallable {

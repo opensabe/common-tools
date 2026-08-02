@@ -40,10 +40,10 @@ public class ProtoBufDecoder extends ByteToMessageDecoder {
     private static ConcurrentHashMap<String, Class<? extends GeneratedMessageV3>> name2classMap = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<String, Method> name2methodMap = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("unchecked")
 /**
  * decode 方法。
  */
+    @SuppressWarnings("unchecked")
     public static GeneratedMessageV3 decode(short methodId, byte[] message) {
 
         String classNameStr = MessageType.methodIdToRequestName.get(methodId);
@@ -65,10 +65,10 @@ public class ProtoBufDecoder extends ByteToMessageDecoder {
         }
     }
 
-    @Override
 /**
  * decode 方法。
  */
+    @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 
         if (in.readableBytes() > 2) {

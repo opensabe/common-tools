@@ -22,9 +22,6 @@ import lombok.Setter;
 /**
  * @author Sjaak Derksen
  */
-/**
- * OrderItemDto 数据传输对象。
- */
 @Getter
 @Setter
 @Binding

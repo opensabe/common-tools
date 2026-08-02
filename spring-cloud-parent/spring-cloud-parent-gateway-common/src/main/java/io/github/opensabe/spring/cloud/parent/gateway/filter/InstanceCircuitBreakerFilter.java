@@ -43,8 +43,8 @@ public class InstanceCircuitBreakerFilter extends AbstractTracedFilter {
     @Autowired
     private CircuitBreakerRegistry circuitBreakerRegistry;
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
         URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
         Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
@@ -68,8 +68,8 @@ public class InstanceCircuitBreakerFilter extends AbstractTracedFilter {
         return chain.filter(exchange).transform(CircuitBreakerOperator.of(circuitBreaker));
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public int ordered() {
         try {
             //必须在负载均衡器之后，这样才能拿到最终的要调用的实例 ip port

@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import io.github.opensabe.common.web.config.base.ErrResponse;
 import io.github.opensabe.common.web.config.base.ErrorUtil;
 
-@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 /**
  * C422Exception 类。
  * <p>C422异常。</p>
  */
+@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 public class C422Exception extends RESTFull4xxBaseException implements Serializable {
 /** serialVersionUID 字段。 */
     private static final long serialVersionUID = -2312393803704717855L;

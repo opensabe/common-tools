@@ -34,60 +34,60 @@ public class ClassIntrospectorDecorator extends ClassIntrospector {
         this.delegate = delegate;
     }
 
-    @Override
 /**
  * copy 方法。
  */
+    @Override
     public ClassIntrospector copy() {
         return new ClassIntrospectorDecorator(delegate);
     }
 
-    @Override
 /**
  * forSerialization 方法。
  */
+    @Override
     public BeanDescription forSerialization(SerializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forSerialization(cfg, type, r);
     }
 
-    @Override
 /**
  * forDeserialization 方法。
  */
+    @Override
     public BeanDescription forDeserialization(DeserializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forDeserialization(cfg, type, r);
     }
 
-    @Override
 /**
  * forDeserializationWithBuilder 方法。
  */
+    @Override
     public BeanDescription forDeserializationWithBuilder(DeserializationConfig cfg, JavaType builderType, MixInResolver r, BeanDescription valueTypeDesc) {
         return delegate.forDeserializationWithBuilder(cfg, builderType, r, valueTypeDesc);
     }
 
 //
 
-    @Override
 /**
  * forCreation 方法。
  */
+    @Override
     public BeanDescription forCreation(DeserializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forCreation(cfg, type, r);
     }
 
-    @Override
 /**
  * forClassAnnotations 方法。
  */
+    @Override
     public BeanDescription forClassAnnotations(MapperConfig<?> cfg, JavaType type, MixInResolver r) {
         return delegate.forClassAnnotations(cfg, type, r);
     }
 
-    @Override
 /**
  * forDirectClassAnnotations 方法。
  */
+    @Override
     public BeanDescription forDirectClassAnnotations(MapperConfig<?> cfg, JavaType type, MixInResolver r) {
         return delegate.forDirectClassAnnotations(cfg, type, r);
     }

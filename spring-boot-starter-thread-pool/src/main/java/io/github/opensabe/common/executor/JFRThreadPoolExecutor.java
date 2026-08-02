@@ -37,8 +37,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JFRThreadPoolExecutor implements ExecutorService {
 
-    @Getter
 /** threadPoolExecutor。 */
+    @Getter
     protected final ThreadPoolExecutor threadPoolExecutor;
 
 /** unifiedObservation 工厂。 */

@@ -21,14 +21,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 /**
  * RegDev 类。
  * <p>设备注册。</p>
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class RegDev extends MqMessage {
 /** 请求 ID。 */
     private Integer requestId;

@@ -60,8 +60,8 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
     /** 复合解密器。 */
     private CompositeDecryptor decryptor;
 
-    @Autowired(required = false)
     /** Spring 注入的可选 SPI 解密器列表。 */
+    @Autowired(required = false)
     private List<Decryptor> decrypters;
 
 //

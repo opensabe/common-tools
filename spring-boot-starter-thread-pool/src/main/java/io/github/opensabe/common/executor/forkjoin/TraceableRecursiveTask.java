@@ -30,8 +30,8 @@ import lombok.Getter;
  */
 public abstract class TraceableRecursiveTask<V> extends RecursiveTask<V> implements JFRecordable<V>, Traceable<V> {
 
-    @Getter
 /** observation。 */
+    @Getter
     protected final Observation observation;
 /** event。 */
     private final ThreadTaskJFREvent event;

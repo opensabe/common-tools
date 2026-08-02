@@ -45,8 +45,8 @@ public class DynamodbExecuteContext extends Observation.Context {
 /** rangeKey。 */
     private String rangeKey;
 
-    @Setter(AccessLevel.NONE)
 /** expression。 */
+    @Setter(AccessLevel.NONE)
     private String expression;
 
     public DynamodbExecuteContext(String method, AttributeValue hashKey, Optional<AttributeValue> rangeKey) {

@@ -204,17 +204,17 @@ public class BatchBufferQueueTest {
 
     }
 
-    @SpringBootApplication
     /**
  * App。
  */
+    @SpringBootApplication
 public static class App {
 
-        @Log4j2
-        @Component
         /**
  * Queue1。
  */
+        @Log4j2
+        @Component
 public static class Queue1 extends BatchBufferedQueue<Event> {
 
             @Override
@@ -285,10 +285,10 @@ public static class Queue1 extends BatchBufferedQueue<Event> {
             }
         }
 
-        @Component
         /**
  * Queue2。
  */
+        @Component
 public static class Queue2 extends BatchBufferedCountDownQueue<CountDownEvent> {
             @Override
             protected Comparator<CountDownEvent> comparator() {

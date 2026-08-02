@@ -21,9 +21,6 @@ import lombok.Setter;
 /**
  * @author Sjaak Derksen
  */
-/**
- * OrderItemKeyDto 数据传输对象。
- */
 @Getter
 @Setter
 public class OrderItemKeyDto {

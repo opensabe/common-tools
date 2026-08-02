@@ -40,11 +40,11 @@ import io.github.opensabe.spring.boot.starter.rocketmq.observation.RocketMQObser
 import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 
-@Component
 /**
  * MQClientImpl 类。
  * <p>MQClient实现。</p>
  */
+@Component
 public class MQClientImpl implements Client {
 /** log 字段。 */
     private static final Logger log = LogManager.getLogger(MQClientImpl.class);

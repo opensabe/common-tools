@@ -20,12 +20,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
 
-@ConfigurationProperties(prefix = "alive.push")
-@Data
 /**
  * AliveProperties 类。
  * <p>Alive 推送Properties。</p>
  */
+@ConfigurationProperties(prefix = "alive.push")
+@Data
 public class AliveProperties {
 
 /** ROCKET_CLIENT_NAME 字段。 */

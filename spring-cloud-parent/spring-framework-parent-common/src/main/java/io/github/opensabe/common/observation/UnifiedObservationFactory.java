@@ -45,7 +45,6 @@ public class UnifiedObservationFactory {
      * 参考代码：io.micrometer.tracing.brave.bridge.W3CPropagation
      * TraceContext.Injector<R> injector(Setter<R, String> setter)
      */
-    /** W3C traceparent 头字段名。 */
     public static final String TRACE_PARENT = "traceparent";
     /** traceparent 各段分隔符。 */
     public static final char TRACEPARENT_DELIMITER = '-';

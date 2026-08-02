@@ -33,11 +33,11 @@ import lombok.Getter;
  */
 public abstract class ListableRecursiveTask<T, R> extends TraceableRecursiveTask<R> {
 
-    @Getter
 /** capacity。 */
-    protected int capacity;
     @Getter
+    protected int capacity;
 /** list。 */
+    @Getter
     protected List<T> list;
 /** transformer。 */
     protected Function<T, R> transformer;

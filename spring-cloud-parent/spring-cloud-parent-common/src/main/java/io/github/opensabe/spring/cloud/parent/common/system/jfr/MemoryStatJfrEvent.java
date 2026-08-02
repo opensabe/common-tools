@@ -22,14 +22,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * cgroup memory.stat 指标的 JFR 事件。
+ */
 @Category({"Native Memory Tracking"})
 @Label("Memory Stat")
 @NoArgsConstructor
 @Getter
 @Setter
-/**
- * cgroup memory.stat 指标的 JFR 事件。
- */
 public class MemoryStatJfrEvent extends Event {
 
     private long cache;

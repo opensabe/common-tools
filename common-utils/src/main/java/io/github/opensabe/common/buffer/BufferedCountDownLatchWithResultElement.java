@@ -17,10 +17,10 @@ package io.github.opensabe.common.buffer;
 
 import lombok.extern.log4j.Log4j2;
 
-@Log4j2
 /**
  * BufferedCountDownLatchWithResultElement。
  */
+@Log4j2
 public abstract class BufferedCountDownLatchWithResultElement<RESULT> extends BufferedCountDownLatchElement {
     private volatile RESULT result;
 

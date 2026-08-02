@@ -35,8 +35,8 @@ public class CustomerCallable<T> implements JFRecordable<T>, Traceable<T>, Calla
     private final Callable<T> callable;
 /** threadTaskJFREvent。 */
     private final ThreadTaskJFREvent threadTaskJFREvent;
-    @Getter
 /** observation。 */
+    @Getter
     private final Observation observation;
 /** observationRegistry。 */
     private final ObservationRegistry observationRegistry;

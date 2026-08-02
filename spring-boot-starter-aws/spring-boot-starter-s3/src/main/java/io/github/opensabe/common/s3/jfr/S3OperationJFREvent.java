@@ -32,14 +32,14 @@ import lombok.Setter;
 @Label("operation")
 @StackTrace(false)
 public class S3OperationJFREvent extends Event {
-    @Label("file name")
 /** fileName。 */
+    @Label("file name")
     private String fileName;
-    @Label("file size")
 /** fileSize。 */
+    @Label("file size")
     private long fileSize;
-    @Label("operate type")
 /** operateType。 */
+    @Label("operate type")
     private String operateType;
 /** success。 */
     private boolean success;

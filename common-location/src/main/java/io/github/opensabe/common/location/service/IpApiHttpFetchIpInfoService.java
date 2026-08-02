@@ -63,11 +63,11 @@ public class IpApiHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<
                 .build();
     }
 
-    @NoArgsConstructor
-    @Data
     /**
  * Response。
  */
+    @NoArgsConstructor
+    @Data
 public static class Response {
 
         @JsonProperty("ip")

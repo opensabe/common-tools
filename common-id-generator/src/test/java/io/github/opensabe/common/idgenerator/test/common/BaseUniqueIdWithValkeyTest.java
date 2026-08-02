@@ -43,10 +43,10 @@ public abstract class BaseUniqueIdWithValkeyTest {
         SingleValkeyIntegrationTest.setProperties(registry);
     }
 
-    @SpringBootApplication(scanBasePackages = {"io.github.opensabe.common.idgenerator.test"})
     /**
  * App。
  */
+    @SpringBootApplication(scanBasePackages = {"io.github.opensabe.common.idgenerator.test"})
 public static class App {
     }
 }

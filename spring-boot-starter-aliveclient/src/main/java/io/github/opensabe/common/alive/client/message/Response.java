@@ -19,12 +19,12 @@ import io.github.opensabe.common.alive.client.message.enumeration.RetCode;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
-@Builder
 /**
  * Response 类。
  * <p>响应。</p>
  */
+@Data
+@Builder
 public class Response extends MqMessage {
 /** 请求 ID。 */
     private Integer requestId;

@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author erdaoya
  * @since 1.0
  */
-@ResponseStatus(HttpStatus.NOT_FOUND)
 /**
  * C404Exception 类。
  * <p>C404异常。</p>
  */
+@ResponseStatus(HttpStatus.NOT_FOUND)
 public class C404Exception extends RESTFull4xxBaseException implements Serializable {
 /** serialVersionUID 字段。 */
     private static final long serialVersionUID = 4127623155490726561L;

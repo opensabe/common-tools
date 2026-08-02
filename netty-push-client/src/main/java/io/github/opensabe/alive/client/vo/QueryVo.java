@@ -49,10 +49,10 @@ public class QueryVo extends PushVo {
 
     }
 
-    @Override
 /**
  * 返回调试字符串。
  */
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("topic: ").append(topic);

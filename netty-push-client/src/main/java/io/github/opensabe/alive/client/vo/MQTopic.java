@@ -18,12 +18,12 @@ package io.github.opensabe.alive.client.vo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter
-@AllArgsConstructor
 /**
  * MQTopic 枚举。
  * <p>MQ 主题。</p>
  */
+@Getter
+@AllArgsConstructor
 public enum MQTopic {
 
     BROAD_CAST("opensabe_common_alive_broadcast"),

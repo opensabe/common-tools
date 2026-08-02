@@ -32,8 +32,8 @@ import lombok.Setter;
 @StackTrace(value = false)
 public class DynamodbExecuteEvent extends Event {
 
-    @Label("SQL Executed Method")
 /** method。 */
+    @Label("SQL Executed Method")
     private final String method;
 
 /** traceId。 */

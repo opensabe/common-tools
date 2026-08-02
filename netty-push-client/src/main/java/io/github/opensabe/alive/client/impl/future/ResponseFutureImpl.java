@@ -50,27 +50,27 @@ public class ResponseFutureImpl implements ResponseFuture {
         return future.get0(timeout, unit);
     }
 
-    @Override
 /**
  * get 方法。
  */
+    @Override
     public Response get() throws InterruptedException, AliveClientExecutionException {
         return get0();
     }
 
-    @Override
 /**
  * get 方法。
  */
+    @Override
     public Response get(long timeout, TimeUnit unit)
             throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         return get0(timeout, unit);
     }
 
-    @Override
 /**
  * getUninterruptibly 方法。
  */
+    @Override
     public Response getUninterruptibly() throws AliveClientExecutionException {
         while (true) {
             try {
@@ -81,10 +81,10 @@ public class ResponseFutureImpl implements ResponseFuture {
         }
     }
 
-    @Override
 /**
  * getUninterruptibly 方法。
  */
+    @Override
     public Response getUninterruptibly(long timeout, TimeUnit unit) throws AliveClientExecutionException, AliveClientTimeoutException {
         if (timeout == 0) {
             return getUninterruptibly();

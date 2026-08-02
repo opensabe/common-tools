@@ -33,8 +33,8 @@ public class KeyValueDynamoDbService extends DynamoDbBaseService<KeyValueDynamoD
 
     @TableName(name = "dynamodb_${aws_env}_${defaultOperId}_typehandler")
     public static class KeyValueMap {
-        @HashKeyName(name = "key")
 /** key。 */
+        @HashKeyName(name = "key")
         private String key;
 /** value。 */
         private String value;

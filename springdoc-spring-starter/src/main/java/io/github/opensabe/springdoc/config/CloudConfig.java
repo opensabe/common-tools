@@ -29,19 +29,19 @@ import io.github.opensabe.springdoc.responses.SpringdocResponseService;
 /**
  * @author heng.ma
  */
-@ConditionalOnClass({ErrorMessage.class, OperationService.class})
-@Configuration(proxyBeanMethods = false)
 /**
  * CloudConfig 类。
  * <p>Cloud Config。</p>
  */
+@ConditionalOnClass({ErrorMessage.class, OperationService.class})
+@Configuration(proxyBeanMethods = false)
 public class CloudConfig {
 
-    @Bean
-    @ConditionalOnMissingBean
 /**
  * springdocResponseService 方法。
  */
+    @Bean
+    @ConditionalOnMissingBean
     public SpringdocResponseService springdocResponseService(OperationService operationService, SpringDocConfigProperties springDocConfigProperties, PropertyResolverUtils propertyResolverUtils) {
         return new SpringdocResponseService(operationService, springDocConfigProperties, propertyResolverUtils);
     }

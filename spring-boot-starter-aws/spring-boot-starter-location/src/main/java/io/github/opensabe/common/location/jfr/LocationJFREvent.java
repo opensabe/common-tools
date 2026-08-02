@@ -33,35 +33,35 @@ import lombok.Setter;
 @StackTrace(false)
 public class LocationJFREvent extends Event {
     // 方法名称
-    @Label("method name")
 /** methodName。 */
+    @Label("method name")
     private String methodName;
 
     // 请求参数
-    @Label("request params")
 /** requestParams。 */
+    @Label("request params")
     private String requestParams;
 
     // 响应结果
-    @Label("response")
 /** response。 */
+    @Label("response")
     private String response;
 
     // 执行时间（毫秒）
-    @Label("execution time")
 /** executionTime。 */
+    @Label("execution time")
     private long executionTime;
 
-    @Label("successful")
 /** successful。 */
+    @Label("successful")
     private boolean successful;
 
-    @Label("trace id")
 /** traceId。 */
+    @Label("trace id")
     private String traceId;
 
-    @Label("span id")
 /** spanId。 */
+    @Label("span id")
     private String spanId;
 
     // 默认构造器

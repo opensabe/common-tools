@@ -57,12 +57,12 @@ public @interface IntegerEnumedValue {
     int[] value();
 
     /** 同一元素上重复注解的容器。 */
+        /** 重复的 {@link IntegerEnumedValue} 实例。 */
     @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
     @Retention(RUNTIME)
     @Documented
     @interface List {
 
-        /** 重复的 {@link IntegerEnumedValue} 实例。 */
         IntegerEnumedValue[] value();
     }
 }

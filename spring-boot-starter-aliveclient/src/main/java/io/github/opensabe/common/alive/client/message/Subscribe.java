@@ -22,14 +22,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 /**
  * Subscribe 类。
  * <p>订阅。</p>
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Subscribe extends MqMessage {
 /** 请求 ID。 */
     private Integer requestId;

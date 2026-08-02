@@ -110,32 +110,32 @@ public class BeanUtilsTest {
 public record RU(String name, Integer age) {
     }
 
-    @Data
     /**
  * CT。
  */
+    @Data
 public static class CT {
         private String name;
         private Integer age;
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     /**
  * CU。
  */
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
 public static class CU {
         private String name;
         private int age;
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     /**
  * CC。
  */
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
 public static class CC {
         private CU cu;
     }

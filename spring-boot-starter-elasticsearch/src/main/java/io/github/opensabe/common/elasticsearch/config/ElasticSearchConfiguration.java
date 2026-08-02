@@ -86,21 +86,18 @@ public class ElasticSearchConfiguration implements DisposableBean {
     /**
      * ES 连接与集群属性。
      */
-    /** properties。 */
     @Autowired
     private ElasticSearchProperties properties;
 
     /**
      * 全局敏感串过滤管理器。
      */
-    /** globalSecret 管理器。 */
     @Autowired
     private GlobalSecretManager globalSecretManager;
 
     /**
      * 统一 Observation 工厂。
      */
-    /** unifiedObservation 工厂。 */
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 

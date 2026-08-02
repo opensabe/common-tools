@@ -20,9 +20,6 @@ import java.util.regex.Pattern;
 /**
  * Created by houpu on 2017/7/26.
  */
-/**
- * RegexUtil 工具类。
- */
 public class RegexUtil {
 
     private static final Pattern DOMAIN_PATTERN = Pattern.compile("(?<=http://|\\.)[^.]*?\\.(com|cn|net|org|biz|info|cc|tv)", Pattern.CASE_INSENSITIVE);

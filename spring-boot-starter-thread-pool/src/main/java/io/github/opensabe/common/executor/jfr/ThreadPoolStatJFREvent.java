@@ -46,8 +46,8 @@ public class ThreadPoolStatJFREvent extends Event {
     private int activeCount;
 /** poolSize。 */
     private int poolSize;
-    @Getter
 /** queueSize。 */
+    @Getter
     private int queueSize;
 
     public ThreadPoolStatJFREvent(String name, ThreadPoolExecutor executor) {

@@ -278,8 +278,8 @@ public class CommonLogFilter extends AbstractTracedFilter {
         return null;
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public int ordered() {
         return ORDER;
     }

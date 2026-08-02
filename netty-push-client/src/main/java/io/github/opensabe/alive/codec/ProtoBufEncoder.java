@@ -28,10 +28,10 @@ import io.netty.handler.codec.MessageToByteEncoder;
  */
 public class ProtoBufEncoder extends MessageToByteEncoder<GeneratedMessageV3> {
 
-    @Override
 /**
  * encode 方法。
  */
+    @Override
     protected void encode(ChannelHandlerContext ctx, GeneratedMessageV3 message, ByteBuf out) throws Exception {
         String className = message.getClass().getName();
         short methodId = MessageType.requestNameToMethodId.get(className);

@@ -36,10 +36,10 @@ public class ThirdPartyWebClientSpecification implements NamedContextFactory.Spe
         this.configuration = configuration;
     }
 
-    @Override
 /**
  * 返回调试字符串。
  */
+    @Override
     public String toString() {
         return "WebClientSpecification{" +
                 "name='" + name + '\'' +
@@ -47,18 +47,18 @@ public class ThirdPartyWebClientSpecification implements NamedContextFactory.Spe
                 '}';
     }
 
-    @Override
 /**
  * getName 方法。
  */
+    @Override
     public String getName() {
         return name;
     }
 
-    @Override
 /**
  * getConfiguration 方法。
  */
+    @Override
     public Class<?>[] getConfiguration() {
         return configuration;
     }

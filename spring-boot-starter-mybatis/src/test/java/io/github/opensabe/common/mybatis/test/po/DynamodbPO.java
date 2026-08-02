@@ -33,12 +33,12 @@ import tk.mybatis.mapper.annotation.ColumnType;
 @Table(name = "t_dynamodb_type_handler")
 public class DynamodbPO {
 
-    @Id
 /** id。 */
+    @Id
     private String id;
 
-    @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = DynamoDbTypeHandler.class)
 /** orderInfo。 */
+    @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = DynamoDbTypeHandler.class)
     private OrderInfo orderInfo;
 
     @Getter

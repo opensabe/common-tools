@@ -23,9 +23,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * @author maheng
- */
-/**
  * WebFlux 请求路径参数解析器。
  * <p>
  * 支持 Controller 方法参数直接注入 {@link org.springframework.http.server.RequestPath}。

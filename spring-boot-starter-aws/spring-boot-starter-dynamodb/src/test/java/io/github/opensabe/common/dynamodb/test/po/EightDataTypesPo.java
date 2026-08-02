@@ -35,16 +35,16 @@ import lombok.Data;
 @Data
 public class EightDataTypesPo {
 
+/** id。 */
     @JSONField(name = "id")
     @HashKeyName(name = "id")
-/** id。 */
     private String id;
+/** order。 */
     @JSONField(name = "order")
     @RangeKeyName(name = "order")
-/** order。 */
     private Integer order;
-    @JSONField(name = "it")
 /** num1。 */
+    @JSONField(name = "it")
     private int num1;
 /** db1。 */
     private Double db1;
@@ -66,11 +66,11 @@ public class EightDataTypesPo {
     private Boolean flag1;
 /** flag2。 */
     private boolean flag2;
-    @JSONField(name = "create_time")
 /** createTime。 */
+    @JSONField(name = "create_time")
     private Date createTime;
-    @JSONField(name = "update_time")
 /** updateTime。 */
+    @JSONField(name = "update_time")
     private LocalDateTime updateTime;
 /** bg。 */
     private BigDecimal bg;

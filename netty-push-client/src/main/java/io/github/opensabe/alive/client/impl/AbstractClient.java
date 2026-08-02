@@ -65,35 +65,35 @@ public abstract class AbstractClient implements Client {
         }
     }
 
-    @Override
 /**
  * query 方法。
  */
+    @Override
     public Response query(QueryVo queryVo) throws AliveClientExecutionException, InterruptedException, AliveClientException {
         return query(queryVo, 0, TimeUnit.SECONDS);
     }
 
-    @Override
 /**
  * query 方法。
  */
+    @Override
     public Response query(QueryVo queryVo, long timeout, TimeUnit unit)
             throws AliveClientExecutionException, InterruptedException, AliveClientException {
         return queryAsync(queryVo).get();
     }
 
-    @Override
 /**
  * queryAsync 方法。
  */
+    @Override
     public ResponseFuture queryAsync(QueryVo queryVo) throws AliveClientException {
         final BaseResponseFutureImpl baseFuture = new BaseResponseFutureImpl();
         ResponseFuture future = new ResponseFutureImpl(baseFuture);
         queryAsync(queryVo, new ClientCallback() {
-            @Override
 /**
  * 推送完成回调。
  */
+            @Override
             public void opComplete(Set<Message.Response> response) {
                 if (response == null || response.size() == 0) {
                     baseFuture.set(Response.ERR);
@@ -115,19 +115,19 @@ public abstract class AbstractClient implements Client {
     }
 
 
-    @Override
 /**
  * push 方法。
  */
+    @Override
     public Response push(MessageVo messageVo)
             throws AliveClientExecutionException, AliveClientTimeoutException, InterruptedException, AliveClientException {
         return push(messageVo, 0, TimeUnit.SECONDS);
     }
 
-    @Override
 /**
  * push 方法。
  */
+    @Override
     public Response push(MessageVo messageVo, long timeout, TimeUnit unit)
             throws AliveClientExecutionException, AliveClientTimeoutException, InterruptedException, AliveClientException {
         return pushAsync(messageVo).get(timeout, unit);

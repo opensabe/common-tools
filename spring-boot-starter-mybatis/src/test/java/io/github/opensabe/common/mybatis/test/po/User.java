@@ -40,8 +40,8 @@ import tk.mybatis.mapper.annotation.ColumnType;
 @Table(name = "t_user")
 public class User {
 
-    @Id
 /** id。 */
+    @Id
     private String id;
 /** firstName。 */
     private String firstName;
@@ -49,8 +49,8 @@ public class User {
     private String lastName;
 /** createTime。 */
     private Timestamp createTime;
-    @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = JSONTypeHandler.class)
 /** properties。 */
+    @ColumnType(jdbcType = JdbcType.VARCHAR, typeHandler = JSONTypeHandler.class)
     private Properties properties;
 
     @Data

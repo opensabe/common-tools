@@ -39,18 +39,16 @@ public class ConnectionEvent extends Event {
      * 连接创建时间
      */
     @Label("Connection Create Time")
-/** connectedTime。 */
     private final long connectedTime;
 
     /**
      * 连接池中剩余连接数量
      */
     @Label("Connection Count")
-/** remain。 */
     private final int remain;
 
-    @Label("Connect Event Type")
 /** type。 */
+    @Label("Connect Event Type")
     private final String type;
 
 /** success。 */

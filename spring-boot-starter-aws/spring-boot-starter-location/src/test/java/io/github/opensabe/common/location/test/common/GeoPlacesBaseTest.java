@@ -29,13 +29,13 @@ import lombok.extern.log4j.Log4j2;
 /**
  * GeoPlaces Starter 集成测试基类：加载 {@link GeoPlacesProperties} 与最小 Spring Boot 上下文。
  */
+/**
+ * GeoPlacesBase 测试。
+ */
 @Log4j2
 @ExtendWith({SpringExtension.class})
 @SpringBootTest(classes = GeoPlacesBaseTest.App.class)
 //@JfrEventTest
-/**
- * GeoPlacesBase 测试。
- */
 public abstract class GeoPlacesBaseTest {
 
     /** geoPlaces 配置属性。 */

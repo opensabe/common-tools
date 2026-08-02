@@ -40,9 +40,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
 
 /** S3ClientWrapper。 */
-/**
- * S3ClientWrapper。
- */
 @Log4j2
 public record S3ClientWrapper(S3Client s3Client, String folderName, String bucketName,
                               UnifiedObservationFactory unifiedObservationFactory) {
