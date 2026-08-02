@@ -91,7 +91,7 @@ class BaseRspTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
                 failResponse.resolveData((code, msg) -> new RuntimeException("business failure: " + msg))
         );
-        assertTrue(exception.getMessage().contains("业务失败"));
+        assertTrue(exception.getMessage().contains("business failure"));
     }
 
     @Test
