@@ -24,7 +24,14 @@ import org.springframework.test.context.DynamicPropertySource;
 import io.github.opensabe.spring.boot.starter.rocketmq.MQProducerImpl;
 import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQTest;
 
+/**
+ * 新版 RocketMQ Producer（{@code use-new-producer=true}）Bean 注入测试。
+ */
+@DisplayName("新版 RocketMQ Producer 测试")
 public class NewRocketMQProducerTest extends BaseRocketMQTest {
+    /**
+     * 验证 MQProducer 注入且实现类为 {@link MQProducerImpl}。
+     */
     @Test
     @DisplayName("验证MQProducer Bean 注入")
     public void testMQProducerBeanInject() {

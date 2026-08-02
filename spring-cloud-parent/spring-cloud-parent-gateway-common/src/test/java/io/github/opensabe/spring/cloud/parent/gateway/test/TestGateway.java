@@ -73,6 +73,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         },
         classes = TestGateway.MockConfig.class
 )
+@DisplayName("Spring Cloud Gateway集成测试")
 public class TestGateway extends CommonMicroServiceTest {
     private static final String serviceId = "testService";
     @LocalServerPort

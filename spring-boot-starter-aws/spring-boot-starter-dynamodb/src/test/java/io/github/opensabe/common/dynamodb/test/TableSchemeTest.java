@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.core.TypeInformation;
 
@@ -40,19 +41,28 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.StaticTableSchema;
 
 /**
- * @author heng.ma
+ * DynamoDB 静态表 schema 生成与泛型解析测试。
  */
+@DisplayName("DynamoDB表Schema测试")
 public class TableSchemeTest {
 
 
+    /**
+     * 应能从基类泛型参数解析 KeyValue 实体类型。
+     */
     @Test
+    @DisplayName("基类泛型参数类型解析")
     void testParamerizedType() {
         TypeInformation<KeyValueDynamoDbService> information = TypeInformation.of(KeyValueDynamoDbService.class);
         TypeInformation<?> superTypeInformation = information.getSuperTypeInformation(DynamoDbBaseService.class);
         Assertions.assertEquals(KeyValueDynamoDbService.KeyValueMap.class, superTypeInformation.getTypeArguments().get(0).getType());
     }
 
+    /**
+     * 按 PO 注解生成的 StaticTableSchema 应包含正确主键与属性数量。
+     */
     @Test
+    @DisplayName("注解驱动表Schema生成")
     void testGenerateTableScheme() {
         BeanDesc desc = BeanUtil.getBeanDesc(EightDataTypesPo.class);
         MethodHandles.Lookup lookup = MethodHandles.lookup();

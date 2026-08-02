@@ -20,8 +20,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 /**
- * Child-first class loader for conflicting JARs (e.g. an older Fastjson stack).
- * Parent is the platform loader so application Fastjson is not visible here.
+ * 子优先类加载器，用于隔离冲突 JAR（如旧版 Fastjson 栈）。
+ * <p>父加载器为平台加载器，避免应用侧 Fastjson 对本加载器可见。
  */
 public final class IsolatedJarClassLoader extends URLClassLoader {
 

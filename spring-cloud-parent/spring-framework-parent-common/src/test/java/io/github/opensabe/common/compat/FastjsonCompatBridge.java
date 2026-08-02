@@ -31,8 +31,7 @@ import tools.jackson.core.type.TypeReference;
 import io.github.opensabe.common.utils.json.JsonUtil;
 
 /**
- * Invokes Fastjson inside an {@link IsolatedJarClassLoader}. Only {@link String}/{@code byte[]}
- * cross the class-loader boundary.
+ * 在 {@link IsolatedJarClassLoader} 中调用旧版 Fastjson；仅 {@link String}/{@code byte[]} 跨类加载器边界。
  */
 public final class FastjsonCompatBridge {
 

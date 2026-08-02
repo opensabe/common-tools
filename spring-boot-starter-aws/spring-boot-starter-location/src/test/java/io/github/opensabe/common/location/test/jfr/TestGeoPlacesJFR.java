@@ -41,9 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 /**
- * @author changhongwei
- * @date 2025/1/22 14:25
- * @description:
+ * 地理位置服务 JFR 事件录制测试（当前禁用）：验证 geocode / reverseGeocode 的 trace 与 JFR 字段。
  */
 @AutoConfigureTracing
 @Log4j2
@@ -59,6 +57,9 @@ public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
     @Autowired
     private GeocodeService geocodeService;
 
+    /**
+     * 验证 getCoordinates 调用产生 LocationJFREvent 且 traceId/spanId 与 Observation 一致。
+     */
     //    @Test
     @DisplayName("测试获取坐标功能 - 验证JFR事件记录")
     public void testGetCoordinates() {
@@ -87,6 +88,9 @@ public class TestGeoPlacesJFR extends GeoPlacesBaseTest {
         }
     }
 
+    /**
+     * 验证 reverseGeocode 调用产生 LocationJFREvent 且请求/响应字段完整。
+     */
     //    @Test
     @DisplayName("测试反向地理编码功能 - 验证JFR事件记录")
     public void testReverseGeocode() {

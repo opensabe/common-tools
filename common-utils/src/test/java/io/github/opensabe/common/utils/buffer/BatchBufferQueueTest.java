@@ -54,6 +54,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
+/**
+ * 批量缓冲队列行为与 JFR 事件集成测试。
+ */
 @JfrEventTest
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
@@ -81,6 +84,9 @@ public class BatchBufferQueueTest {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    /**
+     * 验证异步批量队列的 JFR 事件、链路追踪与批次排序（本地 JFR 环境运行）。
+     */
     @Test
     @DisplayName("测试批量缓冲队列和JFR事件记录 - 验证异步处理和链路追踪")
     @EnableEvent("io.github.opensabe.common.buffer.BufferedElementJFREvent")
@@ -172,6 +178,9 @@ public class BatchBufferQueueTest {
         });
     }
 
+    /**
+     * 验证 CountDown 批量队列在 submit 返回前已完成处理。
+     */
     @Test
     @DisplayName("测试批量缓冲计数队列 - 验证同步处理")
     public void testBatchBufferedCountDownQueue() throws InterruptedException {

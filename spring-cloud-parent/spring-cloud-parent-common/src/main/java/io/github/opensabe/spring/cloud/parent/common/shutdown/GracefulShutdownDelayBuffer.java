@@ -17,9 +17,7 @@ package io.github.opensabe.spring.cloud.parent.common.shutdown;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.context.ShutdownEndpoint;
@@ -36,48 +34,57 @@ import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationL
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 优雅关闭延迟缓冲，目的是：
- * 1. 减少 org.xnio.nio.QueuedNioTcpServer2$$Lambda$2208/0x0000000801dcfbd0@46d8ae74 failed with an exception
- * java.util.concurrent.RejectedExecutionException: XNIO007007: Thread is terminating
- * 这种报错，由于其他微服务可能本地还在请求这个实例，但是这个实例的 WebServer 已经关闭了导致 IO 线程接受了连接但是没有 servlet 线程处理，因为 servlet 线程池已经关闭了
- * 2. 减少其他微服务调用这个实例的时候报 503 导致重试
- * 实现思路是：
- * 1. 实例配置，必须配置优雅关闭 `server.shutdown=graceful`，暴露 `/actuator/shutdown` 接口
- * 2. k8s 通过调用 `/actuator/shutdown` 关闭实例
- * 3. `/actuator/shutdown` 底层是通过调用 ConfigurableApplicationContext.close() 实现的关闭
- * 4. ConfigurableApplicationContext.close() 分为如下几步：
- * 1. publishEvent(new ContextClosedEvent(this)); EurekaAutoConfiguration 会在这一步将实例设置为 Down
- * 2. lifecycleProcessor.onClose();（SmartLifeCycle，Undertow 的 GracefulShutDown 在这一步优雅关闭实例，所有新请求回复 503）
- * 3. destroyBeans(); （调用 Disposable Bean 的 destroy）
- * 4. closeBeanFactory();
- * 5. onClose();
- * 5. 我们通过监听 ContextClosedEvent，同时顺序在 EurekaAutoConfiguration 之后，sleep 当前实例过期时间 + 各种缓存预留时间
+ * 优雅关闭延迟缓冲监听器。
+ * <p>
+ * 目的：
+ * <ol>
+ *   <li>减少 Web 服务器已关闭但仍有本地连接到达时 XNIO 线程终止导致的
+ *       {@code RejectedExecutionException} 报错</li>
+ *   <li>减少其他微服务在实例下线前仍调用本实例而收到 503 并触发重试</li>
+ * </ol>
+ * 实现思路：
+ * <ol>
+ *   <li>实例须配置 {@code server.shutdown=graceful} 并暴露 {@code /actuator/shutdown}</li>
+ *   <li>K8s 通过 {@code /actuator/shutdown} 触发关闭（底层调用 {@code ConfigurableApplicationContext.close()}）</li>
+ *   <li>{@code close()} 顺序：发布 {@link ContextClosedEvent}（Eureka 标记 Down）→
+ *       {@code lifecycleProcessor.onClose()}（Web 服务器优雅排水）→ destroyBeans → closeBeanFactory → onClose</li>
+ *   <li>本监听器在 {@link ContextClosedEvent} 中、于 Eureka 下线之后 sleep
+ *       「注册表拉取间隔 + 租约续期间隔 + 缓存预留」秒，等待客户端缓存刷新</li>
+ * </ol>
  */
 @Log4j2
 @ConditionalOnBean({EurekaAutoServiceRegistration.class, EurekaClientConfigBean.class})
 @ConditionalOnAvailableEndpoint(endpoint = ShutdownEndpoint.class)
 public class GracefulShutdownDelayBuffer extends OnlyOnceApplicationListener<ContextClosedEvent> implements Ordered {
-    private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
     /**
-     * 用于抵消 eureka read cache 刷新，客户端 loadbalancer 缓存等缓存时间
+     * 额外 sleep 秒数，用于抵消 Eureka read cache、客户端 LoadBalancer 缓存等延迟。
      */
     private static final int SLEEP_SECONDS_FOR_CACHE = 5;
 
+    /** @see EurekaClientConfigBean */
     @Autowired(required = false)
     private EurekaClientConfigBean eurekaClientConfigBean;
+
+    /** @see EurekaInstanceConfigBean */
     @Autowired(required = false)
     private EurekaInstanceConfigBean eurekaInstanceConfigBean;
+
+    /** 服务器关闭模式等 Web 服务器属性。 */
     @Autowired
     private ServerProperties serverProperties;
 
+    /**
+     * 在优雅关闭且 Eureka 配置可用时，按推算的缓存刷新时间 sleep。
+     *
+     * @param event 上下文关闭事件
+     */
     @Override
     protected void onlyOnce(ContextClosedEvent event) {
         if (Objects.isNull(eurekaClientConfigBean) || Objects.isNull(eurekaInstanceConfigBean)) {
             return;
         }
         if (serverProperties.getShutdown() != null && serverProperties.getShutdown() == Shutdown.GRACEFUL) {
-            //以下均为推测时间，根据本实例的配置，推测其他微服务也是这么配置的
             int registryFetchIntervalSeconds = eurekaClientConfigBean.getRegistryFetchIntervalSeconds();
             int leaseRenewalIntervalInSeconds = eurekaInstanceConfigBean.getLeaseRenewalIntervalInSeconds();
             int sleepSeconds = registryFetchIntervalSeconds + leaseRenewalIntervalInSeconds + SLEEP_SECONDS_FOR_CACHE;
@@ -85,15 +92,19 @@ public class GracefulShutdownDelayBuffer extends OnlyOnceApplicationListener<Con
             try {
                 TimeUnit.SECONDS.sleep(sleepSeconds);
             } catch (InterruptedException e) {
-                //ignore
+                Thread.currentThread().interrupt();
             }
             log.info("GracefulShutdownDelayBuffer-onApplicationEvent complete");
         }
     }
 
+    /**
+     * 与 {@link EurekaAutoServiceRegistration} 相同顺序，保证在 Eureka 下线之后执行。
+     *
+     * @return 监听器顺序值
+     */
     @Override
     public int getOrder() {
-        //必须在 EurekaAutoServiceRegistration 之后
         return new EurekaAutoServiceRegistration(null, null, null).getOrder();
     }
 }

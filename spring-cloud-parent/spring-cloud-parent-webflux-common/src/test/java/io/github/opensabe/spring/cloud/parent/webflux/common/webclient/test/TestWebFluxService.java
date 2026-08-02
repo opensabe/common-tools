@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,10 +48,12 @@ import reactor.core.publisher.Mono;
         classes = TestWebFluxService.TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
+@DisplayName("WebFlux服务集成测试")
 public class TestWebFluxService {
     @Autowired
     private WebTestClient webTestClient;
 
+    @DisplayName("WebFlux TestController基础调用")
     @Test
     void test() {
         String thread1 = webTestClient.get().uri("/test").exchange()

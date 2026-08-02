@@ -23,13 +23,20 @@ import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.ThreadPoolFactoryGracefulShutDownHandler;
 
 /**
- * Registers graceful shutdown for ThreadPoolFactory.
- * Named historically for Undertow; Boot 4 no longer ships Undertow, but the handler
- * is still invoked via {@code UndertowGracefulShutdownInitializer} during app stop.
+ * 注册 {@link ThreadPoolFactory} 优雅关闭处理器。
+ * <p>
+ * 类名沿用 Undertow 历史命名；Boot 4 已不再内置 Undertow，但处理器仍通过
+ * {@code UndertowGracefulShutdownInitializer} 在应用停止阶段被调用。
  */
 @Configuration(proxyBeanMethods = false)
 public class UndertowThreadConfiguration {
 
+    /**
+     * 注册线程池工厂优雅关闭处理器（若容器中尚未存在）。
+     *
+     * @param threadPoolFactory 线程池工厂
+     * @return 优雅关闭处理器
+     */
     @Bean
     @ConditionalOnMissingBean(ThreadPoolFactoryGracefulShutDownHandler.class)
     public ThreadPoolFactoryGracefulShutDownHandler threadPoolFactoryGracefulShutDownHandler(ThreadPoolFactory threadPoolFactory) {

@@ -17,6 +17,7 @@ package io.github.opensabe.common.dynamodb.test;
 
 import java.lang.annotation.Annotation;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.Association;
@@ -34,14 +35,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @author heng.ma
+ * DynamoDB 属性转换器读写测试。
  */
+@DisplayName("DynamoDB属性转换器测试")
 public class DynamoConverterTest extends DynamicdbStarter {
 
     @Autowired
     private DynamodbConverter converter;
 
+    /**
+     * 嵌套 record 属性应能序列化后再反序列化为等价对象。
+     */
     @Test
+    @DisplayName("嵌套record属性读写往返")
     void testConvert() throws NoSuchFieldException {
         BasicPersistentEntity entity = new BasicPersistentEntity<>(TypeInformation.of(Entity.class));
         entity.addPersistentProperty(new AbstractPersistentProperty(Property.of(TypeInformation.of(Entity.class), Entity.class.getDeclaredField("child")), entity, SimpleTypeHolder.DEFAULT) {

@@ -21,6 +21,9 @@ import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.TypesDto;
 import io.github.opensabe.common.utils.mapstruct.vo.Types;
 
+/**
+ * Types 与 TypesDto 互转 MapStruct 映射器（测试桩）。
+ */
 @Mapper
 public interface TypesTypesDtoMapper extends CommonCopyMapper<Types, TypesDto> {
 

@@ -21,6 +21,9 @@ import io.github.opensabe.mapstruct.core.ObjectConverter;
 import io.github.opensabe.mapstruct.core.FromMapMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.Activity;
 
+/**
+ * Map 到 Activity 的 MapStruct 映射器（测试桩）。
+ */
 @Mapper(uses=ObjectConverter.class )
 public interface ActivityMapMapper extends FromMapMapper<Activity> {
 

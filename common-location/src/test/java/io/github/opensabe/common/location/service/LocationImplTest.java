@@ -16,6 +16,7 @@
 package io.github.opensabe.common.location.service;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,14 @@ import io.github.opensabe.common.location.vo.IpLocation;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import io.github.opensabe.common.utils.json.JsonUtil;
 
+/**
+ * 位置服务集成测试（Redis Testcontainers）。
+ */
 @ExtendWith({SpringExtension.class, SingleRedisIntegrationTest.class})
 @SpringBootTest(properties = {
         "eureka.client.enabled=false"
 })
+@DisplayName("位置服务集成测试（Redis）")
 public class LocationImplTest {
 
     private static final String TEST_IP = "203.0.113.10";
@@ -52,7 +57,11 @@ public class LocationImplTest {
         SingleRedisIntegrationTest.setProperties(registry);
     }
 
+    /**
+     * 预置 IP 缓存后，重复查询应返回一致的国家信息。
+     */
     @Test
+    @DisplayName("IP定位缓存命中后结果一致")
     public void testGetRegion() {
         // Seed cache so the test does not depend on flaky external IP geo APIs.
         IpLocation seeded = IpLocation.builder()
@@ -72,7 +81,11 @@ public class LocationImplTest {
         Assertions.assertEquals("United States", first.getCountry());
     }
 
+    /**
+     * 按经纬度查询最近地理位置应返回非空结果。
+     */
     @Test
+    @DisplayName("经纬度查询最近地理位置")
     public void testGetNearest() {
         GeoLocationData nearest = geoLocation.getNearest(37.42301, -122.083352);
         Assertions.assertNotNull(nearest);

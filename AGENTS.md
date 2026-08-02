@@ -38,6 +38,24 @@
 | Cache Redis serializer | Jackson 2 `GenericJackson2` | 等 Spring Data Redis Jackson 3 正式路径 | **勿盲目统一** |
 | opensabe `mapstruct-processor` | **1.4.0** | 等上游修 Java 25 APT | 已知 blocker |
 
+## 1.2 注释与测试标题
+
+- 手写源码：类 / 字段 / 方法使用完整 **Javadoc**，说明以**中文**为主（`@param` / `@return` / `@throws`）。
+- Lombok 生成访问器：注释写在字段上即可。
+- 单元测试：类与测试方法使用中文 `@DisplayName`。
+- **禁止**运行时中文：日志、异常 message、对外错误文案保持英文。
+- 生成码（APT / MapStruct / protobuf）与 `target/` 不要求补注释。
+
+## 1.3 审核 follow-up（注释批次记录，勿与小修混搅）
+
+- `GracefulShutdownDelayBuffer`：用 `new EurekaAutoServiceRegistration(null,null,null)` 取 order，脆弱；Eureka 门禁可考虑降级/去耦。
+- `DelayApplicationReadyEventListener`：预热 5 万次健康请求可配置化。
+- `CustomizedOtelEnabledCondition`：环境变量 vs `environment` 属性不一致，yml-only 可能不启用。
+- `MultiRedisConnectionFactoryConfiguration`：`enable-multi` 缺 `default` 条目时可能 NPE，宜启动期校验。
+- `SocketIOServerLifecycle.start`：失败仍可能 `running=true`。
+- `DynamicRedisCacheManager.settings()`：仍返回空列表（既有 TODO）。
+- Cache `CompositeCacheManager` 对 Caffeine 内部字段 VarHandle：上游改名会静默失效。
+
 ## 2. 改动归属
 
 → 全 Matchplay Java 栈的基础设施面；需与 `be-matchplay-parent` 协同升级。

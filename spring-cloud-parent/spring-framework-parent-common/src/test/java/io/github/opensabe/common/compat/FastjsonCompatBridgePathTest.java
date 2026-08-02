@@ -23,9 +23,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * {@link FastjsonCompatBridge} compat-libs 目录解析：不依赖进程 cwd。
+ */
 @DisplayName("FastjsonCompatBridge compat-libs 路径解析")
 class FastjsonCompatBridgePathTest {
 
+    /**
+     * resolve 须定位到含 fastjson 三件套 JAR 的 target/compat-libs 目录。
+     */
     @Test
     @DisplayName("resolve 到含三件套 JAR 的目录（不依赖进程 cwd）")
     void resolveFindsCopiedJars() {

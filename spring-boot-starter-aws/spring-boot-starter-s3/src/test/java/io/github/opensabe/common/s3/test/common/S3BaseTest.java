@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +35,9 @@ import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 
+/**
+ * S3 Starter 集成测试基类：挂载 LocalStack S3 并在每个用例前确保默认 bucket 存在。
+ */
 @Log4j2
 @ExtendWith({SpringExtension.class, SingleS3IntegrationTest.class})
 @SpringBootTest(properties = {
@@ -42,6 +46,7 @@ import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
         "aws.s3.defaultBucket=" + S3BaseTest.BUCKET_NAME,
         "aws.s3.profile=test"
 }, classes = App.class)
+@DisplayName("S3 Starter 集成测试基类")
 public abstract class S3BaseTest {
     public static final String FOLDER_NAME = "testFolder/country";
     public static final String BUCKET_NAME = "test-bucket";

@@ -20,6 +20,9 @@ import io.github.opensabe.mapstruct.core.SelfCopyMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.NodeDto;
 import io.github.opensabe.mapstruct.core.SelfConvertor;
 
+/**
+ * NodeDto 自复制 MapStruct 映射器（测试桩）。
+ */
 @Mapper(uses = SelfConvertor.class) 
 public interface NodeDtoMapper extends SelfCopyMapper<NodeDto> {
 

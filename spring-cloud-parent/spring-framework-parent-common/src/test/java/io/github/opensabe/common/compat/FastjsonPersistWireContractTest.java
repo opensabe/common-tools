@@ -43,6 +43,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Fastjson 持久化线格式兼容：当前/旧版 ClassLoader 交叉读写与 JsonUtil 互操作。
+ */
 @DisplayName("Fastjson 持久化兼容（含独立 ClassLoader 跨版本）")
 class FastjsonPersistWireContractTest {
 
@@ -83,6 +86,9 @@ class FastjsonPersistWireContractTest {
         return map;
     }
 
+    /**
+     * 当前 classpath Fastjson serialize → parseObject round-trip。
+     */
     @Test
     @DisplayName("当前 Fastjson round-trip")
     void currentFastjsonRoundTrip() {
@@ -95,6 +101,9 @@ class FastjsonPersistWireContractTest {
         assertEquals(original.getNested().getRef(), loaded.getNested().getRef());
     }
 
+    /**
+     * 旧版 JAR ClassLoader 写入 → 当前 Fastjson 读取。
+     */
     @Test
     @DisplayName("旧 Fastjson CL 写 → 当前 Fastjson 读")
     void oldJarWriteCurrentRead() {
@@ -109,6 +118,9 @@ class FastjsonPersistWireContractTest {
         assertEquals(original.getStatus(), loaded.getStatus());
     }
 
+    /**
+     * 当前 Fastjson 写入 → 旧版 ClassLoader 读取为 Map。
+     */
     @Test
     @DisplayName("当前 Fastjson 写 → 旧 Fastjson CL 读")
     void currentWriteOldJarRead() {
@@ -124,6 +136,9 @@ class FastjsonPersistWireContractTest {
         assertEquals(original.getCreatedAt().getTime(), ((Number) created).longValue());
     }
 
+    /**
+     * gzip+Base64 Redis 大包形态：当前 Fastjson 序列化后非裸 JSON 前缀。
+     */
     @Test
     @DisplayName("gzip+Base64 大包 Redis 形态：当前 Fastjson")
     void gzipBase64RedisShape() throws Exception {
@@ -137,6 +152,9 @@ class FastjsonPersistWireContractTest {
         assertTrue(!stored.trim().startsWith("{"));
     }
 
+    /**
+     * JsonUtil 与 Fastjson 双向互读，含 LocalDateTime epoch-ms 线格式。
+     */
     @Test
     @DisplayName("JsonUtil 写 → Fastjson 读；Fastjson 写 → JsonUtil 读（含 LDT）")
     void crossJsonUtilAndFastjson() {

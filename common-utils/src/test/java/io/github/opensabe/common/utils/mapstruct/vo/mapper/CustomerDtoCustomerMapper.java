@@ -21,6 +21,9 @@ import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.CustomerDto;
 import io.github.opensabe.common.utils.mapstruct.vo.Customer;
 
+/**
+ * CustomerDto 与 Customer 互转 MapStruct 映射器（测试桩）。
+ */
 @Mapper
 public interface CustomerDtoCustomerMapper extends CommonCopyMapper<CustomerDto, Customer> {
 

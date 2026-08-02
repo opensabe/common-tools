@@ -33,6 +33,9 @@ import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.mapstruct.core.FromMapMapper;
 import io.github.opensabe.mapstruct.core.MapperRepository;
 
+/**
+ * MapStruct 全类型字段映射测试。
+ */
 @DisplayName("MapStruct所有类型映射测试")
 public class AllTypesTest {
 
@@ -41,6 +44,9 @@ public class AllTypesTest {
     }
 
 
+    /**
+     * 类到 Record 映射应正确转换各基础类型。
+     */
     @Test
     @DisplayName("测试类到Record的映射 - 验证所有数据类型转换")
     void testToRecord() {
@@ -88,6 +94,9 @@ public class AllTypesTest {
     }
 
 
+    /**
+     * Record 到类映射应正确转换各基础类型。
+     */
     @Test
     @DisplayName("测试Record到类的映射 - 验证所有数据类型转换")
     void testToClass() {
@@ -118,6 +127,9 @@ public class AllTypesTest {
         Assertions.assertEquals(BigDecimal.TEN, type.getPrice());
     }
 
+    /**
+     * Map 到类映射应正确转换各基础类型。
+     */
     @Test
     @DisplayName("测试Map到类的映射 - 验证所有数据类型转换")
     void testFromMap() {

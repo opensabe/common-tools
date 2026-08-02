@@ -24,6 +24,9 @@ import io.github.opensabe.common.utils.mapstruct.vo.ActivityDto;
 import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.mapstruct.core.MapperRepository;
 
+/**
+ * 自定义 MapStruct 映射器注册与转换测试。
+ */
 @DisplayName("自定义MapStruct映射器测试")
 public class CustomerTest {
 
@@ -34,6 +37,9 @@ public class CustomerTest {
 
     private MapperRepository repository = MapperRepository.getInstance();
 
+    /**
+     * 自定义映射器应被正确注册并可获取。
+     */
     @Test
     @DisplayName("测试自定义映射器注册和获取")
     void testOverride() {
@@ -43,6 +49,9 @@ public class CustomerTest {
                 .isInstanceOf(CustomerMapper.class);
     }
 
+    /**
+     * Activity 到 ActivityDto 应应用自定义 convert 逻辑。
+     */
     @Test
     @DisplayName("测试自定义转换方法 - Activity到ActivityDto")
     void testCustomer() {
@@ -52,6 +61,9 @@ public class CustomerTest {
         Assertions.assertThat(dto.getName()).isEqualTo("a1Customer");
     }
 
+    /**
+     * ActivityDto 到 Activity 反向映射应应用自定义 convert 逻辑。
+     */
     @Test
     @DisplayName("测试反向映射 - ActivityDto到Activity")
     void testRevise() {

@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ import io.github.opensabe.common.testcontainers.integration.SingleDynamoDbIntegr
 import lombok.extern.log4j.Log4j2;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 
+/**
+ * DynamoDB Starter 集成测试基类：挂载 Testcontainers DynamoDB 并在每个用例前建表。
+ */
 @Log4j2
 @JfrEventTest
 @ExtendWith({SpringExtension.class, SingleDynamoDbIntegrationTest.class})
@@ -41,6 +45,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
         "eureka.client.enabled=false",
         "spring.application.name=aws-dynamo-db-test"
 }, classes = App.class)
+@DisplayName("DynamoDB Starter 集成测试基类")
 public abstract class DynamicdbStarter {
     @Autowired
     private List<DynamoDbBaseService> services;

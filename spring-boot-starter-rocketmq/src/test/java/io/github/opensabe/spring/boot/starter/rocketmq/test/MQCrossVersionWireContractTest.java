@@ -39,6 +39,9 @@ import lombok.NoArgsConstructor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * MQ V1/V2 信封与内层 JsonUtil/Fastjson 交叉兼容契约测试。
+ */
 @DisplayName("MQ V1↔V2 交叉兼容（信封 JsonUtil；内层 JsonUtil/Fastjson）")
 class MQCrossVersionWireContractTest {
 
@@ -52,6 +55,9 @@ class MQCrossVersionWireContractTest {
         );
     }
 
+    /**
+     * V1 双编码信封经 {@link AbstractConsumer} 消费，内层 JsonUtil 解析。
+     */
     @Test
     @DisplayName("老产新消：V1 双编码信封 → AbstractConsumer；内层 JsonUtil")
     void oldProduceNewConsumeV1() {
@@ -72,6 +78,9 @@ class MQCrossVersionWireContractTest {
         assertPayload(payload, consumer.last);
     }
 
+    /**
+     * V1 信封内层 Fastjson 编码，{@link AbstractConsumer} 仍可用 JsonUtil 解析。
+     */
     @Test
     @DisplayName("老产新消：V1 信封；内层 Fastjson → AbstractConsumer(JsonUtil 解析)")
     void oldProduceNewConsumeV1FastjsonInner() {
@@ -92,6 +101,9 @@ class MQCrossVersionWireContractTest {
         assertPayload(payload, consumer.last);
     }
 
+    /**
+     * V2 object data 信封经 {@link AbstractMQConsumer} 消费，内层 JsonUtil 与 Fastjson 均可读。
+     */
     @Test
     @DisplayName("新产老消：V2 object data → AbstractMQConsumer；内层 JsonUtil 与 Fastjson")
     void newProduceOldConsumeV2() {

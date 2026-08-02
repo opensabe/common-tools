@@ -26,18 +26,35 @@ import io.github.opensabe.common.secret.FilterSecretStringResult;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 
 /**
- * Rest5/HC5 async clients pass the body as {@code AsyncEntityProducer}, so classic
- * {@code HttpRequestInterceptor} often cannot see the entity. Filter via transport
- * instrumentation which receives the materialized request body.
+ * 基于 ES 传输层 {@link Instrumentation} 的敏感串过滤。
+ * <p>
+ * Rest5/HC5 异步客户端将 body 封装为 {@code AsyncEntityProducer}，经典
+ * {@code HttpRequestInterceptor} 往往无法读取实体；本类在
+ * {@link Context#beforeSendingHttpRequest} 收到已物化的请求体后再过滤。
+ * </p>
  */
 final class SecretFilteringInstrumentation implements Instrumentation {
 
+    /**
+     * 全局敏感串检测与告警管理器。
+     */
     private final GlobalSecretManager globalSecretManager;
 
+    /**
+     * @param globalSecretManager 敏感串管理器
+     */
     SecretFilteringInstrumentation(GlobalSecretManager globalSecretManager) {
         this.globalSecretManager = globalSecretManager;
     }
 
+    /**
+     * 为每个 ES API 调用创建过滤上下文。
+     *
+     * @param request  API 请求对象
+     * @param endpoint 传输端点
+     * @param <TRequest> 请求类型
+     * @return 在 HTTP 发出前执行 body 过滤的 {@link Context}
+     */
     @Override
     public <TRequest> Context newContext(TRequest request, Endpoint<TRequest, ?, ?> endpoint) {
         return new Context() {
@@ -47,6 +64,9 @@ final class SecretFilteringInstrumentation implements Instrumentation {
                 };
             }
 
+            /**
+             * 拼接请求体 UTF-8 文本并检测敏感串；命中则抛出异常阻断请求。
+             */
             @Override
             public void beforeSendingHttpRequest(TransportHttpClient.Request httpRequest, TransportOptions options) {
                 Iterable<ByteBuffer> body = httpRequest.body();
@@ -80,12 +100,12 @@ final class SecretFilteringInstrumentation implements Instrumentation {
             public <TResponse> void afterDecodingApiResponse(TResponse response) {
             }
 
+            /**
+             * 密钥命中发生在 HTTP 之前，不会污染 {@link ElasticSearchConfiguration} 的 observation 缓存；
+             * 无响应的中途失败仍依赖该缓存 TTL 兜底 stop。
+             */
             @Override
             public void recordException(Throwable throwable) {
-                // HC5 observation is started in a request interceptor only after HTTP begins.
-                // This filter runs in beforeSendingHttpRequest (before HTTP), so a secret hit
-                // never leaves an in-flight Observation in ElasticSearchConfiguration.CACHE.
-                // Mid-flight HTTP failures without a response still rely on that CACHE TTL.
             }
 
             @Override

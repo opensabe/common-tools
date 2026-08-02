@@ -35,7 +35,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author heng.ma
+ * {@link S3JsonConverter} 读写契约：验证嵌套对象经 Spring Data 持久化属性序列化后 round-trip。
  */
 @Slf4j
 @DisplayName("S3转换器测试")
@@ -44,6 +44,9 @@ public class ConverterTest extends S3BaseTest {
     @Autowired
     private S3JsonConverter converter;
 
+    /**
+     * 写入 Child 后读回，断言与原始值相等。
+     */
     @Test
     @DisplayName("测试S3 JSON转换器读写功能 - 验证对象序列化和反序列化")
     void testRead() throws NoSuchFieldException {

@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
@@ -90,6 +91,7 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRe
 @AutoConfigureTestRestTemplate
 @AutoConfigureTracing
 @Disabled
+@DisplayName("Servlet JFR事件测试")
 public class TestJFREvent extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "TestOpenFeignJFREvent-TestService1";
     static final String CONTEXT_ID_1 = "TestOpenFeignJFREvent-testService1Client";
@@ -113,6 +115,7 @@ public class TestJFREvent extends CommonMicroServiceTest {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    @DisplayName("HttpServerRequest JFR事件字段")
     @Test
     public void testHttpServerRequestJFREvent() {
         jfrEvents.reset();
@@ -215,6 +218,7 @@ public class TestJFREvent extends CommonMicroServiceTest {
         });
     }
 
+    @DisplayName("正常Feign调用JFR录制")
     @Test
     public void testNormal() {
         jfrEvents.reset();
@@ -289,6 +293,7 @@ public class TestJFREvent extends CommonMicroServiceTest {
         assertEquals(200, recordedEvent.getInt("status"));
     }
 
+    @DisplayName("异常Feign调用JFR录制")
     @Test
     public void testAbnormal() {
         jfrEvents.reset();

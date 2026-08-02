@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 
+/**
+ * MyBatis Starter 集成测试基类：MySQL + S3 + DynamoDB + Redis Testcontainers 与表初始化。
+ */
 @Log4j2
 @JfrEventTest
 @ExtendWith({
@@ -61,6 +65,7 @@ import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
         "aws.s3.profile=test",
         "mybatis.configuration.map-underscore-to-camel-case=true"
 }, classes = BaseMybatisTest.App.class)
+@DisplayName("MyBatis Starter 集成测试基类")
 public abstract class BaseMybatisTest {
     public static final String FOLDER_NAME = "testFolder/country";
     public static final String BUCKET_NAME = "test-bucket";

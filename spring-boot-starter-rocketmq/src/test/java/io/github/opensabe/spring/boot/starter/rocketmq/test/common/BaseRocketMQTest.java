@@ -60,6 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "spring.application.name=rocketmq-test",
         "rocketmq.producer.group=rocketmq-test",
 }, classes = BaseRocketMQTest.App.class)
+@DisplayName("RocketMQ集成测试基类")
 public abstract class BaseRocketMQTest {
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {

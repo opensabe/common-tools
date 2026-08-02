@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,17 +52,20 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRe
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @AutoConfigureTestRestTemplate
+@DisplayName("WebFlux枚举参数解析测试")
 public class EnumResolverTest {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
 
+    @DisplayName("请求参数枚举解析")
     @Test
     void testParam() {
         int type = testRestTemplate.getForObject("/test/param?type=2", int.class);
         Assertions.assertEquals(2, type);
     }
 
+    @DisplayName("请求体枚举解析")
     @Test
     void testBody() {
         int type = testRestTemplate.postForObject("/test/body", Map.of("type", 1), int.class);

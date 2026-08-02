@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -73,6 +74,7 @@ import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfig
 //JFR 测试最好在本地做
 @AutoConfigureTracing
 @Disabled
+@DisplayName("WebFlux HTTP服务端JFR事件测试")
 public class TestHttpServerRequestJFREvent {
     public JfrEvents jfrEvents = new JfrEvents();
     @Autowired
@@ -80,6 +82,7 @@ public class TestHttpServerRequestJFREvent {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    @DisplayName("HttpServerRequest JFR事件字段")
     @Test
     public void test() {
         jfrEvents.reset();

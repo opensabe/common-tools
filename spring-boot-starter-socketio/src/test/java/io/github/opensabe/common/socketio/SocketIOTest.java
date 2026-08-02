@@ -34,6 +34,9 @@ import io.socket.client.Socket;
 import lombok.extern.log4j.Log4j2;
 
 
+/**
+ * Socket.IO 客户端连接与事件订阅集成测试。
+ */
 @Log4j2
 @DisplayName("SocketIO客户端连接测试")
 public class SocketIOTest extends SocketIOStarter {
@@ -42,11 +45,7 @@ public class SocketIOTest extends SocketIOStarter {
     private SocketIoServerProperties socketIoServerProperties;
 
     /**
-     * socketio测试地址 https://amritb.github.io/socketio-client-tool/v1/#url=d3M6Ly9sb2NhbGhvc3Q6NDAwMQ==&path=L3NvY2tldC5pbw==&opt=&events=
-     * url ws://localhost:4001/socket.io
-     * event sub
-     *
-     * @throws InterruptedException
+     * 连接本地 Socket.IO 服务并 emit sub 事件（手动验证用）。
      */
     @Test
     @DisplayName("测试SocketIO客户端连接和事件订阅")

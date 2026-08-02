@@ -22,12 +22,10 @@ import io.github.opensabe.common.utils.mapstruct.vo.Activity;
 import io.github.opensabe.common.utils.mapstruct.vo.ActivityDto;
 
 /**
- * Test-scoped replacement for the APT-generated {@code MapperRegisterImpl}.
+ * 测试用 {@code MapperRegisterImpl} 替代实现。
  * <p>
- * opensabe mapstruct-processor 1.4.0 under Java 25 often emits incomplete register
- * code and broken short imports ({@code import ActivityDto;}), which breaks
- * {@code testCompile}. Remaining {@code @Binding} mappers are installed by
- * {@link io.github.opensabe.common.utils.mapstruct.MapstructTestBootstrap}.
+ * 规避 Java 25 下 opensabe mapstruct-processor 1.4.0 生成残缺注册代码的问题；
+ * 其余 {@code @Binding} 映射器由 {@link io.github.opensabe.common.utils.mapstruct.MapstructTestBootstrap} 注册。
  */
 public class MapperRegisterImpl extends MapperRegister {
 

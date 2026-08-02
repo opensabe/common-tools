@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
- * Test-only Jackson 2 mirror of production TimestampModule (LocalDateTime ↔ epoch ms).
+ * 测试专用 Jackson 2 版 {@link io.github.opensabe.common.jackson.TimestampModule} 镜像（LocalDateTime ↔ epoch ms）。
  */
 public final class Jackson2TimestampModule extends SimpleModule {
 

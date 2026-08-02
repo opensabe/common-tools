@@ -25,9 +25,23 @@ import org.springframework.context.annotation.Configuration;
 import io.github.opensabe.spring.cloud.parent.web.common.feign.preheating.FeignClientPreheatingApplicationReadyEventListener;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Feign 客户端预热配置。
+ * <p>
+ * 在 {@code FeignClientPreheating.enabled=true} 且 Health 端点已通过 Web 暴露时，
+ * 注册应用就绪后的 Feign 预热监听器。
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 public class FeignClientPreheatingConfiguration {
+
+    /**
+     * 注册 Feign 客户端预热监听器。
+     * <p>
+     * 依赖 Web 暴露的 {@link HealthEndpoint}，以便在就绪阶段探测依赖服务。
+     *
+     * @return Feign 预热应用就绪事件监听器
+     */
     @Bean
     @ConditionalOnProperty(value = "FeignClientPreheating.enabled", matchIfMissing = false, havingValue = "true")
     @ConditionalOnAvailableEndpoint(endpoint = HealthEndpoint.class, exposure = EndpointExposure.WEB)

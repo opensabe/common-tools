@@ -21,6 +21,9 @@ import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.Activity;
 import io.github.opensabe.common.utils.mapstruct.vo.ActivityDto;
 
+/**
+ * Activity 与 ActivityDto 互转 MapStruct 映射器（测试桩）。
+ */
 @Mapper
 public interface ActivityActivityDtoMapper extends CommonCopyMapper<Activity, ActivityDto> {
 

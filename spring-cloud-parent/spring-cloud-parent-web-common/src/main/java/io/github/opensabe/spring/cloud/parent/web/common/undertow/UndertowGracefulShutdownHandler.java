@@ -18,7 +18,11 @@ package io.github.opensabe.spring.cloud.parent.web.common.undertow;
 import io.github.opensabe.common.executor.GracefulShutdownHandler;
 
 /**
- * @deprecated Use {@link GracefulShutdownHandler}. Kept for binary compatibility after Undertow removal.
+ * Undertow 优雅关闭处理器（已废弃）。
+ * <p>
+ * Undertow 移除后请改用 {@link GracefulShutdownHandler}；保留本接口仅为二进制兼容。
+ *
+ * @deprecated 请使用 {@link GracefulShutdownHandler} 替代
  */
 @Deprecated
 public interface UndertowGracefulShutdownHandler extends GracefulShutdownHandler {

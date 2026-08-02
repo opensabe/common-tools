@@ -21,6 +21,9 @@ import io.github.opensabe.mapstruct.core.ObjectConverter;
 import io.github.opensabe.mapstruct.core.FromMapMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.OrderItemDto;
 
+/**
+ * Map 到 OrderItemDto 的 MapStruct 映射器（测试桩）。
+ */
 @Mapper(uses=ObjectConverter.class )
 public interface OrderItemDtoMapMapper extends FromMapMapper<OrderItemDto> {
 

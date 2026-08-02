@@ -34,21 +34,29 @@ import lombok.extern.log4j.Log4j2;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
 
+/**
+ * 第三方 HTTP 调用 WebClient 默认配置。
+ * <p>
+ * 按 {@link ThirdPartyWebClientNamedContextFactory} 上下文名称读取
+ * {@link ThirdPartyWebClientConfigurationProperties}，创建直连第三方 baseUrl 的 {@link WebClient}，
+ * 不含服务发现与 Resilience4j 组件。
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 public class ThirdPartyWebClientDefaultConfiguration {
 
     /**
-     * @param webClientConfigurationProperties
-     * @param environment
-     * @param observationWebClientCustomizer
-     * @return
+     * 按命名上下文创建第三方 {@link WebClient}。
+     * <p>
+     * 必须配置 {@code third-party.webclient.configs.<name>.base-url}；
+     * 可选 {@code service-name}，缺省时使用配置 key。
+     *
+     * @param webClientConfigurationProperties 第三方 WebClient 配置属性
+     * @param environment                      Spring 环境
+     * @param observationWebClientCustomizer   Observation 定制器
+     * @return 配置完成的 WebClient
      * @see org.springframework.boot.actuate.autoconfigure.observation.web.client.HttpClientObservationsAutoConfiguration
      */
-//    @Bean
-//    public ObservationWebClientCustomizer observationWebClientCustomizer () {
-//        return new ObservationWebClientCustomizer(unifiedObservationFactory.getObservationRegistry(), new DefaultClientRequestObservationConvention());
-//    }
     @Bean
     public WebClient getWebClient(
             ThirdPartyWebClientConfigurationProperties webClientConfigurationProperties,
@@ -65,7 +73,7 @@ public class ThirdPartyWebClientDefaultConfiguration {
             throw new BeanCreationException("Failed to create webClient, please provide configurations under namespace: third-party.webclient.configs." + name);
         }
         String serviceName = webClientProperties.getServiceName();
-        //如果没填写微服务名称，就使用配置 key 作为微服务名称
+        // 若未填写微服务名称，则使用配置 key 作为名称
         if (StringUtils.isBlank(serviceName)) {
             serviceName = name;
         }
@@ -76,7 +84,7 @@ public class ThirdPartyWebClientDefaultConfiguration {
 
         HttpClient httpClient = HttpClient
                 .create()
-                //跟随重定向
+                // 跟随重定向
                 .followRedirect(true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) webClientProperties.getConnectTimeout().toMillis())
                 .doOnConnected(connection ->
@@ -85,7 +93,7 @@ public class ThirdPartyWebClientDefaultConfiguration {
                                 .addHandlerLast(new WriteTimeoutHandler((int) webClientProperties.getResponseTimeout().toSeconds()))
                 )
                 .observe(ConnectionObserver.emptyListener())
-                //开启请求压缩
+                // 开启请求压缩
                 .compress(true);
         WebClient.Builder builder = WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))

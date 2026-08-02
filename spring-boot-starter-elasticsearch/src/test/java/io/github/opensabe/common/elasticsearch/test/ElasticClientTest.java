@@ -45,6 +45,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Elasticsearch Java API Client 集成测试：索引 CRUD、搜索与敏感字段过滤。
+ */
 @SpringBootTest(
         classes = ElasticClientTest.Main.class,
         properties = "eureka.client.enabled=false"
@@ -66,6 +69,9 @@ public class ElasticClientTest {
         SingleElasticSearchIntegrationTest.setProperties(registry);
     }
 
+    /**
+     * 创建索引、upsert 文档、拦截 secret 字段更新，并验证 search 结果。
+     */
     @Test
     @DisplayName("测试Elasticsearch基本操作 - 索引创建、文档更新、搜索和敏感信息过滤")
     public void test() throws IOException, InterruptedException {

@@ -19,6 +19,9 @@ import org.mapstruct.Mapper;
 import io.github.opensabe.mapstruct.core.SelfCopyMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.OrderItemDto;
 
+/**
+ * OrderItemDto 自复制 MapStruct 映射器（测试桩）。
+ */
 @Mapper
 public interface OrderItemDtoMapper extends SelfCopyMapper<OrderItemDto> {
 

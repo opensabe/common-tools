@@ -23,6 +23,9 @@ import org.mapstruct.Context;
 import io.github.opensabe.common.utils.mapstruct.vo.NodeDto;
 import io.github.opensabe.common.utils.mapstruct.vo.Node;
 
+/**
+ * NodeDto 与 Node 互转 MapStruct 映射器（测试桩）。
+ */
 @Mapper(uses = CycleAvoidingMappingContext.class) 
 public interface NodeDtoNodeMapper extends CommonCopyMapper<NodeDto, Node> {
 

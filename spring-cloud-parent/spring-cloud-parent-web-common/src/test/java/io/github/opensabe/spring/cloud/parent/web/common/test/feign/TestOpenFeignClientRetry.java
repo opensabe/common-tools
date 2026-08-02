@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -54,6 +55,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("retrytest")
 @SpringBootTest
 @EnableFeignClients
+@DisplayName("OpenFeign客户端重试测试")
 public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "RetryTestService1";
     static final String CONTEXT_ID_1 = "RetryTestService1Client1";
@@ -183,6 +185,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试默认次数，默认为 3 次，方法为get ，遇到 internal server error 错误应该重试 3 次
      */
+    @DisplayName("默认GET重试DefaultRequest")
     @Test
     public void testRetryByDefaultGetDefault() throws IOException {
         //防止断路器影响
@@ -200,6 +203,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试自定义次数为 6 次，方法为 get，遇到 internal server error 错误应该重试 6 次
      */
+    @DisplayName("默认GET重试自定义Request")
     @Test
     void testRetryByDefaultGetCustomized() throws IOException {
         //防止断路器影响
@@ -217,6 +221,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试默认 post 方法 internal server error 重试次数 post 只能 1 次
      */
+    @DisplayName("默认POST重试DefaultRequest")
     @Test
     void testRetryByDefaultPostDefault() throws IOException {
         //防止断路器影响
@@ -236,6 +241,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试自定义 post 方法 internal server error 重试次数为 1 次
      */
+    @DisplayName("默认POST重试自定义Request")
     @Test
     void testRetryByDefaultPostCustomized() throws IOException {
         //防止断路器影响
@@ -253,6 +259,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试默认遇到错误重试 1 次, 但是此方法上有 @RetryableMethod 需要重试
      */
+    @DisplayName("Retryable方法POST重试")
     @Test
     void testRetryByRetryableMethodPostCustomized() throws IOException {
         //防止断路器影响
@@ -270,6 +277,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试默认 get 方法 readTimeout 为 2 秒，模拟对方 api 需要 1 秒，也就是不超时，直接 1 次
      */
+    @DisplayName("GET重试未超时场景")
     @Test
     void testRetryByDefaultGetDefaultNotTimeout() throws IOException {
         //防止断路器影响
@@ -284,6 +292,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试默认 get方法 readTimeout 为 2 秒，模拟对方 api 需要 3 秒，也就是超时，需要重试 3 次
      */
+    @DisplayName("GET重试超时场景")
     @Test
     void testRetryByDefaultGetDefaultTimeout() throws IOException {
         //防止断路器影响
@@ -302,6 +311,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试默认 post 方法 readTimeout 为 2 秒，模拟对方 api 需要 3 秒，也就是超时，但是 post 只需要重试 1 次
      */
+    @DisplayName("POST重试超时场景")
     @Test
     void testRetryByDefaultPostDefaultTimeout() throws IOException {
         //防止断路器影响
@@ -319,6 +329,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试一个好的一个连不上的服务的重试
      */
+    @DisplayName("连接超时重试")
     @Test
     void testRetryConnectTimeout() throws IOException {
         when(serviceInstance8_1.getMetadata()).thenReturn(Map.ofEntries(Map.entry("zone", "zone1")));
@@ -355,6 +366,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试一个好的一个读取超时的服务的重试
      */
+    @DisplayName("读超时重试")
     @Test
     void testRetryReadTimeout() throws IOException {
         when(serviceInstance8_1.getMetadata()).thenReturn(Map.ofEntries(Map.entry("zone", "zone1")));
@@ -394,6 +406,7 @@ public class TestOpenFeignClientRetry extends CommonMicroServiceTest {
     /**
      * 测试一个好的一个直接 Reset （模拟正在关闭）的服务的重试
      */
+    @DisplayName("对端重置连接重试")
     @Test
     void testRetryResetPeer() throws IOException {
         when(serviceInstance8_1.getMetadata()).thenReturn(Map.ofEntries(Map.entry("zone", "zone1")));

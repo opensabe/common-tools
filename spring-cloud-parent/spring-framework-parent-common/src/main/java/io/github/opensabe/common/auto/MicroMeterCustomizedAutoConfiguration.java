@@ -21,6 +21,12 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.config.MicroMeterCustomizedConfiguration;
 
+/**
+ * Micrometer 观测与指标相关的 Spring Boot 自动配置入口。
+ * <p>
+ * 在 {@link ObservationAutoConfiguration} 之前加载，确保自定义 Observation 处理器与
+ * {@link io.github.opensabe.common.observation.UnifiedObservationFactory} 等 Bean 先于默认观测链路注册。
+ */
 @AutoConfiguration(before = ObservationAutoConfiguration.class)
 @Import({
         MicroMeterCustomizedConfiguration.class,

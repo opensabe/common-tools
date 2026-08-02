@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -76,6 +77,7 @@ import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfig
 //JFR 测试最好在本地做
 @AutoConfigureTracing
 @Disabled
+@DisplayName("WebClient请求JFR事件测试")
 public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
     private final String serviceId = "testService";
     public JfrEvents jfrEvents = new JfrEvents();
@@ -104,6 +106,7 @@ public class TestWebClientRequestJFREvent extends CommonMicroServiceTest {
     /**
      * 测试 WebClient 正常调用
      */
+    @DisplayName("WebClient正常请求JFR录制")
     @Test
     public void testNormal() {
         jfrEvents.reset();

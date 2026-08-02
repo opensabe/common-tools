@@ -24,6 +24,12 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import io.github.opensabe.common.cache.config.RedisConfiguration;
 
 /**
+ * Redis 缓存管理器自动配置入口。
+ * <p>
+ * 在 {@link DataRedisAutoConfiguration} 之后、且存在 {@link RedisConnectionFactory} 时，
+ * 导入 {@link RedisConfiguration} 以注册动态 Redis {@link org.springframework.cache.CacheManager}。
+ * </p>
+ *
  * @author heng.ma
  */
 @AutoConfiguration(after = DataRedisAutoConfiguration.class)

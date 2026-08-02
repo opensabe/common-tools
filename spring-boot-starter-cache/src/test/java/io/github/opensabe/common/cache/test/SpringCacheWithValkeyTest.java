@@ -46,6 +46,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Spring Cache 与 Valkey 集成测试：与 {@link SpringCacheTest} 同场景，后端换 Valkey。
+ */
 @ExtendWith({
         SpringExtension.class, SingleValkeyIntegrationTest.class
 })

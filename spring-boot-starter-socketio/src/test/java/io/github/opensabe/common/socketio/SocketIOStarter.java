@@ -27,6 +27,9 @@ import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrati
 import io.github.opensabe.spring.boot.starter.rocketmq.autoconf.RocketMQAutoConfiguration;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Socket.IO 集成测试启动基类，提供 Redis Testcontainers 与最小 Spring Boot 上下文。
+ */
 @Log4j2
 @JfrEventTest
 @SpringBootTest(classes = SocketIOStarter.App.class, properties = "eureka.client.enabled=false")

@@ -25,17 +25,22 @@ import com.google.common.base.Charsets;
 import cn.hutool.core.util.ZipUtil;
 
 /**
- * Gzip 工具类，如果数据库中字段过长，则需要压缩
+ * Gzip 压缩与 Base64 编解码工具类。
+ * <p>
+ * 适用于数据库字段过长需压缩存储的场景；默认字符集为 UTF-8。
  */
 public class GzipUtil {
 
+    /**
+     * 默认字符集（UTF-8）。
+     */
     private static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
 
     /**
-     * 先将字符串用gzip压缩, 然后再base64编码为字符串
+     * 先将字符串 Gzip 压缩，再 Base64 编码为字符串。
      *
-     * @param source
-     * @return
+     * @param source 原始明文
+     * @return Base64 编码后的压缩字符串
      */
     public static String zipThenBase64Enc(String source) {
         byte[] bytes = ZipUtil.gzip(source, DEFAULT_CHARSET.name());
@@ -43,10 +48,10 @@ public class GzipUtil {
     }
 
     /**
-     * 先 Base64 解码，之后将字节码解压, 再将解压后的字节码转为字符串
+     * 先 Base64 解码，再 Gzip 解压为明文字符串。
      *
-     * @param source
-     * @return
+     * @param source Base64 编码的压缩字符串
+     * @return 解压后的明文
      */
     public static String base64DecThenUnzip(String source) {
         byte[] decode = Base64.getDecoder().decode(source);
@@ -54,6 +59,14 @@ public class GzipUtil {
         return new String(bytes, DEFAULT_CHARSET);
     }
 
+    /**
+     * 若值非 JSON 字面量（不以 {@code {} 或 []} 开头），则尝试 Base64 解码并 Gzip 解压。
+     * <p>
+     * 字面量 {@code "null"}（忽略大小写）会转为 Java {@code null}。
+     *
+     * @param value 可能已压缩的字符串
+     * @return 解压后的明文，或原值
+     */
     public static String unzipped(String value) {
         if (StringUtils.isNotBlank(value)) {
             if ("null".equalsIgnoreCase(value)) {

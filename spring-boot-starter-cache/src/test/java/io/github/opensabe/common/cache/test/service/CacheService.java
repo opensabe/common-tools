@@ -28,6 +28,9 @@ import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
 import lombok.AllArgsConstructor;
 
+/**
+ * 缓存集成测试用 {@link CacheService}：封装 Caffeine/Redis 各类 {@code @Cacheable} 场景。
+ */
 @Service
 @AllArgsConstructor
 public class CacheService {

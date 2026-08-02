@@ -22,6 +22,9 @@ import io.github.opensabe.common.utils.mapstruct.vo.ActivityDto;
 import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.mapstruct.core.RegisterRepository;
 
+/**
+ * Activity 与 ActivityDto 自定义 MapStruct 映射器（测试用）。
+ */
 @Mapper
 @RegisterRepository
 public interface CustomerMapper extends CommonCopyMapper<Activity, ActivityDto> {

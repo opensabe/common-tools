@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.common.idgenerator.test.common;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,12 +27,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 唯一 ID 生成器集成测试基类（Redis Testcontainers）。
+ */
 @Log4j2
 @JfrEventTest
 @ExtendWith({SpringExtension.class, SingleRedisIntegrationTest.class})
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
 }, classes = BaseUniqueIdTest.App.class)
+@DisplayName("唯一ID生成器测试基类（Redis）")
 public abstract class BaseUniqueIdTest {
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {

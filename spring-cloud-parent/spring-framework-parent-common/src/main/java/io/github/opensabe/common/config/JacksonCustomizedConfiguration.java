@@ -24,14 +24,19 @@ import tools.jackson.module.blackbird.BlackbirdModule;
 
 import io.github.opensabe.common.jackson.TimestampModule;
 
+/**
+ * Jackson 模块相关的 Spring 配置。
+ * <p>
+ * 将自定义模块注册为 Spring Bean，避免 SPI 加载顺序不确定导致 JSR-310 模块覆盖
+ * {@link java.time.LocalDateTime} 的时间戳序列化行为。
+ */
 @Configuration(proxyBeanMethods = false)
 public class JacksonCustomizedConfiguration {
 
     /**
-     * 最终还是将module创建到spring容器，因为spi无法保证顺序，jsr310会比我们自定义的后加载，
-     * 因此会覆盖掉我们自己的LocalDateTime序列化
+     * 注册时间戳序列化模块，使 {@link java.time.LocalDateTime} 以毫秒时间戳读写。
      *
-     * @return
+     * @return {@link TimestampModule} 实例
      */
     @Bean
     public JacksonModule timstampModule() {
@@ -39,8 +44,9 @@ public class JacksonCustomizedConfiguration {
     }
 
     /**
-     * BlackbirdModule 可以通过预编译序列化反序列化字节码提升序列化和反序列化的性能
-     * @return
+     * 注册 Blackbird 模块，通过预编译字节码提升序列化/反序列化性能。
+     *
+     * @return {@link BlackbirdModule} 实例
      */
     @Bean
     public JacksonModule blackbirdModule() {

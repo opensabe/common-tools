@@ -24,20 +24,37 @@ import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomize
 import org.springframework.http.converter.HttpMessageConverter;
 
 /**
- * OpenFeign 5.x {@link FeignHttpMessageConverters#getConverters()} publishes an empty list
- * before filling it without synchronization. Concurrent first decode then fails with
- * {@code 'messageConverters' must not be empty}. Gate initialization so only one thread runs it.
+ * 线程安全的 OpenFeign HTTP 消息转换器。
+ * <p>
+ * OpenFeign 5.x 中 {@link FeignHttpMessageConverters#getConverters()} 在填充转换器列表前
+ * 会无同步地发布空列表，并发首次解码可能触发
+ * {@code 'messageConverters' must not be empty}。本类通过双重检查锁定保证初始化只执行一次，
+ * 并将结果快照为不可变列表。
  */
 public final class ThreadSafeFeignHttpMessageConverters extends FeignHttpMessageConverters {
 
+    /**
+     * 已初始化的转换器列表快照；{@code volatile} 保证可见性。
+     */
     private volatile List<HttpMessageConverter<?>> snapshot;
 
+    /**
+     * 使用 Boot 与 OpenFeign 提供的定制器构建父类转换器。
+     *
+     * @param customizers      Boot HTTP 消息转换器定制器
+     * @param cloudCustomizers OpenFeign 消息转换器定制器
+     */
     public ThreadSafeFeignHttpMessageConverters(
             ObjectProvider<ClientHttpMessageConvertersCustomizer> customizers,
             ObjectProvider<HttpMessageConverterCustomizer> cloudCustomizers) {
         super(customizers, cloudCustomizers);
     }
 
+    /**
+     * 返回线程安全、不可变的 HTTP 消息转换器列表。
+     *
+     * @return 消息转换器列表快照
+     */
     @Override
     public List<HttpMessageConverter<?>> getConverters() {
         List<HttpMessageConverter<?>> local = snapshot;

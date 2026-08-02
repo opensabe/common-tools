@@ -19,12 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Test-scoped replacement for the APT-generated {@code MapperRepositoryImpl}.
+ * 测试用 {@code MapperRepositoryImpl} 替代实现。
  * <p>
- * {@link MapperRepository#getInstance()} constructs a new repository on every call
- * (mapstruct-core 1.4.0). Instance-field maps therefore discard registrations from
- * {@link io.github.opensabe.common.utils.mapstruct.MapstructTestBootstrap}. Static maps
- * keep registrations visible across {@code getInstance()} calls under Java 25.
+ * {@link MapperRepository#getInstance()} 每次新建实例会导致实例字段映射丢失注册；
+ * 静态 Map 保证 {@link io.github.opensabe.common.utils.mapstruct.MapstructTestBootstrap} 的注册在 Java 25 下可见。
  */
 public class MapperRepositoryImpl implements MapperRepository {
 

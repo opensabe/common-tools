@@ -20,6 +20,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,7 @@ import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfig
         classes = TestGatewayObservation.MockConfig.class
 )
 @AutoConfigureTracing
+@DisplayName("Gateway观测链路测试")
 public class TestGatewayObservation extends CommonMicroServiceTest {
     private static final String serviceId = "testService";
     //不同的测试方法的类对象不是同一个对象，会重新生成，保证互相没有影响
@@ -112,6 +114,7 @@ public class TestGatewayObservation extends CommonMicroServiceTest {
         loadBalancerClientFactoryInstance.setServiceInstanceListSupplier(serviceInstanceListSupplier);
     }
 
+    @DisplayName("Gateway请求携带Observation与trace")
     @Test
     public void testObservation() {
         //验证从 Spring Cloud Gateway 到后端服务的调用，是否会传递 traceId

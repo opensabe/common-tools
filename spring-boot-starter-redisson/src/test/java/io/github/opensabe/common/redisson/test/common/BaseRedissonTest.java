@@ -16,6 +16,7 @@
 package io.github.opensabe.common.redisson.test.common;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.DisplayName;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +25,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
+import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
+
+/**
+ * Redisson Starter 集成测试基类：SingleRedis Testcontainers、Tracing 与 JFR 支持。
+ */
 @ExtendWith({SpringExtension.class, SingleRedisIntegrationTest.class})
 @SpringBootTest(
         classes = BaseRedissonTest.App.class,
@@ -35,6 +41,7 @@ import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfig
 )
 @AutoConfigureTracing
 @JfrEventTest
+@DisplayName("Redisson Starter 集成测试基类")
 public abstract class BaseRedissonTest {
     public static final int AOP_ORDER = 10000;
 

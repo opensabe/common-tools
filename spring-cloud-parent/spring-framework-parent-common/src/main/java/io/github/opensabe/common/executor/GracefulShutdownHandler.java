@@ -18,9 +18,17 @@ package io.github.opensabe.common.executor;
 import org.springframework.core.Ordered;
 
 /**
- * Graceful shutdown hook invoked when the application context closes
- * (e.g. after the embedded web server begins shutdown).
+ * 应用上下文关闭时触发的优雅停机 SPI。
+ * <p>
+ * 实现类在嵌入式 Web 服务器开始关闭等阶段被调用，可通过 {@link Ordered#getOrder()} 控制执行顺序。
+ * 原 {@code UndertowGracefulShutdownHandler} 已弃用，请实现本接口。
+ *
+ * @see org.springframework.core.Ordered
  */
 public interface GracefulShutdownHandler extends Ordered {
+
+    /**
+     * 执行资源排空与关闭逻辑（如线程池 shutdown、连接 drain 等）。
+     */
     void gracefullyShutdown();
 }

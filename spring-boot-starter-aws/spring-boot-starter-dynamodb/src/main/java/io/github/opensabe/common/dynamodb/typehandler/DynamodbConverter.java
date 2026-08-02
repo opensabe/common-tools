@@ -39,23 +39,39 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 /**
+ * 将复杂属性序列化至 DynamoDB 转换表，持久化层仅保存 Hashids 主键。
+ * <p>
+ * 表名模板 {@code ${aws_env}_converter}；读写经 {@link JsonUtil}（epoch-ms 时间线格式）。
+ *
  * @author heng.ma
  */
-
 public class DynamodbConverter extends DynamoDbBaseService<DynamodbConverter.ConverterBean> implements PropertyValueConverter<Object, String, ValueConversionContext<?>> {
 
+    /** 生成短主键的 Hashids 实例。 */
     private final Hashids hashids;
 
+    /**
+     * @param environment Spring 环境（解析表名占位符）
+     * @param dynamoDbEnhancedClient Enhanced 客户端
+     */
     public DynamodbConverter(Environment environment, DynamoDbEnhancedClient dynamoDbEnhancedClient) {
         super(environment, dynamoDbEnhancedClient);
         this.hashids = Hashids.create("wdsfdgf3".toCharArray());
     }
 
+    /** {@inheritDoc} — 返回 {@code ${aws_env}_converter}。 */
     @Override
     protected String table(Class<ConverterBean> type) {
         return "${aws_env}_converter";
     }
 
+    /**
+     * 按主键读取 JSON 并反序列化为属性声明类型。
+     *
+     * @param value 存储的主键 ID
+     * @param context 属性转换上下文
+     * @return 反序列化对象，无记录时为 {@code null}
+     */
     @Override
     public Object read(String value, ValueConversionContext context) {
         ConverterBean bean = table.getItem(Key.builder().partitionValue(value).build());
@@ -65,37 +81,68 @@ public class DynamodbConverter extends DynamoDbBaseService<DynamodbConverter.Con
         return JsonUtil.parseObject(bean.getValue(), JacksonParameterizedTypeTypeReference.fromTypeInformation(context.getProperty().getTypeInformation()));
     }
 
+    /**
+     * 将对象 JSON 写入转换表并返回生成的主键。
+     *
+     * @param value 待持久化对象
+     * @param context 属性转换上下文
+     * @return Hashids 编码的主键
+     */
     @Override
     public String write(Object value, ValueConversionContext context) {
-        String id = hashids.encode(System.nanoTime(), Thread.currentThread().getId());
+        String id = hashids.encode(System.nanoTime(), Thread.currentThread().threadId());
         table.putItem(new ConverterBean(id, JsonUtil.toJSONString(value)));
         return id;
     }
 
+    /**
+     * DynamoDB 转换表行映射。
+     */
     @Getter
     @DynamoDbBean
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ConverterBean {
 
+        /** 分区键（Hashids ID）。 */
         private String id;
 
+        /** JSON 序列化后的属性值。 */
         private String value;
 
+        /**
+         * 设置分区键。
+         *
+         * @param id 主键
+         */
         @DynamoDbPartitionKey
         public void setId(String id) {
             this.id = id;
         }
 
+        /**
+         * 设置 JSON 载荷。
+         *
+         * @param value JSON 字符串
+         */
         public void setValue(String value) {
             this.value = value;
         }
     }
 
-
+    /**
+     * 从 Spring {@link TypeInformation} 构造 Jackson {@link TypeReference}。
+     *
+     * @param <T> 目标类型
+     */
     private static class JacksonParameterizedTypeTypeReference<T> extends TypeReference<T> {
+
+        /** 参数化目标类型。 */
         private final ParameterizedType type;
 
+        /**
+         * @param information 属性类型信息
+         */
         JacksonParameterizedTypeTypeReference(final TypeInformation<T> information) {
             final List<TypeInformation<?>> arguments = information.getTypeArguments();
             this.type = new ParameterizedType() {
@@ -113,10 +160,18 @@ public class DynamodbConverter extends DynamoDbBaseService<DynamodbConverter.Con
             };
         }
 
+        /**
+         * 工厂方法。
+         *
+         * @param typeInformation 类型信息
+         * @param <T> 目标类型
+         * @return 类型引用
+         */
         public static <T> JacksonParameterizedTypeTypeReference<T> fromTypeInformation(TypeInformation<T> typeInformation) {
             return new JacksonParameterizedTypeTypeReference<>(typeInformation);
         }
 
+        /** {@inheritDoc} */
         public Type getType() {
             return this.type;
         }

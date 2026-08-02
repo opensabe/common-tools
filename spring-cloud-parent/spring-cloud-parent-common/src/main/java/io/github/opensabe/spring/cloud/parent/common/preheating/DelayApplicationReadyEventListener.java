@@ -22,7 +22,6 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,48 +40,66 @@ import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationL
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 用于预热的
- * 延迟 ApplicationReadyEvent 完成
+ * 应用就绪预热监听器。
+ * <p>
+ * 在 {@link ApplicationReadyEvent} 触发后，向本机 Health 端点并发发起大量异步请求以预热
+ * HTTP 客户端与线程池，并预热各服务的 LoadBalancer 实例选择，从而延迟就绪信号的实际生效时间。
  */
 @Log4j2
 public class DelayApplicationReadyEventListener extends OnlyOnceApplicationListener<ApplicationReadyEvent> {
-    private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
+    /**
+     * 并发 Health 检查请求数量。
+     */
+    private static final int PREHEAT_REQUEST_COUNT = 50000;
+
+    /** @see PreheatingProperties */
     @Autowired
     private PreheatingProperties preheatingProperties;
+
+    /** @see WebEndpointProperties */
     @Autowired
     private WebEndpointProperties webEndpointProperties;
+
+    /** @see DiscoveryClient */
     @Autowired
     private DiscoveryClient discoveryClient;
+
+    /** @see LoadBalancerClientFactory */
     @Autowired
     private LoadBalancerClientFactory clientFactory;
+
+    /** 本机 HTTP 服务端口。 */
     @Value("${server.port}")
     private int port;
 
+    /**
+     * 执行一次性预热：并发 Health 请求与 LoadBalancer 实例选择。
+     *
+     * @param event 应用就绪事件
+     */
     @Override
     protected void onlyOnce(ApplicationReadyEvent event) {
-        //每个spring-cloud应用只能初始化一次
         log.info("DelayApplicationReadyEventListener-onApplicationEvent: delay application ready start, should wait {}", preheatingProperties.getDelayReadyTime());
         String basePath = webEndpointProperties.getBasePath();
         String url = "http://127.0.0.1:" + port +
                 (StringUtils.startsWith(basePath, "/") ? basePath : "/" + basePath)
                 + "/health";
-        int size = 50000;
         List<CompletableFuture<HttpResponse<String>>> futures = Lists.newArrayList();
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .build();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < PREHEAT_REQUEST_COUNT; i++) {
             futures.add(client.sendAsync(request, HttpResponse.BodyHandlers.ofString()));
         }
         try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[size]))
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[PREHEAT_REQUEST_COUNT]))
                     .get(preheatingProperties.getDelayReadyTime().toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
+            // 超时或部分失败不影响后续 LoadBalancer 预热
         }
 
-        //Preheat load balance client
         discoveryClient.getServices().forEach(service -> {
             log.info("DelayApplicationReadyEventListener-onApplicationEvent: preheat load balance client for service {}", service);
             ReactorLoadBalancer<ServiceInstance> loadBalancer = clientFactory.getInstance(service, ReactorServiceInstanceLoadBalancer.class);

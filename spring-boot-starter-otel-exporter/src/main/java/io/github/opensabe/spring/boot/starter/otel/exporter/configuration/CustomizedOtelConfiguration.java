@@ -32,18 +32,38 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import java.util.List;
 
 /**
+ * 基于运维约定环境变量的 OpenTelemetry OTLP 导出与采样定制。
+ * <p>
+ * 当 {@code APPENV}、{@code TRACING_ENDPOINT}、{@code TRACING_SAMPLE_RATIO} 均存在时生效，
+ * 覆盖 OTLP endpoint 并设置 {@code X-Scope-OrgID} 头以区分环境。
+ * </p>
+ *
  * @see org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryAutoConfiguration
  */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 public class CustomizedOtelConfiguration {
 
+    /**
+     * 应用环境标识环境变量名（K8s Pod 注入）。
+     */
     private static final String APP_ENV = "APPENV";
+
+    /**
+     * OTLP 追踪上报端点环境变量名。
+     */
     private static final String TRACING_ENDPOINT = "TRACING_ENDPOINT";
+
+    /**
+     * 追踪采样比例环境变量名；{@code <= 0} 时启用全 drop 采样器。
+     */
     private static final String TRACING_SAMPLE_RATIO = "TRACING_SAMPLE_RATIO";
 
-
-
+    /**
+     * 定制 OTLP gRPC Span Exporter：设置 endpoint 与 {@code X-Scope-OrgID} 头。
+     *
+     * @return {@link OtlpGrpcSpanExporterBuilderCustomizer}
+     */
     @Bean
     @Conditional(CustomizedOtelEnabledCondition.class)
     public OtlpGrpcSpanExporterBuilderCustomizer customizedOtelTracingExporterBuilderCustomizer() {
@@ -51,11 +71,17 @@ public class CustomizedOtelConfiguration {
         String tracingEndpoint = System.getenv(TRACING_ENDPOINT);
         log.info("init OtlpGrpcSpanExporter with tracingEndpoint: {}, app_env: {}", tracingEndpoint, appenv);
         return builder -> builder.setEndpoint(tracingEndpoint)
-                //这个是运维约定的header，用于区分不同的环境
-                //APPENV是环境变量，运维在k8s的pod中设置了这个环境变量，我们在上报的时候带上这个header用于区分
                 .addHeader("X-Scope-OrgID", appenv);
     }
 
+    /**
+     * 注册主 {@link Sampler}：优先读取 {@code TRACING_SAMPLE_RATIO}，否则回退 Boot {@link TracingProperties}。
+     * 比例 {@code <= 0} 时返回恒 drop 的 noop 采样器（便于测试环境关闭追踪）。
+     *
+     * @param environment  Spring 环境
+     * @param properties   Boot tracing 属性
+     * @return parent-based 采样器或全 drop 采样器
+     */
     @Bean
     @Primary
     @Conditional(CustomizedOtelEnabledCondition.class)
@@ -64,8 +90,7 @@ public class CustomizedOtelConfiguration {
         double ratio;
         if (StringUtils.isBlank(tracingSampleRatio)) {
             ratio = properties.getSampling().getProbability();
-        }else {
-            //测试环境支持全部drop的
+        } else {
             ratio = Double.parseDouble(tracingSampleRatio);
             if (ratio <= 0) {
                 return new Sampler() {
@@ -87,10 +112,16 @@ public class CustomizedOtelConfiguration {
         return Sampler.parentBased(rootSampler);
     }
 
-
-
+    /**
+     * 判断是否启用本配置的 Spring {@link Condition}。
+     * 要求 {@code APPENV}、{@code TRACING_ENDPOINT}、{@code TRACING_SAMPLE_RATIO} 三个环境变量均非 null。
+     */
     @Log4j2
     public static class CustomizedOtelEnabledCondition implements Condition {
+
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
             String appenv = System.getenv(APP_ENV);
@@ -100,9 +131,7 @@ public class CustomizedOtelConfiguration {
                     "CustomizedOtelEnabledCondition: appenv: {}, tracingEndpoint: {}, tracingSampleRatio: {}",
                     appenv, tracingEndpoint, tracingSampleRatio
             );
-            //必须要有这三个属性才会满足条件
             return appenv != null && tracingEndpoint != null && tracingSampleRatio != null;
         }
     }
 }
-

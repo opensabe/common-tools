@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -45,6 +46,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+/**
+ * OpenFeign Micrometer Observation 测试：Traceparent 向下游传播且 child span 独立。
+ */
 @AutoConfigureTracing
 @SpringBootTest(properties = {
         "management.tracing.sampling.probability=1.0",
@@ -52,6 +56,7 @@ import static org.mockito.Mockito.when;
 })
 @ActiveProfiles("observation")
 @EnableFeignClients
+@DisplayName("OpenFeign Observation 传播测试")
 public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "TestOpenFeignWithObservation-TestService1";
     static final String CONTEXT_ID_1 = "TestOpenFeignWithObservation-testService1Client";
@@ -75,10 +80,10 @@ public class TestOpenFeignWithObservation extends CommonMicroServiceTest {
     }
 
     /**
-     * 验证 FeignClient 在有活跃 Observation 时会通过 MicrometerObservationCapability
-     * 向下游传播 Traceparent，且 child span 与 parent 同 TraceId、不同 spanId。
+     * 活跃 Observation 下 Feign 请求须携带 Traceparent，traceId 相同、spanId 不同。
      */
     @Test
+    @DisplayName("Feign 请求携带 Traceparent 且 child span 与 parent 区分")
     public void testRequestHasObservation() {
         assertNotNull(tracer, "Tracer bean required for W3C Traceparent injection");
         assertTrue(tracer != Tracer.NOOP, "Tracer must not be NOOP, got " + tracer.getClass());

@@ -45,57 +45,84 @@ import software.amazon.awssdk.services.s3.S3ClientBuilder;
 
 import static software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create;
 
+/**
+ * AWS S3 同步客户端与文件服务 Bean 配置。
+ * <p>
+ * SDK 2.30+ 默认 CRC32 校验；此处显式 {@code WHEN_REQUIRED} 以兼容 LocalStack 等端点。
+ * 异步上传暂委托同步 {@link S3SyncFileService}（本地代理限制，见 {@link #asyncFileService}）。
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "aws.s3.enabled", havingValue = "true", matchIfMissing = true)
 public class AwsS3Configuration {
 
+    /** S3 连接与桶配置。 */
     private final S3Properties s3Properties;
+
+    /** 异步任务线程池工厂。 */
     @Autowired
     private ThreadPoolFactory threadPoolFactory;
+
+    /** 可选本地/兼容 S3 端点 URL（{@code awsS3LocalUrl}）。 */
     @Value("${awsS3LocalUrl:}")
     private String awsS3LocalUrl;
 
+    /**
+     * @param s3Properties S3 配置；无 Bean 时可为 {@code null}（{@code required = false}）
+     */
     @Autowired(required = false)
     public AwsS3Configuration(S3Properties s3Properties) {
         this.s3Properties = s3Properties;
     }
 
+    /**
+     * 构建同步 {@link S3Client} 并探测连通性（listBuckets）。
+     * <p>
+     * 注意：探测与返回的 client 为两次 {@code build()}，探测失败仅打日志。
+     *
+     * @return 同步 S3 客户端
+     */
     @Bean("s3SyncClient")
     public S3Client s3SyncClient() {
-        log.info("s3 sync client inits...");
+        log.info("Initializing S3 sync client...");
         S3ClientBuilder builder = S3Client.builder();
-        // SDK 2.30+ defaults CRC32 on uploads; LocalStack / some S3-compat endpoints reject it.
         builder.region(Region.of(s3Properties.getRegion()))
                 .credentialsProvider(() -> create(s3Properties.getAccessKeyId(), s3Properties.getAccessKey()))
                 .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
                 .responseChecksumValidation(ResponseChecksumValidation.WHEN_REQUIRED);
         if (StringUtils.isNotEmpty(awsS3LocalUrl)) {
-            log.fatal("AwsS3 will use local url {}", awsS3LocalUrl);
+            log.warn("S3 client using custom endpoint: {}", awsS3LocalUrl);
             builder.endpointOverride(URI.create(awsS3LocalUrl));
         }
-        //proxy 配置
-//        if(StringUtils.isNotBlank(s3Properties.getEndpoint())) {
-//            builder.httpClient(ApacheHttpClient.builder()
-//                    .proxyConfiguration(ProxyConfiguration.builder()
-//                            .endpoint(URI.create(s3Properties.getEndpoint()))
-//                            .build())
-//                    .build());
-//        }
         try (S3Client client = builder.build()) {
-            log.info("s3 sync client is inited: " + client.listBuckets().buckets());
+            log.info("S3 sync client connectivity check: buckets={}", client.listBuckets().buckets());
         } catch (Throwable e) {
-            log.error("s3 sync client init failed!", e);
+            log.error("S3 sync client init connectivity check failed", e);
         }
         return builder.build();
     }
 
+    /**
+     * 带观测的 S3 客户端包装。
+     *
+     * @param s3Properties 桶与路径配置
+     * @param s3Client 底层同步客户端
+     * @param unifiedObservationFactory 观测工厂
+     * @return 包装客户端
+     */
     @Bean
     @ConditionalOnMissingBean
     public S3ClientWrapper getS3ClientWrapper(S3Properties s3Properties, S3Client s3Client, UnifiedObservationFactory unifiedObservationFactory) {
         return new S3ClientWrapper(s3Client, s3Properties.getFolderName(), s3Properties.getDefaultBucket(), unifiedObservationFactory);
     }
 
+    /**
+     * 同步文件服务 Bean。
+     *
+     * @param client 同步 S3 客户端
+     * @param unifiedObservationFactory 观测工厂
+     * @return {@link S3SyncFileService}
+     */
     @Bean("s3ObjectSyncFileService")
     @ConditionalOnMissingBean
     public FileService s3ObjectSyncFileService(@Qualifier("s3SyncClient") S3Client client, UnifiedObservationFactory unifiedObservationFactory) {
@@ -106,10 +133,12 @@ public class AwsS3Configuration {
     }
 
     /**
-     * 暂时用同步上传的service,异步上传本地无法设置代理，以后解决
+     * 异步任务文件服务；当前基于同步 {@link FileService} 在线程池中执行。
+     * <p>
+     * 异步 SDK 上传暂无法在本地环境配置 HTTP 代理，后续可替换为原生异步实现。
      *
-     * @param s3ObjectSyncFileService
-     * @return
+     * @param s3ObjectSyncFileService 同步文件服务
+     * @return 异步任务包装
      */
     @Bean
     @ConditionalOnMissingBean
@@ -118,6 +147,14 @@ public class AwsS3Configuration {
         return new S3AsyncTaskFileService(s3ObjectSyncFileService, executorService, s3Properties);
     }
 
+    /**
+     * OBS 风格 S3 访问服务。
+     *
+     * @param fileService 文件服务
+     * @param properties S3 配置
+     * @param defaultOrderId 默认操作 ID（{@code defaultOperId}）
+     * @return {@link S3OBSService}
+     */
     @Bean
     @ConditionalOnMissingBean
     public S3OBSService s3OBSService(@Qualifier("s3ObjectSyncFileService") FileService fileService,
@@ -126,6 +163,11 @@ public class AwsS3Configuration {
         return new S3OBSService(fileService, properties, defaultOrderId);
     }
 
+    /**
+     * 将 S3 operation observation 转为 JFR 事件。
+     *
+     * @return JFR 生成器
+     */
     @Bean
     @ConditionalOnMissingBean
     public S3OperationObservationToJFRGenerator s3OperationObservationToJFRGenerator() {

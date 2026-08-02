@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -75,6 +76,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         },
         classes = TestRequestIsTheSame.MockConfig.class
 )
+@DisplayName("Gateway请求体缓存一致性测试")
 public class TestRequestIsTheSame extends CommonMicroServiceTest {
     private final String serviceId = "testService";
     @LocalServerPort
@@ -119,6 +121,7 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
         requests = new DefaultRequest[3];
     }
 
+    @DisplayName("重试时DefaultRequest请求体保持不变")
     @Test
     public void test() {
         when(loadBalancerClientFactory.getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class)).thenReturn(loadBalancerClientFactoryInstance);

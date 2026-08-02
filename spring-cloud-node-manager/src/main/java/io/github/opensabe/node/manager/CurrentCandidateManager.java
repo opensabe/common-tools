@@ -28,12 +28,34 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 基于服务发现实例排序的 Leader 选举辅助类。
+ * <p>
+ * 通过 {@link DiscoveryClient} 获取同服务全部实例，按给定比较器排序后判断当前实例是否为首位。
+ */
 @Log4j2
 public class CurrentCandidateManager {
+
+    /**
+     * Spring Cloud 服务发现客户端。
+     */
     private final DiscoveryClient discoveryClient;
+
+    /**
+     * 目标服务 ID。
+     */
     private final String serviceId;
+
+    /**
+     * 当前实例 ID。
+     */
     private final String instanceId;
 
+    /**
+     * @param discoveryClient 服务发现客户端
+     * @param serviceId       服务 ID
+     * @param instanceId      当前实例 ID
+     */
     public CurrentCandidateManager(DiscoveryClient discoveryClient, String serviceId, String instanceId) {
         this.discoveryClient = discoveryClient;
         this.serviceId = serviceId;
@@ -41,10 +63,10 @@ public class CurrentCandidateManager {
     }
 
     /**
-     * 判断在某种排序算法下，是否是第一个
+     * 在指定排序规则下，判断当前实例是否为排序后的第一个（Leader）。
      *
-     * @param instanceComparator
-     * @return
+     * @param instanceComparator 实例比较器
+     * @return 当前实例为 Leader 时返回 {@code true}
      */
     public boolean isLeader(Comparator<ServiceInstance> instanceComparator) {
         List<ServiceInstance> instances = this.discoveryClient.getInstances(serviceId);

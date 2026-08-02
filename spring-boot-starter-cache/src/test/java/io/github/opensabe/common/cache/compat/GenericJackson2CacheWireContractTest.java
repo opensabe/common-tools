@@ -37,6 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Spring Cache Redis {@link GenericJackson2JsonRedisSerializer} 写读契约：
+ * 裸构造与带 {@link JavaTimeModule} 的行为差异及 Date round-trip。
+ */
 @DisplayName("Spring Cache Redis GenericJackson2 写读契约")
 class GenericJackson2CacheWireContractTest {
 
@@ -54,6 +58,9 @@ class GenericJackson2CacheWireContractTest {
         return new GenericJackson2JsonRedisSerializer(mapper);
     }
 
+    /**
+     * 与 starter 裸构造一致：LocalDateTime 序列化应失败。
+     */
     @Test
     @DisplayName("默认 serializer 不支持 LocalDateTime（与 starter 裸构造一致）")
     void bareSerializerRejectsLocalDateTime() {
@@ -62,6 +69,9 @@ class GenericJackson2CacheWireContractTest {
         assertThrows(Exception.class, () -> bare.serialize(dto));
     }
 
+    /**
+     * 注册 JavaTimeModule 后 LocalDateTime 可 serialize → deserialize round-trip。
+     */
     @Test
     @DisplayName("带 JavaTimeModule 的 GenericJackson2：serialize → byte[] → deserialize")
     void roundTripWithJavaTimeModule() {
@@ -83,6 +93,9 @@ class GenericJackson2CacheWireContractTest {
         assertTrue(stored.length > 0);
     }
 
+    /**
+     * 裸构造 serializer 对 {@link Date} 字段可正常 round-trip。
+     */
     @Test
     @DisplayName("默认 serializer：Date 字段 round-trip（裸构造可用路径）")
     void bareSerializerRoundTripWithDate() {

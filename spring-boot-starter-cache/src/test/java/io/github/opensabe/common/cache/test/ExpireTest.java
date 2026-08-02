@@ -18,6 +18,7 @@ package io.github.opensabe.common.cache.test;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ import io.github.opensabe.common.cache.test.storage.MockStorage;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 
 /**
- * @author heng.ma
+ * {@link Expire} 注解与 Caffeine/Redis TTL、{@code @CacheEvict} 多 TTL 扇出行为测试。
  */
 @ExtendWith({
         SpringExtension.class, SingleRedisIntegrationTest.class
@@ -55,6 +56,7 @@ import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrati
         "caches.custom[1].redis.timeToLive=5s",
         "caches.custom[1].redis.cacheNullValues=false"
 }, classes = App.class)
+@DisplayName("缓存 Expire 注解 TTL 测试")
 public class ExpireTest {
 
     private final CacheService cacheService;
@@ -75,6 +77,7 @@ public class ExpireTest {
     }
 
     @Test
+    @DisplayName("Caffeine @Expire 到期后缓存失效")
     void testCaffeine() throws InterruptedException, NoSuchMethodException {
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
@@ -91,6 +94,7 @@ public class ExpireTest {
     }
 
     @Test
+    @DisplayName("Redis @Expire 写入后 TTL 与注解一致")
     void testRedis() throws NoSuchMethodException {
         ItemObject item = ItemObject.builder().id(2L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
@@ -110,6 +114,7 @@ public class ExpireTest {
     }
 
     @Test
+    @DisplayName("@Expire cacheType 覆盖：Redis 名映射到 Caffeine 实现")
     void testAssignment() throws NoSuchMethodException, InterruptedException {
         ItemObject item = ItemObject.builder().id(2L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
@@ -123,6 +128,7 @@ public class ExpireTest {
     }
 
     @Test
+    @DisplayName("Caffeine @CacheEvict 清除指定 key")
     void testRemoveCaffeine() throws NoSuchMethodException {
         Long id = 3L;
         String filed = "id3";
@@ -141,6 +147,7 @@ public class ExpireTest {
     }
 
     @Test
+    @DisplayName("Redis @CacheEvict 清除指定 key")
     void testRemoveRedis() throws NoSuchMethodException {
         Long id = 4L;
         String filed = "id4";
@@ -153,10 +160,10 @@ public class ExpireTest {
     }
 
     /**
-     * Without {@code @Expire}, {@code @CacheEvict} must clear every TTL-scoped Redis cache
-     * for the same name (not only {@code limit(1)} as in 2.x).
+     * 无 {@code @Expire} 的 {@code @CacheEvict} 须清理同名 cache 下所有 TTL 变体。
      */
     @Test
+    @DisplayName("无 @Expire 时 @CacheEvict 扇出清理全部 TTL 变体")
     void testCacheEvictFansOutAcrossExpireTtls() {
         Long id = 401L;
         String field = "multiTtl";

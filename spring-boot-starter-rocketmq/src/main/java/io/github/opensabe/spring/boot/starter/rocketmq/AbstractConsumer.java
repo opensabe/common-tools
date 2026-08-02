@@ -45,19 +45,40 @@ import lombok.extern.log4j.Log4j2;
 
 import static io.github.opensabe.spring.boot.starter.rocketmq.MQMessageUtil.trimBodyForLog;
 
+/**
+ * RocketMQ 消费者抽象基类（V1/V2 消息线兼容）。
+ * <p>
+ * 在 {@link ApplicationReadyEvent} 之前阻塞消费，避免 ApplicationContext 未就绪时处理消息；
+ * 消费过程包裹 Micrometer observation 并支持 {@link BaseMessage} 泛型解析。
+ *
+ * @param <T> 消息体类型
+ */
 @Log4j2
 public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt>, ApplicationListener<ApplicationReadyEvent>, InitializingBean, ConsumerAdjust {
-    //用来阻断消费，防止微服务 ApplicationContext 还没启动完全就开始消费
+
+    /** 阻断消费直至应用就绪。 */
     private final CountDownLatch cdl;
+
+    /** 从子类泛型参数推导的 Jackson 类型引用。 */
     private final MessageTypeReference<T> typeReference;
+
+    /** Spring 环境，用于解析 {@link RocketMQMessageListener#topic()} 占位符。 */
     @Autowired
     protected Environment environment;
+
+    /** 解析后的消费主题。 */
     protected String topic;
+
+    /** 统一观测工厂。 */
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
-    //用来防止每次消费都要读取 cdl 导致性能下降
+
+    /** 应用就绪后为 {@code true}，避免每次消费检查 {@link #cdl}。 */
     private volatile boolean isStarted = false;
 
+    /**
+     * 从子类声明的 {@code AbstractConsumer<T>} 泛型参数初始化 {@link #typeReference}。
+     */
     @SuppressWarnings("unchecked")
     protected AbstractConsumer() {
         TypeInformation<?> information = TypeInformation.of(getClass()).getSuperTypeInformation(AbstractConsumer.class).getTypeArguments().getFirst();
@@ -65,18 +86,22 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         this.cdl = new CountDownLatch(1);
     }
 
-
+    /** 解析 {@link RocketMQMessageListener#topic()} 并写入 {@link #topic}。 */
     @Override
     public void afterPropertiesSet() {
         RocketMQMessageListener rocketMQMessageListener = getClass().getAnnotation(RocketMQMessageListener.class);
         this.topic = environment.resolvePlaceholders(rocketMQMessageListener.topic());
     }
 
-
+    /**
+     * 按 {@code CORE_VERSION} 属性在 V1/V2 格式间分发反序列化。
+     *
+     * @param ext RocketMQ 原始消息
+     * @return 解析后的 {@link BaseMessage}
+     */
     @SuppressWarnings("unchecked")
     protected BaseMessage<T> convert(MessageExt ext) {
         String payload = new String(ext.getBody(), Charset.defaultCharset());
-        // 先进行解码
         String decode = StringUtils.trim(MQMessageUtil.decode(payload));
         if ("v2".equals(ext.getProperty("CORE_VERSION"))) {
             return convertV2(decode);
@@ -91,14 +116,17 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         return message;
     }
 
+    /**
+     * V2 线反序列化：优先解析为 {@link BaseMessage}；失败或 {@code data} 为空时直接解析为 {@code T}。
+     *
+     * @param decode 解码后的消息体
+     * @return 消息信封
+     */
     protected BaseMessage<T> convertV2(String decode) {
         BaseMessage<T> message = null;
-        //如果是 json 对象，尝试解析为 BaseMessage
         if (StringUtils.startsWith(decode, "{")) {
             message = JsonUtil.parseObject(decode, typeReference.baseMessageType());
         }
-        //如果不以 { 开头，可能是数组。如果解析出来的 message 为空，或者 message.data 为空。
-        //这些都尝试直接解析为 T，填入 message.data
         if (Objects.isNull(message)) {
             message = new BaseMessage<>();
         }
@@ -108,31 +136,35 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         return message;
     }
 
+    /**
+     * V1 线反序列化：{@link BaseMQMessage} 包装；{@code data} 为空时使用原始消息体（未包装兼容）。
+     *
+     * @param decode 解码后的消息体
+     * @return V1 信封
+     */
     protected BaseMQMessage convertV1(String decode) {
         BaseMQMessage baseMQMessage = JsonUtil.parseObject(decode, BaseMQMessage.class);
         if (Objects.isNull(baseMQMessage)) {
             baseMQMessage = new BaseMQMessage();
         }
-        //如果 data 为空，则说明消息没有经过包装，直接使用原始消息体
         if (StringUtils.isBlank(baseMQMessage.getData())) {
-            // 兼容没有包装的消息
             baseMQMessage.setData(decode);
         }
         baseMQMessage = MQMessageUtil.decode(baseMQMessage);
         return baseMQMessage;
     }
 
+    /** {@inheritDoc} — 等待就绪后转换消息并记录消费 observation。 */
     @Override
     public void onMessage(MessageExt ext) {
         if (!isStarted) {
             try {
                 long start = System.currentTimeMillis();
-                log.info("AbstractMQConsumer-onMessage await for ApplicationReadyEvent...");
-                // If the application is not started - wait to consume the messages
+                log.info("AbstractConsumer awaiting ApplicationReadyEvent before consuming...");
                 cdl.await();
-                log.info("AbstractMQConsumer-onMessage await complete in {}ms", (System.currentTimeMillis() - start));
+                log.info("AbstractConsumer ApplicationReadyEvent wait completed in {}ms", (System.currentTimeMillis() - start));
             } catch (Throwable e) {
-                log.error("MQ consume countDownLatch interrupted!", e);
+                log.error("MQ consume CountDownLatch interrupted", e);
             }
         }
 
@@ -145,15 +177,15 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
 
         observation.observe(() -> {
             if (StringUtils.isEmpty(message.getTraceId())) {
-                log.info("AbstractMQConsumer-onMessage: topic: {} -> message: {}", topic, trimBodyForLog(new String(ext.getBody())));
+                log.info("AbstractConsumer onMessage: topic={} body={}", topic, trimBodyForLog(new String(ext.getBody())));
             } else {
-                log.info("AbstractMQConsumer-onMessage: topic: initial trace id {}, topic: {} -> message: {}", message.getTraceId(), topic, trimBodyForLog(new String(ext.getBody())));
+                log.info("AbstractConsumer onMessage: traceId={} topic={} body={}", message.getTraceId(), topic, trimBodyForLog(new String(ext.getBody())));
             }
             try {
                 onBaseMessage(message);
                 messageConsumeContext.setSuccessful(true);
             } catch (Throwable e) {
-                log.error("MQ consume failed! {}, {}", new String(ext.getBody()), e.getMessage(), e);
+                log.error("MQ consume failed: body={} error={}", new String(ext.getBody()), e.getMessage(), e);
                 messageConsumeContext.setSuccessful(false);
                 messageConsumeContext.setThrowable(e);
                 throw e;
@@ -161,22 +193,29 @@ public abstract class AbstractConsumer<T> implements RocketMQListener<MessageExt
         });
     }
 
+    /** 应用就绪后释放 {@link #cdl} 并标记 {@link #isStarted}。 */
     @Override
     public void onApplicationEvent(@Nonnull ApplicationReadyEvent event) {
         cdl.countDown();
         isStarted = true;
     }
 
-
+    /** {@inheritDoc} */
     @Override
     public ConsumeFromWhere consumeFromWhere() {
         return ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET;
     }
 
+    /** {@inheritDoc} */
     @Override
     public long consumeFromSecondsAgo() {
         return 10;
     }
 
+    /**
+     * 子类实现的业务消费逻辑。
+     *
+     * @param baseMessage 已解析的消息信封
+     */
     protected abstract void onBaseMessage(BaseMessage<T> baseMessage);
 }

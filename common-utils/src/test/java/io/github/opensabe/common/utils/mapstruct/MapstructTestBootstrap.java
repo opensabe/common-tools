@@ -52,13 +52,10 @@ import io.github.opensabe.common.utils.mapstruct.vo.mapper.TypesTypesDtoMapper;
 import io.github.opensabe.mapstruct.core.MapperRepository;
 
 /**
- * Work around opensabe mapstruct-processor 1.4.0 under Java 25:
- * incomplete / broken {@code MapperRegisterImpl} generation (short imports) and
- * {@link MapperRepository#getInstance()} creating a new repository each call.
+ * MapStruct 测试引导类：在 Java 25 下补注册 APT 未完整生成的映射器。
  * <p>
- * Test classpath ships a static-map {@code MapperRepositoryImpl} plus a minimal
- * {@code MapperRegisterImpl} (CustomerMapper for Activity↔ActivityDto). Remaining
- * {@code @Binding} mappers are registered here once.
+ * 规避 opensabe mapstruct-processor 1.4.0 生成残缺 {@code MapperRegisterImpl} 以及
+ * {@link MapperRepository#getInstance()} 每次新建仓库导致注册丢失的问题。
  */
 public final class MapstructTestBootstrap {
 

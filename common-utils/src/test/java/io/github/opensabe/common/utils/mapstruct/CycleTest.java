@@ -38,6 +38,9 @@ import io.github.opensabe.mapstruct.core.SelfCopyMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * MapStruct 循环引用场景映射测试。
+ */
 @DisplayName("MapStruct循环引用测试")
 public class CycleTest {
 
@@ -63,6 +66,9 @@ public class CycleTest {
         node.setChildren(List.of(c1, c2));
     }
 
+    /**
+     * DTO 映射器应正确处理父子循环引用。
+     */
     @Test
     @DisplayName("测试DTO映射器 - 验证循环引用处理")
     void testOriginDto() {
@@ -76,6 +82,9 @@ public class CycleTest {
                 .containsExactly("child1", "child2");
     }
 
+    /**
+     * 节点自映射应正确处理父子循环引用。
+     */
     @Test
     @DisplayName("测试节点自映射 - 验证循环引用处理")
     void testOrigin() {
@@ -88,6 +97,9 @@ public class CycleTest {
                 .containsExactly("child1", "child2");
     }
 
+    /**
+     * Map 到 Node 映射应正确处理循环引用。
+     */
     @Test
     @DisplayName("测试Map到对象映射 - 验证循环引用处理")
     void testOriginMap() {
@@ -108,6 +120,9 @@ public class CycleTest {
                 .containsExactly("child1", "child2");
     }
 
+    /**
+     * 自复制映射器应正确处理循环引用。
+     */
     @Test
     @DisplayName("测试自复制映射器 - 验证循环引用处理")
     void test() {
@@ -120,6 +135,9 @@ public class CycleTest {
                 .containsExactly("child1", "child2");
     }
 
+    /**
+     * 通用复制映射器应正确处理循环引用。
+     */
     @Test
     @DisplayName("测试通用复制映射器 - 验证循环引用处理")
     void testNormal() {

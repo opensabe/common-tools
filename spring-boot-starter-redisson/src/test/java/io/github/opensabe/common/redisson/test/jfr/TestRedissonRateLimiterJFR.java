@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -48,6 +49,10 @@ import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfig
 @AutoConfigureTracing
 @Disabled
 @JfrEventTest
+/**
+ * Redisson 限流器 JFR 事件录制测试（当前禁用）。
+ */
+@DisplayName("Redisson限流器JFR事件测试")
 public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     public JfrEvents jfrEvents = new JfrEvents();
@@ -56,6 +61,7 @@ public class TestRedissonRateLimiterJFR extends BaseRedissonTest {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    @DisplayName("限流器tryAcquire等待JFR录制")
     @Test
     public void testRateLimiterTryAcquireWithWait() throws InterruptedException {
         Thread[] threads = new Thread[THREAD_COUNT];

@@ -32,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Upgrade gate: CommonOpenFeignConfiguration must keep custom LB Feign Client as @Primary.
- * Does not require Testcontainers — bean wiring only.
+ * 升级门禁：确认 {@code CommonOpenFeignConfiguration} 将自定义负载均衡 Feign {@code Client} 保持为 {@code @Primary}。
+ * <p>无需 Testcontainers，仅校验 Bean 装配。
  */
 @EnableFeignClients
 @SpringBootTest(

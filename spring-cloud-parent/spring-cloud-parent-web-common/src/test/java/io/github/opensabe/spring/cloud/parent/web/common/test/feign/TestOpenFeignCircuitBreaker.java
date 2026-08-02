@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -49,6 +50,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("circuitbreaker")
 @SpringBootTest
 @EnableFeignClients
+@DisplayName("OpenFeign熔断器测试")
 public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
     static final String TEST_SERVICE_CIRCUITBREAKER = "testServiceCircuitbreaker";
     static final String CONTEXT_ID_CIRCUITBREAKER = "testServiceCircuitbreakerClient";
@@ -76,6 +78,7 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
     /**
      * 测试断路器的配置是对的
      */
+    @DisplayName("熔断器配置生效")
     @Test
     public void testCircuitBreakerConfiguration() {
         //防止断路器影响
@@ -106,6 +109,7 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
      *
      * @throws InterruptedException
      */
+    @DisplayName("熔断器计时与半开恢复")
     @Test
     public void testCircuitBreakerTiming() throws InterruptedException {
         //防止断路器影响
@@ -137,6 +141,7 @@ public class TestOpenFeignCircuitBreaker extends CommonMicroServiceTest {
         Assertions.assertTrue(result.getData().isBlank());
     }
 
+    @DisplayName("熔断器状态切换")
     @Test
     public void testCircuitBreakerStatus() {
         //防止断路器影响

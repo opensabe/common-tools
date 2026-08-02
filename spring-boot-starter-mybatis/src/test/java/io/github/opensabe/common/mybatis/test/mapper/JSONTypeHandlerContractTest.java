@@ -42,8 +42,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 
 /**
- * Upgrade gate: JSONTypeHandler uses its own Jackson ObjectMapper;
- * assertions must use Jackson (not Fastjson) so Boot 4 / Jackson 3 stays honest.
+ * {@link JSONTypeHandler} Jackson 3 契约：独立 ObjectMapper、未知字段忽略与 null 写入。
  */
 @DisplayName("JSONTypeHandler Jackson 契约")
 class JSONTypeHandlerContractTest {
@@ -59,6 +58,9 @@ class JSONTypeHandlerContractTest {
         rs = Mockito.mock(ResultSet.class);
     }
 
+    /**
+     * 写入 JSON 字符串后须可用 Jackson 原样解析嵌套结构。
+     */
     @Test
     @DisplayName("写入 JSON 可用 Jackson 原样读回")
     void writeThenReadWithJackson() throws Exception {
@@ -83,6 +85,9 @@ class JSONTypeHandlerContractTest {
         assertEquals(SAMPLE.getChildren().get(0).getKey(), roundTrip.getChildren().get(0).getKey());
     }
 
+    /**
+     * 反序列化忽略未知字段；blank/null 列值返回 null。
+     */
     @Test
     @DisplayName("反序列化忽略未知字段；blank / null 返回 null")
     void readUnknownFieldsAndNulls() throws Exception {
@@ -100,6 +105,9 @@ class JSONTypeHandlerContractTest {
         assertNull(handler.getNullableResult(rs, COL));
     }
 
+    /**
+     * null 参数经 handler 写入 JDBC null 字符串。
+     */
     @Test
     @DisplayName("null 参数写入 null 字符串")
     void writeNull() throws Exception {

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -56,6 +57,7 @@ import static org.mockito.Mockito.when;
 @EnableFeignClients
 @ActiveProfiles("feignDefaultRequest")
 @SpringBootTest
+@DisplayName("Feign阻塞负载均衡DefaultRequest一致性测试")
 public class FeignBlockingLoadBalancerDefaultRequestSameTest extends CommonMicroServiceTest {
     static final String TEST_SERVICE_1 = "testService1";
     static final String CONTEXT_ID_1 = "testService1Client";
@@ -99,6 +101,7 @@ public class FeignBlockingLoadBalancerDefaultRequestSameTest extends CommonMicro
      * 测试需要在 TracedCircuitBreakerRoundRobinLoadBalancer getInstanceResponse 的方法入口参数对于重试验证 Request 是之前的
      * 测试默认次数默认为 3 次，方法为 get，遇到 internal server error 错误应该重试 3 次
      */
+    @DisplayName("GET重试时DefaultRequest不变")
     @Test
     void testRetryByDefaultGetDefault() {
         //防止断路器影响

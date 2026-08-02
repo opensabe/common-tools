@@ -46,6 +46,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Spring Cache 与 Redis 集成测试：{@code @Cacheable}/{@code @CachePut}/{@code @CacheEvict} 与 TTL。
+ */
 @ExtendWith({
         SpringExtension.class, SingleRedisIntegrationTest.class
 })

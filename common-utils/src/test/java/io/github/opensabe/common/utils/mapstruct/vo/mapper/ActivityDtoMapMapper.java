@@ -21,6 +21,9 @@ import io.github.opensabe.mapstruct.core.ObjectConverter;
 import io.github.opensabe.mapstruct.core.FromMapMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.ActivityDto;
 
+/**
+ * Map 到 ActivityDto 的 MapStruct 映射器（测试桩）。
+ */
 @Mapper(uses=ObjectConverter.class )
 public interface ActivityDtoMapMapper extends FromMapMapper<ActivityDto> {
 

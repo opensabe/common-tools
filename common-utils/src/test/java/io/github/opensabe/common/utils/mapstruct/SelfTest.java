@@ -23,6 +23,9 @@ import io.github.opensabe.mapstruct.core.MapperRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * MapStruct 自映射测试。
+ */
 @DisplayName("MapStruct自映射测试")
 public class SelfTest {
 
@@ -31,6 +34,9 @@ public class SelfTest {
     }
 
 
+    /**
+     * 同类型对象自映射应复制字段值。
+     */
     @Test
     @DisplayName("测试对象自映射功能")
     void test1() {

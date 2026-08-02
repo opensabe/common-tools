@@ -50,14 +50,24 @@ import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.micrometer.observation.Observation;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Elasticsearch Java API Client 与 Rest5 传输层的 Spring 配置。
+ * <p>
+ * 通过 HC5 拦截器关联 Micrometer Observation，并用 Caffeine 缓存兜底未正常 stop 的 observation；
+ * 传输层挂载 {@link SecretFilteringInstrumentation} 在 HTTP 发出前过滤敏感串。
+ * </p>
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore(ElasticsearchRestClientAutoConfiguration.class)
 public class ElasticSearchConfiguration implements DisposableBean {
+
+    /**
+     * 进行中的 ES 请求 observation 缓存；5 分钟过期，防止异常路径未 stop 导致泄漏。
+     */
     private static final Cache<Long, Observation> CACHE = Caffeine.newBuilder()
             .weakKeys()
             .weakValues()
-            //最多5分钟，防止 ES 异常没有捕获，导致 Observation 一直不 stop
             .expireAfterWrite(Duration.ofMinutes(5))
             .evictionListener((key, value, cause) -> {
                 if (cause.wasEvicted()) {
@@ -67,20 +77,50 @@ public class ElasticSearchConfiguration implements DisposableBean {
                 }
             })
             .build();
+
+    /**
+     * 单调递增的请求计数器，作为 observation 在 {@link #CACHE} 中的键。
+     */
     private static final AtomicLong COUNTER = new AtomicLong(0);
+
+    /**
+     * ES 连接与集群属性。
+     */
     @Autowired
     private ElasticSearchProperties properties;
+
+    /**
+     * 全局敏感串过滤管理器。
+     */
     @Autowired
     private GlobalSecretManager globalSecretManager;
+
+    /**
+     * 统一 Observation 工厂。
+     */
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
+
+    /**
+     * 容器关闭时需显式 close 的客户端引用。
+     */
     private ElasticsearchClient elasticsearchClient;
 
+    /**
+     * 注册 ES 客户端 Observation → JFR 事件桥接器。
+     *
+     * @return JFR 生成器 Bean
+     */
     @Bean
     public ElasticSearchClientObservationToJFRGenerator elasticSearchClientObservationToJFRGenerator() {
         return new ElasticSearchClientObservationToJFRGenerator();
     }
 
+    /**
+     * 构建 Rest5 低层客户端 Builder，配置 observation 拦截器与 keep-alive。
+     *
+     * @return 未 build 的 {@link Rest5ClientBuilder}
+     */
     @Bean
     public Rest5ClientBuilder rest5ClientBuilderForElasticSearch() {
         System.setProperty("es.set.netty.runtime.available.processors", "false");
@@ -93,6 +133,12 @@ public class ElasticSearchConfiguration implements DisposableBean {
                 .setHttpClientConfigCallback(httpClientBuilder -> configureHttpClient(httpClientBuilder));
     }
 
+    /**
+     * 为异步 HTTP 客户端添加请求/响应 observation 拦截器。
+     *
+     * @param httpClientBuilder HC5 异步客户端构建器
+     * @return 配置后的构建器
+     */
     private HttpAsyncClientBuilder configureHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
         return httpClientBuilder
                 .addRequestInterceptorFirst((HttpRequestInterceptor) (request, entityDetails, context) -> {
@@ -136,11 +182,23 @@ public class ElasticSearchConfiguration implements DisposableBean {
                 .setKeepAliveStrategy((httpResponse, httpContext) -> TimeValue.ofSeconds(10));
     }
 
+    /**
+     * 创建 Rest5 低层客户端实例。
+     *
+     * @param rest5ClientBuilder 已配置的 builder
+     * @return {@link Rest5Client}
+     */
     @Bean
     public Rest5Client rest5ClientForElasticSearch(Rest5ClientBuilder rest5ClientBuilder) {
         return rest5ClientBuilder.build();
     }
 
+    /**
+     * 创建带 Jackson 3 映射与密钥过滤 instrumentation 的 {@link ElasticsearchClient}。
+     *
+     * @param rest5Client Rest5 低层客户端
+     * @return 高级 ES 客户端
+     */
     @Bean
     public ElasticsearchClient elasticsearchClientForElasticSearch(Rest5Client rest5Client) {
         Rest5ClientTransport transport = new Rest5ClientTransport(
@@ -152,11 +210,20 @@ public class ElasticSearchConfiguration implements DisposableBean {
         return elasticsearchClient;
     }
 
+    /**
+     * 注册脚本化搜索辅助 Bean。
+     *
+     * @param elasticsearchClient ES 客户端
+     * @return {@link ScriptedSearcher}
+     */
     @Bean
     public ScriptedSearcher scriptedSearcherForElasticSearch(ElasticsearchClient elasticsearchClient) {
         return new ScriptedSearcher(elasticsearchClient);
     }
 
+    /**
+     * 容器销毁时关闭 ES 客户端。
+     */
     @Override
     public void destroy() {
         if (this.elasticsearchClient != null) {

@@ -41,11 +41,17 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 
+/**
+ * {@link JSONTypeHandler} 落库线格式契约：LocalDateTime 为 ISO 而非 JsonUtil epoch-ms。
+ */
 @DisplayName("JSONTypeHandler 落库 ISO 日期持久化契约")
 class JSONTypeHandlerPersistContractTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    /**
+     * 写读 round-trip；LocalDateTime 须为 ISO 文本而非 epoch 数字。
+     */
     @Test
     @DisplayName("写读 round-trip；LocalDateTime 线格式为 ISO 而非 epoch")
     void writeReadIsoLocalDateTime() throws Exception {
@@ -78,6 +84,9 @@ class JSONTypeHandlerPersistContractTest {
         assertEquals(original.getOptions().get("tier"), loaded.getOptions().get("tier"));
     }
 
+    /**
+     * 模拟升级前已落库的 ISO 字串仍可读。
+     */
     @Test
     @DisplayName("旧库 ISO 字串可读（模拟升级前已落库）")
     void legacyIsoColumnReadable() throws Exception {

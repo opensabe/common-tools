@@ -20,6 +20,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -64,6 +65,7 @@ import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfig
         "resilience4j.circuitbreaker.configs.default.minimumNumberOfCalls=4",
         "resilience4j.circuitbreaker.configs.default.recordExceptions=java.lang.Exception"}, classes = TestWebFluxObservation.MockConfig.class)
 @AutoConfigureTracing
+@DisplayName("WebFlux观测链路测试")
 public class TestWebFluxObservation extends CommonMicroServiceTest {
     private final String serviceId = "testService";
     ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
@@ -92,6 +94,7 @@ public class TestWebFluxObservation extends CommonMicroServiceTest {
     /**
      * 测试 WebClient 调用有链路信息
      */
+    @DisplayName("WebFlux请求携带Observation")
     @Test
     public void testObservation() {
         ObservationRegistry observationRegistry = unifiedObservationFactory.getObservationRegistry();

@@ -37,6 +37,9 @@ import io.github.opensabe.mapstruct.core.MapperRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+/**
+ * MapStruct 深度克隆与嵌套结构映射测试。
+ */
 @DisplayName("MapStruct深度克隆测试")
 public class DeepCloneTest {
 
@@ -45,6 +48,9 @@ public class DeepCloneTest {
     }
 
 
+    /**
+     * 复杂对象深度克隆应复制集合与 Map 内容且保持引用关系。
+     */
     @Test
     @DisplayName("测试复杂对象深度克隆 - 验证对象引用和内容")
     void test() {
@@ -86,6 +92,9 @@ public class DeepCloneTest {
         assertThat(entry.getValue()).isEqualTo(customer.getOrders().get(0));
     }
 
+    /**
+     * Record 到类映射应正确转换嵌套类型。
+     */
     @Test
     @DisplayName("测试Record类型深度克隆 - 验证内部类型映射")
     void testInnerType() {

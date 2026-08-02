@@ -21,6 +21,9 @@ import io.github.opensabe.mapstruct.core.CommonCopyMapper;
 import io.github.opensabe.common.utils.mapstruct.vo.Person;
 import io.github.opensabe.common.utils.mapstruct.vo.PersonRecord;
 
+/**
+ * Person 与 PersonRecord 互转 MapStruct 映射器（测试桩）。
+ */
 @Mapper
 public interface PersonPersonRecordMapper extends CommonCopyMapper<Person, PersonRecord> {
 

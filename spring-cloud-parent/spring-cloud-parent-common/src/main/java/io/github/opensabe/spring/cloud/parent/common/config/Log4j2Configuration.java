@@ -35,43 +35,55 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Log4j2 异步 Logger Ring Buffer 指标配置。
+ * <p>
+ * 在启用 Prometheus 指标导出且 {@link PrometheusMeterRegistry} 可用时，
+ * 于 {@link ContextRefreshedEvent} 后为每个 Logger 注册 Ring Buffer 剩余容量 Gauge。
+ * 仅初始化一次，以应对多次 refresh 或多 ApplicationContext 场景。
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
-//需要在引入了 prometheus 并且 actuator 暴露了 prometheus 端口的情况下才加载
 @ConditionalOnEnabledMetricsExport("prometheus")
 public class Log4j2Configuration {
+
+    /**
+     * Ring Buffer 剩余容量 Gauge 名称后缀。
+     */
     public static final String GAUGE_NAME_SUFFIX = "_logger_ring_buffer_remaining_capacity";
 
+    /**
+     * Prometheus 指标注册表；可能尚未就绪时通过 {@link ObjectProvider} 延迟获取。
+     */
     @Autowired
     private ObjectProvider<PrometheusMeterRegistry> meterRegistry;
-    //只初始化一次
+
+    /**
+     * 是否已完成 Gauge 注册，保证全局只初始化一次。
+     */
     private volatile boolean isInitialized = false;
 
-    //需要在 ApplicationContext 刷新之后进行注册
-    //在加载 ApplicationContext 之前，日志配置就已经初始化好了
-    //但是 prometheus 的相关 Bean 加载比较复杂，并且随着版本更迭改动比较多，所以就直接偷懒，在整个 ApplicationContext 刷新之后再注册
-    // ApplicationContext 可能 refresh 多次，例如调用 /actuator/refresh，还有就是多 ApplicationContext 的场景
-    // 这里为了简单，通过一个简单的 isInitialized 判断是否是第一次初始化，保证只初始化一次
+    /**
+     * 在 ApplicationContext 刷新后为每个 Logger 注册 Ring Buffer 剩余容量 Gauge。
+     * <p>
+     * Log4j2 在 Context 刷新前已初始化；Prometheus Bean 加载时序复杂，
+     * 因此在首次 {@link ContextRefreshedEvent} 时注册。Root Logger 在指标名中显示为 {@code root}。
+     */
     @EventListener(ContextRefreshedEvent.class)
     public synchronized void init() {
         if (!isInitialized) {
-            //通过 LogManager 获取 LoggerContext，从而获取配置
             LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
             org.apache.logging.log4j.core.config.Configuration configuration = loggerContext.getConfiguration();
-            //获取 LoggerContext 的名称，因为 Mbean 的名称包含这个
             String ctxName = loggerContext.getName();
             configuration.getLoggers().keySet().forEach(k -> {
                 try {
-                    //针对 RootLogger，它的 cfgName 是空字符串，为了显示好看，我们在 prometheus 中将它命名为 root
                     String cfgName = StringUtils.isBlank(k) ? "" : k;
                     String gaugeName = StringUtils.isBlank(k) ? "root" : k;
                     Gauge.builder(gaugeName + GAUGE_NAME_SUFFIX, () -> {
                         try {
                             return (Number) ManagementFactory.getPlatformMBeanServer()
                                     .getAttribute(new ObjectName(
-                                            //按照 Log4j2 源码中的命名方式组装名称
                                             String.format(RingBufferAdminMBean.PATTERN_ASYNC_LOGGER_CONFIG, ctxName, cfgName)
-                                            //获取剩余大小，注意这个是严格区分大小写的
                                     ), "RemainingCapacity");
                         } catch (InstanceNotFoundException e) {
                             log.warn("{} ring buffer remaining not found", k);

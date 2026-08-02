@@ -35,16 +35,30 @@ import io.github.opensabe.common.s3.service.FileService;
 import io.github.opensabe.common.utils.json.JsonUtil;
 
 /**
+ * 将复杂属性以 JSON 文件存入 S3，持久化层仅保存对象键。
+ * <p>
+ * 路径模板 {@code {profile}/converter/{OwnerSimpleName}/{propertyName}/{hashids}.json}；
+ * 序列化经 {@link JsonUtil}。
+ *
  * @author heng.ma
  */
 @SuppressWarnings("rawtypes")
 public class S3JsonConverter implements PropertyValueConverter<Object, String, ValueConversionContext<?>> {
 
+    /** 文件读写服务。 */
     private final FileService service;
+
+    /** S3 对象键格式字符串（含三个 {@code %s} 占位符）。 */
     private final String fileName;
 
+    /** 生成唯一文件名片段的 Hashids。 */
     private final Hashids hashids;
 
+    /**
+     * @param service S3 文件服务
+     * @param properties 须含非空 {@link S3Properties#getProfile()}
+     * @throws IllegalArgumentException profile 为空
+     */
     public S3JsonConverter(FileService service, S3Properties properties) {
         this.service = service;
         this.hashids = Hashids.create("swdfffqssasd".toCharArray());
@@ -52,10 +66,17 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
         if (StringUtils.isNotBlank(profile)) {
             this.fileName = profile + "/converter/%s/%s/%s.json";
         } else {
-            throw new IllegalArgumentException("s3 profile must can not be null");
+            throw new IllegalArgumentException("S3 profile must not be blank");
         }
     }
 
+    /**
+     * 按 S3 键读取 JSON 并反序列化。
+     *
+     * @param value 对象键
+     * @param context 属性类型上下文
+     * @return 反序列化对象
+     */
     @Override
     @SuppressWarnings("unchecked")
     public Object read(@NotNull String value, ValueConversionContext context) {
@@ -65,6 +86,13 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
         return JsonUtil.parseObject(bytes, JacksonParameterizedTypeTypeReference.fromTypeInformation(typeInformation));
     }
 
+    /**
+     * 上传 JSON 并返回 S3 对象键。
+     *
+     * @param value 待序列化对象
+     * @param context 属性上下文（用于生成路径）
+     * @return 对象键
+     */
     @Override
     public String write(@NotNull Object value, ValueConversionContext context) {
         PersistentProperty property = context.getProperty();
@@ -73,16 +101,31 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
         return key;
     }
 
+    /**
+     * 根据实体类名、属性名与时间戳生成唯一对象键。
+     *
+     * @param property 持久化属性
+     * @return S3 键
+     */
     private String getFileName(PersistentProperty property) {
-
         return fileName.formatted(property.getOwner().getType().getSimpleName(),
                 property.getName(),
                 hashids.encode(System.nanoTime(), Thread.currentThread().threadId()));
     }
 
+    /**
+     * 从 {@link TypeInformation} 构建 Jackson 参数化类型引用。
+     *
+     * @param <T> 目标类型
+     */
     private static class JacksonParameterizedTypeTypeReference<T> extends TypeReference<T> {
+
+        /** 参数化类型。 */
         private final ParameterizedType type;
 
+        /**
+         * @param information 属性类型信息
+         */
         JacksonParameterizedTypeTypeReference(final TypeInformation<T> information) {
             final List<TypeInformation<?>> arguments = information.getTypeArguments();
             this.type = new ParameterizedType() {
@@ -100,10 +143,18 @@ public class S3JsonConverter implements PropertyValueConverter<Object, String, V
             };
         }
 
+        /**
+         * 工厂方法。
+         *
+         * @param typeInformation 类型信息
+         * @param <T> 目标类型
+         * @return 类型引用
+         */
         public static <T> JacksonParameterizedTypeTypeReference<T> fromTypeInformation(TypeInformation<T> typeInformation) {
             return new JacksonParameterizedTypeTypeReference<>(typeInformation);
         }
 
+        /** {@inheritDoc} */
         public Type getType() {
             return this.type;
         }
