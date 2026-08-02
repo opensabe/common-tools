@@ -1,0 +1,3 @@
+# Boot 4: use org.springframework.boot.EnvironmentPostProcessor (not the deprecated env package).
+org.springframework.boot.EnvironmentPostProcessor=\
+io.github.opensabe.common.config.OpensabeMetricsEnvironmentPostProcessor
