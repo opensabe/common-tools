@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.opensabe.common.autoconfig;
+package io.github.opensabe.common.auto;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
+import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.common.config.JacksonCustomizedConfiguration;
 
 /**
- * common-utils 自动配置占位。
+ * Jackson 模块与 JsonMapper 定制的自动配置入口。
  * <p>
- * {@link io.github.opensabe.common.config.SpringCommonUtilConfiguration} 已由
- * {@code spring-framework-parent-common} 的
- * {@link io.github.opensabe.common.auto.SpringCustomizedAutoConfiguration} 注册，
- * 此处不再重复 {@code @Import}，避免双重装配。
- *
- * @deprecated 无独立 Bean；保留类名以免破坏外部对 auto-config 入口的引用，后续小版本可删除。
+ * 必须在 {@link JacksonAutoConfiguration} 之前加载，确保 {@link JacksonCustomizedConfiguration}
+ * 注册的 {@code JacksonModule} / {@code JsonMapperBuilderCustomizer} 参与 Boot JsonMapper 构建。
  */
-@Deprecated(since = "3.0.0", forRemoval = true)
-@AutoConfiguration
-public class CommonUtilAutoConfiguration {
+@AutoConfiguration(before = JacksonAutoConfiguration.class)
+@Import(JacksonCustomizedConfiguration.class)
+public class JacksonCustomizedAutoConfiguration {
 }

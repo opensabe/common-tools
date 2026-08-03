@@ -15,20 +15,20 @@
  */
 package io.github.opensabe.common.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import tools.jackson.databind.ObjectMapper;
 import io.github.opensabe.common.secret.ConfigurationPropertiesSecretProvider;
-
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.Log4jAppenderCheckSecretCheckFilter;
 import io.github.opensabe.common.utils.SpringUtil;
-import io.github.opensabe.common.utils.json.JsonUtil;
 
 /**
- * 通用工具类、密钥管理与 JSON 工具相关的 Spring 配置。
+ * 通用工具类与密钥管理相关的 Spring 配置。
+ * <p>
+ * {@link JsonUtilSpringBridge} 由 {@link io.github.opensabe.common.auto.SpringCustomizedAutoConfiguration}
+ * 在 {@code JacksonAutoConfiguration} 之后直接注册，避免 {@code @ConditionalOnBean} 在
+ * {@code @Import} 配置类上过早求值。
  */
 @Configuration(proxyBeanMethods = false)
 public class SpringCommonUtilConfiguration {
@@ -72,17 +72,5 @@ public class SpringCommonUtilConfiguration {
     @Bean
     public Log4jAppenderCheckSecretCheckFilter log4jAppenderCheckSecretCheckFilter() {
         return new Log4jAppenderCheckSecretCheckFilter();
-    }
-
-    /**
-     * 当 Spring 容器中存在 {@link ObjectMapper} Bean 时，将其注入 {@link JsonUtil} 静态门面。
-     *
-     * @param objectMapper Spring 管理的 Jackson ObjectMapper
-     * @return JsonUtil 实例（副作用为替换静态 mapper）
-     */
-    @Bean
-    @ConditionalOnBean(ObjectMapper.class)
-    public JsonUtil jsonUtil(ObjectMapper objectMapper) {
-        return new JsonUtil(objectMapper);
     }
 }

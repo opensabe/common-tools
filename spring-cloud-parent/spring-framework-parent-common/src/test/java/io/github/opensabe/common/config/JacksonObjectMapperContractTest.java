@@ -20,7 +20,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +30,13 @@ import org.springframework.context.ApplicationContext;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.module.blackbird.BlackbirdModule;
 
 import io.github.opensabe.base.vo.IntValueEnum;
 import io.github.opensabe.common.jackson.TimestampModule;
+import io.github.opensabe.common.utils.SpringUtil;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,11 +44,12 @@ import lombok.NoArgsConstructor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Upgrade gate: Spring ObjectMapper (TimestampModule + Blackbird) must stay aligned with JsonUtil
- * for LocalDateTime epoch-ms serialization after Boot 4 / Jackson 3 migration.
+ * Spring Jackson / JsonUtil / SpringUtil 升级契约：验证自动配置桥接在无手动劫持下生效。
  */
 @SpringBootTest(classes = JacksonObjectMapperContractTest.App.class)
 @DisplayName("Jackson ObjectMapper ↔ JsonUtil 升级契约")
@@ -56,12 +59,27 @@ class JacksonObjectMapperContractTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private JsonMapper jsonMapper;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
-    @BeforeEach
-    void useSpringObjectMapper() {
-        // Mirror SpringCommonUtilConfiguration: JsonUtil adopts the Spring ObjectMapper bean
-        new JsonUtil(objectMapper);
+    @Autowired
+    private JsonUtilSpringBridge jsonUtilSpringBridge;
+
+    @Test
+    @DisplayName("JsonUtilSpringBridge 已将 JsonUtil 静态 mapper 桥接到 Boot JsonMapper（同一实例）")
+    void jsonUtilAdoptedSpringJsonMapperWithoutManualHijack() {
+        assertNotNull(jsonUtilSpringBridge);
+        assertSame(jsonMapper, objectMapper, "Boot JsonMapper must be the ObjectMapper bean");
+        assertSame(jsonMapper, JsonUtil.mapper(), "JsonUtil must adopt the Spring JsonMapper via bridge");
+    }
+
+    @Test
+    @DisplayName("SpringUtil 已持有 ApplicationContext")
+    void springUtilHoldsApplicationContext() {
+        assertNotNull(SpringUtil.getApplicationContext());
+        assertSame(applicationContext, SpringUtil.getApplicationContext());
     }
 
     @Test
@@ -70,6 +88,15 @@ class JacksonObjectMapperContractTest {
         Map<String, JacksonModule> modules = applicationContext.getBeansOfType(JacksonModule.class);
         assertTrue(modules.values().stream().anyMatch(TimestampModule.class::isInstance));
         assertTrue(modules.values().stream().anyMatch(BlackbirdModule.class::isInstance));
+        assertTrue(modules.containsKey("timestampModule"), "bean name should be timestampModule after typo fix");
+    }
+
+    @Test
+    @DisplayName("Boot JsonMapper 已启用 WRITE_DATES_AS_TIMESTAMPS")
+    void writeDatesAsTimestampsEnabled() {
+        assertTrue(
+                jsonMapper.isEnabled(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS),
+                "JsonMapperBuilderCustomizer must enable WRITE_DATES_AS_TIMESTAMPS");
     }
 
     @Test

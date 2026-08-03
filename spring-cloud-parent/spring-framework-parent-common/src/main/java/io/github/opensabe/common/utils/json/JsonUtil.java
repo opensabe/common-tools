@@ -34,14 +34,15 @@ import lombok.extern.log4j.Log4j2;
  * JSON 静态工具类，基于 Jackson 3 {@link ObjectMapper} 提供序列化与反序列化门面。
  * <p>
  * 非 Spring 环境使用内置独立 mapper（启用时间戳日期、{@link TimestampModule}、Blackbird）；
- * Spring 容器启动后可通过 Bean 构造器替换为容器中的 {@link ObjectMapper}。
+ * Spring 容器启动后由 {@code JsonUtilSpringBridge} 调用 {@link #adopt(ObjectMapper)}
+ * 替换为容器中的 {@link ObjectMapper}。
  *
  * @author mheng
  */
 @Log4j2
 public final class JsonUtil {
 
-    /** 全局共享的 ObjectMapper；Spring 环境下可能被构造器替换。 */
+    /** 全局共享的 ObjectMapper；Spring 环境下可能被 {@link #adopt(ObjectMapper)} 替换。 */
     private static ObjectMapper objectMapper;
 
     static {
@@ -55,12 +56,15 @@ public final class JsonUtil {
                 .build();
     }
 
+    private JsonUtil() {
+    }
+
     /**
-     * Spring 环境下用容器中的 {@link ObjectMapper} 替换静态 mapper。
+     * 采用给定 mapper 作为 {@link JsonUtil} 全局静态实例（Spring 桥接入口）。
      *
-     * @param objectMapper Spring 管理的 ObjectMapper Bean
+     * @param objectMapper 容器中的 ObjectMapper（通常为 Boot {@link tools.jackson.databind.json.JsonMapper}）
      */
-    public JsonUtil(ObjectMapper objectMapper) {
+    public static void adopt(ObjectMapper objectMapper) {
         log.info("Using Spring ObjectMapper Bean");
         JsonUtil.objectMapper = objectMapper;
     }
