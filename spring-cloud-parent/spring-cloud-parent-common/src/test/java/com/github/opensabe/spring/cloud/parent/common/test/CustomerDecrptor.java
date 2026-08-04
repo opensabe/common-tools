@@ -21,8 +21,12 @@ import org.springframework.core.Ordered;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 测试用 SPI Decryptor，记录调用次数并返回 null 以触发下一解密器。
+ */
 public class CustomerDecrptor implements Decryptor {
 
+    /** 解密调用计数。 */
     private static AtomicInteger run = new AtomicInteger(0);
 
     @Override
@@ -32,6 +36,7 @@ public class CustomerDecrptor implements Decryptor {
     }
 
 
+    /** @return 解密方法被调用次数 */
     int getRun() {
         return run.get();
     }

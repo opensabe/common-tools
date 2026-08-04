@@ -15,17 +15,25 @@
  */
 package io.github.opensabe.common.alive.client.message.enumeration;
 
+/**
+ * DevType 枚举。
+ * <p>设备类型。</p>
+ */
 public enum DevType {
     IOS(1),
     ANDROID(2),
     WP(3),
     WEB(4);
+/** val 字段。 */
     private int val;
 
     DevType(int val) {
         this.val = val;
     }
 
+/**
+ * getVal 方法。
+ */
     public int getVal() {
         return val;
     }

@@ -20,6 +20,11 @@ import io.micrometer.observation.Observation;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+/**
+ * 在 {@link io.micrometer.observation.Observation} 作用域内订阅的 {@link Mono} 包装器。
+ * <p>
+ * 保证异步回调中 TraceId/SpanId 正确传播。
+ */
 public class TracedMono<T> extends Mono<T> {
     private final Mono<T> delegate;
     private final Observation observation;
@@ -29,6 +34,7 @@ public class TracedMono<T> extends Mono<T> {
         this.observation = observation;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void subscribe(CoreSubscriber<? super T> actual) {
         delegate.subscribe(new TracedCoreSubscriber(actual, observation));

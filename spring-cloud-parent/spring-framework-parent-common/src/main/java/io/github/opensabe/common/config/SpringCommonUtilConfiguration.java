@@ -15,43 +15,62 @@
  */
 package io.github.opensabe.common.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.opensabe.common.secret.ConfigurationPropertiesSecretProvider;
-
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.Log4jAppenderCheckSecretCheckFilter;
 import io.github.opensabe.common.utils.SpringUtil;
-import io.github.opensabe.common.utils.json.JsonUtil;
 
+/**
+ * 通用工具类与密钥管理相关的 Spring 配置。
+ * <p>
+ * {@link JsonUtilSpringBridge} 由 {@link io.github.opensabe.common.auto.SpringCustomizedAutoConfiguration}
+ * 在 {@code JacksonAutoConfiguration} 之后直接注册，避免 {@code @ConditionalOnBean} 在
+ * {@code @Import} 配置类上过早求值。
+ */
 @Configuration(proxyBeanMethods = false)
 public class SpringCommonUtilConfiguration {
+
+    /**
+     * 注册 {@link SpringUtil}，供非 Spring 管理的代码获取 ApplicationContext。
+     *
+     * @return Spring 上下文工具实例
+     */
     @Bean
     public SpringUtil getSpringUtil() {
         return new SpringUtil();
     }
 
+    /**
+     * 全局密钥管理器，协调各 {@link io.github.opensabe.common.secret.SecretProvider}。
+     *
+     * @return 全局密钥管理器
+     */
     @Bean
     public GlobalSecretManager globalSecretManager() {
         return new GlobalSecretManager();
     }
 
+    /**
+     * 扫描 {@code @ConfigurationProperties} 上 {@link io.github.opensabe.common.secret.SecretProperty} 注解的密钥提供者。
+     *
+     * @param globalSecretManager 全局密钥管理器
+     * @return 配置属性密钥提供者
+     */
     @Bean
-    public ConfigurationPropertiesSecretProvider annotationSecretProvider (GlobalSecretManager globalSecretManager) {
+    public ConfigurationPropertiesSecretProvider annotationSecretProvider(GlobalSecretManager globalSecretManager) {
         return new ConfigurationPropertiesSecretProvider(globalSecretManager);
     }
 
+    /**
+     * Log4j Appender 层面的密钥泄露检查过滤器。
+     *
+     * @return Log4j 密钥检查过滤器
+     */
     @Bean
     public Log4jAppenderCheckSecretCheckFilter log4jAppenderCheckSecretCheckFilter() {
         return new Log4jAppenderCheckSecretCheckFilter();
-    }
-
-    @Bean
-    @ConditionalOnBean(ObjectMapper.class)
-    public JsonUtil jsonUtil(ObjectMapper objectMapper) {
-        return new JsonUtil(objectMapper);
     }
 }

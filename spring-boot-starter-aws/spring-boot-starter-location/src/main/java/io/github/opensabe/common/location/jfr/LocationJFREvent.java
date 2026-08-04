@@ -23,6 +23,9 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Location JFR 事件。
+ */
 @Setter
 @Getter
 @Category({"observation", "location"})
@@ -30,27 +33,34 @@ import lombok.Setter;
 @StackTrace(false)
 public class LocationJFREvent extends Event {
     // 方法名称
+/** methodName。 */
     @Label("method name")
     private String methodName;
 
     // 请求参数
+/** requestParams。 */
     @Label("request params")
     private String requestParams;
 
     // 响应结果
+/** response。 */
     @Label("response")
     private String response;
 
     // 执行时间（毫秒）
+/** executionTime。 */
     @Label("execution time")
     private long executionTime;
 
+/** successful。 */
     @Label("successful")
     private boolean successful;
 
+/** traceId。 */
     @Label("trace id")
     private String traceId;
 
+/** spanId。 */
     @Label("span id")
     private String spanId;
 

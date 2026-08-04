@@ -32,6 +32,9 @@ import java.util.stream.Collectors;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 
+/**
+ * CompletableFutureWithSpan。
+ */
 public class CompletableFutureWithSpan<T> extends CompletableFuture<T> {
     private final CompletableFuture<T> completableFuture;
     private final Observation observation;

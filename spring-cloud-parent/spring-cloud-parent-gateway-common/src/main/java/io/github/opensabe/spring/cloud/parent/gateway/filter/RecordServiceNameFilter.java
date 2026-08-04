@@ -32,11 +32,13 @@ import reactor.core.publisher.Mono;
 public class RecordServiceNameFilter extends AbstractTracedFilter {
     public static final String SERVICE_NAME = "SERVICE-NAME";
 
+    /** {@inheritDoc} */
     @Override
     public Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
         Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
         String host = route.getUri().getHost();
         return chain.filter(exchange.mutate().request(new ServerHttpRequestDecorator(exchange.getRequest()) {
+            /** {@inheritDoc} */
             @Override
             public HttpHeaders getHeaders() {
                 HttpHeaders httpHeaders = new HttpHeaders();
@@ -47,6 +49,7 @@ public class RecordServiceNameFilter extends AbstractTracedFilter {
         }).build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public int ordered() {
         return TraceIdFilter.ORDER + 1;

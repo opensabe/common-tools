@@ -16,34 +16,41 @@
 package io.github.opensabe.spring.cloud.parent.common.secret;
 
 
-import io.github.opensabe.common.secret.Decryptor;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+
+import io.github.opensabe.common.secret.Decryptor;
+import lombok.extern.log4j.Log4j2;
+
 /**
+ * 聚合多路 {@link io.github.opensabe.common.secret.Decryptor} 的复合解密器。
+ * <p>
+ * 按 {@link org.springframework.core.Ordered} 顺序依次尝试 SPI 解密器，
+ * 全部失败后回退内置 AES-CBC / AES-ECB 实现。
  *
- * 聚合所有的解密算法，根据order顺序，依次解密
  * @author maheng
  */
 @Log4j2
 public class CompositeDecryptor implements Decryptor {
 
 
+    /** 按 Order 排序的 SPI 解密器列表。 */
     private final List<Decryptor> decrypters;
 
     /**
-     * 使用 spring spi 加载解密算法
-     * @param decrypters spi中加载的解密算法
+     * 构造复合解密器。
+     *
+     * @param decrypters Spring 注入的解密器列表，可为空
      */
     public CompositeDecryptor(List<Decryptor> decrypters) {
         if (decrypters == null || decrypters.isEmpty()) {
@@ -54,6 +61,13 @@ public class CompositeDecryptor implements Decryptor {
         }
     }
 
+    /**
+     * 依次尝试 SPI 解密器，失败后使用内置 AES 算法。
+     *
+     * @param encrypted 密文
+     * @param cipher 密钥或算法标识
+     * @return 明文
+     */
     @Override
     public String decrypt(String encrypted, String cipher) {
         String result = null;
@@ -82,15 +96,25 @@ public class CompositeDecryptor implements Decryptor {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getOrder() {
         return Ordered.HIGHEST_PRECEDENCE;
     }
 
 
+    /** AES/CBC/PKCS5Padding 解密器（密钥为 Base64）。 */
     public static class AESCBCDecryptor {
         private static final String AES_CBC = "AES/CBC/PKCS5Padding";
 
+        /**
+         * 解密 Base64 密文（前 16 字节为 IV）。
+         *
+         * @param base64 Base64 密文
+         * @param keyString Base64 编码密钥
+         * @return 明文
+         * @throws Exception 解密失败
+         */
         public static String decrypt(String base64, String keyString) throws Exception {
             Base64.Decoder decoder = Base64.getDecoder();
             byte[] raw = decoder.decode(keyString);
@@ -107,11 +131,20 @@ public class CompositeDecryptor implements Decryptor {
     }
 
 
+    /** AES/ECB/PKCS5Padding 解密器。 */
     public static class AESECBDecryptor {
 
         private static final String AES_ECB = "AES/ECB/PKCS5Padding";
         private static final int AES_KEY_LENGTH = 16;
 
+        /**
+         * 解密原始密文字节。
+         *
+         * @param cipherBytes 密文
+         * @param keyString UTF-8 密钥（截断或填充至 16 字节）
+         * @return 明文
+         * @throws Exception 解密失败
+         */
         public static String decrypt(byte[] cipherBytes, String keyString) throws Exception {
             byte[] keyBytes = keyString.getBytes(StandardCharsets.UTF_8);
             if (keyBytes.length > AES_KEY_LENGTH) {
@@ -131,7 +164,12 @@ public class CompositeDecryptor implements Decryptor {
         }
 
         /**
-         * 密文为 Base64 字符串时（例如从别处导出为 Base64）
+         * 解密 Base64 编码密文。
+         *
+         * @param base64Cipher Base64 密文
+         * @param keyString UTF-8 密钥
+         * @return 明文
+         * @throws Exception 解密失败
          */
         public static String decrypt(String base64Cipher, String keyString) throws Exception {
             return decrypt(Base64.getDecoder().decode(base64Cipher), keyString);

@@ -20,13 +20,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * MQ 测试 class 消息体。
+ */
 @Data
 @Builder
 @AllArgsConstructor
 public class MessageClassPojo {
+/** text。 */
     private final String text;
+/** number。 */
     private final Integer number;
+/** timestamp。 */
     private final Long timestamp;
+/** cost。 */
     private final Double cost;
 
     public MessageClassPojo() {

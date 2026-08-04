@@ -17,46 +17,80 @@ package io.github.opensabe.alive.client.vo;
 
 import io.github.opensabe.alive.protobuf.Message.PushType;
 
+/**
+ * MessageBuilder 类。
+ * <p>消息Builder。</p>
+ */
 public class MessageBuilder {
 
+/** MQ 主题名。 */
     private String topic;
+/** 消息体。 */
     private byte[] body;
+/** 推送类型。 */
     private PushType pushType;
+/** 设备 ID。 */
     private String deviceId;
+/** 账号 ID。 */
     private String accountId;
+/** 过期时间戳。 */
     private long expiry = 0;
 
     private MessageBuilder() {
     }
 
+/**
+ * newBuilder 方法。
+ */
     public static MessageBuilder newBuilder() {
         return new MessageBuilder();
     }
 
+/**
+ * setTopic 方法。
+ */
     public void setTopic(String topic) {
         this.topic = topic;
     }
 
+/**
+ * setBody 方法。
+ */
     public void setBody(byte[] body) {
         this.body = body;
     }
 
+/**
+ * setPushType 方法。
+ */
     public void setPushType(PushType pushType) {
         this.pushType = pushType;
     }
 
+/**
+ * setDeviceId 方法。
+ */
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 
+/**
+ * setAccountId 方法。
+ */
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
+/**
+ * setExpiry 方法。
+ */
     public void setExpiry(long expiry) {
         this.expiry = expiry;
     }
 
+/**
+ * build 方法。
+ */
     public MessageVo build() {
         if (pushType == PushType.GROUP) {
             return new MessageVo(topic, body);

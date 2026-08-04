@@ -24,17 +24,28 @@ import io.github.opensabe.alive.client.ResponseFuture;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;
 import io.github.opensabe.alive.client.exception.AliveClientTimeoutException;
 
+/**
+ * BaseResponseFutureMultiImpl 类。
+ * <p>Base响应FutureMultiImpl。</p>
+ */
 public class BaseResponseFutureMultiImpl implements BaseResponseFuture {
 
+/** futureList 字段。 */
     private List<ResponseFuture> futureList = new LinkedList<ResponseFuture>();
 
     public BaseResponseFutureMultiImpl() {
     }
 
+/**
+ * add 方法。
+ */
     public void add(ResponseFuture future) {
         futureList.add(future);
     }
 
+/**
+ * get0 方法。
+ */
     @Override
     public Response get0() throws InterruptedException, AliveClientExecutionException {
         Response ans = Response.FAIL;
@@ -49,6 +60,9 @@ public class BaseResponseFutureMultiImpl implements BaseResponseFuture {
         return ans;
     }
 
+/**
+ * get0 方法。
+ */
     @Override
     public Response get0(long timeout, TimeUnit unit)
             throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {

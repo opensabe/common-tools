@@ -18,6 +18,7 @@ package io.github.opensabe.common.cache.test;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +40,14 @@ import io.github.opensabe.common.cache.test.storage.MockStorage;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 
 /**
- * @author heng.ma
+ * {@link Expire} 注解与 Caffeine/Redis TTL、{@code @CacheEvict} 多 TTL 扇出行为测试。
  */
 @ExtendWith({
         SpringExtension.class, SingleRedisIntegrationTest.class
 })
+/**
+ * Expire 测试。
+ */
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "caches.enabled=true",
@@ -55,11 +59,16 @@ import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrati
         "caches.custom[1].redis.timeToLive=5s",
         "caches.custom[1].redis.cacheNullValues=false"
 }, classes = App.class)
+@DisplayName("缓存 Expire 注解 TTL 测试")
 public class ExpireTest {
 
+/** cache 服务。 */
     private final CacheService cacheService;
+/** cache 管理器。 */
     private final ExpireCacheManager cacheManager;
+/** redisTemplate。 */
     private final StringRedisTemplate redisTemplate;
+/** storage。 */
     private final MockStorage storage;
     @Autowired
     public ExpireTest(CacheService cacheService, ExpireCacheManager cacheManager, StringRedisTemplate redisTemplate, MockStorage storage) {
@@ -69,12 +78,16 @@ public class ExpireTest {
         this.storage = storage;
     }
 
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleRedisIntegrationTest.setProperties(registry);
     }
 
     @Test
+    @DisplayName("@Expire cacheType 覆盖：Redis 名映射到 Caffeine 实现")
     void testCaffeine() throws InterruptedException, NoSuchMethodException {
         ItemObject item = ItemObject.builder().id(1L).name("caffeineCache").value("Test_Caffeine").build();
         storage.addItem(item);
@@ -150,5 +163,32 @@ public class ExpireTest {
         cacheService.deleteRedis(id, filed);
         String s = redisTemplate.opsForValue().get(RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX + "test_redis::" + id + ":" + filed);
         Assertions.assertNull(s);
+    }
+
+    /**
+     * 无 {@code @Expire} 的 {@code @CacheEvict} 须清理同名 cache 下所有 TTL 变体。
+     */
+    @Test
+    void testCacheEvictFansOutAcrossExpireTtls() {
+        Long id = 401L;
+        String field = "multiTtl";
+        String cacheKey = id + ":" + field;
+        ItemObject item = ItemObject.builder().id(id).name(field).value("multi").build();
+        storage.addItem(item);
+
+        cacheService.getRedisExpireTtl5(id, field);
+        cacheService.getRedisExpireTtl30(id, field);
+
+        Cache ttl5 = cacheManager.getCache("test_redis", Duration.ofSeconds(5));
+        Cache ttl30 = cacheManager.getCache("test_redis", Duration.ofSeconds(30));
+        Assertions.assertNotNull(ttl5.get(cacheKey));
+        Assertions.assertNotNull(ttl30.get(cacheKey));
+
+        cacheService.deleteRedis(id, field);
+
+        Assertions.assertNull(ttl5.get(cacheKey));
+        Assertions.assertNull(ttl30.get(cacheKey));
+        Assertions.assertNull(redisTemplate.opsForValue().get(
+                RedisConfiguration.DEFAULT_REDIS_KEY_PREFIX + "test_redis::" + cacheKey));
     }
 }

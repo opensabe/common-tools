@@ -24,11 +24,26 @@ import org.apache.ibatis.annotations.Update;
 
 import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
 
+/**
+ * MQ 失败日志 MyBatis Mapper 接口。
+ */
 public interface MqFailLogEntityMapper {
 
+    /**
+     * 选择性插入失败日志记录。
+     *
+     * @param record 失败日志实体
+     * @return 影响行数
+     */
     @InsertProvider(type = MqFailLogEntitySqlProvider.class, method = "insertSelective")
     int insertSelective(MqFailLogEntity record);
 
+    /**
+     * 查询待重发的失败消息。
+     *
+     * @param limit 最大条数
+     * @return 待处理消息列表
+     */
     @Select({
             "select id as id, topic as topic, ",
             "hash_key as hashKey, trace_id as traceId, ",
@@ -42,6 +57,14 @@ public interface MqFailLogEntityMapper {
     })
     List<MqFailLogEntity> selectPendingMessages(int limit);
 
+    /**
+     * 更新消息发送状态与重试次数。
+     *
+     * @param msgId      消息 ID
+     * @param sendStatus 发送状态
+     * @param retryNum   重试次数
+     * @return 影响行数
+     */
     @Update({
             "update t_common_mq_fail_log ",
             "set send_status = #{sendStatus}, ",

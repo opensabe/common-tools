@@ -18,6 +18,9 @@ package io.github.opensabe.common.s3.service;
 import java.io.File;
 import java.util.List;
 
+/**
+ * FileService。
+ */
 public interface FileService {
     /**
      * 上传文件

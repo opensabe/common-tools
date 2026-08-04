@@ -27,27 +27,40 @@ import com.fasterxml.jackson.databind.introspect.ClassIntrospector;
  */
 public class ClassIntrospectorDecorator extends ClassIntrospector {
 
+/** delegate 字段。 */
     private final ClassIntrospector delegate;
 
     public ClassIntrospectorDecorator(ClassIntrospector delegate) {
         this.delegate = delegate;
     }
 
+/**
+ * copy 方法。
+ */
     @Override
     public ClassIntrospector copy() {
         return new ClassIntrospectorDecorator(delegate);
     }
 
+/**
+ * forSerialization 方法。
+ */
     @Override
     public BeanDescription forSerialization(SerializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forSerialization(cfg, type, r);
     }
 
+/**
+ * forDeserialization 方法。
+ */
     @Override
     public BeanDescription forDeserialization(DeserializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forDeserialization(cfg, type, r);
     }
 
+/**
+ * forDeserializationWithBuilder 方法。
+ */
     @Override
     public BeanDescription forDeserializationWithBuilder(DeserializationConfig cfg, JavaType builderType, MixInResolver r, BeanDescription valueTypeDesc) {
         return delegate.forDeserializationWithBuilder(cfg, builderType, r, valueTypeDesc);
@@ -55,16 +68,25 @@ public class ClassIntrospectorDecorator extends ClassIntrospector {
 
 //
 
+/**
+ * forCreation 方法。
+ */
     @Override
     public BeanDescription forCreation(DeserializationConfig cfg, JavaType type, MixInResolver r) {
         return delegate.forCreation(cfg, type, r);
     }
 
+/**
+ * forClassAnnotations 方法。
+ */
     @Override
     public BeanDescription forClassAnnotations(MapperConfig<?> cfg, JavaType type, MixInResolver r) {
         return delegate.forClassAnnotations(cfg, type, r);
     }
 
+/**
+ * forDirectClassAnnotations 方法。
+ */
     @Override
     public BeanDescription forDirectClassAnnotations(MapperConfig<?> cfg, JavaType type, MixInResolver r) {
         return delegate.forDirectClassAnnotations(cfg, type, r);

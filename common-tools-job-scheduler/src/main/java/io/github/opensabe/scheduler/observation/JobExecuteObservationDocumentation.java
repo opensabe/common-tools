@@ -20,6 +20,9 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
 
+/**
+ * JobExecuteObservationDocumentation 调度任务。
+ */
 public enum JobExecuteObservationDocumentation implements ObservationDocumentation {
     JOB_EXECUTE {
         @Override
@@ -33,7 +36,10 @@ public enum JobExecuteObservationDocumentation implements ObservationDocumentati
         }
     };
 
-    public enum JobExecuteTag implements KeyName {
+    /**
+ * JobExecuteTag 调度任务。
+ */
+public enum JobExecuteTag implements KeyName {
         JOB_EXECUTE_STATUS {
             @Override
             public String asString() {

@@ -28,6 +28,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 敏感信息提供者抽象基类：应用就绪后立即加载并在固定间隔刷新密钥快照至 {@link GlobalSecretManager}。
+ */
 @Log4j2
 public abstract class SecretProvider implements ApplicationListener<ApplicationReadyEvent> {
     private final GlobalSecretManager globalSecretManager;
@@ -35,6 +38,9 @@ public abstract class SecretProvider implements ApplicationListener<ApplicationR
 
     private volatile boolean isScheduled = false;
 
+    /**
+     * @param globalSecretManager 全局密钥管理器
+     */
     protected SecretProvider(GlobalSecretManager globalSecretManager) {
         this.globalSecretManager = globalSecretManager;
         scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadFactoryBuilder().setNameFormat("secret-reload-" + name())
@@ -44,17 +50,31 @@ public abstract class SecretProvider implements ApplicationListener<ApplicationR
                 .build());
     }
 
+    /**
+     * Provider 唯一名称，用作 {@link GlobalSecretManager} 中的分区键。
+     *
+     * @return Provider 名称
+     */
     protected abstract String name();
 
+    /**
+     * 定时刷新间隔数值。
+     *
+     * @return 间隔长度
+     */
     protected abstract long reloadTimeInterval();
 
+    /**
+     * 定时刷新间隔单位。
+     *
+     * @return 时间单位
+     */
     protected abstract TimeUnit reloadTimeIntervalUnit();
 
     /**
-     * key: secret name
-     * value: secret related values
+     * 重新加载敏感值快照。
      *
-     * @return
+     * @return 配置键到敏感值集合的映射
      */
     protected abstract Map<String, Set<String>> reload();
 
@@ -73,6 +93,7 @@ public abstract class SecretProvider implements ApplicationListener<ApplicationR
         }
     }
 
+    /** 执行一次 reload 并写入 {@link GlobalSecretManager}。 */
     private void reloadSecret() {
         String name = name();
         log.info("SecretProvider-reloadSecret: reload secret {}", name);

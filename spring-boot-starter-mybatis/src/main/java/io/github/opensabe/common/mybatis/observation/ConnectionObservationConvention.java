@@ -42,6 +42,7 @@ public class ConnectionObservationConvention implements ObservationConvention<Co
 //        }
 //    }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getHighCardinalityKeyValues(ConnectionContext context) {
         if (context.isConnect()) {
@@ -60,6 +61,7 @@ public class ConnectionObservationConvention implements ObservationConvention<Co
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof ConnectionContext;

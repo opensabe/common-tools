@@ -18,9 +18,14 @@ package io.github.opensabe.common.secret;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * {@link GlobalSecretManager#filterSecretStringAndAlarm(String)} 的过滤结果。
+ */
 @Data
 @Builder
 public class FilterSecretStringResult {
+    /** 是否在内容中检测到敏感字符串。 */
     private final boolean foundSensitiveString;
+    /** 敏感子串替换为掩码后的内容。 */
     private final String filteredContent;
 }

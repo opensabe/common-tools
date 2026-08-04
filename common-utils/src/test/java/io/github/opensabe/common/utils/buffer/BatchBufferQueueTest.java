@@ -33,7 +33,6 @@ import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -53,16 +52,21 @@ import lombok.extern.log4j.Log4j2;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
+/**
+ * 批量缓冲队列行为与 JFR 事件集成测试。
+ */
 @JfrEventTest
-@AutoConfigureObservability
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
         classes = BatchBufferQueueTest.App.class,
         properties = {
+                "management.tracing.sampling.probability=1.0",
                 "eureka.client.enabled=false"
         }
 )
+@AutoConfigureTracing
 @DisplayName("批量缓冲队列测试")
 public class BatchBufferQueueTest {
     private static final int EVENT_COUNT = 150;
@@ -80,6 +84,9 @@ public class BatchBufferQueueTest {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    /**
+     * 验证异步批量队列的 JFR 事件、链路追踪与批次排序（本地 JFR 环境运行）。
+     */
     @Test
     @DisplayName("测试批量缓冲队列和JFR事件记录 - 验证异步处理和链路追踪")
     @EnableEvent("io.github.opensabe.common.buffer.BufferedElementJFREvent")
@@ -171,6 +178,9 @@ public class BatchBufferQueueTest {
         });
     }
 
+    /**
+     * 验证 CountDown 批量队列在 submit 返回前已完成处理。
+     */
     @Test
     @DisplayName("测试批量缓冲计数队列 - 验证同步处理")
     public void testBatchBufferedCountDownQueue() throws InterruptedException {
@@ -194,12 +204,18 @@ public class BatchBufferQueueTest {
 
     }
 
+    /**
+ * App。
+ */
     @SpringBootApplication
-    public static class App {
+public static class App {
 
+        /**
+ * Queue1。
+ */
         @Log4j2
         @Component
-        public static class Queue1 extends BatchBufferedQueue<Event> {
+public static class Queue1 extends BatchBufferedQueue<Event> {
 
             @Override
             protected Comparator<Event> comparator() {
@@ -269,8 +285,11 @@ public class BatchBufferQueueTest {
             }
         }
 
+        /**
+ * Queue2。
+ */
         @Component
-        public static class Queue2 extends BatchBufferedCountDownQueue<CountDownEvent> {
+public static class Queue2 extends BatchBufferedCountDownQueue<CountDownEvent> {
             @Override
             protected Comparator<CountDownEvent> comparator() {
                 return Comparator.comparing(CountDownEvent::getId);
@@ -286,7 +305,10 @@ public class BatchBufferQueueTest {
 
     }
 
-    @Getter
+    /**
+ * Event JFR 事件。
+ */
+@Getter
     static class Event extends BufferedElement {
         private String id;
         private volatile boolean beforeExecute;
@@ -305,7 +327,10 @@ public class BatchBufferQueueTest {
         }
     }
 
-    @Getter
+    /**
+ * CountDownEvent JFR 事件。
+ */
+@Getter
     static class CountDownEvent extends BufferedCountDownLatchElement {
         private String id;
         private volatile int value = 0;

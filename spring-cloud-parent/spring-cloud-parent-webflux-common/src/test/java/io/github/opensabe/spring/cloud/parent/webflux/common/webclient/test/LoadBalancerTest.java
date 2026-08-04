@@ -20,10 +20,10 @@ import java.util.Map;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -55,7 +55,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@AutoConfigureObservability
 @SpringBootTest(properties = {
         "webclient.jfr.enabled=false",
         "spring.server.jfr.enabled=false",
@@ -75,6 +74,7 @@ import static org.mockito.Mockito.when;
         "resilience4j.circuitbreaker.configs.default.minimumNumberOfCalls=4",
         "resilience4j.circuitbreaker.configs.default.recordExceptions=java.lang.Exception"
 }, classes = LoadBalancerTest.MockConfig.class)
+@DisplayName("WebClient负载均衡与重试测试")
 public class LoadBalancerTest extends CommonMicroServiceTest {
     private final String serviceId = "testService";
     ServiceInstance zone1Instance1 = new DefaultServiceInstance("instance1", serviceId, GOOD_HOST, GOOD_PORT, false, Map.ofEntries(Map.entry("zone", "zone1")));
@@ -104,6 +104,7 @@ public class LoadBalancerTest extends CommonMicroServiceTest {
     /**
      * 测试 断路器为微服务级别，且断路器打开后会重试
      */
+    @DisplayName("熔断器层级与负载均衡")
     @Test
     public void testLevelOfCircuit() {
         when(loadBalancerClientFactory.getInstance(serviceId)).thenReturn(loadBalancerClientFactoryInstance);
@@ -134,6 +135,7 @@ public class LoadBalancerTest extends CommonMicroServiceTest {
     /**
      * 测试connect time out ，无论是 GET请求还是post请求，都会重试
      */
+    @DisplayName("连接超时重试")
     @Test
     public void testRetryOnConnectTimeout() {
         when(loadBalancerClientFactory.getInstance(serviceId)).thenReturn(loadBalancerClientFactoryInstance);
@@ -177,6 +179,7 @@ public class LoadBalancerTest extends CommonMicroServiceTest {
     /**
      * 测试read time out 重试
      */
+    @DisplayName("读超时重试")
     @Test
     public void testRetryOnReadTimeout() {
         when(loadBalancerClientFactory.getInstance(serviceId)).thenReturn(loadBalancerClientFactoryInstance);
@@ -215,6 +218,7 @@ public class LoadBalancerTest extends CommonMicroServiceTest {
     /**
      * 测试 非200响应码
      */
+    @DisplayName("特定响应码重试")
     @Test
     public void testRetryOnResponceCode() {
         when(loadBalancerClientFactory.getInstance(serviceId)).thenReturn(loadBalancerClientFactoryInstance);
@@ -255,6 +259,7 @@ public class LoadBalancerTest extends CommonMicroServiceTest {
     /**
      * 测试针对 重试时 是同一个Request
      */
+    @DisplayName("重试时请求体一致")
     @Test
     public void testRetrySameRequest() {
         when(loadBalancerClientFactory.getInstance(serviceId)).thenReturn(loadBalancerClientFactoryInstance);

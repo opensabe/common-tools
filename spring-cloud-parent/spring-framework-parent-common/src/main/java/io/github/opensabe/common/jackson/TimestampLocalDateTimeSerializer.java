@@ -15,34 +15,46 @@
  */
 package io.github.opensabe.common.jackson;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-
 import lombok.Getter;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
- * LocalDateTime 序列化为毫秒时间戳
- * 注意，这里的时间戳是毫秒级别的，LocalDateTime 是纳秒级别的，所以会丢失精度
+ * 将 {@link LocalDateTime} 序列化为毫秒级 epoch 时间戳。
+ * <p>
+ * {@link LocalDateTime} 精度为纳秒，转换为毫秒时会截断亚毫秒部分；建议在写入前
+ * {@code truncatedTo(ChronoUnit.MILLIS)}。
  */
-public class TimestampLocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
+public class TimestampLocalDateTimeSerializer extends ValueSerializer<LocalDateTime> {
 
+    /** 单例实例，供 {@link TimestampModule} 注册使用。 */
     @Getter
     private static final TimestampLocalDateTimeSerializer INSTANCE = new TimestampLocalDateTimeSerializer();
 
+    /** 本地日期时间转换为 epoch 毫秒时使用的系统默认时区。 */
     private final ZoneId zoneId;
 
+    /**
+     * 使用系统默认时区构造序列化器。
+     */
     public TimestampLocalDateTimeSerializer() {
         this.zoneId = ZoneId.systemDefault();
     }
 
+    /**
+     * 将非 null 的 {@link LocalDateTime} 写为 JSON 数值（毫秒 epoch）。
+     *
+     * @param value       待序列化的本地日期时间
+     * @param gen         JSON 生成器
+     * @param serializers 序列化上下文
+     */
     @Override
-    public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(LocalDateTime value, JsonGenerator gen, SerializationContext serializers) {
         if (Objects.nonNull(value)) {
             gen.writeNumber(value.atZone(zoneId).toInstant().toEpochMilli());
         }

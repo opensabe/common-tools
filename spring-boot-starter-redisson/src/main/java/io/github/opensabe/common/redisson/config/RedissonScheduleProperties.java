@@ -17,16 +17,25 @@ package io.github.opensabe.common.redisson.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-
+/**
+ * Redisson 分布式定时任务开关，绑定前缀 {@code spring.redis.redisson.enable}。
+ */
 @ConfigurationProperties(prefix = "spring.redis.redisson.enable")
 public class RedissonScheduleProperties {
 
+    /** 是否启用 {@link io.github.opensabe.common.redisson.aop.scheduled.RedissonScheduledListener}。 */
     private boolean schedule = true;
 
+    /**
+     * @return 定时任务是否启用
+     */
     public boolean isEnableSchedule() {
         return schedule;
     }
 
+    /**
+     * @param enableSchedule 是否启用定时任务
+     */
     public void setEnableSchedule(boolean enableSchedule) {
         this.schedule = enableSchedule;
     }

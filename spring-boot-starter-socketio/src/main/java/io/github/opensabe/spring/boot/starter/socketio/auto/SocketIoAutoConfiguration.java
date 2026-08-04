@@ -1,3 +1,6 @@
+/**
+ * Socket.IO Starter 自动配置入口。
+ */
 /*
  * Copyright 2025 opensabe-tech
  *

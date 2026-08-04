@@ -17,6 +17,9 @@ package io.github.opensabe.common.s3.test.common;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * 集成测试最小 Spring Boot 启动类。
+ */
 @SpringBootApplication
 public class App {
 }

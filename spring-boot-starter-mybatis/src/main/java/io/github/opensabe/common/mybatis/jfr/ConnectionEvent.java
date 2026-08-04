@@ -47,9 +47,11 @@ public class ConnectionEvent extends Event {
     @Label("Connection Count")
     private final int remain;
 
+/** type。 */
     @Label("Connect Event Type")
     private final String type;
 
+/** success。 */
     private final boolean success;
 
     public ConnectionEvent(ConnectionContext context) {

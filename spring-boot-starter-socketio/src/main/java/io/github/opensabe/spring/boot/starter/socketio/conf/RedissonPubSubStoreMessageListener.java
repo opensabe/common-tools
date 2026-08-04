@@ -25,10 +25,14 @@ import com.corundumstudio.socketio.store.pubsub.PubSubType;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Redisson Pub/Sub 会话存储消息监听器。
+ */
 @Log4j2
 public class RedissonPubSubStoreMessageListener<T> implements MessageListener<PubSubMessage> {
     final PubSubListener<T> listener;
     final SocketIoServerProperties socketIoServerProperties;
+/** nodeId。 */
     private final Long nodeId;
 
     public RedissonPubSubStoreMessageListener(Long nodeId, PubSubListener<T> listener, PubSubType type, SocketIoServerProperties socketIoServerProperties) {
@@ -37,6 +41,7 @@ public class RedissonPubSubStoreMessageListener<T> implements MessageListener<Pu
         this.socketIoServerProperties = socketIoServerProperties;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onMessage(CharSequence channel, PubSubMessage msg) {
         try {

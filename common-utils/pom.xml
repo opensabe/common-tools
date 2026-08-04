@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>spring-cloud-parent</artifactId>
-        <version>2.0.9</version>
+        <version>3.0.0-SNAPSHOT</version>
         <relativePath>../spring-cloud-parent/pom.xml</relativePath>
     </parent>
 
@@ -18,7 +18,7 @@
     <properties>
         <UserAgentUtils.version>1.21</UserAgentUtils.version>
         <poi.version>5.4.0</poi.version>
-        <hutool.version>5.8.36</hutool.version>
+        <hutool.version>5.8.47</hutool.version>
         <jctools.version>4.0.5</jctools.version>
         <commons-validator.version>1.10.0</commons-validator.version>
     </properties>
@@ -101,5 +101,42 @@
             <version>${commons-validator.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <!-- Keep Maven test classes away from IDE ECJ output (target/test-classes),
+             which otherwise overwrites javac results with "Unresolved compilation problems" stubs. -->
+        <testOutputDirectory>${project.build.directory}/maven-test-classes</testOutputDirectory>
+        <plugins>
+            <!--
+              Skip opensabe mapstruct-processor 1.4.0 under Java 25: it emits broken
+              MapperRegisterImpl imports and can corrupt Mapper*Impl sources. Test sources
+              ship the @Mapper interfaces + a static-map MapperRepositoryImpl / minimal
+              MapperRegisterImpl; org.mapstruct still generates *Impl classes.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${lombok-mapstruct-binding.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

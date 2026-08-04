@@ -21,6 +21,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 
 import io.github.opensabe.common.testcontainers.CustomizedRedisContainer;
 
+/**
+ * SingleRedisIntegrationTest 单元/集成测试。
+ */
 public class SingleRedisIntegrationTest implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
     public static final CustomizedRedisContainer REDIS = new CustomizedRedisContainer();
 

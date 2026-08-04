@@ -20,18 +20,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import io.github.opensabe.common.redisson.annotation.slock.FencedLock;
 
 /**
- * 测试Map以Method为key，遇到方法重载会不会有问题
- *
- * @author heng.ma
+ * 以 Method 为 Map 键时方法重载场景下注解解析测试。
  */
+@DisplayName("Method 键注解解析测试")
 public class MethodKeyTest {
 
 
+    @DisplayName("Method 重载作为 Map 键不冲突")
     @Test
     void testHash() throws NoSuchMethodException {
         Method method1 = Animal.class.getMethod("eat");

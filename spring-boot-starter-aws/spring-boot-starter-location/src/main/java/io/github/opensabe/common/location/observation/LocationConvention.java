@@ -31,11 +31,13 @@ public class LocationConvention implements ObservationConvention<LocationContext
     public static final LocationConvention DEFAULT = new LocationConvention();
 
     // supportsContext 实现
+    /** {@inheritDoc} */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof LocationContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getLowCardinalityKeyValues(LocationContext context) {
         return KeyValues.of(
@@ -44,6 +46,7 @@ public class LocationConvention implements ObservationConvention<LocationContext
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getHighCardinalityKeyValues(LocationContext context) {
         return KeyValues.of(

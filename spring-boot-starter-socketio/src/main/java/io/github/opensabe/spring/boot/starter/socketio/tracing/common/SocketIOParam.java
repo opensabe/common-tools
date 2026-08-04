@@ -18,6 +18,9 @@ package io.github.opensabe.spring.boot.starter.socketio.tracing.common;
 import io.github.opensabe.common.utils.OptionalUtil;
 import io.github.opensabe.common.utils.json.JsonUtil;
 
+/**
+ * Socket.IO 事件参数封装。
+ */
 public interface SocketIOParam extends SocketIOCommonEvent {
 
     default String getAllHeaders() {

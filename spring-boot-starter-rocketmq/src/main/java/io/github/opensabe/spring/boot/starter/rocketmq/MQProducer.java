@@ -20,6 +20,9 @@ import org.apache.rocketmq.client.producer.SendResult;
 
 import io.github.opensabe.common.entity.base.vo.BaseMQMessage;
 
+/**
+ * MQProducer。
+ */
 public interface MQProducer {
     /**
      * 同步发送消息，不能保持消费有序

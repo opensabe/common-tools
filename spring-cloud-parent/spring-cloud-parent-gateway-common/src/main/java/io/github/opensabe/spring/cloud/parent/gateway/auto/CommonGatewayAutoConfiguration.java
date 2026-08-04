@@ -21,6 +21,11 @@ import org.springframework.context.annotation.Import;
 import io.github.opensabe.spring.cloud.parent.gateway.config.CommonGatewayConfiguration;
 import io.github.opensabe.spring.cloud.parent.gateway.config.DefaultFilterConfiguration;
 
+/**
+ * Spring Cloud Gateway 通用自动配置入口。
+ * <p>
+ * 导入 Gateway 核心配置与默认 GlobalFilter 组件扫描。
+ */
 @AutoConfiguration
 @Import({CommonGatewayConfiguration.class, DefaultFilterConfiguration.class})
 public class CommonGatewayAutoConfiguration {

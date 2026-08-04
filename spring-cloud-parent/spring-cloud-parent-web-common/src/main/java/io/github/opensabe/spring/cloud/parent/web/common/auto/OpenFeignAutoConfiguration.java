@@ -20,6 +20,12 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.web.common.config.CommonOpenFeignConfiguration;
 
+/**
+ * OpenFeign 自动配置入口。
+ * <p>
+ * 导入 {@link io.github.opensabe.spring.cloud.parent.web.common.config.CommonOpenFeignConfiguration}，
+ * 为所有 Feign 客户端注入默认配置、Resilience4j 装饰与 JFR 观测等能力。
+ */
 @AutoConfiguration
 @Import({CommonOpenFeignConfiguration.class})
 //@EnableFeignClients(value = "io.github.opensabe", defaultConfiguration = DefaultOpenFeignConfiguration.class)

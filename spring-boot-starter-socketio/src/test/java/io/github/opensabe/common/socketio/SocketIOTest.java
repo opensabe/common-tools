@@ -34,27 +34,28 @@ import io.socket.client.Socket;
 import lombok.extern.log4j.Log4j2;
 
 
+/**
+ * Socket.IO 客户端连接与事件订阅集成测试。
+ */
 @Log4j2
 @DisplayName("SocketIO客户端连接测试")
 public class SocketIOTest extends SocketIOStarter {
     private static final String URL = "http://localhost:";
+    /** socketIoServer 配置属性。 */
     @Autowired
     private SocketIoServerProperties socketIoServerProperties;
 
     /**
-     * socketio测试地址 https://amritb.github.io/socketio-client-tool/v1/#url=d3M6Ly9sb2NhbGhvc3Q6NDAwMQ==&path=L3NvY2tldC5pbw==&opt=&events=
-     * url ws://localhost:4001/socket.io
-     * event sub
-     *
-     * @throws InterruptedException
+     * 连接本地 Socket.IO 服务并 emit sub 事件（手动验证用）。
      */
-    @Test
     @DisplayName("测试SocketIO客户端连接和事件订阅")
+    @Test
     public void testClient() throws InterruptedException, URISyntaxException {
         TimeUnit.SECONDS.sleep(1);
         connectToLocalhost();
     }
 
+    /** connectToLocalhost。 */
     public void connectToLocalhost() throws InterruptedException, URISyntaxException {
         IO.Options opt = createOptionsWithQueryParams();
         String url = URL + socketIoServerProperties.getPort();
@@ -71,6 +72,7 @@ public class SocketIOTest extends SocketIOStarter {
         socket.close();
     }
 
+    /** createOptionsWithQueryParams。 */
     public IO.Options createOptionsWithQueryParams() {
         Map<String, List<String>> extraHeaders = new HashMap<>();
         extraHeaders.put(CommonAttribute.UID, List.of("21131221uid123213213"));

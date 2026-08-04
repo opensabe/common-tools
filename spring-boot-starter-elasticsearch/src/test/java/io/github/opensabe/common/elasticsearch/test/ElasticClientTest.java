@@ -16,40 +16,28 @@
 package io.github.opensabe.common.elasticsearch.test;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.CreateIndexResponse;
-import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.xcontent.XContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
 import io.github.opensabe.common.testcontainers.integration.SingleElasticSearchIntegrationTest;
-import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,6 +45,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Elasticsearch Java API Client 集成测试：索引 CRUD、搜索与敏感字段过滤。
+ */
 @SpringBootTest(
         classes = ElasticClientTest.Main.class,
         properties = "eureka.client.enabled=false"
@@ -64,95 +55,102 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith({
         SingleElasticSearchIntegrationTest.class,
         SpringExtension.class
+/**
+ * ElasticClient 测试。
+ */
 })
 @Log4j2
-@AutoConfigureObservability
 @DisplayName("Elasticsearch客户端测试")
 public class ElasticClientTest {
     private static final String INDEX = "test_index";
     private static final String SECRET = "secretString";
+    /** elasticsearch 客户端。 */
     @Autowired
-    private RestHighLevelClient restHighLevelClient;
+    private ElasticsearchClient elasticsearchClient;
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         SingleElasticSearchIntegrationTest.setProperties(registry);
     }
 
-    @Test
+    /**
+     * 创建索引、upsert 文档、拦截 secret 字段更新，并验证 search 结果。
+     */
     @DisplayName("测试Elasticsearch基本操作 - 索引创建、文档更新、搜索和敏感信息过滤")
+    @Test
     public void test() throws IOException, InterruptedException {
-        GetIndexRequest getIndexRequest = new GetIndexRequest(INDEX);
-        boolean exists = restHighLevelClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
+        boolean exists = elasticsearchClient.indices().exists(e -> e.index(INDEX)).value();
         assertFalse(exists);
 
-        CreateIndexRequest createIndexRequest = new CreateIndexRequest(INDEX);
-        createIndexRequest.source(
-                "{\n" +
-                        "  \"settings\": {\n" +
-                        "    \"index\": {\n" +
-                        "      \"refresh_interval\": \"1s\",\n" +
-                        "      \"number_of_shards\": \"1\",\n" +
-                        "      \"number_of_replicas\": \"1\"\n" +
-                        "    }\n" +
-                        "  },\n" +
-                        "  \"mappings\": {\n" +
-                        "    \"properties\": {\n" +
-                        "      \"name\": {\n" +
-                        "        \"type\": \"text\"\n" +
-                        "      },\n" +
-                        "      \"id\": {\n" +
-                        "        \"type\": \"keyword\"\n" +
-                        "      }\n" +
-                        "    }\n" +
-                        "  },\n" +
-                        "  \"aliases\": {}\n" +
-                        "}"
-                , XContentType.JSON
+        var createIndexResponse = elasticsearchClient.indices().create(c -> c
+                .index(INDEX)
+                .withJson(new StringReader(
+                        "{\n" +
+                                "  \"settings\": {\n" +
+                                "    \"index\": {\n" +
+                                "      \"refresh_interval\": \"1s\",\n" +
+                                "      \"number_of_shards\": \"1\",\n" +
+                                "      \"number_of_replicas\": \"1\"\n" +
+                                "    }\n" +
+                                "  },\n" +
+                                "  \"mappings\": {\n" +
+                                "    \"properties\": {\n" +
+                                "      \"name\": {\n" +
+                                "        \"type\": \"text\"\n" +
+                                "      },\n" +
+                                "      \"id\": {\n" +
+                                "        \"type\": \"keyword\"\n" +
+                                "      }\n" +
+                                "    }\n" +
+                                "  },\n" +
+                                "  \"aliases\": {}\n" +
+                                "}"
+                ))
         );
-        CreateIndexResponse createIndexResponse = restHighLevelClient.indices()
-                .create(createIndexRequest, RequestOptions.DEFAULT);
-        assertTrue(createIndexResponse.isAcknowledged());
+        assertTrue(createIndexResponse.acknowledged());
 
-        UpdateRequest updateRequest = new UpdateRequest(INDEX, "id1");
         Map<String, String> obj = Map.of("name", "test name", "id", "id1");
-        String jsonString = JsonUtil.toJSONString(obj);
-        updateRequest.doc(jsonString, XContentType.JSON);
-        updateRequest.fetchSource(false);
-        updateRequest.upsert(jsonString, XContentType.JSON);
-        updateRequest.retryOnConflict(3);
-        UpdateResponse update = restHighLevelClient.update(updateRequest, RequestOptions.DEFAULT);
-        assertEquals("id1", update.getId());
+        Map<String, String> upsertDoc = obj;
+        var update = elasticsearchClient.update(u -> u
+                        .index(INDEX)
+                        .id("id1")
+                        .doc(upsertDoc)
+                        .upsert(upsertDoc)
+                        .docAsUpsert(true)
+                        .retryOnConflict(3),
+                Map.class
+        );
+        assertEquals("id1", update.id());
 
-        obj = Map.of("name", SECRET, "id", "id2");
-        jsonString = JsonUtil.toJSONString(obj);
-        updateRequest = new UpdateRequest(INDEX, "id2");
-        updateRequest.doc(jsonString, XContentType.JSON);
-        updateRequest.fetchSource(false);
-        updateRequest.upsert(jsonString, XContentType.JSON);
-        updateRequest.retryOnConflict(3);
-        UpdateRequest finalUpdateRequest = updateRequest;
-        assertThrows(RuntimeException.class, () -> restHighLevelClient.update(finalUpdateRequest, RequestOptions.DEFAULT));
+        Map<String, String> secretObj = Map.of("name", SECRET, "id", "id2");
+        assertThrows(RuntimeException.class, () -> elasticsearchClient.update(u -> u
+                        .index(INDEX)
+                        .id("id2")
+                        .doc(secretObj)
+                        .upsert(secretObj)
+                        .docAsUpsert(true)
+                        .retryOnConflict(3),
+                Map.class
+        ));
 
         // Wait for the document to be indexed
         TimeUnit.SECONDS.sleep(3);
 
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().fetchSource(true);
-        MatchAllQueryBuilder matchAllQueryBuilder = QueryBuilders.matchAllQuery();
-        searchSourceBuilder.query(matchAllQueryBuilder);
-        SearchRequest searchRequest = new SearchRequest()
-                .indices(INDEX)
-                .source(searchSourceBuilder)
-                .preference("_local");
-        SearchResponse search = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        SearchHit[] hits = search.getHits().getHits();
-        assertEquals(1, hits.length);
-        assertEquals("test name", hits[0].getSourceAsMap().get("name"));
-        assertEquals("id1", hits[0].getSourceAsMap().get("id"));
+        SearchResponse<Map> search = elasticsearchClient.search(s -> s
+                        .index(INDEX)
+                        .preference("_local")
+                        .query(q -> q.matchAll(m -> m)),
+                Map.class
+        );
+        assertEquals(1, search.hits().hits().size());
+        Hit<Map> hit = search.hits().hits().get(0);
+        assertEquals("test name", hit.source().get("name"));
+        assertEquals("id1", hit.source().get("id"));
     }
 
     @SpringBootApplication
     public static class Main {
+        /** testSecretProvider。 */
         @Bean
         public TestSecretProvider testSecretProvider(GlobalSecretManager globalSecretManager) {
             return new TestSecretProvider(globalSecretManager);
@@ -164,21 +162,25 @@ public class ElasticClientTest {
             super(globalSecretManager);
         }
 
+        /** {@inheritDoc} */
         @Override
         protected String name() {
             return "testSecretProvider";
         }
 
+        /** {@inheritDoc} */
         @Override
         protected long reloadTimeInterval() {
             return 1;
         }
 
+        /** {@inheritDoc} */
         @Override
         protected TimeUnit reloadTimeIntervalUnit() {
             return TimeUnit.DAYS;
         }
 
+        /** {@inheritDoc} */
         @Override
         protected Map<String, Set<String>> reload() {
             return Map.of(

@@ -40,10 +40,14 @@ import io.github.opensabe.spring.boot.starter.rocketmq.OldDefaultMQProducerImpl;
 import io.github.opensabe.spring.boot.starter.rocketmq.RocketMQListenerContainerBeanPostProcessor;
 import io.github.opensabe.spring.boot.starter.rocketmq.UniqueRocketMQLocalTransactionListener;
 
+/**
+ * MQProducer Spring 配置类。
+ */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(RocketMQExtendProperties.class)
 public class MQProducerConfiguration {
 
+    /** mybatisMessagePersistent。 */
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass(SqlSessionFactory.class)
@@ -51,6 +55,9 @@ public class MQProducerConfiguration {
         return mapper::insertSelective;
     }
 
+    /**
+     * @return mQProducer
+     */
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnBooleanProperty(
@@ -102,12 +109,16 @@ public class MQProducerConfiguration {
         return mqProducer;
     }
 
+    /**
+     * @return mQLocalTransactionListener
+     */
     @Bean
     @ConditionalOnMissingBean
     public MQLocalTransactionListener getMQLocalTransactionListener(List<UniqueRocketMQLocalTransactionListener> uniqueRocketMQLocalTransactionListeners) {
         return new MQLocalTransactionListener(uniqueRocketMQLocalTransactionListeners);
     }
 
+    /** rocketMQListenerContainerBeanPostProcessor。 */
     @Bean
     @ConditionalOnMissingBean
     public RocketMQListenerContainerBeanPostProcessor rocketMQListenerContainerBeanPostProcessor() {

@@ -34,6 +34,9 @@ import lombok.extern.log4j.Log4j2;
 
 
 @Log4j2
+/**
+ * 强制断连 MQ 消息消费者。
+ */
 @RocketMQMessageListener(
         consumerGroup = "${spring.application.name}_" + ForceDisconnectProducer.MQ_TOPIC_FORCE_DISCONNECT + "_SuperKickForceDisconnect",
         consumeMode = ConsumeMode.CONCURRENTLY,
@@ -43,12 +46,14 @@ import lombok.extern.log4j.Log4j2;
 )
 public class ForceDisconnectConsumer extends AbstractMQConsumer {
 
+/** socketIOServer。 */
     private SocketIOServer socketIOServer;
 
     public ForceDisconnectConsumer(SocketIOServer socketIOServer) {
         this.socketIOServer = socketIOServer;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
         log.info("ForceDisconnectConsumer-onBaseMQMessage {}", JsonUtil.toJSONString(baseMQMessage));

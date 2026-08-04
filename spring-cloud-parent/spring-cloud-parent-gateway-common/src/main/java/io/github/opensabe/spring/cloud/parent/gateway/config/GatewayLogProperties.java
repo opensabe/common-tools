@@ -25,6 +25,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Gateway 访问日志配置属性。
+ * <p>
+ * 绑定前缀 {@code spring.cloud.gateway.log}。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties("spring.cloud.gateway.log")

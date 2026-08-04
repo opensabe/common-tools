@@ -15,13 +15,18 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.auto;
 
-import org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusMetricsExportAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusMetricsExportAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.common.config.Log4j2Configuration;
 
+/**
+ * Log4j2 指标导出自动配置入口。
+ * <p>
+ * 在 Prometheus 指标导出自动配置之后加载，注册 Log4j2 异步 Logger Ring Buffer 剩余容量 Gauge。
+ */
 @AutoConfiguration
 @Import({Log4j2Configuration.class})
 @AutoConfigureAfter(PrometheusMetricsExportAutoConfiguration.class)

@@ -1,6 +1,9 @@
 target/
 **/log/
 **/target/
+# Test/runtime log dirs when LOG_ROOT is unresolved literally
+**/${LOG_ROOT}/
+**/\$\{LOG_ROOT\}/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

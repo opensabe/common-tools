@@ -26,6 +26,9 @@ import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
+/**
+ * EnhancedStream 接口。
+ */
 public interface EnhancedStream<T> extends Stream<T> {
     EnhancedStream<T> distinct(ToIntFunction<T> hashCode,
                                BiPredicate<T, T> equals,

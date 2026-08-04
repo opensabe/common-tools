@@ -17,7 +17,12 @@ package io.github.opensabe.common.observation;
 
 import io.micrometer.observation.docs.ObservationDocumentation;
 
+/**
+ * 占位用 Observation 文档枚举，供 {@link UnifiedObservationFactory#createEmptyObservation()} 等场景
+ * 在无标准 ObservationConvention 时创建空 Observation。
+ */
 public enum DefaultEmptyObservationDocumentation implements ObservationDocumentation {
+    /** 默认空 Observation，名称为 {@code opensabe.default-empty}。 */
     EMPTY_OBSERVATION_DOCUMENTATION {
         @Override
         public String getName() {

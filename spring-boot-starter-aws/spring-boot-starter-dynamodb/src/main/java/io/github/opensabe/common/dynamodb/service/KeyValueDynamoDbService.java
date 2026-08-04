@@ -21,6 +21,9 @@ import io.github.opensabe.common.dynamodb.annotation.HashKeyName;
 import io.github.opensabe.common.dynamodb.annotation.TableName;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 
+/**
+ * KeyValueDynamoDbService。
+ */
 public class KeyValueDynamoDbService extends DynamoDbBaseService<KeyValueDynamoDbService.KeyValueMap> {
 
 
@@ -30,22 +33,36 @@ public class KeyValueDynamoDbService extends DynamoDbBaseService<KeyValueDynamoD
 
     @TableName(name = "dynamodb_${aws_env}_${defaultOperId}_typehandler")
     public static class KeyValueMap {
+/** key。 */
         @HashKeyName(name = "key")
         private String key;
+/** value。 */
         private String value;
 
+        /**
+         * @return key
+         */
         public String getKey() {
             return key;
         }
 
+        /**
+         * @param key 待设置值
+         */
         public void setKey(String key) {
             this.key = key;
         }
 
+        /**
+         * @return value
+         */
         public String getValue() {
             return value;
         }
 
+        /**
+         * @param value 待设置值
+         */
         public void setValue(String value) {
             this.value = value;
         }

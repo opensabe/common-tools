@@ -22,6 +22,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * cgroup memory.stat 指标的 JFR 事件。
+ */
 @Category({"Native Memory Tracking"})
 @Label("Memory Stat")
 @NoArgsConstructor

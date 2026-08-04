@@ -19,12 +19,18 @@ import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * MessageProduce Observation 上下文。
+ */
 @Getter
 @Setter
 public class MessageProduceContext extends Observation.Context {
+/** topic。 */
     private final String topic;
+/** msgLength。 */
     private long msgLength;
     private String sendResult = "";
+/** throwable。 */
     private Throwable throwable;
 
     public MessageProduceContext(String topic) {

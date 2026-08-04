@@ -33,12 +33,17 @@ import lombok.Getter;
  */
 public abstract class ListableRecursiveTask<T, R> extends TraceableRecursiveTask<R> {
 
+/** capacity。 */
     @Getter
     protected int capacity;
+/** list。 */
     @Getter
     protected List<T> list;
+/** transformer。 */
     protected Function<T, R> transformer;
+/** combiner。 */
     protected Function<List<R>, R> combiner;
+/** reducer。 */
     protected BinaryOperator<R> reducer;
 
     protected ListableRecursiveTask(int capacity, List<T> list, Function<T, R> transformer, Function<List<R>, R> combiner, BinaryOperator<R> reducer, Observation observation) {
@@ -59,6 +64,7 @@ public abstract class ListableRecursiveTask<T, R> extends TraceableRecursiveTask
     }
 
 
+    /** {@inheritDoc} */
     @Override
     protected R compute0() {
         var tasks = segmentation();
@@ -70,7 +76,9 @@ public abstract class ListableRecursiveTask<T, R> extends TraceableRecursiveTask
         return aggregate(stream);
     }
 
+    /** segmentation。 */
     protected abstract List<ListableRecursiveTask<T, R>> segmentation();
 
+    /** aggregate。 */
     protected abstract R aggregate(Stream<R> result);
 }

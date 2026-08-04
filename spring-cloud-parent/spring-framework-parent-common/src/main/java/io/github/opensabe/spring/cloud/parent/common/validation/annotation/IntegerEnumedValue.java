@@ -32,6 +32,11 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * 整型字段必须在指定允许值集合内；{@code null} 由其他约束处理。
+ * <p>
+ * 校验实现见 {@link io.github.opensabe.spring.cloud.parent.common.validation.IntegerEnumedValidator}。
+ */
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
 @Retention(RUNTIME)
 @Repeatable(IntegerEnumedValue.List.class)
@@ -39,15 +44,20 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = {})
 public @interface IntegerEnumedValue {
 
+    /** 校验失败时的默认消息模板。 */
     String message() default "allowed in {value}";
 
+    /** 校验分组。 */
     Class<?>[] groups() default {};
 
+    /** 负载类型。 */
     Class<? extends Payload>[] payload() default {};
 
+    /** 允许的整型值列表。 */
     int[] value();
 
-
+    /** 同一元素上重复注解的容器。 */
+        /** 重复的 {@link IntegerEnumedValue} 实例。 */
     @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
     @Retention(RUNTIME)
     @Documented

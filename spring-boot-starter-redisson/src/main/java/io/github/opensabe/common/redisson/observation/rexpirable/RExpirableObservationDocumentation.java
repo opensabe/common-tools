@@ -19,6 +19,9 @@ import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
+/**
+ * Redisson RExpirable 过期相关 Observation 名称与标签定义。
+ */
 
 public enum RExpirableObservationDocumentation implements ObservationDocumentation {
     EXPIRE {

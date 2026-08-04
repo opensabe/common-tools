@@ -20,9 +20,15 @@ import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Mock Config Server 测试配置。
+ * <p>
+ * 注册 {@link MockConfigServerPropertySourceLocator} 模拟加密属性源。
+ */
 @Configuration(proxyBeanMethods = false)
 public class MockConfigServierConfig {
 
+    /** @return Mock 属性源定位器 */
     @Bean
     public PropertySourceLocator configServerPropertySourceLocator() {
         return new MockConfigServerPropertySourceLocator();

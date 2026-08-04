@@ -33,14 +33,19 @@ import lombok.extern.log4j.Log4j2;
  * @description monitor transaction
  *
  */
+/**
+ * MyBatis 事务监控切面。
+ */
 @Log4j2
 @Aspect
 public class MonitorTransactionAspect {
 
+    /** annotationPointcut。 */
     @Pointcut("@annotation(org.springframework.transaction.annotation.Transactional)") // annotation declare pointcut
     public void annotationPointcut() {
     }
 
+    /** beforeMethod。 */
     @Before("annotationPointcut()")
     public void beforeMethod(JoinPoint point) {
         MethodSignature methodSignature = (MethodSignature) point.getSignature();

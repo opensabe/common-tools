@@ -23,13 +23,21 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * RetMsg 类。
+ * <p>返回消息。</p>
+ */
 @Setter
 @Getter
 @Builder
 public class RetMsg extends MqMessage {
+/** 消息体。 */
     private String body;
+/** MQ 主题名。 */
     private String topic;
+/** 推送类型。 */
     private PushType pushType;
+/** messageId 字段。 */
     private Integer messageId;
 
     public RetMsg() {
@@ -42,6 +50,9 @@ public class RetMsg extends MqMessage {
         this.messageId = messageId;
     }
 
+/**
+ * 本地调试入口（非生产使用）。
+ */
     public static void main(String[] args) {
         RetMsg retMsg = new RetMsg();
         retMsg.setBody("aaaa");

@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.common.executor.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,13 +22,23 @@ import org.springframework.context.annotation.Configuration;
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.executor.ThreadPoolFactoryGracefulShutDownHandler;
 
-
-@ConditionalOnClass(name = "io.undertow.Undertow")
+/**
+ * 注册 {@link ThreadPoolFactory} 优雅关闭处理器。
+ * <p>
+ * 类名沿用 Undertow 历史命名；Boot 4 已不再内置 Undertow，但处理器仍通过
+ * {@code UndertowGracefulShutdownInitializer} 在应用停止阶段被调用。
+ */
 @Configuration(proxyBeanMethods = false)
 public class UndertowThreadConfiguration {
 
+    /**
+     * 注册线程池工厂优雅关闭处理器（若容器中尚未存在）。
+     *
+     * @param threadPoolFactory 线程池工厂
+     * @return 优雅关闭处理器
+     */
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(ThreadPoolFactoryGracefulShutDownHandler.class)
     public ThreadPoolFactoryGracefulShutDownHandler threadPoolFactoryGracefulShutDownHandler(ThreadPoolFactory threadPoolFactory) {
         return new ThreadPoolFactoryGracefulShutDownHandler(threadPoolFactory);
     }

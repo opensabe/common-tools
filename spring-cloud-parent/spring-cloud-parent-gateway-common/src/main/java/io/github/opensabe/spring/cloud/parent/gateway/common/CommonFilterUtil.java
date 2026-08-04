@@ -30,11 +30,17 @@ import io.github.opensabe.base.vo.BaseRsp;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import reactor.core.publisher.Mono;
 
+/**
+ * Gateway 过滤器通用工具类。
+ * <p>
+ * 提供路径匹配、DataBuffer 转字符串与统一错误响应写入等静态方法。
+ */
 public class CommonFilterUtil {
     /**
      * 路径匹配，包括原始的 * 匹配，以及扩展的正则匹配
      */
     public static final AntPathMatcher MATCHER = new AntPathMatcher() {
+        /** {@inheritDoc} */
         @Override
         public boolean match(String pattern, String path) {
             //判断原始 * 匹配
@@ -67,6 +73,15 @@ public class CommonFilterUtil {
         return new String(content, StandardCharsets.UTF_8);
     }
 
+    /**
+     * 写入 JSON 错误响应。
+     *
+     * @param response          响应对象
+     * @param httpStatus        HTTP 状态码
+     * @param baseRsp           业务响应体
+     * @param dataBufferFactory 缓冲区工厂
+     * @return 写入完成的 Mono
+     */
     public static Mono<Void> errorResponse(ServerHttpResponse response, HttpStatus httpStatus, BaseRsp baseRsp, DataBufferFactory dataBufferFactory) {
         response.setStatusCode(httpStatus);
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -78,6 +93,14 @@ public class CommonFilterUtil {
         ));
     }
 
+    /**
+     * 使用响应自带 bufferFactory 写入 JSON 错误响应。
+     *
+     * @param response   响应对象
+     * @param httpStatus HTTP 状态码
+     * @param baseRsp    业务响应体
+     * @return 写入完成的 Mono
+     */
     public static Mono<Void> errorResponse(ServerHttpResponse response, HttpStatus httpStatus, BaseRsp baseRsp) {
         return errorResponse(response, httpStatus, baseRsp, response.bufferFactory());
     }

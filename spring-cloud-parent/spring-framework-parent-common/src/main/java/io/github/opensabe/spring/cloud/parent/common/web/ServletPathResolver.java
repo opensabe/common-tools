@@ -23,8 +23,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * 解析@Path注解的参数，仅适用于与servlet环境
- * @author maheng
+ * 解析 {@link Path} 注解的控制器参数，注入完整请求 URI（仅 Servlet 环境）。
  */
 public class ServletPathResolver implements HandlerMethodArgumentResolver {
     @Override
@@ -32,6 +31,11 @@ public class ServletPathResolver implements HandlerMethodArgumentResolver {
         return parameter.hasParameterAnnotation(Path.class) && String.class.isAssignableFrom(parameter.getParameterType());
     }
 
+    /**
+     * 从 {@link NativeWebRequest#getDescription(boolean)} 提取 {@code uri=} 后的完整路径。
+     *
+     * @return 请求 URI 路径字符串
+     */
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         String uri = webRequest.getDescription(false);

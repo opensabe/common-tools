@@ -22,6 +22,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * GeoLocationData。
+ */
 @Data
 @Builder
 @NoArgsConstructor

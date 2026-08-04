@@ -19,6 +19,9 @@ import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.common.redisson.observation.rexpirable.RExpirableExpireContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
+/**
+ * 将 RExpirable 过期 Observation 转换为 {@link RExpirableExpireJFREvent}。
+ */
 
 public class RExpirableExpireObservationToJFRGenerator extends ObservationToJFRGenerator<RExpirableExpireContext> {
     @Override

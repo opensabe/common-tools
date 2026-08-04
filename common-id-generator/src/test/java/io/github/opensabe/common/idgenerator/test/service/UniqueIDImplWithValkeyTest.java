@@ -18,6 +18,7 @@ package io.github.opensabe.common.idgenerator.test.service;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,6 +26,10 @@ import cn.hutool.core.collection.ConcurrentHashSet;
 import io.github.opensabe.common.idgenerator.service.UniqueID;
 import io.github.opensabe.common.idgenerator.test.common.BaseUniqueIdWithValkeyTest;
 
+/**
+ * UniqueIDImpl Valkey 集成环境多线程并发测试。
+ */
+@DisplayName("UniqueID Valkey 多线程并发测试")
 public class UniqueIDImplWithValkeyTest extends BaseUniqueIdWithValkeyTest {
 
     private static final int THREAD_COUNT = 15;
@@ -33,6 +38,7 @@ public class UniqueIDImplWithValkeyTest extends BaseUniqueIdWithValkeyTest {
     private UniqueID uniqueID;
 
     @Test
+    @DisplayName("多线程并发获取唯一ID")
     public void testMultiThreadGetUniqueId() throws InterruptedException {
         Set<String> ids = new ConcurrentHashSet<>();
         Thread[] threads = new Thread[THREAD_COUNT];
@@ -51,6 +57,7 @@ public class UniqueIDImplWithValkeyTest extends BaseUniqueIdWithValkeyTest {
     }
 
     @Test
+    @DisplayName("多线程并发获取短唯一ID")
     public void testMultiThreadGetShortUniqueId() throws InterruptedException {
         Set<String> ids = new ConcurrentHashSet<>();
         Thread[] threads = new Thread[THREAD_COUNT];

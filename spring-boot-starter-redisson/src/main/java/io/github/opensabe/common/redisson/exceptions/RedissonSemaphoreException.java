@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 package io.github.opensabe.common.redisson.exceptions;
-
 /**
+ * Redisson 信号量操作失败时抛出的异常。
+ *
  * @author heng.ma
  */
+
 public class RedissonSemaphoreException extends RedissonClientException {
 
     public RedissonSemaphoreException(String message) {

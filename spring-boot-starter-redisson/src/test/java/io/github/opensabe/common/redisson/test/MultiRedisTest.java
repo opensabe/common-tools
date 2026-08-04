@@ -18,6 +18,7 @@ package io.github.opensabe.common.redisson.test;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
@@ -36,6 +37,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFactory;
 
+/**
+ * Multi-Redis Lettuce 路由测试：default/test 实例间 key 隔离与多线程并发。
+ */
 @Testcontainers
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = {
@@ -53,6 +57,7 @@ import io.github.opensabe.common.redisson.lettuce.MultiRedisLettuceConnectionFac
         "spring.data.redis.multi.default.lettuce.pool.max-active=100",
 })
 @Execution(ExecutionMode.SAME_THREAD)
+@DisplayName("Multi-Redis 路由测试")
 public class MultiRedisTest {
 
 
@@ -86,11 +91,13 @@ public class MultiRedisTest {
     }
 
     @Test
+    @DisplayName("单线程切换 default/test Redis 实例 key 隔离")
     public void testMultiBlock() {
         testMulti("");
     }
 
     @Test
+    @DisplayName("多线程并发切换 Redis 实例互不干扰")
     public void testMultiBlockMultiThread() throws InterruptedException {
         Thread thread[] = new Thread[10];
         AtomicBoolean result = new AtomicBoolean(true);

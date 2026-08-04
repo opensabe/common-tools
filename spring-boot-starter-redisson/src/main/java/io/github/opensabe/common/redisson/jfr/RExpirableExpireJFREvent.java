@@ -22,6 +22,9 @@ import jdk.jfr.Label;
 import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * {@link io.github.opensabe.common.redisson.observation.rexpirable.RExpirableExpireContext} 对应的 JFR 事件，记录过期设置结果与 trace 信息。
+ */
 
 @Setter
 @Getter

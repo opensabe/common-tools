@@ -18,6 +18,10 @@ package io.github.opensabe.common.alive.client;
 
 import io.github.opensabe.common.alive.client.message.MessageVo;
 
+/**
+ * Client 接口。
+ * <p>客户端。</p>
+ */
 public interface Client {
 
     int pushAsync(MessageVo messageVo, ClientCallback callback);

@@ -21,9 +21,17 @@ import org.springframework.context.annotation.Configuration;
 
 import okhttp3.OkHttpClient;
 
+/**
+ * PayPal OpenAPI 客户端使用的 OkHttp 自动配置。
+ */
 @Configuration
 public class OkHttpClientAutoConfig {
 
+    /**
+     * 注册默认 {@link OkHttpClient} Bean。
+     *
+     * @return OkHttp 客户端实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public OkHttpClient okHttpClient() {

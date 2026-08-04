@@ -19,6 +19,9 @@ import javax.annotation.Nullable;
 
 import io.github.opensabe.common.location.vo.GeoLocationData;
 
+/**
+ * LocationService 服务接口/实现。
+ */
 public interface LocationService {
     /**
      * 同步微服务获取地理位置信息

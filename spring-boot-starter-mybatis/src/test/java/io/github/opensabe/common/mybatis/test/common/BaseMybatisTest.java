@@ -19,12 +19,12 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -46,8 +46,10 @@ import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 
+/**
+ * MyBatis Starter 集成测试基类：MySQL + S3 + DynamoDB + Redis Testcontainers 与表初始化。
+ */
 @Log4j2
-@AutoConfigureObservability
 @JfrEventTest
 @ExtendWith({
         SpringExtension.class,
@@ -56,6 +58,9 @@ import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
         SingleDynamoDbIntegrationTest.class,
         SingleRedisIntegrationTest.class,
 })
+/**
+ * BaseMybatis 测试。
+ */
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "aws.s3.folderName=" + BaseMybatisTest.FOLDER_NAME,
@@ -66,17 +71,25 @@ import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 public abstract class BaseMybatisTest {
     public static final String FOLDER_NAME = "testFolder/country";
     public static final String BUCKET_NAME = "test-bucket";
+    /** s3 客户端。 */
     @Autowired
     private S3Client s3Client;
+    /** s3 配置属性。 */
     @Autowired
     private S3Properties s3Properties;
+    /** dynamoDb 客户端。 */
     @Autowired
     private DynamoDbClient dynamoDbClient;
+    /** aws_env。 */
     @Value("${aws_env}")
     private String aws_env;
+    /** defaultOperId。 */
     @Value("${defaultOperId}")
     private String defaultOperId;
 
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         ReadWriteMySQLIntegrationTest.setProperties(registry);
@@ -85,6 +98,7 @@ public abstract class BaseMybatisTest {
         SingleRedisIntegrationTest.setProperties(registry);
     }
 
+    /** initializeBucket。 */
     @BeforeEach
     public void initializeBucket() {
         ListBucketsResponse listBucketsResponse = s3Client.listBuckets();

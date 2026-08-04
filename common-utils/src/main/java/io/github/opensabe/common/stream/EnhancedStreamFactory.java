@@ -18,6 +18,9 @@ package io.github.opensabe.common.stream;
 import java.lang.reflect.Proxy;
 import java.util.stream.Stream;
 
+/**
+ * EnhancedStreamFactory 工厂类。
+ */
 public class EnhancedStreamFactory {
     @SuppressWarnings("unchecked")
     public static <E> EnhancedStream<E> newEnhancedStream(Stream<E> stream) {

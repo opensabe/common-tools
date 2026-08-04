@@ -18,6 +18,9 @@ package io.github.opensabe.common.redisson.jfr;
 import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.common.redisson.observation.ratelimiter.RRateLimiterAcquireContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
+/**
+ * 将限流器 acquire Observation 转换为 {@link RRateLimiterAcquireJFREvent}。
+ */
 
 public class RRateLimiterAcquireObservationToJFRGenerator extends ObservationToJFRGenerator<RRateLimiterAcquireContext> {
     @Override

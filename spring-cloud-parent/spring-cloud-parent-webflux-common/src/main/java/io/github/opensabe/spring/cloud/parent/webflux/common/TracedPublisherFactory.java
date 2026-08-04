@@ -28,10 +28,24 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class TracedPublisherFactory {
 
+    /**
+     * 包装 Flux 以在 Observation 作用域内传播链路上下文。
+     *
+     * @param publisher   原始 Flux
+     * @param observation 当前 Observation
+     * @return 包装后的 Flux
+     */
     public <T> Flux<T> getTracedFlux(Flux<T> publisher, Observation observation) {
         return new TracedFlux<>(publisher, observation);
     }
 
+    /**
+     * 包装 Mono 以在 Observation 作用域内传播链路上下文。
+     *
+     * @param publisher   原始 Mono
+     * @param observation 当前 Observation
+     * @return 包装后的 Mono
+     */
     public <T> Mono<T> getTracedMono(Mono<T> publisher, Observation observation) {
         return new TracedMono<>(publisher, observation);
     }

@@ -20,6 +20,9 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * EmojiUtil 工具类。
+ */
 public class EmojiUtil {
     private static final Pattern PATTERN = Pattern.compile("\\P{M}\\p{M}*+");
 

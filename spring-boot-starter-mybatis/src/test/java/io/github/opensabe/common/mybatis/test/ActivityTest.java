@@ -29,13 +29,17 @@ import io.github.opensabe.common.mybatis.test.common.BaseMybatisTest;
 import io.github.opensabe.common.mybatis.test.mapper.user.ActivityMapper;
 import io.github.opensabe.common.mybatis.test.po.Activity;
 
+/**
+ * Activity 测试。
+ */
 @DisplayName("活动实体测试")
 public class ActivityTest extends BaseMybatisTest {
+    /** activity Mapper。 */
     @Autowired
     private ActivityMapper activityMapper;
 
-    @Test
     @DisplayName("测试活动实体的插入和查询功能 - 验证复杂数据类型的序列化和反序列化")
+    @Test
     @Transactional
     public void testInsertSelect() {
         var id = "activity1";

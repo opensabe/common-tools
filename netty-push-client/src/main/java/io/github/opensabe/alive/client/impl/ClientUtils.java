@@ -25,8 +25,15 @@ import io.github.opensabe.alive.protobuf.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+/**
+ * ClientUtils 类。
+ * <p>客户端Utils。</p>
+ */
 public class ClientUtils {
 
+/**
+ * sleepUninterruptibly 方法。
+ */
     public static void sleepUninterruptibly(long timeout, TimeUnit unit) {
         if (timeout == 0) {
             return;
@@ -46,6 +53,9 @@ public class ClientUtils {
 
     }
 
+/**
+ * string2InetSocketAddress 方法。
+ */
     public static InetSocketAddress string2InetSocketAddress(String data) {
         try {
             String[] args = StringUtils.split(data, ":");
@@ -55,6 +65,9 @@ public class ClientUtils {
         }
     }
 
+/**
+ * retCode2Response 方法。
+ */
     public static Response retCode2Response(Message.RetCode retCode) {
         switch (retCode.getNumber()) {
             case Message.RetCode.SUCCESS_VALUE:
@@ -68,10 +81,16 @@ public class ClientUtils {
         }
     }
 
+/**
+ * length 方法。
+ */
     public static int length(short type, byte[] data) {
         return Short.SIZE / Byte.SIZE + data.length;
     }
 
+/**
+ * marshall 方法。
+ */
     public static ByteBuf marshall(short type, byte[] data) {
         ByteBuf buf = Unpooled.buffer(Integer.SIZE / Byte.SIZE + Short.SIZE / Byte.SIZE + data.length);
         buf.writeInt(Short.SIZE / Byte.SIZE + data.length);

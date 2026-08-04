@@ -24,13 +24,30 @@ import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfig
 import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanCustomizer;
 import io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanPostProcessor;
 
+/**
+ * Eureka 实例注册定制配置。
+ * <p>
+ * 注册节点/可用区 metadata 注入器与 {@link EurekaInstanceConfigBeanCustomizer} 后置处理器。
+ */
 @Configuration(proxyBeanMethods = false)
 public class CustomizedEurekaConfiguration {
+
+    /**
+     * 向 Eureka metadata 注入 K8s 节点名与可用区。
+     *
+     * @return 节点信息定制器
+     */
     @Bean
     public EurekaInstanceConfigBeanAddNodeInfoCustomizer eurekaInstanceConfigBeanAddNodeInfoCustomizer() {
         return new EurekaInstanceConfigBeanAddNodeInfoCustomizer();
     }
 
+    /**
+     * 在 {@link org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean} 初始化后应用所有定制器。
+     *
+     * @param eurekaInstanceConfigBeanCustomizers 已注册的定制器列表
+     * @return Bean 后置处理器
+     */
     @Bean
     public EurekaInstanceConfigBeanPostProcessor eurekaInstanceConfigBeanPostProcessor(
             List<EurekaInstanceConfigBeanCustomizer> eurekaInstanceConfigBeanCustomizers

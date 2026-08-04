@@ -26,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 
+/**
+ * 声明 Redisson 读写锁（{@link org.redisson.api.RedissonClient#getReadWriteLock(String)}）。
+ */
 @Documented
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -41,6 +44,7 @@ public @interface ReadWriteLock {
     @AliasFor(annotation = SLock.class)
     String[] name();
 
+    /** 锁键前缀。 */
     @AliasFor(annotation = SLock.class)
     String prefix() default RedissonLock.DEFAULT_PREFIX;
 
@@ -62,10 +66,11 @@ public @interface ReadWriteLock {
     @AliasFor(annotation = SLock.class)
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
+    /** 读锁或写锁。 */
     @AliasFor(annotation = SLock.class)
     SLock.ReadOrWrite readOrWrite() default SLock.ReadOrWrite.READ;
 
-
+    /** 加锁策略。 */
     @AliasFor(annotation = SLock.class)
     SLock.LockType lockType() default SLock.LockType.BLOCK_LOCK;
 }

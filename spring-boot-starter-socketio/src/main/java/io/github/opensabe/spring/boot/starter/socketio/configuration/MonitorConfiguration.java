@@ -24,24 +24,31 @@ import io.github.opensabe.spring.boot.starter.socketio.tracing.jfr.DisConnectExe
 import io.github.opensabe.spring.boot.starter.socketio.tracing.jfr.OnEventExecuteJFRGenerator;
 import io.github.opensabe.spring.boot.starter.socketio.tracing.observation.ObservationService;
 
+/**
+ * Monitor Spring 配置类。
+ */
 @Configuration(proxyBeanMethods = false)
 public class MonitorConfiguration {
 
+    /** connectionExecuteJFRGenerator。 */
     @Bean
     public ConnectionExecuteJFRGenerator connectionExecuteJFRGenerator() {
         return new ConnectionExecuteJFRGenerator();
     }
 
+    /** disConnectExecuteJFRGenerator。 */
     @Bean
     public DisConnectExecuteJFRGenerator disConnectExecuteJFRGenerator() {
         return new DisConnectExecuteJFRGenerator();
     }
 
+    /** onEventExecuteJFRGenerator。 */
     @Bean
     public OnEventExecuteJFRGenerator onEventExecuteJFRGenerator() {
         return new OnEventExecuteJFRGenerator();
     }
 
+    /** observationService。 */
     @Bean
     public ObservationService observationService(UnifiedObservationFactory unifiedObservationFactory) {
         return new ObservationService(unifiedObservationFactory);

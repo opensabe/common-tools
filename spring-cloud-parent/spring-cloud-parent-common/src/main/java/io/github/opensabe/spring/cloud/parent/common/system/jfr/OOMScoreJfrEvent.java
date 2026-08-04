@@ -22,6 +22,9 @@ import jdk.jfr.Label;
 import jdk.jfr.StackTrace;
 import lombok.Getter;
 
+/**
+ * /proc/pid/oom_adj、oom_score、oom_score_adj 的 JFR 事件。
+ */
 @Category({"OOM Score Monitoring Recording"})
 @Label("OOM Score JFR")
 @Description("it manages to record the metrics in OOM Score Monitoring such as oom_adj and oom_score and oom_score_adj")
@@ -37,6 +40,11 @@ public class OOMScoreJfrEvent extends Event {
     @Label("oom_score_adj")
     private final long oomScoreAdj;
 
+    /**
+     * @param oomAdj OOM adj 值
+     * @param oomScore OOM score 值
+     * @param oomScoreAdj OOM score adj 值
+     */
     public OOMScoreJfrEvent(long oomAdj, long oomScore, long oomScoreAdj) {
         this.oomAdj = oomAdj;
         this.oomScore = oomScore;

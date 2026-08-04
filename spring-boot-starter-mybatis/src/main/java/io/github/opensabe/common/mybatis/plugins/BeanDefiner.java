@@ -33,6 +33,7 @@ import static java.lang.String.format;
  */
 public class BeanDefiner {
 
+/** register。 */
     private DefaultListableBeanFactory register;
 
     public BeanDefiner(DefaultListableBeanFactory register) {
@@ -50,16 +51,19 @@ public class BeanDefiner {
                 .getBeanDefinition();
     }
 
+    /** sqlSessionFactory。 */
     public BeanDefinition sqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
         return BeanDefinitionBuilder.genericBeanDefinition(SqlSessionFactory.class, () -> sqlSessionFactory)
                 .getBeanDefinition();
     }
 
+    /** sqlSessionTemplate。 */
     public BeanDefinition sqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
         return BeanDefinitionBuilder.genericBeanDefinition(SqlSessionTemplate.class, () -> sqlSessionTemplate)
                 .getBeanDefinition();
     }
 
+    /** transactionManager。 */
     public BeanDefinition transactionManager(DataSourceTransactionManager transactionManager) {
         return BeanDefinitionBuilder.genericBeanDefinition(DataSourceTransactionManager.class, () -> transactionManager)
                 .getBeanDefinition();
@@ -91,12 +95,14 @@ public class BeanDefiner {
         return beanName;
     }
 
+    /** registerSqlSessionTemplate。 */
     public String registerSqlSessionTemplate(String key, SqlSessionTemplate sqlSessionTemplate) {
         String beanName = format("%s.sqlSessionTemplate", key);
         register.registerBeanDefinition(beanName, sqlSessionTemplate(sqlSessionTemplate));
         return beanName;
     }
 
+    /** registerTransactionManager。 */
     public String registerTransactionManager(String key, DataSourceTransactionManager transactionManager) {
         String beanName = format("%s.transactionManager", key);
         register.registerBeanDefinition(beanName, transactionManager(transactionManager));

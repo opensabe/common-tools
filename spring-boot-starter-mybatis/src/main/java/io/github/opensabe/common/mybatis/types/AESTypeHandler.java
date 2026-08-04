@@ -20,23 +20,34 @@ import org.springframework.util.StringUtils;
 import io.github.opensabe.common.mybatis.plugins.CryptTypeHandler;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * AESTypeHandler。
+ */
 @Log4j2
 public class AESTypeHandler extends CryptTypeHandler {
 
     private static ThreadLocal<String> keyHolder = new ThreadLocal<String>();
 
+    /**
+     * @return key
+     */
     public static String getKey() {
         return keyHolder.get();
     }
 
+    /**
+     * @param key 待设置值
+     */
     public static void setKey(String key) {
         keyHolder.set(key);
     }
 
+    /** clearKey。 */
     public static void clearKey() {
         keyHolder.remove();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected String encrypt(String origin) {
         var key = getKey();
@@ -52,6 +63,7 @@ public class AESTypeHandler extends CryptTypeHandler {
         return origin;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected String decrypt(String origin) {
         var key = getKey();

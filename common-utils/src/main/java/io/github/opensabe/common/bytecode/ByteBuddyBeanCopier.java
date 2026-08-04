@@ -110,7 +110,10 @@ public abstract class ByteBuddyBeanCopier<S, T> implements BeanCopier<S, T> {
     }
 
 
-    public static class Interceptor<S, T> {
+    /**
+ * Interceptor。
+ */
+public static class Interceptor<S, T> {
 
 
         @SuppressWarnings("unused")
@@ -118,7 +121,10 @@ public abstract class ByteBuddyBeanCopier<S, T> implements BeanCopier<S, T> {
             thi.propertyTransformers.forEach(t -> t.invoke(source, target));
         }
 
-    }
+    }/**
+ * PropertyTransformer。
+ */
+
 
     class PropertyTransformer {
 

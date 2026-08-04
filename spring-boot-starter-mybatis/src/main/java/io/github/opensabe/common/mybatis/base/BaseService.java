@@ -48,9 +48,12 @@ import static java.lang.String.format;
  */
 @SuppressWarnings("resource")
 public abstract class BaseService<T> {
+/** entityClass。 */
     private final Class<T> entityClass;
     protected org.apache.logging.log4j.Logger log = org.apache.logging.log4j.LogManager.getLogger(this.getClass().getName());
+/** mapper。 */
     private BaseMapper<T> mapper;
+    /** provider。 */
     @Autowired
     private ObjectProvider<BaseMapper<T>> provider;
 
@@ -75,6 +78,7 @@ public abstract class BaseService<T> {
     }
 
 
+    /** readOnly。 */
     @SuppressWarnings("all")
     public BaseService<T> readOnly(boolean isReadOnly) {
         if (isReadOnly) {
@@ -91,6 +95,7 @@ public abstract class BaseService<T> {
         return this;
     }
 
+    /** initMapper。 */
     @PostConstruct
     public void initMapper() {
         var mapper = getMapper();
@@ -120,6 +125,9 @@ public abstract class BaseService<T> {
         this.mapper = mapper;
     }
 
+    /**
+     * @return mapper
+     */
     protected BaseMapper<T> getMapper() {
         return null;
     }
@@ -173,6 +181,7 @@ public abstract class BaseService<T> {
         return mapper.selectByPrimaryKey(id);
     }
 
+    /** selectByIdReadOnly。 */
     public T selectByIdReadOnly(Object id) {
         readOnly(true);
         return mapper.selectByPrimaryKey(id);
@@ -186,6 +195,7 @@ public abstract class BaseService<T> {
         return mapper.selectCount(record);
     }
 
+    /** selectCountReadOnly。 */
     public long selectCountReadOnly(T record) {
         readOnly(true);
         return mapper.selectCount(record);
@@ -201,6 +211,7 @@ public abstract class BaseService<T> {
         return mapper.select(record);
     }
 
+    /** selectReadOnly。 */
     public List<T> selectReadOnly(T record) {
         readOnly(true);
         return mapper.select(record);
@@ -221,6 +232,7 @@ public abstract class BaseService<T> {
                 .doSelectPage(() -> mapper.select(record));
     }
 
+    /** selectReadOnly。 */
     public Page<T> selectReadOnly(T record, int pageNum, int pageSize, Map<String, String> order) {
         String orderBy = orderBy(order);
         return PageHelper.startPage(pageNum, pageSize, orderBy)
@@ -242,6 +254,7 @@ public abstract class BaseService<T> {
         return select(record, pageNum, pageSize, null);
     }
 
+    /** selectReadOnly。 */
     public Page<T> selectReadOnly(T record, int pageNum, int pageSize) {
         readOnly(true);
         return select(record, pageNum, pageSize, null);
@@ -262,6 +275,7 @@ public abstract class BaseService<T> {
         return null;
     }
 
+    /** selectOneReadOnly。 */
     public T selectOneReadOnly(T record, Map<String, String> order) {
         readOnly(true);
         return selectOne(record, order);
@@ -282,15 +296,18 @@ public abstract class BaseService<T> {
                 .doSelectPage(() -> mapper.select(record));
     }
 
+    /** selectLimitReadOnly。 */
     public List<T> selectLimitReadOnly(T record, Map<String, String> order, int limit) {
         readOnly(true);
         return selectLimit(record, order, limit);
     }
 
+    /** selectLimit。 */
     public List<T> selectLimit(T record, int limit) {
         return selectLimit(record, null, limit);
     }
 
+    /** selectLimitReadOnly。 */
     public List<T> selectLimitReadOnly(T record, int limit) {
         readOnly(true);
         return selectLimit(record, null, limit);
@@ -311,6 +328,7 @@ public abstract class BaseService<T> {
         return null;
     }
 
+    /** selectOneByExampleReadOnly。 */
     public T selectOneByExampleReadOnly(Weekend<T> weekend, Map<String, String> order) {
         readOnly(true);
         return selectOneByExample(weekend, order);
@@ -331,15 +349,18 @@ public abstract class BaseService<T> {
                 .doSelectPage(() -> mapper.selectByExample(weekend));
     }
 
+    /** selectLimitByExampleReadOnly。 */
     public List<T> selectLimitByExampleReadOnly(Weekend<T> weekend, Map<String, String> order, int limit) {
         readOnly(true);
         return selectLimitByExample(weekend, order, limit);
     }
 
+    /** selectLimitByExample。 */
     public List<T> selectLimitByExample(Weekend<T> weekend, int limit) {
         return selectLimitByExample(weekend, null, limit);
     }
 
+    /** selectLimitByExampleReadOnly。 */
     public List<T> selectLimitByExampleReadOnly(Weekend<T> weekend, int limit) {
         readOnly(true);
         return selectLimitByExample(weekend, null, limit);
@@ -354,6 +375,7 @@ public abstract class BaseService<T> {
         return selectOneByExample(weekend, null);
     }
 
+    /** selectOneByExampleReadOnly。 */
     public T selectOneByExampleReadOnly(Weekend<T> weekend) {
         readOnly(true);
         return selectOneByExample(weekend, null);
@@ -369,6 +391,7 @@ public abstract class BaseService<T> {
         return selectOne(record, null);
     }
 
+    /** selectOneReadOnly。 */
     public T selectOneReadOnly(T record) {
         readOnly(true);
         return selectOne(record, null);
@@ -389,26 +412,31 @@ public abstract class BaseService<T> {
         return mapper.selectByExample(weekend);
     }
 
+    /** selectByExampleReadOnly。 */
     public List<T> selectByExampleReadOnly(Weekend<T> weekend) {
         readOnly(true);
         return mapper.selectByExample(weekend);
     }
 
+    /** selectByExample。 */
     public Page<T> selectByExample(Weekend<T> weekend, int pageNum, int pageSize, Map<String, String> order) {
         String orderQuery = orderBy(order);
         return PageHelper.startPage(pageNum, pageSize, orderQuery).
                 doSelectPage(() -> mapper.selectByExample(weekend));
     }
 
+    /** selectByExampleReadOnly。 */
     public Page<T> selectByExampleReadOnly(Weekend<T> weekend, int pageNum, int pageSize, Map<String, String> order) {
         readOnly(true);
         return selectByExample(weekend, pageNum, pageSize, order);
     }
 
+    /** selectCountByExample。 */
     public long selectCountByExample(Weekend<T> weekend) {
         return mapper.selectCountByExample(weekend);
     }
 
+    /** selectCountByExampleReadOnly。 */
     public long selectCountByExampleReadOnly(Weekend<T> weekend) {
         readOnly(true);
         return mapper.selectCountByExample(weekend);
@@ -424,14 +452,17 @@ public abstract class BaseService<T> {
         return mapper.updateByPrimaryKeySelective(record);
     }
 
+    /** updateByExample。 */
     public int updateByExample(T record, Weekend<T> weekend) {
         return mapper.updateByExampleSelective(record, weekend);
     }
 
+    /** updateByExampleLimit。 */
     public int updateByExampleLimit(T record, Weekend<T> weekend, int limit) {
         return mapper.updateByExampleSelectiveLimit(record, weekend, limit);
     }
 
+    /** insertSelective。 */
     @SuppressWarnings("all")
     public int insertSelective(T record) {
         return mapper.insertSelective(record);
@@ -448,6 +479,7 @@ public abstract class BaseService<T> {
         return mapper.insertList(list);
     }
 
+    /** orderBy。 */
     private String orderBy(Map<String, String> order) {
         if (order != null) {
             Map<String, EntityColumn> propertyMap = EntityHelper.getEntityTable(entityClass).getPropertyMap();

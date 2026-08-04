@@ -19,9 +19,9 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -35,28 +35,39 @@ import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 
+/**
+ * S3 Starter 集成测试基类：挂载 LocalStack S3 并在每个用例前确保默认 bucket 存在。
+ */
 @Log4j2
 @ExtendWith({SpringExtension.class, SingleS3IntegrationTest.class})
+/**
+ * S3Base 测试。
+ */
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "aws.s3.folderName=" + S3BaseTest.FOLDER_NAME,
         "aws.s3.defaultBucket=" + S3BaseTest.BUCKET_NAME,
         "aws.s3.profile=test"
 }, classes = App.class)
-@AutoConfigureObservability
 public abstract class S3BaseTest {
     public static final String FOLDER_NAME = "testFolder/country";
     public static final String BUCKET_NAME = "test-bucket";
+    /** s3 客户端。 */
     @Autowired
     private S3Client s3Client;
+    /** s3 配置属性。 */
     @Autowired
     private S3Properties s3Properties;
 
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleS3IntegrationTest.setProperties(registry);
     }
 
+    /** initializeBucket。 */
     @BeforeEach
     public void initializeBucket() {
         ListBucketsResponse listBucketsResponse = s3Client.listBuckets();

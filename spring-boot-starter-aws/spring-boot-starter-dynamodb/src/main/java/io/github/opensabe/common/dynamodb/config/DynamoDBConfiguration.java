@@ -52,17 +52,23 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 @Configuration(proxyBeanMethods = false)
 public class DynamoDBConfiguration {
 
+    /** accessKey。 */
     @Value("${aws_access_key_id}")
     private String accessKey;
+    /** secretKey。 */
     @Value("${aws_secret_access_key}")
     private String secretKey;
+    /** awsRegion。 */
     @Value("${aws_region:}")
     private String awsRegion;
+    /** dynamolLocalUrl。 */
     @Value("${dynamolLocalUrl:}")
     private String dynamolLocalUrl;
 
+/** dynamoDb 客户端。 */
     private DynamoDbClient dynamoDbClient;
 
+    /** s3Client。 */
     @Bean
     public DynamoDbClient s3Client() {
         Region region;
@@ -86,16 +92,19 @@ public class DynamoDBConfiguration {
         return dynamoDbClient;
     }
 
+    /** shutdown。 */
     @PreDestroy
     public void shutdown() {
         log.info("aws dynamoDbClient shutdown...");
         dynamoDbClient.close();
     }
 
+    /** dynamoDbEnhancedClient。 */
     @Bean
     public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient client, UnifiedObservationFactory unifiedObservationFactory) {
         DynamoDbEnhancedClient delegate = DynamoDbEnhancedClient.builder().dynamoDbClient(client).build();
         return new DynamoDbEnhancedClient() {
+            /** {@inheritDoc} */
             @Override
             public <T> DynamoDbTable<T> table(String tableName, TableSchema<T> tableSchema) {
                 return new ObservedTable<>(delegate.table(tableName, tableSchema), unifiedObservationFactory);
@@ -104,17 +113,20 @@ public class DynamoDBConfiguration {
     }
 
 
+    /** keyValueDynamoDbService。 */
     @Bean
     public KeyValueDynamoDbService keyValueDynamoDbService(Environment environment, DynamoDbEnhancedClient dynamoDbEnhancedClient) {
         return new KeyValueDynamoDbService(environment, dynamoDbEnhancedClient);
     }
 
+    /** dynamoDbOBSService。 */
     @Bean
     @ConditionalOnClass(KeyValueDynamoDbService.class)
     public DynamoDbOBService dynamoDbOBSService(KeyValueDynamoDbService dynamoDbBaseService) {
         return new DynamoDbOBService(dynamoDbBaseService);
     }
 
+    /** dynamodbConverter。 */
     @Bean
     public DynamodbConverter dynamodbConverter(Environment environment, DynamoDbEnhancedClient client) {
         return new DynamodbConverter(environment, client);

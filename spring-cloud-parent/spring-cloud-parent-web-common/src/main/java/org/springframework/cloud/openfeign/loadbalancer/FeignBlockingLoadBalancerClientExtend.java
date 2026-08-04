@@ -100,6 +100,14 @@ public class FeignBlockingLoadBalancerClientExtend implements Client {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    /**
+     * 执行带负载均衡的 Feign 请求，并在 {@link RequestDataContext} 中附带 {@link RequestTemplate} 供断路器提取。
+     *
+     * @param request HTTP 请求
+     * @param options 请求选项
+     * @return HTTP 响应
+     * @throws IOException 底层 IO 异常
+     */
     @Override
     public Response execute(Request request, Request.Options options) throws IOException {
         final URI originalUri = URI.create(request.url());
@@ -169,11 +177,26 @@ public class FeignBlockingLoadBalancerClientExtend implements Client {
         );
     }
 
+    /**
+     * 使用重构后的 URL 构建新请求。
+     *
+     * @param request          原始请求
+     * @param reconstructedUrl 负载均衡重构后的 URL
+     * @return 新请求
+     */
     protected Request buildRequest(Request request, String reconstructedUrl) {
         return Request.create(request.httpMethod(), reconstructedUrl, request.headers(), request.body(),
                 request.charset(), request.requestTemplate());
     }
 
+    /**
+     * 使用重构 URL 与选定实例构建请求，并应用请求转换器链。
+     *
+     * @param request          原始请求
+     * @param reconstructedUrl 重构后的 URL
+     * @param instance         选定的服务实例
+     * @return 转换后的请求
+     */
     protected Request buildRequest(Request request, String reconstructedUrl, ServiceInstance instance) {
         Request newRequest = buildRequest(request, reconstructedUrl);
         if (transformers != null) {
@@ -184,7 +207,11 @@ public class FeignBlockingLoadBalancerClientExtend implements Client {
         return newRequest;
     }
 
-    // Visible for Sleuth instrumentation
+    /**
+     * 返回被装饰的底层 Feign Client（供链路追踪等扩展使用）。
+     *
+     * @return 委托 Client
+     */
     public Client getDelegate() {
         return delegate;
     }

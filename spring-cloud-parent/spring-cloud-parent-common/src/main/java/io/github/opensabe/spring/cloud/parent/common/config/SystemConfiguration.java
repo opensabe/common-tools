@@ -15,25 +15,41 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceProvider;
 import io.github.opensabe.spring.cloud.parent.common.system.MonitorMemoryRSS;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 系统级 Bean 配置。
+ * <p>
+ * 注册内存 RSS 定时采集与 Secret 属性脱敏 Provider。
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 public class SystemConfiguration {
+
+    /**
+     * 注册内存 RSS 与 cgroup 指标采集监听器。
+     *
+     * @return 内存监控 Bean
+     */
     @Bean
     public MonitorMemoryRSS getMonitorMemoryRSS() {
         return new MonitorMemoryRSS();
     }
 
-
+    /**
+     * 注册 Secret 属性源脱敏 Provider。
+     *
+     * @param globalSecretManager 全局密钥管理器
+     * @return Secret 属性源 Provider
+     */
     @Bean
-    public SecretPropertySourceProvider secretPropertySourceProvider (GlobalSecretManager globalSecretManager) {
+    public SecretPropertySourceProvider secretPropertySourceProvider(GlobalSecretManager globalSecretManager) {
         return new SecretPropertySourceProvider(globalSecretManager);
     }
 }

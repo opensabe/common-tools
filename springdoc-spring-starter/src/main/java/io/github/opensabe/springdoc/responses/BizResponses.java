@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * {@link BizResponse} 的可重复容器注解。
+ *
  * @author heng.ma
  * @see BizResponse
  */
@@ -31,6 +33,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BizResponses {
 
+    /** 聚合的 {@link BizResponse} 声明。 */
     BizResponse[] value();
 
 }

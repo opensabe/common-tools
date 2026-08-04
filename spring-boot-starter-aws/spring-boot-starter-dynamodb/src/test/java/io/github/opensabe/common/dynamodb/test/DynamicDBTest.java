@@ -15,6 +15,8 @@
  */
 package io.github.opensabe.common.dynamodb.test;
 
+import org.junit.jupiter.api.DisplayName;
+
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
@@ -41,14 +43,21 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * DynamicDB 测试。
+ */
+@DisplayName("DynamicDB测试")
 @Log4j2
 @Import(DynamicDBTest.LogContentHandler.class)
 public class DynamicDBTest extends DynamicdbStarter {
 
+    /** eightDataTypes 管理器。 */
     @Autowired
     private EightDataTypesManager eightDataTypesManager;
+    /** dynamoDbOB 服务。 */
     @Autowired
     private DynamoDbOBService dynamoDbOBService;
+    /** unifiedObservation 工厂。 */
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
@@ -61,6 +70,7 @@ public class DynamicDBTest extends DynamicdbStarter {
         });
     }
 
+    /** query。 */
     private void query(EightDataTypesPo params1, EightDataTypesPo params2) {
         EightDataTypesPo eightDataTypesPo = new EightDataTypesPo();
         eightDataTypesPo.setId(params1.getId());
@@ -76,6 +86,7 @@ public class DynamicDBTest extends DynamicdbStarter {
         });
     }
 
+    /** save。 */
     private EightDataTypesPo save(String id) {
         EightDataTypesPo eightDataTypesPo = new EightDataTypesPo();
         eightDataTypesPo.setId(id);
@@ -151,11 +162,13 @@ public class DynamicDBTest extends DynamicdbStarter {
     @Configuration(proxyBeanMethods = false)
     public static class LogContentHandler implements ObservationHandler<DynamodbExecuteContext> {
 
+        /** {@inheritDoc} */
         @Override
         public void onStop(DynamodbExecuteContext context) {
             System.out.println(context);
         }
 
+        /** {@inheritDoc} */
         @Override
         public boolean supportsContext(Observation.Context context) {
             return context instanceof DynamodbExecuteContext;

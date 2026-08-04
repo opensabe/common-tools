@@ -47,13 +47,16 @@ import static software.amazon.awssdk.core.sync.RequestBody.fromFile;
  */
 public class S3SyncFileService extends BucketS3FileService {
 
+/** unifiedObservation 工厂。 */
     private final UnifiedObservationFactory unifiedObservationFactory;
+/** client。 */
     private S3Client client;
 
     public S3SyncFileService(UnifiedObservationFactory unifiedObservationFactory) {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String putObject(File file, String bucket, String profile, String fileName) {
         String key = format("%s/%s", profile, fileName);
@@ -82,6 +85,7 @@ public class S3SyncFileService extends BucketS3FileService {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public String putObject(byte[] source, String bucket, String profile, String fileName) {
         String key = format("%s/%s", profile, fileName);
@@ -111,6 +115,7 @@ public class S3SyncFileService extends BucketS3FileService {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void putObjectAssignedPath(byte[] source, String fileName, String contentType) {
         S3OperationContext s3OperationContext = new S3OperationContext(fileName, "putObject");
@@ -135,6 +140,7 @@ public class S3SyncFileService extends BucketS3FileService {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getObject(String key, String bucket) {
         S3OperationContext s3OperationContext = new S3OperationContext(key, "getObject");
@@ -162,6 +168,7 @@ public class S3SyncFileService extends BucketS3FileService {
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public List<String> listObjects(String basePath, String bucket) {
         S3OperationContext s3OperationContext = new S3OperationContext(basePath, "listObjects");
@@ -189,6 +196,7 @@ public class S3SyncFileService extends BucketS3FileService {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<String> listObjectsByPrefix(String prefix, String bucket) {
         S3OperationContext s3OperationContext = new S3OperationContext(prefix, "listObjects");
@@ -215,6 +223,7 @@ public class S3SyncFileService extends BucketS3FileService {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void deleteObject(String key, String bucket) {
         S3OperationContext s3OperationContext = new S3OperationContext(key, "deleteObject");
@@ -237,10 +246,16 @@ public class S3SyncFileService extends BucketS3FileService {
         }
     }
 
+    /**
+     * @return client
+     */
     public S3Client getClient() {
         return client;
     }
 
+    /**
+     * @param client 待设置值
+     */
     public void setClient(S3Client client) {
         this.client = client;
     }
@@ -251,6 +266,7 @@ public class S3SyncFileService extends BucketS3FileService {
 //        System.out.println("aaa.jpg".matches(".*\\.(png|jpg)"));
 //        System.out.println("aaa.xl".matches(".*\\.(png|jpg)"));
 //    }
+    /** contentType。 */
     public String contentType(String fileName) {
         if (fileName.endsWith(".html")) return "text/html";
         var arr = fileName.split("\\.");

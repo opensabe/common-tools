@@ -15,16 +15,24 @@
  */
 package io.github.opensabe.common.alive.client.message.enumeration;
 
+/**
+ * MQTopic 枚举。
+ * <p>MQ 主题。</p>
+ */
 public enum MQTopic {
     BROAD_CAST("opensabe_common_alive_broadcast"),
     SIMPLE("opensabe_common_alive_simple");
 
+/** MQ 主题名。 */
     private String topic;
 
     MQTopic(final String topic) {
         this.topic = topic;
     }
 
+/**
+ * getTopic 方法。
+ */
     public String getTopic() {
         return this.topic;
     }

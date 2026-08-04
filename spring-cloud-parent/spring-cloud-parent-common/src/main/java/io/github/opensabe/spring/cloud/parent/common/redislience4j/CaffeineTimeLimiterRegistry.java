@@ -29,9 +29,23 @@ import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 
 import static java.util.Collections.emptyMap;
 
+/**
+ * 基于 Caffeine 存储的 {@link io.github.resilience4j.timelimiter.TimeLimiterRegistry} 实现。
+ * <p>
+ * 替代默认 InMemory 实现，支持条目过期与 AutoCloseable 资源回收。
+ *
+ * @see io.github.resilience4j.core.registry.AbstractRegistry
+ */
 public class CaffeineTimeLimiterRegistry extends CaffeineResilienceRegistry<TimeLimiter, TimeLimiterConfig> implements TimeLimiterRegistry {
 
 
+    /**
+     * 构造 Registry。
+     *
+     * @param configs 命名配置
+     * @param registryEventConsumers 事件消费者
+     * @param tags 全局标签
+     */
     public CaffeineTimeLimiterRegistry(Map<String, TimeLimiterConfig> configs, RegistryEventConsumer<TimeLimiter> registryEventConsumers, Map<String, String> tags) {
         super(configs, () -> TimeLimiterConfig.ofDefaults(), registryEventConsumers, tags);
     }

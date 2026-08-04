@@ -21,6 +21,9 @@ import io.github.opensabe.mapstruct.core.Binding;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * NodeDto 数据传输对象。
+ */
 @Getter
 @Setter
 @Binding(value = Node.class, cycle = true)

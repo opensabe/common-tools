@@ -24,6 +24,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * IpLocation。
+ */
 @Data
 @Builder
 @NoArgsConstructor

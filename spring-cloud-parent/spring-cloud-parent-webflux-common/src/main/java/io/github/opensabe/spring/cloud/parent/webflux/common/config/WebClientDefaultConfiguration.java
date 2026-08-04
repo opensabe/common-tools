@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.boot.actuate.metrics.web.reactive.client.ObservationWebClientCustomizer;
+import org.springframework.boot.webclient.observation.ObservationWebClientCustomizer;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.CustomizedReactorLoadBalancerExchangeFilterFunction;
@@ -63,17 +63,39 @@ import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
+/**
+ * 命名 WebClient 默认配置。
+ * <p>
+ * 按 {@link WebClientNamedContextFactory} 上下文名称读取 {@link WebClientConfigurationProperties}，
+ * 组装带负载均衡、重试、实例级断路器与 Observation 链路透传的 {@link WebClient}。
+ */
 @Log4j2
+/**
+ * 单个 WebClient 命名上下文的默认配置。
+ * <p>
+ * 注册 Resilience4j 断路器/重试 Operator 与 Observation 过滤器等。
+ */
 @Configuration(proxyBeanMethods = false)
 public class WebClientDefaultConfiguration {
+
+    /**
+     * 从请求 URL 构造占位 {@link ServiceInstance}，供断路器 Operator 使用。
+     *
+     * @param clientRequest 当前客户端请求
+     * @return 由 URL 主机与端口构成的服务实例
+     */
     private static ServiceInstance getServiceInstance(ClientRequest clientRequest) {
         URI url = clientRequest.url();
-        DefaultServiceInstance defaultServiceInstance = new DefaultServiceInstance();
-        defaultServiceInstance.setHost(url.getHost());
-        defaultServiceInstance.setPort(url.getPort());
-        return defaultServiceInstance;
+        return new DefaultServiceInstance(null, null, url.getHost(), url.getPort(), false);
     }
 
+    /**
+     * 若请求携带 Observation 属性，则在 Observation 作用域内执行后续 Exchange。
+     *
+     * @param clientRequest 客户端请求
+     * @param supplier      实际 Exchange 逻辑
+     * @return 客户端响应 Mono
+     */
     private static Mono<ClientResponse> tracedFilter(
             ClientRequest clientRequest,
             Supplier<Mono<ClientResponse>> supplier) {
@@ -86,6 +108,21 @@ public class WebClientDefaultConfiguration {
         }
     }
 
+    /**
+     * 按命名上下文创建配置完整的 {@link WebClient}。
+     * <p>
+     * 过滤器链顺序：Observation 注入 → 重试 → 负载均衡 → 实例级断路器。
+     *
+     * @param lbFunction                      负载均衡 Exchange 过滤器
+     * @param applicationContext              应用上下文
+     * @param webClientConfigurationProperties WebClient 配置属性
+     * @param environment                     Spring 环境
+     * @param retryRegistry                   Resilience4j 重试注册表
+     * @param circuitBreakerRegistry          Resilience4j 断路器注册表
+     * @param observationWebClientCustomizer  Observation 定制器
+     * @param unifiedObservationFactory       统一 Observation 工厂
+     * @return 配置完成的 WebClient
+     */
     @Bean
     public WebClient getWebClient(
             CustomizedReactorLoadBalancerExchangeFilterFunction lbFunction,
@@ -107,12 +144,12 @@ public class WebClientDefaultConfiguration {
             throw new BeanCreationException("Failed to create webClient, please provide configurations under namespace: webclient.configs." + name);
         }
         String serviceName = webClientProperties.getServiceName();
-        //如果没填写微服务名称，就使用配置 key 作为微服务名称
+        // 若未填写微服务名称，则使用配置 key 作为微服务名称
         if (StringUtils.isBlank(serviceName)) {
             serviceName = name;
         }
         String baseUrl = webClientProperties.getBaseUrl();
-        //如果没填写 baseUrl，就使用微服务名称填充
+        // 若未填写 baseUrl，则使用微服务名称填充
         if (StringUtils.isBlank(baseUrl)) {
             baseUrl = "http://" + serviceName;
         }
@@ -123,10 +160,10 @@ public class WebClientDefaultConfiguration {
         } catch (ConfigurationNotFoundException e) {
             retry = retryRegistry.retry(serviceName);
         }
-        //覆盖其中的异常判断
+        // 覆盖其中的异常判断逻辑
         retry = Retry.of(serviceName, RetryConfig.from(retry.getRetryConfig()).retryOnException(throwable -> {
-            //WebClientResponseException 会重试，因为在这里能 catch 的 WebClientResponseException 只对可以重试的请求封装了 WebClientResponseException
-            //参考 ClientResponseCircuitBreakerSubscriber 的代码
+            // WebClientResponseException 会重试，因为能 catch 到的 WebClientResponseException
+            // 仅对可重试请求封装；参考 ClientResponseCircuitBreakerSubscriber
             if (throwable instanceof WebClientResponseException) {
                 WebClientResponseException webClientResponseException = (WebClientResponseException) throwable;
                 boolean isClientError = webClientResponseException.getStatusCode().is4xxClientError();
@@ -137,7 +174,7 @@ public class WebClientDefaultConfiguration {
                 log.info("should retry on {}", throwable.toString());
                 return true;
             }
-            //断路器异常重试，因为请求没有发出去
+            // 断路器拒绝时重试，因请求尚未发出
             if (throwable instanceof CallNotPermittedException) {
                 log.info("should retry on {}", throwable.toString());
                 return true;
@@ -146,16 +183,15 @@ public class WebClientDefaultConfiguration {
                 WebClientRequestException webClientRequestException = (WebClientRequestException) throwable;
                 HttpMethod method = webClientRequestException.getMethod();
                 URI uri = webClientRequestException.getUri();
-                //判断是否为响应超时，响应超时代表请求已经发出去了，对于非 GET 并且没有标注可以重试的请求则不能重试
+                // 判断是否为响应超时：响应超时表示请求已发出，对非 GET 且未标注可重试的请求不应重试
                 boolean isResponseTimeout = false;
                 Throwable cause = throwable.getCause();
-                //netty 的读取超时一般是 ReadTimeoutException
+                // Netty 读取超时一般为 ReadTimeoutException
                 if (cause instanceof ReadTimeoutException) {
                     log.info("Cause is a ReadTimeoutException which indicates it is a response time out");
                     isResponseTimeout = true;
                 } else {
-                    //对于其他一些框架，使用了 java 底层 nio 的一般是 SocketTimeoutException，message 为 read time out
-                    //还有一些其他异常，但是 message 都会有 read time out 字段，所以通过 message 判断
+                    // 其他框架使用 Java NIO 时多为 SocketTimeoutException，message 含 read time out
                     String message = throwable.getMessage();
                     if (StringUtils.isNotBlank(message)) {
                         message = message.replace(" ", "");
@@ -169,12 +205,12 @@ public class WebClientDefaultConfiguration {
                         }
                     }
                 }
-                //如果请求是 GET 或者标注了重试，则直接判断可以重试
+                // GET 或路径匹配可重试配置时允许重试
                 if (method.equals(HttpMethod.GET) || webClientProperties.retryablePathsMatch(uri.getPath())) {
                     log.info("should retry on {}-{}, {}", method, uri, throwable.toString());
                     return true;
                 } else {
-                    //否则，只针对请求还没有发出去的异常进行重试
+                    // 非 GET：仅对请求尚未发出的异常重试
                     if (isResponseTimeout) {
                         log.info("should not retry on {}-{}, {}", method, uri, throwable.toString());
                     } else {
@@ -199,11 +235,24 @@ public class WebClientDefaultConfiguration {
         Retry finalRetry = retry;
         String finalServiceName = serviceName;
         WebClient.Builder builder = getBuilder(lbFunction, circuitBreakerRegistry, unifiedObservationFactory, httpClient, finalRetry, finalServiceName, webClientProperties, baseUrl);
-        //使用 observationWebClientCustomizer 定制化 builder，这样可以在链路自动添加 Observation 并且可以从 Context 获取
+        // 使用 observationWebClientCustomizer 定制 builder，以便在链路中自动添加 Observation
         observationWebClientCustomizer.customize(builder);
         return builder.build();
     }
 
+    /**
+     * 组装 WebClient Builder，注册 Observation、重试、负载均衡与实例级断路器过滤器。
+     *
+     * @param lbFunction                 负载均衡过滤器
+     * @param circuitBreakerRegistry     断路器注册表
+     * @param unifiedObservationFactory  Observation 工厂
+     * @param httpClient                 Reactor Netty HTTP 客户端
+     * @param finalRetry                 重试策略
+     * @param finalServiceName           服务名（用于断路器配置查找）
+     * @param webClientProperties        当前 WebClient 属性
+     * @param baseUrl                    基础 URL
+     * @return 已配置过滤器的 WebClient Builder
+     */
     private static WebClient.Builder getBuilder(
             CustomizedReactorLoadBalancerExchangeFilterFunction lbFunction,
             CircuitBreakerRegistry circuitBreakerRegistry,
@@ -216,18 +265,18 @@ public class WebClientDefaultConfiguration {
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
                                 .defaultCodecs()
-                                //最大 body 占用 16m 内存
+                                // 最大 body 占用 16MB 内存
                                 .maxInMemorySize(16 * 1024 * 1024))
                         .build())
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .filter((clientRequest, exchangeFunction) -> {
-                    //从 WebFlux 的 Context 中获取 observation，这个是框架塞入的
+                    // 从 WebFlux Context 获取 Observation（由框架注入）
                     return Mono.deferContextual(contextView -> {
                         Observation observation = null;
                         if (contextView.hasKey(ObservationThreadLocalAccessor.KEY)) {
                             observation = contextView.get(ObservationThreadLocalAccessor.KEY);
                         } else {
-                            //我们这里并不是想启动新的 Observation，只是想复用老的，如果老的不存在，其实是有问题的
+                            // 复用已有 Observation；若不存在则创建空 Observation（通常表示上下文缺失）
                             observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
                         }
                         ClientRequest.Builder clientBuilder = ClientRequest.from(clientRequest);
@@ -238,34 +287,31 @@ public class WebClientDefaultConfiguration {
                         return exchangeFunction.exchange(clientBuilder.build());
                     });
                 })
-                //Retry在负载均衡前
+                // 重试在负载均衡之前
                 .filter((clientRequest, exchangeFunction) -> {
                     return tracedFilter(clientRequest, () -> {
                         Optional<Object> attribute =
                                 clientRequest.attribute(TracedCircuitBreakerRoundRobinLoadBalancer.OBSERVATION_KEY);
                         return exchangeFunction
                                 .exchange(clientRequest)
-                                //前面已经塞入 span，这里肯定存在
                                 .transform(ClientResponseRetryOperator.of(finalRetry, (Observation) attribute.get()));
                     });
                 })
-                //负载均衡器，改写url
+                // 负载均衡器，改写 URL
                 .filter((clientRequest, exchangeFunction) -> {
                     return tracedFilter(clientRequest,
                             () -> lbFunction.filter(clientRequest, exchangeFunction)
                     );
                 })
-                //实例级别的断路器需要在负载均衡获取真正地址之后
+                // 实例级断路器在负载均衡解析真实地址之后
                 .filter((clientRequest, exchangeFunction) -> {
                     return tracedFilter(clientRequest,
                             () -> {
                                 ServiceInstance serviceInstance = getServiceInstance(clientRequest);
                                 CircuitBreaker circuitBreaker;
-                                //这时候的url是经过负载均衡器的，是实例的url
-                                //断路器是每个实例一个断路器
+                                // 此时 URL 已由负载均衡器改写为实例地址；每个实例一个断路器
                                 String instanceId = Resilience4jUtil.getServiceInstance(clientRequest.url().getHost(), clientRequest.url().getPort());
                                 try {
-                                    //使用实例id新建或者获取现有的CircuitBreaker,使用serviceName获取配置
                                     circuitBreaker = circuitBreakerRegistry.circuitBreaker(instanceId, finalServiceName);
                                 } catch (ConfigurationNotFoundException e) {
                                     circuitBreaker = circuitBreakerRegistry.circuitBreaker(instanceId);

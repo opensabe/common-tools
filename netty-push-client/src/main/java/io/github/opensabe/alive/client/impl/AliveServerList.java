@@ -32,28 +32,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * AliveServerList 类。
+ * <p>Alive 推送ServerList。</p>
+ */
 public class AliveServerList implements Watcher {
 
+/** emptyServerList 字段。 */
     private static InetSocketAddress[] emptyServerList = new InetSocketAddress[]{};
 
+/** logger 字段。 */
     private static Logger logger = LoggerFactory.getLogger(AliveServerList.class);
 
     private volatile InetSocketAddress[] serverList = emptyServerList;
 
+/** listener 字段。 */
     private AliveServerListListener listener;
 
+/** curator 字段。 */
     private CuratorFramework curator;
 
+/** closed 字段。 */
     private boolean closed = false;
 
+/** started 字段。 */
     private boolean started = false;
 
+/** zkDelayLock 字段。 */
     private Object zkDelayLock = new Object();
 
+/** zkDelayed 字段。 */
     private boolean zkDelayed = false;
 
+/** zkPath 字段。 */
     private String zkPath;
 
+/** zkMaxDelay 字段。 */
     private int zkMaxDelay;
 
     public AliveServerList(String zkString, String zkPath, int zkRetryInterval, int zkRetryMax, int zkMaxDelay,
@@ -65,6 +79,9 @@ public class AliveServerList implements Watcher {
 
         curator.getConnectionStateListenable().addListener(new ConnectionStateListener() {
 
+/**
+ * stateChanged 方法。
+ */
             @Override
             public void stateChanged(CuratorFramework client, ConnectionState newState) {
                 logger.info("stateChanged client {},state{}", client, newState);
@@ -85,6 +102,9 @@ public class AliveServerList implements Watcher {
     public AliveServerList() {
     }
 
+/**
+ * start 方法。
+ */
     public synchronized void start() {
         if (!started) {
             started = true;
@@ -102,6 +122,9 @@ public class AliveServerList implements Watcher {
         }
     }
 
+/**
+ * close 方法。
+ */
     public synchronized void close() {
         logger.info("try to close zookeeper");
         if (!closed) {
@@ -117,10 +140,16 @@ public class AliveServerList implements Watcher {
         logger.info("close zookeeper");
     }
 
+/**
+ * getServerList 方法。
+ */
     public InetSocketAddress[] getServerList() {
         return serverList;
     }
 
+/**
+ * watchServerList 方法。
+ */
     private void watchServerList() {
         logger.info("try to watch server list");
         try {
@@ -130,6 +159,9 @@ public class AliveServerList implements Watcher {
         }
     }
 
+/**
+ * refreshServerList 方法。
+ */
     public void refreshServerList() {
         logger.info("try to refresh server list");
         try {
@@ -157,6 +189,9 @@ public class AliveServerList implements Watcher {
         }
     }
 
+/**
+ * process 方法。
+ */
     @Override
     public void process(WatchedEvent event) {
         logger.info("zookeeper trigger event, " + event);
@@ -167,10 +202,17 @@ public class AliveServerList implements Watcher {
         }
     }
 
+/**
+ * getCurator 方法。
+ */
     public CuratorFramework getCurator() {
         return curator;
     }
 
+/**
+ * AliveServerListListener 接口。
+ * <p>Alive 推送ServerListListener。</p>
+ */
     public interface AliveServerListListener {
 
         void serverListChanged();

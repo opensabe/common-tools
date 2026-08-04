@@ -15,5 +15,8 @@
  */
 package io.github.opensabe.scheduler.listener;
 
+/**
+ * JobRetryListener 任务监听器。
+ */
 public interface JobRetryListener extends JobListener {
 }

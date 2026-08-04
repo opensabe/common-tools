@@ -35,21 +35,33 @@ import io.github.opensabe.common.redisson.exceptions.RedissonSemaphoreException;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * redisson 限流器核心实现类
+ * {@link RedissonSemaphore} 方法拦截器：获取 {@link org.redisson.api.RPermitExpirableSemaphore} permit 并在 finally 释放。
  */
 @Log4j2
 public class RedissonSemaphoreInterceptor implements MethodInterceptor {
 
+    /** Redisson 客户端。 */
     private final RedissonClient redissonClient;
+
+    /** 信号量属性切点。 */
     private final RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut;
+
+    /** 参数 SpEL 解析器（预留）。 */
     private final SpelExpressionParser parser = new SpelExpressionParser();
+
+    /** SpEL 模板上下文（预留）。 */
     private final ParserContext context = new TemplateParserContext();
 
+    /**
+     * @param redissonClient Redisson 客户端
+     * @param redissonSemaphoreCachedPointcut 信号量切点
+     */
     public RedissonSemaphoreInterceptor(RedissonClient redissonClient, RedissonSemaphoreCachedPointcut redissonSemaphoreCachedPointcut) {
         this.redissonClient = redissonClient;
         this.redissonSemaphoreCachedPointcut = redissonSemaphoreCachedPointcut;
     }
 
+    /** {@inheritDoc} — 初始化 permit 总量、获取 permit 并执行业务方法。 */
     @Nullable
     @Override
     public Object invoke(@Nonnull MethodInvocation invocation) throws Throwable {
@@ -63,7 +75,6 @@ public class RedissonSemaphoreInterceptor implements MethodInterceptor {
         RedissonSemaphore redissonSemaphore = redissonSemaphoreProperties.getRedissonSemaphore();
         String semaphoreName = redissonSemaphoreProperties.resolve(method, invocation.getThis(), invocation.getArguments());
         RPermitExpirableSemaphore semaphore = redissonClient.getPermitExpirableSemaphore(semaphoreName);
-        //首先尝试设置总的 permits
         int totalPermits = redissonSemaphore.totalPermits();
         boolean trySetPermits = semaphore.trySetPermits(totalPermits);
         if (trySetPermits) {

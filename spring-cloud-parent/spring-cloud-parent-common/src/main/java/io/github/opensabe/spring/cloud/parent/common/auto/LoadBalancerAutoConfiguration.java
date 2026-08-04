@@ -20,6 +20,12 @@ import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 
 import io.github.opensabe.spring.cloud.parent.common.config.DefaultLoadBalancerConfiguration;
 
+/**
+ * 负载均衡自动配置入口。
+ * <p>
+ * 为所有 {@code @LoadBalancerClient} 应用默认可用区过滤、实例缓存、
+ * 断路器感知轮询等定制策略。
+ */
 @AutoConfiguration
 @LoadBalancerClients(defaultConfiguration = DefaultLoadBalancerConfiguration.class)
 public class LoadBalancerAutoConfiguration {

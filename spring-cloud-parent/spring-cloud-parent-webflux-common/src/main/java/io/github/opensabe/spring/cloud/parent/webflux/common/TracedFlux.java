@@ -19,6 +19,11 @@ import io.micrometer.observation.Observation;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
 
+/**
+ * 在 {@link io.micrometer.observation.Observation} 作用域内订阅的 {@link Flux} 包装器。
+ * <p>
+ * 保证异步回调中 TraceId/SpanId 正确传播。
+ */
 public class TracedFlux<T> extends Flux<T> {
     private final Flux<T> delegate;
     private final Observation observation;
@@ -28,6 +33,7 @@ public class TracedFlux<T> extends Flux<T> {
         this.observation = observation;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void subscribe(CoreSubscriber<? super T> actual) {
         delegate.subscribe(new TracedCoreSubscriber(actual, observation));

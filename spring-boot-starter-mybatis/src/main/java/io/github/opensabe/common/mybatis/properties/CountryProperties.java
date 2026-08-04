@@ -25,6 +25,9 @@ import lombok.Setter;
 
 import static io.github.opensabe.common.mybatis.properties.CountryProperties.PREFIX;
 
+/**
+ * Country 配置属性。
+ */
 @ConfigurationProperties(prefix = PREFIX)
 @Getter
 @Setter

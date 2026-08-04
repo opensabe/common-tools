@@ -31,9 +31,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SQLExecuteContext extends Observation.Context {
+/** method。 */
     private final String method;
+/** transactionName。 */
     private final String transactionName;
+/** end。 */
     private long end;
+/** success。 */
     private boolean success;
 
     public SQLExecuteContext(String method, @Nullable String transactionName) {

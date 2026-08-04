@@ -19,6 +19,9 @@ import io.github.opensabe.mapstruct.core.Binding;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * MapStruct 测试用 Activity 实体。
+ */
 @Binding(ActivityDto.class)
 @Getter
 @AllArgsConstructor

@@ -24,7 +24,9 @@ import io.github.opensabe.alive.protobuf.Message;
  */
 public class MessageVo extends PushVo {
 
+/** 消息体。 */
     public final byte[] body;
+/** 过期时间戳。 */
     public final long expiry;
 
     public MessageVo(String topic, byte[] body) {
@@ -55,10 +57,16 @@ public class MessageVo extends PushVo {
         this.expiry = expiry;
     }
 
+/**
+ * 本地调试入口（非生产使用）。
+ */
     public static void main(String[] args) {
         new MessageVo("aa", new byte[]{}).buildPublush(1, 1);
     }
 
+/**
+ * buildPublush 方法。
+ */
     public Message.Publish buildPublush(int requestId, int productCode) {
         Message.Publish.Builder builder = Message.Publish.newBuilder()
                 .setRequestId(requestId)
@@ -78,6 +86,9 @@ public class MessageVo extends PushVo {
         return builder.build();
     }
 
+/**
+ * 返回调试字符串。
+ */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

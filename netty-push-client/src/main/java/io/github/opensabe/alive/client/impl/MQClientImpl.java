@@ -41,11 +41,18 @@ import lombok.extern.log4j.Log4j2;
 
 import static io.github.opensabe.alive.client.Response.SUCEESS;
 
+/**
+ * MQClientImpl 类。
+ * <p>MQClient实现。</p>
+ */
 @Log4j2
 public class MQClientImpl implements Client {
+/** producer 字段。 */
     @Setter
     private RocketMQTemplate producer;
+/** 产品代码。 */
     private Integer productCode;
+/** 请求 ID。 */
     private AtomicInteger requestId = new AtomicInteger(1);
 
     public MQClientImpl(RocketMQTemplate producer, Integer productCode) {
@@ -53,47 +60,74 @@ public class MQClientImpl implements Client {
         this.productCode = productCode;
     }
 
+/**
+ * query 方法。
+ */
     @Override
     public Response query(QueryVo queryVo) throws AliveClientExecutionException, InterruptedException, AliveClientException {
         throw new AliveClientException("not supported action");
     }
 
+/**
+ * query 方法。
+ */
     @Override
     public Response query(QueryVo queryVo, long timeout, TimeUnit unit) throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException {
         throw new AliveClientException("not supported action");
     }
 
+/**
+ * queryAsync 方法。
+ */
     @Override
     public ResponseFuture queryAsync(QueryVo queryVo) throws AliveClientException {
         throw new AliveClientException("not supported action");
     }
 
+/**
+ * queryAsync 方法。
+ */
     @Override
     public int queryAsync(QueryVo queryVo, ClientCallback callback) throws AliveClientException {
         throw new AliveClientException("not supported action");
     }
 
+/**
+ * push 方法。
+ */
     @Override
     public Response push(MessageVo messageVo) throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException {
         producer.syncSend(getTopic(messageVo), build(messageVo));
         return SUCEESS;
     }
 
+/**
+ * push 方法。
+ */
     @Override
     public Response push(MessageVo messageVo, long timeout, TimeUnit unit) throws AliveClientTimeoutException, AliveClientExecutionException, InterruptedException, AliveClientException {
         producer.syncSend(getTopic(messageVo), build(messageVo));
         return SUCEESS;
     }
 
+/**
+ * 异步推送消息。
+ */
     @Override
     public ResponseFuture pushAsync(MessageVo messageVo) throws AliveClientException {
         var f = new BaseResponseFutureImpl();
         producer.asyncSend(getTopic(messageVo), build(messageVo), new SendCallback() {
+/**
+ * onSuccess 方法。
+ */
             @Override
             public void onSuccess(SendResult sendResult) {
                 f.set(SUCEESS);
             }
 
+/**
+ * onException 方法。
+ */
             @Override
             public void onException(Throwable throwable) {
                 f.setException(throwable);
@@ -102,10 +136,16 @@ public class MQClientImpl implements Client {
         return new ResponseFutureImpl(f);
     }
 
+/**
+ * 异步推送消息。
+ */
     @Override
     public int pushAsync(MessageVo messageVo, ClientCallback callback) throws AliveClientException {
         var message = build(messageVo);
         producer.asyncSend(getTopic(messageVo), message, new SendCallback() {
+/**
+ * onSuccess 方法。
+ */
             @Override
             public void onSuccess(SendResult sendResult) {
                 callback.opComplete(Set.of(Message.Response.newBuilder()
@@ -114,6 +154,9 @@ public class MQClientImpl implements Client {
                         .build()));
             }
 
+/**
+ * onException 方法。
+ */
             @Override
             public void onException(Throwable throwable) {
                 log.error(throwable);
@@ -126,11 +169,17 @@ public class MQClientImpl implements Client {
         return 0;
     }
 
+/**
+ * close 方法。
+ */
     @Override
     public void close() throws AliveClientException {
 
     }
 
+/**
+ * getTopic 方法。
+ */
     private String getTopic(MessageVo message) {
         if (io.github.opensabe.alive.protobuf.Message.PushType.GROUP.equals(message.pushType)) {
             return MQTopic.BROAD_CAST.getTopic();
@@ -138,6 +187,9 @@ public class MQClientImpl implements Client {
         return MQTopic.SIMPLE.getTopic();
     }
 
+/**
+ * build 方法。
+ */
     private Message.Publish build(MessageVo messageVo) {
         return messageVo.buildPublush(messageVo.getRequestId() == 0 ? requestId.incrementAndGet() : messageVo.getRequestId(),
                 productCode);

@@ -80,6 +80,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
         this.webClientProperties = webClientProperties;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void hookOnNext(ClientResponse clientResponse) {
         if (!isDisposed()) {
@@ -129,6 +130,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void hookOnComplete() {
         if (successSignaled.compareAndSet(false, true)) {
@@ -138,6 +140,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
         downstreamSubscriber.onComplete();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void hookOnCancel() {
         if (!successSignaled.get()) {
@@ -149,6 +152,7 @@ public class ClientResponseCircuitBreakerSubscriber extends AbstractSubscriber<C
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void hookOnError(Throwable e) {
         circuitBreaker.onError(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit(), e);

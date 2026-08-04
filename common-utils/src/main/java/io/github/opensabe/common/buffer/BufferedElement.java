@@ -19,6 +19,9 @@ package io.github.opensabe.common.buffer;
 
 import jakarta.persistence.Transient;
 
+/**
+ * BufferedElement。
+ */
 public abstract class BufferedElement {
     private final BufferedElementJFREvent bufferedElementJFREvent;
     @Transient

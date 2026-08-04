@@ -18,5 +18,8 @@ package io.github.opensabe.common.mybatis.test.mapper.user;
 import io.github.opensabe.common.mybatis.base.BaseMapper;
 import io.github.opensabe.common.mybatis.test.po.Activity;
 
+/**
+ * 活动 MyBatis Mapper 测试接口。
+ */
 public interface ActivityMapper extends BaseMapper<Activity> {
 }

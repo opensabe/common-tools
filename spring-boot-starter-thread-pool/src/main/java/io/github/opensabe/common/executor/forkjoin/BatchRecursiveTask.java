@@ -33,6 +33,7 @@ import io.micrometer.observation.Observation;
  * @param <R>
  */
 public class BatchRecursiveTask<T, R> extends SegmentRecursiveTask<T, R> {
+/** transformer。 */
     private final Function<List<T>, R> transformer;
 
     protected BatchRecursiveTask(int capacity, List<T> list, Function<List<T>, R> transformer, Function<List<R>, R> combiner, Observation observation) {
@@ -48,6 +49,7 @@ public class BatchRecursiveTask<T, R> extends SegmentRecursiveTask<T, R> {
         this.transformer = transformer;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected R compute0() {
         var tasks = segmentation();
@@ -57,6 +59,7 @@ public class BatchRecursiveTask<T, R> extends SegmentRecursiveTask<T, R> {
         return aggregate(invokeAll(tasks).stream().map(ForkJoinTask::join));
     }
 
+    /** {@inheritDoc} */
     @Override
     protected R aggregate(Stream<R> result) {
         return reducer == null
@@ -64,6 +67,7 @@ public class BatchRecursiveTask<T, R> extends SegmentRecursiveTask<T, R> {
                 : result.reduce(reducer).orElse(null);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected SegmentRecursiveTask<T, R> clone(List<T> current) {
         return new BatchRecursiveTask<>(capacity, current, this.transformer, reducer, combiner, observation);

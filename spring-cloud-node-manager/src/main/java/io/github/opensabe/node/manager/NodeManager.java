@@ -18,7 +18,7 @@ package io.github.opensabe.node.manager;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -28,10 +28,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 集群内节点 ID 分配与管理器。
+ * <p>
+ * 在 Redis 中为每个服务实例分配递增的数字 nodeId，并通过定时任务续期占用 key（TTL 10 秒）。
+ * 分配过程使用 Redisson 分布式锁保证互斥。
+ */
 @Log4j2
 public class NodeManager {
+
     //private RestTemplate restTemplate = createRestTemplate();
+
+    /**
+     * 节点信息 Actuator 端点路径前缀。
+     */
     public static final String PATH = "/actuator/" + NodeInfoActuator.PATH;
+
+    /**
+     * Redisson 客户端，用于分布式锁。
+     */
     private final RedissonClient redissonClient;
 
 //    private RestTemplate createRestTemplate() {
@@ -41,13 +56,39 @@ public class NodeManager {
 //        httpRequestFactory.setReadTimeout(2500);
 //        return new RestTemplate(httpRequestFactory);
 //    }
+
+    /**
+     * Redis 字符串模板，用于 nodeId 占用 key。
+     */
     private final StringRedisTemplate redisTemplate;
+
+    /**
+     * 服务 ID。
+     */
     private final String serviceId;
+
+    /**
+     * 当前实例 ID。
+     */
     private final String instanceId;
+
+    /**
+     * 续期 nodeId 占用 key 的单线程调度器。
+     */
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+
+    /**
+     * 已分配的数字 nodeId；未分配时为 {@code -1}。
+     */
     @Getter
     private volatile int nodeId = -1;
 
+    /**
+     * @param redissonClient Redisson 客户端
+     * @param redisTemplate  Redis 字符串模板
+     * @param serviceId      服务 ID
+     * @param instanceId     当前实例 ID
+     */
     public NodeManager(
             RedissonClient redissonClient,
             StringRedisTemplate redisTemplate,
@@ -61,16 +102,29 @@ public class NodeManager {
         this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
     }
 
+    /**
+     * 构建 nodeId 分配分布式锁的 Redis key。
+     *
+     * @return 锁 key
+     */
     private String getLockName() {
         return "spring:node:manager:lock:" + serviceId;
     }
 
+    /**
+     * 构建指定 nodeId 占用记录的 Redis key。
+     *
+     * @param nodeId 节点编号
+     * @return 占用 key
+     */
     private String getKey(int nodeId) {
         return "spring:node:manager:" + serviceId + ":" + nodeId;
     }
 
     /**
-     * 在所有bean加载完毕后，，初始化
+     * 在所有 Bean 加载完毕后初始化：加锁后扫描并占用首个空闲 nodeId，并启动续期任务。
+     *
+     * @throws IllegalStateException 无法分配到 nodeId 时抛出
      */
     void init() {
         try {
@@ -89,7 +143,7 @@ public class NodeManager {
                             try {
                                 redisTemplate.opsForValue().set(key, instanceId, 10, TimeUnit.SECONDS);
                             } catch (Throwable e) {
-                                log.warn("reset node manager key: {} error", nodeId, e.getMessage());
+                                log.warn("failed to refresh node manager key for nodeId {}", nodeId, e);
                             }
                         }, 1, 1, TimeUnit.SECONDS);
                         return;
@@ -102,6 +156,9 @@ public class NodeManager {
         }
     }
 
+    /**
+     * 获取 nodeId 分配分布式锁（最多等待 1 分钟）。
+     */
     private void lock() {
         RLock lock = redissonClient.getLock(getLockName());
         log.info("try to acquire node lock");
@@ -110,6 +167,9 @@ public class NodeManager {
 
     }
 
+    /**
+     * 释放 nodeId 分配分布式锁。
+     */
     private void unLock() {
         RLock lock = redissonClient.getLock(getLockName());
         log.info("try to release node lock");
@@ -117,18 +177,23 @@ public class NodeManager {
         log.info("node lock released");
     }
 
+    /**
+     * 节点信息 HTTP 响应 VO（Lombok 生成访问器）。
+     */
     @NoArgsConstructor
     @Data
     private static class NodeResponseVO {
-        /**
-         * bizCode : 10000
-         * innerMsg : success
-         * message : success
-         * data : 1
-         */
+
+        /** 业务码。 */
         private int bizCode;
+
+        /** 内部消息。 */
         private String innerMsg;
+
+        /** 对外消息。 */
         private String message;
+
+        /** 节点 ID 数据。 */
         private int data;
     }
 

@@ -32,6 +32,11 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 
 import static feign.FeignException.errorStatus;
 
+/**
+ * OpenFeign 工具类。
+ * <p>
+ * 提供可重试请求判定、断路器 Supplier 装饰与 clientName 属性键读取等静态方法。
+ */
 public class OpenfeignUtil {
     private static final String CLIENT_NAME_PROPERTY_KEY;
 

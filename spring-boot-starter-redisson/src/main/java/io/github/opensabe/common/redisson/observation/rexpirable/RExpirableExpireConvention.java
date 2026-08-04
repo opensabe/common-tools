@@ -18,6 +18,9 @@ package io.github.opensabe.common.redisson.observation.rexpirable;
 import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
+/**
+ * RExpirable 过期 Observation 的低/高基数 KeyValues 约定。
+ */
 
 public class RExpirableExpireConvention implements ObservationConvention<RExpirableExpireContext> {
     public static final RExpirableExpireConvention DEFAULT = new RExpirableExpireConvention();

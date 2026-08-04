@@ -15,12 +15,20 @@
  */
 package io.github.opensabe.common.auto;
 
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.micrometer.observation.autoconfigure.ObservationAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.config.MicroMeterCustomizedConfiguration;
 
+/**
+ * Micrometer 观测与指标相关的 Spring Boot 自动配置入口。
+ * <p>
+ * 在 {@link ObservationAutoConfiguration} 之前加载，确保
+ * {@link io.github.opensabe.common.observation.UnifiedObservationFactory}、JFR Observation 处理器
+ * 等 Bean 先于默认观测链路注册。LongTaskTimer 忽略由
+ * {@link io.github.opensabe.common.config.OpensabeMetricsEnvironmentPostProcessor} 在环境层固定。
+ */
 @AutoConfiguration(before = ObservationAutoConfiguration.class)
 @Import({
         MicroMeterCustomizedConfiguration.class,

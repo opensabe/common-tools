@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.common.jackson;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,30 +25,37 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
 
 /**
- * 从 long 类型的时间戳反序列化为 LocalDateTime
- * long 类型只到毫秒时间
+ * 将 JSON 数值（毫秒 epoch）或多种字符串格式反序列化为 {@link LocalDateTime}。
+ * <p>
+ * 优先按 long 毫秒时间戳解析；失败时回退到 ISO 及常见业务日期字符串格式。
  */
 @Log4j2
-public class LongToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
+public class LongToLocalDateTimeDeserializer extends ValueDeserializer<LocalDateTime> {
 
+    /** 单例实例，供 {@link TimestampModule} 注册使用。 */
     @Getter
     private static final LongToLocalDateTimeDeserializer INSTANCE = new LongToLocalDateTimeDeserializer();
 
+    /** 毫秒时间戳转换为 {@link LocalDateTime} 时使用的系统默认时区。 */
     private final ZoneId zoneId = ZoneId.systemDefault();
 
+    /** 字符串回退解析时按顺序尝试的日期时间格式器列表。 */
     private final List<DateTimeFormatter> formatters = new ArrayList<>(5);
 
+    /** JSR-310 默认反序列化器，字符串回退的第一选择。 */
     private final LocalDateTimeDeserializer delegate;
 
+    /**
+     * 初始化格式器列表与委托反序列化器。
+     */
     public LongToLocalDateTimeDeserializer() {
         formatters.add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         formatters.add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
@@ -82,9 +88,17 @@ public class LongToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateT
         };
     }
 
-
+    /**
+     * 反序列化 JSON 值为 {@link LocalDateTime}。
+     * <p>
+     * 数值 token 按毫秒 epoch 解析；其他 token 委托 {@link #delegate} 并按 {@link #formatters} 逐级回退。
+     *
+     * @param p    JSON 解析器
+     * @param ctxt 反序列化上下文
+     * @return 解析得到的本地日期时间
+     */
     @Override
-    public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) {
         try {
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(p.getLongValue()), zoneId);
         } catch (Throwable e) {
@@ -93,6 +107,15 @@ public class LongToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateT
         }
     }
 
+    /**
+     * 按 {@link #formatters} 顺序尝试解析日期字符串。
+     *
+     * @param str   待解析字符串
+     * @param index 当前尝试的格式器下标
+     * @param e     上一次解析失败异常，全部失败时重新抛出
+     * @return 解析得到的本地日期时间
+     * @throws DateTimeParseException 所有格式均无法解析时
+     */
     private LocalDateTime parse(String str, int index, DateTimeParseException e) {
         if (index >= formatters.size()) {
             throw e;

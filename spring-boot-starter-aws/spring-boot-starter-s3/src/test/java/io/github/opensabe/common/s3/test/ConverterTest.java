@@ -26,7 +26,7 @@ import org.springframework.data.mapping.model.AbstractPersistentProperty;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
-import org.springframework.data.util.TypeInformation;
+import org.springframework.data.core.TypeInformation;
 
 import io.github.opensabe.common.s3.test.common.S3BaseTest;
 import io.github.opensabe.common.s3.typehandler.S3JsonConverter;
@@ -35,45 +35,55 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author heng.ma
+ * {@link S3JsonConverter} 读写契约：验证嵌套对象经 Spring Data 持久化属性序列化后 round-trip。
  */
 @Slf4j
 @DisplayName("S3转换器测试")
 public class ConverterTest extends S3BaseTest {
 
+    /** converter。 */
     @Autowired
     private S3JsonConverter converter;
 
-    @Test
+    /**
+     * 写入 Child 后读回，断言与原始值相等。
+     */
     @DisplayName("测试S3 JSON转换器读写功能 - 验证对象序列化和反序列化")
+    @Test
     void testRead() throws NoSuchFieldException {
         BasicPersistentEntity entity = new BasicPersistentEntity<>(TypeInformation.of(MyEntity.class));
         entity.addPersistentProperty(new AbstractPersistentProperty(Property.of(TypeInformation.of(MyEntity.class), MyEntity.class.getDeclaredField("child")), entity, SimpleTypeHolder.DEFAULT) {
+            /** {@inheritDoc} */
             @Override
             public boolean isIdProperty() {
                 return false;
             }
 
+            /** {@inheritDoc} */
             @Override
             public boolean isVersionProperty() {
                 return false;
             }
 
+            /** {@inheritDoc} */
             @Override
             public boolean isAnnotationPresent(Class annotationType) {
                 return false;
             }
 
+            /** {@inheritDoc} */
             @Override
             public Annotation findPropertyOrOwnerAnnotation(Class annotationType) {
                 return null;
             }
 
+            /** {@inheritDoc} */
             @Override
             public Annotation findAnnotation(Class annotationType) {
                 return null;
             }
 
+            /** {@inheritDoc} */
             @Override
             protected Association createAssociation() {
                 return null;
@@ -96,10 +106,13 @@ public class ConverterTest extends S3BaseTest {
     @Setter
     public static class MyEntity {
 
+/** id。 */
         private String id;
 
+/** name。 */
         private String name;
 
+/** child。 */
         private Child child;
     }
 

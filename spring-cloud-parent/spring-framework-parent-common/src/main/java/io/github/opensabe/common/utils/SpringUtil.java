@@ -39,13 +39,23 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class SpringUtil implements ApplicationContextAware {
 
+    /** Spring 应用上下文静态持有者。 */
     private static volatile ApplicationContext applicationContext;
 
-    // 获取applicationContext
+    /**
+     * 获取当前 Spring {@link ApplicationContext}。
+     *
+     * @return 应用上下文，未初始化时为 {@code null}
+     */
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
     }
 
+    /**
+     * 注入并持有 {@link ApplicationContext}；重复注入时通过 {@link AlarmUtil#fatal} 告警。
+     *
+     * @param applicationContext Spring 应用上下文
+     */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         if (SpringUtil.applicationContext == null) {
@@ -57,17 +67,35 @@ public class SpringUtil implements ApplicationContextAware {
         }
     }
 
-    // 通过class获取Bean.
+    /**
+     * 按类型获取 Bean。
+     *
+     * @param clazz Bean 类型
+     * @param <T>   Bean 泛型
+     * @return Bean 实例
+     */
     public static <T> T getBean(Class<T> clazz) {
         return getApplicationContext().getBean(clazz);
     }
 
-    // 通过name获取 Bean.
+    /**
+     * 按名称获取 Bean。
+     *
+     * @param name Bean 名称
+     * @return Bean 实例
+     */
     public static Object getBean(String name) {
         return getApplicationContext().getBean(name);
     }
 
-    // 通过name,以及Clazz返回指定的Bean
+    /**
+     * 按名称与类型获取 Bean。
+     *
+     * @param name  Bean 名称
+     * @param clazz Bean 类型
+     * @param <T>   Bean 泛型
+     * @return Bean 实例
+     */
     public static <T> T getBean(String name, Class<T> clazz) {
         return getApplicationContext().getBean(name, clazz);
     }

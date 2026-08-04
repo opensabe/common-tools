@@ -44,8 +44,11 @@ import org.springframework.util.StringUtils;
  */
 public class ExpireCacheResolver implements CacheResolver {
 
+/** cache 管理器。 */
     private final CompositeCacheManager cacheManager;
+/** bean 工厂。 */
     private final BeanFactory beanFactory;
+/** map。 */
     private final Map<Method, CacheFunction> map;
 
     public ExpireCacheResolver(BeanFactory beanFactory) {
@@ -99,6 +102,7 @@ public class ExpireCacheResolver implements CacheResolver {
 
     private record CacheFunction(CacheManager cacheManager, Duration ttl) {
 
+        /** 执行任务。 */
         private Collection<? extends Cache> execute(Collection<String> cacheNames) {
             if (ttl == null) {
                 return getCaches(cacheManager, cacheNames);
@@ -111,10 +115,16 @@ public class ExpireCacheResolver implements CacheResolver {
             }
         }
 
+        /**
+         * @return caches
+         */
         private Collection<? extends Cache> getCaches(ExpireCacheManager cacheManager, Collection<String> cacheNames, Duration ttl) {
             return cacheNames.stream().map(cacheName -> cacheManager.getCache(cacheName, ttl)).toList();
         }
 
+        /**
+         * @return caches
+         */
         private Collection<? extends Cache> getCaches(CacheManager cacheManager, Collection<String> cacheNames) {
             return cacheNames.stream().map(cacheManager::getCache).toList();
         }

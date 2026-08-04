@@ -16,15 +16,37 @@
 package io.github.opensabe.common.auto;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import io.github.opensabe.common.config.JacksonCustomizedConfiguration;
+import io.github.opensabe.common.config.JsonUtilSpringBridge;
 import io.github.opensabe.common.config.SpringCommonUtilConfiguration;
+import tools.jackson.databind.json.JsonMapper;
 
-@AutoConfiguration
-@Import({
-        SpringCommonUtilConfiguration.class,
-        JacksonCustomizedConfiguration.class,
-})
+/**
+ * 通用 Spring 工具与密钥相关自动配置入口。
+ * <p>
+ * 在 {@link JacksonAutoConfiguration} 之后加载，以便 {@link JsonUtilSpringBridge}
+ * 注入已构建的 {@link JsonMapper}。Jackson 模块注册见 {@link JacksonCustomizedAutoConfiguration}。
+ */
+@AutoConfiguration(after = JacksonAutoConfiguration.class)
+@Import(SpringCommonUtilConfiguration.class)
 public class SpringCustomizedAutoConfiguration {
+
+    /**
+     * 将 Boot {@link JsonMapper} 桥接到 {@link io.github.opensabe.common.utils.json.JsonUtil}。
+     * <p>
+     * Bean 定义放在 AutoConfiguration 本类上，保证 {@code after = JacksonAutoConfiguration}
+     * 与 {@code @ConditionalOnBean} 的延迟求值生效。
+     *
+     * @param jsonMapper Boot 自动配置的 JsonMapper
+     * @return JsonUtil 桥接 Bean
+     */
+    @Bean
+    @ConditionalOnBean(JsonMapper.class)
+    public JsonUtilSpringBridge jsonUtilSpringBridge(JsonMapper jsonMapper) {
+        return new JsonUtilSpringBridge(jsonMapper);
+    }
 }

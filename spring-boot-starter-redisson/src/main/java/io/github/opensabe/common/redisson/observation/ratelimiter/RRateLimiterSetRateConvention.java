@@ -18,6 +18,9 @@ package io.github.opensabe.common.redisson.observation.ratelimiter;
 import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
+/**
+ * 限流器 setRate Observation 的低/高基数 KeyValues 约定。
+ */
 
 public class RRateLimiterSetRateConvention implements ObservationConvention<RRateLimiterSetRateContext> {
     public static final RRateLimiterSetRateConvention DEFAULT = new RRateLimiterSetRateConvention();

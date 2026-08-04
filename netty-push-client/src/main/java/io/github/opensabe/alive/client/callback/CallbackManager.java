@@ -36,12 +36,18 @@ public class CallbackManager {
     //requestId to callback
     private static Map<Integer, ClientCallback> callbackMap = new ConcurrentHashMap<>();
 
+/**
+ * addTask 方法。
+ */
     public static void addTask(int requestId, AtomicInteger count, ClientCallback callback) {
         count.incrementAndGet();
         countMap.put(requestId, count);
         callbackMap.put(requestId, callback);
     }
 
+/**
+ * finishTask 方法。
+ */
     public static void finishTask(Message.Response response) {
         int requestId = response.getRequestId();
         AtomicInteger count = countMap.get(requestId);

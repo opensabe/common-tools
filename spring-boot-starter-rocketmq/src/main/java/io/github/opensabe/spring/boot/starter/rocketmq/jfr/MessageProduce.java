@@ -22,17 +22,26 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * RocketMQ 消息生产 JFR 事件。
+ */
 @Getter
 @Setter
 @Category({"RocketMQ"})
 @Label("Message Producer")
 @StackTrace(value = false)
 public class MessageProduce extends Event {
+/** topic。 */
     private final String topic;
+/** msgLength。 */
     private long msgLength;
+/** traceId。 */
     private String traceId;
+/** spanId。 */
     private String spanId;
+/** sendResult。 */
     private String sendResult;
+/** throwable。 */
     private Throwable throwable;
 
 

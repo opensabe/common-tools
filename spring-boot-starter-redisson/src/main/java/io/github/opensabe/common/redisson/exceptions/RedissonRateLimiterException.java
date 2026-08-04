@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 package io.github.opensabe.common.redisson.exceptions;
-
 /**
+ * Redisson 限流器操作失败时抛出的异常。
+ *
  * @author heng.ma
  */
+
 public class RedissonRateLimiterException extends RedissonClientException {
 
     public RedissonRateLimiterException(String message) {

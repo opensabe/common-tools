@@ -25,11 +25,18 @@ import com.corundumstudio.socketio.store.Store;
 import com.corundumstudio.socketio.store.pubsub.BaseStoreFactory;
 import com.corundumstudio.socketio.store.pubsub.PubSubStore;
 
+/**
+ * RedissonStoreFactory。
+ */
 public class RedissonStoreFactory extends BaseStoreFactory {
+/** redis 客户端。 */
     private final RedissonClient redisClient;
+/** redisPub。 */
     private final RedissonClient redisPub;
+/** redisSub。 */
     private final RedissonClient redisSub;
 
+/** pubSubStore。 */
     private final PubSubStore pubSubStore;
 
     public RedissonStoreFactory(RedissonClient redisson, SocketIoServerProperties socketIoServerProperties) {
@@ -40,16 +47,19 @@ public class RedissonStoreFactory extends BaseStoreFactory {
         this.pubSubStore = new RedissonPubSubStore(redisPub, redisSub, getNodeId(), socketIoServerProperties);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Store createStore(UUID sessionId) {
         return new RedissonStore(sessionId, redisClient);
     }
 
+    /** {@inheritDoc} */
     @Override
     public PubSubStore pubSubStore() {
         return pubSubStore;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shutdown() {
         redisClient.shutdown();
@@ -57,6 +67,7 @@ public class RedissonStoreFactory extends BaseStoreFactory {
         redisSub.shutdown();
     }
 
+    /** {@inheritDoc} */
     @Override
     public <K, V> Map<K, V> createMap(String name) {
         return redisClient.getMap(name);

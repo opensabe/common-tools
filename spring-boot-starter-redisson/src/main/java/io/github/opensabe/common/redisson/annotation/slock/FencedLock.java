@@ -26,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 
+/**
+ * 声明 Redisson 栅栏锁（{@link org.redisson.api.RedissonClient#getFencedLock(String)}）。
+ */
 @Documented
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -41,6 +44,7 @@ public @interface FencedLock {
     @AliasFor(annotation = SLock.class)
     String[] name();
 
+    /** 锁键前缀。 */
     @AliasFor(annotation = SLock.class)
     String prefix() default RedissonLock.DEFAULT_PREFIX;
 
@@ -63,6 +67,7 @@ public @interface FencedLock {
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
 
+    /** 加锁策略。 */
     @AliasFor(annotation = SLock.class)
     SLock.LockType lockType() default SLock.LockType.BLOCK_LOCK;
 }

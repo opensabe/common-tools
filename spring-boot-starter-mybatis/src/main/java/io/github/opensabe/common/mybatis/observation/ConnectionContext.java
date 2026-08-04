@@ -33,6 +33,7 @@ public class ConnectionContext extends Observation.Context {
      * 最大连接数
      */
     private final int maxActive;
+    /** 连接事件类型（Connect / Close）。 */
     private final String event;
     /**
      * 最多等待获取连接的线程数，默认是-1，没有限制
@@ -54,6 +55,7 @@ public class ConnectionContext extends Observation.Context {
      * 连接创建时间
      */
     private long connectedTime;
+    /** 连接操作是否成功。 */
     private boolean success;
 
     private ConnectionContext(int maxWaitThread, long maxWaitTime, int maxActive) {
@@ -72,14 +74,31 @@ public class ConnectionContext extends Observation.Context {
         this.success = true;
     }
 
+    /**
+     * 构造连接建立事件的上下文。
+     *
+     * @param maxWaitThread 最大等待线程数
+     * @param maxWaitTime   最大等待毫秒数
+     * @param maxActive     最大连接数
+     * @return 连接建立上下文
+     */
     public static ConnectionContext connect(int maxWaitThread, long maxWaitTime, int maxActive) {
         return new ConnectionContext(maxWaitThread, maxWaitTime, maxActive);
     }
 
+    /**
+     * 构造连接释放事件的上下文。
+     *
+     * @param maxActive     最大连接数
+     * @param activeCount   当前活跃连接数
+     * @param connectedTime 连接存活时长
+     * @return 释放事件上下文
+     */
     public static ConnectionContext release(int maxActive, int activeCount, long connectedTime) {
         return new ConnectionContext(maxActive, activeCount, connectedTime);
     }
 
+    /** @return 是否Connect */
     public boolean isConnect() {
         return "Connect".equals(event);
     }

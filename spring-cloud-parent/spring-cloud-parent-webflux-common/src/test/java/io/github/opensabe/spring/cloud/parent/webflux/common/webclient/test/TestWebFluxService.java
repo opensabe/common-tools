@@ -20,10 +20,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,7 @@ import reactor.core.publisher.Mono;
  * 测试可以正常创建一个微服务
  */
 @Log4j2
-@AutoConfigureObservability
+@AutoConfigureWebTestClient
 @SpringBootTest(
         properties = {
                 "webclient.jfr.enabled=false",
@@ -47,10 +48,12 @@ import reactor.core.publisher.Mono;
         classes = TestWebFluxService.TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
+@DisplayName("WebFlux服务集成测试")
 public class TestWebFluxService {
     @Autowired
     private WebTestClient webTestClient;
 
+    @DisplayName("WebFlux TestController基础调用")
     @Test
     void test() {
         String thread1 = webTestClient.get().uri("/test").exchange()

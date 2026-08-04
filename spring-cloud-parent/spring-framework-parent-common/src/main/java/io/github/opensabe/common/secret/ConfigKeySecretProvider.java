@@ -15,33 +15,42 @@
  */
 package io.github.opensabe.common.secret;
 
-import lombok.Setter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import lombok.Setter;
 
 
 /**
- * 仅仅指定哪些key需要脱敏，系统自动将key对应的值添加进去
- * @author maheng
+ * 指定配置键的密钥提供者：从 {@link Environment} 读取 key 对应值并纳入脱敏。
  */
 public abstract class ConfigKeySecretProvider extends SecretProvider implements EnvironmentAware {
 
+    /** Spring 环境，用于读取配置键值。 */
     @Setter
     private Environment environment;
 
+    /**
+     * @param globalSecretManager 全局密钥管理器
+     */
     protected ConfigKeySecretProvider(GlobalSecretManager globalSecretManager) {
         super(globalSecretManager);
     }
 
 
-    protected abstract Set<String> keys ();
+    /**
+     * 需要纳入脱敏的配置键集合。
+     *
+     * @return 配置 property 键名集合
+     */
+    protected abstract Set<String> keys();
 
+    /** {@inheritDoc} */
     @Override
     protected Map<String, Set<String>> reload() {
         Map<String, Set<String>> map = new HashMap<>(keys().size());

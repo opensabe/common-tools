@@ -38,6 +38,9 @@ public class ClientConnectionGetter {
         build(connections);
     }
 
+/**
+ * build 方法。
+ */
     private void build(List<ClientConnection> connections) {
         List<String> tmpHashs = new ArrayList<>();
         connectionMap = new HashMap<>();
@@ -53,6 +56,9 @@ public class ClientConnectionGetter {
         consistentHash = new ConsistentHash<>(200, tmpHashs);
     }
 
+/**
+ * getConnection 方法。
+ */
     public ClientConnection getConnection(String deviceId) {
         if (StringUtils.isBlank(deviceId)) {
             throw new NullPointerException();
@@ -61,6 +67,9 @@ public class ClientConnectionGetter {
         return tmp.get(ConsistentHash.getIndex(tmp.size()));
     }
 
+/**
+ * getStrForHash 方法。
+ */
     private String getStrForHash(SocketAddress address) {
         final InetSocketAddress inetSocketAddress = (InetSocketAddress) address;
         String host = inetSocketAddress.getHostName();

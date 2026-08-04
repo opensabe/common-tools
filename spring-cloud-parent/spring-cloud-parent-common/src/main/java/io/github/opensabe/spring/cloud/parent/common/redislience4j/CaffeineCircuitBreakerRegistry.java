@@ -30,6 +30,10 @@ import io.github.resilience4j.core.registry.RegistryEventConsumer;
 import static java.util.Collections.emptyMap;
 
 /**
+ * 基于 Caffeine 存储的 CircuitBreakerRegistry 实现。
+ * <p>
+ * 替代默认 InMemory 实现，支持条目过期与 AutoCloseable 资源回收。
+ *
  * @author maheng
  * @see io.github.resilience4j.circuitbreaker.internal.InMemoryCircuitBreakerRegistry
  */

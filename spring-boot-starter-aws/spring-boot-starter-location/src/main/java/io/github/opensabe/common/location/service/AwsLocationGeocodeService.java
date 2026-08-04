@@ -40,8 +40,10 @@ import software.amazon.awssdk.services.geoplaces.model.ReverseGeocodeResponse;
 public class AwsLocationGeocodeService implements GeocodeService {
 
 
+/** geoPlaces 客户端。 */
     private final GeoPlacesClient geoPlacesClient;
 
+/** unifiedObservation 工厂。 */
     private final UnifiedObservationFactory unifiedObservationFactory;
 
     public AwsLocationGeocodeService(GeoPlacesClient geoPlacesClient, UnifiedObservationFactory unifiedObservationFactory) {
@@ -50,6 +52,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public List<Double> getCoordinates(String address) {
         log.info("getCoordinates: address={}", address);
@@ -112,6 +115,7 @@ public class AwsLocationGeocodeService implements GeocodeService {
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public ReverseGeocodeResponse reverseGeocode(List<Double> position) {
         log.info("Fetching reverse geocode for position: {}", position);

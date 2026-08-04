@@ -27,14 +27,17 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import io.github.opensabe.common.mybatis.interceptor.DataSourceSwitchInterceptor;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * DynamicRoutingDataSource。
+ */
 @Log4j2
 public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
 
-    private static final ThreadLocal<String> dataSourceHolder = new ThreadLocal<>();
+    private static final ThreadLocal<String> DATA_SOURCE_HOLDER = new ThreadLocal<>();
 
-    private static final ThreadLocal<String> dataSourceRWHolder = new ThreadLocal<>();
+    private static final ThreadLocal<String> DATA_SOURCE_RW_HOLDER = new ThreadLocal<>();
 
-    private static final ThreadLocal<String> dataSourceCountryCodeHolder = new ThreadLocal<>();
+    private static final ThreadLocal<String> DATA_SOURCE_COUNTRY_CODE_HOLDER = new ThreadLocal<>();
     /**
      * 根据DataSourceName和Read/Write进行数据源路由的Map，其value为AbstractRoutingDataSource中的TargetDataSources的Key
      */
@@ -57,62 +60,79 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         afterPropertiesSet();
     }
 
+    /** clear。 */
     public static void clear() {
         if (log.isDebugEnabled()) {
-            log.debug("DynamicRoutingDataSource.clear: removing dataSourceHolder, previous={}", dataSourceHolder.get());
+            log.debug("DynamicRoutingDataSource.clear: removing DATA_SOURCE_HOLDER, previous={}", DATA_SOURCE_HOLDER.get());
         }
-        dataSourceHolder.remove();
+        DATA_SOURCE_HOLDER.remove();
     }
 
+    /** clearCountryCodeAndRW。 */
     public static void clearCountryCodeAndRW() {
         if (log.isDebugEnabled()) {
             log.debug(
                     "DynamicRoutingDataSource.clearCountryCodeAndRW: rw={}, countryCode={}",
-                    dataSourceRWHolder.get(),
-                    dataSourceCountryCodeHolder.get());
+                    DATA_SOURCE_RW_HOLDER.get(),
+                    DATA_SOURCE_COUNTRY_CODE_HOLDER.get());
         }
-        dataSourceRWHolder.remove();
-        dataSourceCountryCodeHolder.remove();
+        DATA_SOURCE_RW_HOLDER.remove();
+        DATA_SOURCE_COUNTRY_CODE_HOLDER.remove();
     }
 
+    /** clearRW。 */
     public static void clearRW() {
         if (log.isDebugEnabled()) {
-            log.debug("DynamicRoutingDataSource.clearRW: previous={}", dataSourceRWHolder.get());
+            log.debug("DynamicRoutingDataSource.clearRW: previous={}", DATA_SOURCE_RW_HOLDER.get());
         }
-        dataSourceRWHolder.remove();
+        DATA_SOURCE_RW_HOLDER.remove();
     }
 
+    /** currentDataSource。 */
     public static String currentDataSource() {
-        return dataSourceHolder.get();
+        return DATA_SOURCE_HOLDER.get();
     }
 
+    /** dataSource。 */
     public static void dataSource(String dataSource) {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.dataSource: set={}", dataSource);
         }
-        dataSourceHolder.set(dataSource);
+        DATA_SOURCE_HOLDER.set(dataSource);
     }
 
+    /**
+     * @param dataSourceCountryCode 待设置值
+     */
     public static void setDataSourceCountryCode(String dataSourceCountryCode) {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.setDataSourceCountryCode: {}", dataSourceCountryCode);
         }
-        dataSourceCountryCodeHolder.set(dataSourceCountryCode);
+        DATA_SOURCE_COUNTRY_CODE_HOLDER.set(dataSourceCountryCode);
     }
 
+    /**
+     * @return dataSourceRW
+     */
     public static String getDataSourceRW() {
-        return dataSourceRWHolder.get();
+        return DATA_SOURCE_RW_HOLDER.get();
     }
 
+    /**
+     * @return dataSourceCountryCode
+     */
     public static String getDataSourceCountryCode() {
-        return dataSourceCountryCodeHolder.get();
+        return DATA_SOURCE_COUNTRY_CODE_HOLDER.get();
     }
 
+    /**
+     * @param dataSourceRW 待设置值
+     */
     public static void setDataSourceRW(String dataSourceRW) {
         if (log.isDebugEnabled()) {
             log.debug("DynamicRoutingDataSource.setDataSourceRW: {}", dataSourceRW);
         }
-        dataSourceRWHolder.set(dataSourceRW);
+        DATA_SOURCE_RW_HOLDER.set(dataSourceRW);
     }
 
     /**
@@ -121,8 +141,8 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
      */
     @Override
     protected Object determineCurrentLookupKey() {
-        String countryCode = dataSourceCountryCodeHolder.get();
-        String rw = dataSourceRWHolder.get();
+        String countryCode = DATA_SOURCE_COUNTRY_CODE_HOLDER.get();
+        String rw = DATA_SOURCE_RW_HOLDER.get();
         if (log.isDebugEnabled()) {
             log.debug(
                     "DynamicRoutingDataSource.determineCurrentLookupKey: countryCode={}, rw={}, dataSourceIndexMap={}",
@@ -170,6 +190,7 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         return index;
     }
 
+    /** resolveDefaultIndex。 */
     private String resolveDefaultIndex(Map<String, Map<String, List<String>>> dataSourceIndexMap,
                                        String defaultClusterName) {
         Map<String, List<String>> rwIndexMap = dataSourceIndexMap.get(defaultClusterName);

@@ -22,10 +22,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Gateway 批量负载均衡配置属性。
+ * <p>
+ * 绑定前缀 {@code spring.cloud.gateway.batch-load-balance}。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties("spring.cloud.gateway.batch-load-balance")
 public class GatewayBatchLoadBalanceProperties {
 
+    /**
+     * 启用批量负载均衡的路径模式集合。
+     */
     private Set<String> pathPatterns;
 }

@@ -26,12 +26,19 @@ import io.github.opensabe.common.s3.service.FileService;
 import io.github.opensabe.common.s3.typehandler.S3JsonConverter;
 
 /**
- * @author heng.ma
+ * Spring Data S3 自定义属性转换器注册配置。
  */
 @ConditionalOnClass(PersistentProperty.class)
 @Configuration(proxyBeanMethods = false)
 public class SpringDataS3ConverterConfig {
 
+    /**
+     * 注册 {@link S3JsonConverter} Bean。
+     *
+     * @param fileService S3 文件服务
+     * @param properties  S3 配置
+     * @return JSON 属性转换器
+     */
     @Bean
     @ConditionalOnMissingBean
     public S3JsonConverter s3JsonConverter(FileService fileService, S3Properties properties) {

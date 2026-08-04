@@ -16,6 +16,10 @@
 package io.github.opensabe.alive.client.exception;
 
 
+/**
+ * AliveClientExecutionException 类。
+ * <p>Alive 推送ClientExecutionException。</p>
+ */
 public class AliveClientExecutionException extends Exception {
 
     /**

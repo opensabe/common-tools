@@ -17,6 +17,9 @@ package io.github.opensabe.common.utils;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * InviteCodeUtil 工具类。
+ */
 public class InviteCodeUtil {
 
     public static final ThreadLocalRandom THREAD_LOCAL_RANDOM = ThreadLocalRandom.current();

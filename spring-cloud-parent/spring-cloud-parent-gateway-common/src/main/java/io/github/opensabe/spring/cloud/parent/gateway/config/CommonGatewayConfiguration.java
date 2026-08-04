@@ -26,6 +26,11 @@ import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 
 
+/**
+ * Gateway 核心配置。
+ * <p>
+ * 注册 JFR 属性并在启动时为所有路由启用请求体缓存，以支持重试场景。
+ */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(GatewayJFRProperties.class)
 public class CommonGatewayConfiguration {

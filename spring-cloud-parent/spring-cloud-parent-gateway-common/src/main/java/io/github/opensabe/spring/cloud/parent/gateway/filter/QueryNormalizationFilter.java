@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
 @Log4j2
 @Component
 public class QueryNormalizationFilter extends AbstractTracedFilter {
+    /** {@inheritDoc} */
     @Override
     @SneakyThrows
     protected Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -72,6 +73,7 @@ public class QueryNormalizationFilter extends AbstractTracedFilter {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected int ordered() {
         return TraceIdFilter.ORDER + 1;

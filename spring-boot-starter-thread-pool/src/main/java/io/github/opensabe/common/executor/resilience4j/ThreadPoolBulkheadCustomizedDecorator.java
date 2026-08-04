@@ -35,10 +35,15 @@ import io.github.resilience4j.bulkhead.internal.FixedThreadPoolBulkhead;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * ThreadPoolBulkheadCustomizedDecorator。
+ */
 @Log4j2
 public class ThreadPoolBulkheadCustomizedDecorator implements ThreadPoolBulkHeadDecorator {
 
+/** EXECUTOR_SERVICE。 */
     private static final VarHandle EXECUTOR_SERVICE;
+/** CONFIG。 */
     private static final VarHandle CONFIG;
 
     static {
@@ -54,12 +59,14 @@ public class ThreadPoolBulkheadCustomizedDecorator implements ThreadPoolBulkHead
         }
     }
 
+/** threadPool 工厂。 */
     private final ThreadPoolFactory threadPoolFactory;
 
     public ThreadPoolBulkheadCustomizedDecorator(ThreadPoolFactory threadPoolFactory) {
         this.threadPoolFactory = threadPoolFactory;
     }
 
+    /** {@inheritDoc} */
     @SneakyThrows
     @Override
     public ThreadPoolBulkhead decorate(ThreadPoolBulkhead threadPoolBulkhead) {

@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.opensabe-tech</groupId>
         <artifactId>common-tools</artifactId>
-        <version>2.0.9</version>
+        <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -26,22 +26,23 @@
     <properties>
         <!-- 指定JDK版本和maven使用的JDK版本 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <java.version>21</java.version>
+        <maven.compiler.release>25</maven.compiler.release>
+        <java.version>25</java.version>
 
-        <opensabe.version>2.0.9</opensabe.version>
+        <opensabe.version>3.0.0-SNAPSHOT</opensabe.version>
 
         <disruptor.version>4.0.0</disruptor.version>
         <guava.version>33.4.8-jre</guava.version>
-        <hikaricp.version>6.3.0</hikaricp.version>
         <testcontaniers.version>2.0.2</testcontaniers.version>
         <javafaker.version>1.0.2</javafaker.version>
         <spotbugs-annotations.version>4.9.3</spotbugs-annotations.version>
-        <springdoc.version>2.8.8</springdoc.version>
+        <springdoc.version>3.0.3</springdoc.version>
         <common.io.version>2.19.0</common.io.version>
-        <mockito.version>5.18.0</mockito.version>
+        <!-- Align with Boot 4.1 managed Mockito (surefire -javaagent uses this jar). -->
+        <mockito.version>5.23.0</mockito.version>
         <knif4j.version>4.5.0</knif4j.version>
+        <!-- Consumers of S3/DynamoDB (e.g. mybatis tests) must resolve the same AWS SDK line. -->
+        <aws.sdk.version>2.50.2</aws.sdk.version>
 
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
@@ -246,6 +247,14 @@
             </dependency>
 
             <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>spring-boot-starter-location</artifactId>
                 <version>${opensabe.version}</version>
@@ -263,7 +272,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
@@ -335,6 +344,29 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Boot 4: TestRestTemplate moved out of spring-boot-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-resttestclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Boot 4: AutoConfigureWebTestClient -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webtestclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Boot 4: @AutoConfigureTracing (replaces @AutoConfigureObservability) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-tracing-test</artifactId>
             <scope>test</scope>
         </dependency>
 

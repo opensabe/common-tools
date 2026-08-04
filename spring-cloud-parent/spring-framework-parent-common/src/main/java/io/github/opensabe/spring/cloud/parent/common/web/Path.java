@@ -20,8 +20,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * 类似PathVariable，但是PathVariable是获取部分路径，而Path是获取全部路径
- * @author maheng
+ * 控制器方法参数注解：注入完整请求 URI 路径。
+ * <p>
+ * 类似 {@link org.springframework.web.bind.annotation.PathVariable}，但 {@code PathVariable} 仅绑定路径片段，
+ * 本注解通过 {@link ServletPathResolver} 解析完整路径（Servlet 环境）。
  */
 @Target(ElementType.PARAMETER)
 @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)

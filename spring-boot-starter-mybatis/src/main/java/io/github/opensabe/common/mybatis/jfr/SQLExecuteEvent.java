@@ -40,10 +40,14 @@ public class SQLExecuteEvent extends Event {
     @Label("SQL Executed Method")
     private final String method;
 
+/** transactionName。 */
     @Label("Transaction Id")
     private final String transactionName;
+/** success。 */
     private final boolean success;
+/** traceId。 */
     private String traceId;
+/** spanId。 */
     private String spanId;
 
     public SQLExecuteEvent(String method, String transactionName, boolean success) {

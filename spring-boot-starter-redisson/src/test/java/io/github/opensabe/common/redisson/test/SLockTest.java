@@ -18,6 +18,7 @@ package io.github.opensabe.common.redisson.test;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -42,6 +43,10 @@ import lombok.NoArgsConstructor;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Import(SLockTest.Config.class)
+/**
+ * SLock 注解分布式锁集成测试：公平锁、自旋锁、SpEL 锁名与并发场景。
+ */
+@DisplayName("SLock 分布式锁集成测试")
 public class SLockTest extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     private static final int ADD_COUNT = 10000;
@@ -59,11 +64,13 @@ public class SLockTest extends BaseRedissonTest {
     @Autowired
     private TestRedissonLockInterface2 testRedissonLockInterface2;
 
+    @DisplayName("AOP 切面顺序配置校验")
     @Test
     public void testAopConfiguration() {
         Assertions.assertEquals(redissonAopConfiguration.getOrder(), BaseRedissonTest.AOP_ORDER);
     }
 
+    @DisplayName("多线程无锁/阻塞锁/tryLock 并发计数")
     @Test
     public void testMultipleLock() throws InterruptedException {
         testRedissonLockClass.reset();
@@ -282,6 +289,7 @@ public class SLockTest extends BaseRedissonTest {
         Assertions.assertEquals(testRedissonLockClassExtends.getCount(), THREAD_COUNT * ADD_COUNT);
     }
 
+    @DisplayName("block 属性阻塞锁行为")
     @Test
     public void testBlockProperty() throws InterruptedException {
         testRedissonLockClass.reset();
@@ -289,12 +297,14 @@ public class SLockTest extends BaseRedissonTest {
         testRedissonLockClass.testRedissonLockNameProperty(Student.builder().id("111111").build(), "zhx");
     }
 
+    @DisplayName("锁租约时间自动释放")
     @Test
     public void testLockTime() throws InterruptedException {
         testRedissonLockClass.reset();
         testRedissonLockClass.testLockTime("same");
     }
 
+    @DisplayName("tryLock 等待超时抛异常")
     @Test
     public void testWaitTime() throws InterruptedException {
         testRedissonLockClass.reset();
@@ -311,6 +321,7 @@ public class SLockTest extends BaseRedissonTest {
         assertThrows(RedissonClientException.class, () -> testRedissonLockClass.testWaitTime("same"));
     }
 
+    @DisplayName("多锁名 SpEL 表达式解析")
     @Test
     public void testMultiNameLock() throws InterruptedException {
         testRedissonLockClass.reset();
@@ -334,12 +345,14 @@ public class SLockTest extends BaseRedissonTest {
         Assertions.assertTrue(testRedissonLockClass.getCount() <= THREAD_COUNT * ADD_COUNT);
     }
 
+    @DisplayName("SpEL 解析失败抛异常")
     @Test
     void testErrorExpression() {
         RedissonLockException exception = assertThrows(RedissonLockException.class, () -> testRedissonLockClass.testErrorExpression("aa"));
         System.out.println(exception.getMessage());
     }
 
+    @DisplayName("无效 SpEL 降级为字面量锁名")
     @Test
     void testSuppressedExpression() throws InterruptedException {
         testRedissonLockClass.testSuppressedExpression("addd");

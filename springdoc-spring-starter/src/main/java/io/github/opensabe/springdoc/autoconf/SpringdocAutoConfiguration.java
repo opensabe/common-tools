@@ -30,6 +30,10 @@ import io.swagger.v3.core.converter.ModelConverter;
 /**
  * @author heng.ma
  */
+/**
+ * SpringdocAutoConfiguration 类。
+ * <p>Springdoc Auto Configuration。</p>
+ */
 @Import({GenerateConfig.class, FrameworkConfig.class, CloudConfig.class})
 @ConditionalOnBean(SpringDocConfiguration.class)
 @ConditionalOnClass(ModelConverter.class)

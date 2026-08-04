@@ -48,7 +48,9 @@ import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedResponse
  * @author heng.ma
  */
 public class ObservedTable<T> implements DynamoDbTable<T> {
+/** 被装饰的 QueryConditional。 */
     private final DynamoDbTable<T> delegate;
+/** unifiedObservation 工厂。 */
     private final UnifiedObservationFactory unifiedObservationFactory;
 
     public ObservedTable(DynamoDbTable<T> delegate, UnifiedObservationFactory unifiedObservationFactory) {
@@ -56,46 +58,55 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    /** {@inheritDoc} */
     @Override
     public DynamoDbIndex<T> index(String indexName) {
         return delegate.index(indexName);
     }
 
+    /** {@inheritDoc} */
     @Override
     public DynamoDbEnhancedClientExtension mapperExtension() {
         return delegate.mapperExtension();
     }
 
+    /** {@inheritDoc} */
     @Override
     public TableSchema<T> tableSchema() {
         return delegate.tableSchema();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String tableName() {
         return delegate.tableName();
     }
 
+    /** {@inheritDoc} */
     @Override
     public Key keyFrom(T item) {
         return delegate.keyFrom(item);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void createTable(CreateTableEnhancedRequest request) {
         delegate.createTable(request);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void createTable(Consumer<CreateTableEnhancedRequest.Builder> requestConsumer) {
         delegate.createTable(requestConsumer);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void createTable() {
         delegate.createTable();
     }
 
+    /** {@inheritDoc} */
     @Override
     public T deleteItem(DeleteItemEnhancedRequest request) {
         Key key = request.key();
@@ -106,6 +117,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.deleteItem(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public T deleteItem(Consumer<DeleteItemEnhancedRequest.Builder> requestConsumer) {
         DeleteItemEnhancedRequest.Builder builder = DeleteItemEnhancedRequest.builder();
@@ -113,16 +125,19 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return deleteItem(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public T deleteItem(Key key) {
         return deleteItem(b -> b.key(key));
     }
 
+    /** {@inheritDoc} */
     @Override
     public T deleteItem(T keyItem) {
         return deleteItem(keyFrom(keyItem));
     }
 
+    /** {@inheritDoc} */
     @Override
     public DeleteItemEnhancedResponse<T> deleteItemWithResponse(DeleteItemEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#deleteItemWithResponse", request.key());
@@ -132,6 +147,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.deleteItemWithResponse(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public DeleteItemEnhancedResponse<T> deleteItemWithResponse(Consumer<DeleteItemEnhancedRequest.Builder> requestConsumer) {
         DeleteItemEnhancedRequest.Builder builder = DeleteItemEnhancedRequest.builder();
@@ -139,6 +155,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return deleteItemWithResponse(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public T getItem(GetItemEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#getItem", request.key());
@@ -148,6 +165,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.getItem(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public T getItem(Consumer<GetItemEnhancedRequest.Builder> requestConsumer) {
         GetItemEnhancedRequest.Builder builder = GetItemEnhancedRequest.builder();
@@ -155,16 +173,19 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return getItem(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public T getItem(Key key) {
         return getItem(b -> b.key(key));
     }
 
+    /** {@inheritDoc} */
     @Override
     public T getItem(T keyItem) {
         return getItem(keyFrom(keyItem));
     }
 
+    /** {@inheritDoc} */
     @Override
     public GetItemEnhancedResponse<T> getItemWithResponse(GetItemEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#getItemWithResponse", request.key());
@@ -174,6 +195,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.getItemWithResponse(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public GetItemEnhancedResponse<T> getItemWithResponse(Consumer<GetItemEnhancedRequest.Builder> requestConsumer) {
         GetItemEnhancedRequest.Builder builder = GetItemEnhancedRequest.builder();
@@ -181,6 +203,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return getItemWithResponse(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public PageIterable<T> query(QueryEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#query");
@@ -190,6 +213,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.query(request.toBuilder().queryConditional(new QueryConditionalWrapper(request.queryConditional(), context::setExpression)).build()));
     }
 
+    /** {@inheritDoc} */
     @Override
     public PageIterable<T> query(Consumer<QueryEnhancedRequest.Builder> requestConsumer) {
         QueryEnhancedRequest.Builder builder = QueryEnhancedRequest.builder();
@@ -197,11 +221,13 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return query(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public PageIterable<T> query(QueryConditional queryConditional) {
         return query(b -> b.queryConditional(queryConditional));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void putItem(PutItemEnhancedRequest<T> request) {
         Key key = keyFrom(request.item());
@@ -210,6 +236,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         observation.observe(() -> delegate.putItem(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void putItem(Consumer<PutItemEnhancedRequest.Builder<T>> requestConsumer) {
         PutItemEnhancedRequest.Builder<T> builder = PutItemEnhancedRequest.builder(tableSchema().itemType().rawClass());
@@ -217,11 +244,13 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         putItem(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void putItem(T item) {
         putItem(b -> b.item(item));
     }
 
+    /** {@inheritDoc} */
     @Override
     public PutItemEnhancedResponse<T> putItemWithResponse(PutItemEnhancedRequest<T> request) {
         Key key = keyFrom(request.item());
@@ -230,6 +259,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.putItemWithResponse(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public PutItemEnhancedResponse<T> putItemWithResponse(Consumer<PutItemEnhancedRequest.Builder<T>> requestConsumer) {
         PutItemEnhancedRequest.Builder<T> builder = PutItemEnhancedRequest.builder(tableSchema().itemType().rawClass());
@@ -237,6 +267,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return putItemWithResponse(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public PageIterable<T> scan(ScanEnhancedRequest request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#scan");
@@ -248,6 +279,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.scan(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public PageIterable<T> scan(Consumer<ScanEnhancedRequest.Builder> requestConsumer) {
         ScanEnhancedRequest.Builder builder = ScanEnhancedRequest.builder();
@@ -255,6 +287,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return scan(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public PageIterable<T> scan() {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#scan()");
@@ -262,6 +295,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.scan());
     }
 
+    /** {@inheritDoc} */
     @Override
     public T updateItem(UpdateItemEnhancedRequest<T> request) {
         Key key = keyFrom(request.item());
@@ -270,6 +304,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.updateItem(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public T updateItem(Consumer<UpdateItemEnhancedRequest.Builder<T>> requestConsumer) {
         UpdateItemEnhancedRequest.Builder<T> builder = UpdateItemEnhancedRequest.builder(tableSchema().itemType().rawClass());
@@ -277,11 +312,13 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return updateItem(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public T updateItem(T item) {
         return updateItem(b -> b.item(item));
     }
 
+    /** {@inheritDoc} */
     @Override
     public UpdateItemEnhancedResponse<T> updateItemWithResponse(UpdateItemEnhancedRequest<T> request) {
         DynamodbExecuteContext context = new DynamodbExecuteContext(tableName() + "#updateItemWithResponse", keyFrom(request.item()));
@@ -289,6 +326,7 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return observation.observe(() -> delegate.updateItemWithResponse(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     public UpdateItemEnhancedResponse<T> updateItemWithResponse(Consumer<UpdateItemEnhancedRequest.Builder<T>> requestConsumer) {
         UpdateItemEnhancedRequest.Builder<T> builder = UpdateItemEnhancedRequest.builder(tableSchema().itemType().rawClass());
@@ -296,11 +334,13 @@ public class ObservedTable<T> implements DynamoDbTable<T> {
         return updateItemWithResponse(builder.build());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void deleteTable() {
         delegate.deleteTable();
     }
 
+    /** {@inheritDoc} */
     @Override
     public DescribeTableEnhancedResponse describeTable() {
         return delegate.describeTable();

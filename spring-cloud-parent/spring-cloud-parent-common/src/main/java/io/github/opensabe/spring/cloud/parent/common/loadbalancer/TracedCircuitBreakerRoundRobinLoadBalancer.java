@@ -64,16 +64,25 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Mono;
 
-//一定必须是实现ReactorServiceInstanceLoadBalancer
-//而不是ReactorLoadBalancer<ServiceInstance>
-//因为注册的时候是ReactorServiceInstanceLoadBalancer
+/**
+ * 带链路追踪与 Resilience4j 断路器感知的 Reactor 负载均衡器。
+ * <p>
+ * 必须实现 {@link org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer}
+ * （非 {@code ReactorLoadBalancer<ServiceInstance>}），与 Spring Cloud LoadBalancer 注册类型一致。
+ * <p>
+ * 特性：affinity key 亲和、重试上下文复用（weakKeys Caffeine）、
+ * 断路器状态/错误率/历史负载加权排序、新实例与 HALF_OPEN 限流。
+ */
 @Log4j2
 @Setter
 @Getter
-@NoArgsConstructor//仅仅为了单元测试
+@NoArgsConstructor // 仅供单元测试
 public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
+    /** 请求 attributes 中 hash 亲和负载均衡 key。 */
     public static final String LOAD_BALANCE_KEY = "TracedCircuitBreakerRoundRobinLoadBalancer-load-balance-key";
+    /** 请求 attributes 中轮询序号 key。 */
     public static final String ROUND_ROBIN_KEY = "TracedCircuitBreakerRoundRobinLoadBalancer-round-robin-key";
+    /** 请求 attributes 中 Micrometer Observation key。 */
     public static final String OBSERVATION_KEY = "TracedCircuitBreakerRoundRobinLoadBalancer-observation-key";
     private static final Map<String, AffinityLoadBalancer> LOAD_BALANCE_KEY_MAP = Map.of(
             LOAD_BALANCE_KEY, (serviceInstances, o) -> {
@@ -91,25 +100,43 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
                 return serviceInstance;
             }
     );
+    /** 新启动实例的负载均衡计数加权倍数。 */
     private static final long NEWLY_STARTUP_WEIGHT = 10;
+    /** HALF_OPEN 断路器实例的负载均衡计数加权倍数。 */
     private static final long HALF_OPEN_WEIGHT = 10;
     //这里通过 RequestDataContext 来确定请求在负载均衡器的上下文
     //需要注意，如果是重试请求，必须使用最初的 RequestDataContext，不能每次重试使用新的 RequestDataContext，否则负载均衡器的上下文也是新的
     //这里使用了 Caffeine 的 weakKeys，如果 RequestDataContext 被回收了，那么对应的 RequestLoadBalancerContext 也会被回收
     //所以，web 和 webflux 还有 gateway 包都加了单元测试验证这一点
+    /** 按 RequestDataContext 缓存的重试上下文（weakKeys/weakValues）。 */
     private final Cache<RequestDataContext, RequestLoadBalancerContext> requestRequestDataContextMap =
             Caffeine.newBuilder().weakKeys().weakValues().build();
     //负载均衡次数
+    /** 各实例近期负载均衡次数（5 秒过期）。 */
     private final LoadingCache<String, AtomicLong> loadBalancedCount = Caffeine.newBuilder()
             .expireAfterWrite(5, TimeUnit.SECONDS)
             .build(k -> new AtomicLong(0));
+    /** 服务实例列表 Supplier。 */
     private ServiceInstanceListSupplier serviceInstanceListSupplier;
+    /** 无法解析 RequestDataContext 时的降级轮询 LoadBalancer。 */
     private RoundRobinLoadBalancer degradation;
+    /** 目标微服务 ID。 */
     private String serviceId;
+    /** 按实例解析 CircuitBreaker 的策略。 */
     private CircuitBreakerExtractor circuitBreakerExtractor;
+    /** Resilience4j 断路器注册表。 */
     private CircuitBreakerRegistry circuitBreakerRegistry;
+    /** 统一 Observation 工厂。 */
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    /**
+     * @param serviceInstanceListSupplier 实例列表 Supplier
+     * @param degradation 降级轮询 LoadBalancer
+     * @param serviceId 目标服务 ID
+     * @param circuitBreakerExtractor 断路器解析策略
+     * @param circuitBreakerRegistry 断路器注册表
+     * @param unifiedObservationFactory Observation 工厂
+     */
     public TracedCircuitBreakerRoundRobinLoadBalancer(
             ServiceInstanceListSupplier serviceInstanceListSupplier,
             RoundRobinLoadBalancer degradation,
@@ -130,8 +157,8 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
      * 这样做是因为如果直接使用原来的 attributes，会导致一些不必要的属性被传递到下游，
      * 并且这个 Attributes 一般属于弱引用，如果使用原始 Attribute 某些 key 可能强引用导致这个弱引用也变成强引用
      *
-     * @param attributes
-     * @return
+     * @param attributes 原始请求 attributes
+     * @return 仅含 affinity key 与 Observation 的可变 attributes 副本
      */
     public static Map<String, Object> transferAttributes(Map<String, Object> attributes) {
         Map<String, Object> result = Maps.newHashMap();
@@ -157,8 +184,8 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
      * 1. 实例刚注册没多久，实例需要 JIT 编译以及加载一些类，所以不要把过多请求发过去导致请求堆积
      * 2. 断路器处于 HALF_OPEN 状态，只能接受一定的请求，超过请求个数就还是相当于 OPEN，要限制请求个数
      *
-     * @param serviceInstance
-     * @return
+     * @param serviceInstance 目标实例
+     * @return loadBalancedCount 递增量（新实例/HALF_OPEN 时加权）
      */
     private static long getServiceInstanceCallWeightedIncrement(ServiceInstance serviceInstance, CircuitBreaker circuitBreaker) {
         if (isNewlyStartup(serviceInstance)) {
@@ -191,6 +218,12 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         return false;
     }
 
+    /**
+     * 选择目标服务实例；无 RequestDataContext 时降级为轮询。
+     *
+     * @param request 负载均衡请求
+     * @return 选中实例或 EmptyResponse
+     */
     @Override
     public Mono<Response<ServiceInstance>> choose(Request request) {
         return serviceInstanceListSupplier.get().next()
@@ -381,6 +414,7 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         return serviceInstance.getHost() + ":" + serviceInstance.getPort();
     }
 
+    /** 单次 trace 内的负载均衡重试上下文。 */
     @Data
     @NoArgsConstructor
     private static class RequestLoadBalancerContext {
@@ -395,6 +429,7 @@ public class TracedCircuitBreakerRoundRobinLoadBalancer implements ReactorServic
         private int count = 0;
     }
 
+    /** 实例排序用的统计快照。 */
     @Data
     @Builder
     @NoArgsConstructor

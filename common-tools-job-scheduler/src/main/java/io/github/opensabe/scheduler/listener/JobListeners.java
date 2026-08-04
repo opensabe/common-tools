@@ -21,6 +21,9 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+/**
+ * JobListeners 任务监听器。
+ */
 public class JobListeners {
 
     private final List<JobListener> listeners;

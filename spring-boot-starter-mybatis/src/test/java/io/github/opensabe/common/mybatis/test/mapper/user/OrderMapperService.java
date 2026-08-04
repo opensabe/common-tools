@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 import io.github.opensabe.common.mybatis.base.BaseService;
 import io.github.opensabe.common.mybatis.test.po.Order;
 
+/**
+ * 订单 Mapper 服务测试类。
+ */
 @Service
 public class OrderMapperService extends BaseService<Order> {
 }

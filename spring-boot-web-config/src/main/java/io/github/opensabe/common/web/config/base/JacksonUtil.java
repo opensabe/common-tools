@@ -16,19 +16,28 @@
 package io.github.opensabe.common.web.config.base;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
- * 17/9/28 下午2:13.
- *
- * @author zhaozhou
+ * HTTP 边界 Jackson 3 工具类。
+ * <p>
+ * 创建独立 {@link ObjectMapper}：忽略未知属性、序列化时省略 null 字段。
+ * 与 {@link io.github.opensabe.common.utils.json.JsonUtil} 及 Fastjson 路径分离，勿假定全域一致。
  */
 public class JacksonUtil {
+
+    /**
+     * 创建用于 Web 错误响应等场景的 Jackson 3 {@link ObjectMapper}。
+     *
+     * @return 配置好的 ObjectMapper
+     */
     public static ObjectMapper createMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper;
+        return JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .build();
     }
 }

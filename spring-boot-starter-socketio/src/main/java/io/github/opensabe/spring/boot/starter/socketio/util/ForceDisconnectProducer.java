@@ -26,25 +26,32 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * ForceDisconnectProducer。
+ */
 @Log4j2
 public class ForceDisconnectProducer {
 
     public static final String MQ_TOPIC_FORCE_DISCONNECT = "force_disconnect";
     public static final String MQ_TOPIC_LOGOUT = "force_logout";
 
+/** mqProducer。 */
     private MQProducer mqProducer;
 
     public ForceDisconnectProducer(MQProducer mqProducer) {
         this.mqProducer = mqProducer;
     }
 
+    /** sendForceDisconnectMsg。 */
     public void sendForceDisconnectMsg(String userId, UUID session, String roomId) {
         mqProducer.sendAsync(MQ_TOPIC_FORCE_DISCONNECT, new ForceDisconnectDTO(userId, session, roomId), new SendCallback() {
+            /** {@inheritDoc} */
             @Override
             public void onSuccess(SendResult sendResult) {
                 log.info("ForceDisconnectProducer-sendForceDisconnectMsg [success], msgId:{}", sendResult.getMsgId());
             }
 
+            /** {@inheritDoc} */
             @Override
             public void onException(Throwable throwable) {
                 log.info("ForceDisconnectProducer-sendForceDisconnectMsg [exception]", throwable);
@@ -61,11 +68,13 @@ public class ForceDisconnectProducer {
      */
     public void logout(String userId) {
         mqProducer.sendAsync(MQ_TOPIC_LOGOUT, new ForceDisconnectDTO(userId, null, null), new SendCallback() {
+            /** {@inheritDoc} */
             @Override
             public void onSuccess(SendResult sendResult) {
                 log.info("ForceDisconnectProducer-logout [success], msgId:{}", sendResult.getMsgId());
             }
 
+            /** {@inheritDoc} */
             @Override
             public void onException(Throwable throwable) {
                 log.info("ForceDisconnectProducer-logout [exception]", throwable);
@@ -76,10 +85,13 @@ public class ForceDisconnectProducer {
     @Setter
     @Getter
     public static class ForceDisconnectDTO implements Serializable {
+/** userId。 */
         private String userId;
 
+/** session。 */
         private UUID session;
 
+/** roomId。 */
         private String roomId;
 
         public ForceDisconnectDTO(String userId, UUID session, String roomId) {

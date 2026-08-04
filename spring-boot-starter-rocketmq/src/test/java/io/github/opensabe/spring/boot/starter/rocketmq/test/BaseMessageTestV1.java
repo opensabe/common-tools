@@ -40,7 +40,6 @@ public class BaseMessageTestV1 {
         new SimpleMessageListener().onMessage(ext);
     }
     @Test
-    @DisplayName("测试V2消息，data为对象")
     void testWithV2 () {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -61,11 +60,13 @@ public class BaseMessageTestV1 {
         """;
 
 
+        /** {@inheritDoc} */
         @Override
         public void onMessage(MessageExt ext) {
             onBaseMessage(convert(ext));
         }
 
+        /** {@inheritDoc} */
         @Override
         protected void onBaseMQMessage(BaseMQMessage baseMQMessage) {
             User user = JsonUtil.parseObject(baseMQMessage.getData(), User.class);

@@ -28,7 +28,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Basic response format
+ * 统一 HTTP/API 响应体格式。
+ *
+ * @param <T> 业务数据载荷类型
  */
 @Data
 @Builder
@@ -36,24 +38,39 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BaseRsp<T> {
 
+    /** 业务响应码，对应 {@link BizCodeEnum#getVal()}。 */
     @Schema(example = "10000")
-    private int bizCode;                // response code RspCodeEnum.val
+    private int bizCode;
 
-    //考虑这里是否要加JsonIgnore
-    private String innerMsg;            // response msg in systematic level
+    /** 系统/内部级说明，通常不直接暴露给终端用户。 */
+    private String innerMsg;
 
+    /** 用户可见提示消息。 */
     @Schema(example = "success")
-    private String message;             // response user msg
+    private String message;
 
-    private T data;                     // response content data
+    /** 业务数据载荷。 */
+    private T data;
 
+    /**
+     * 判断是否为成功响应（业务码等于 {@link BizCodeEnum#SUCCESS}）。
+     *
+     * @return {@code true} 表示成功
+     */
     @JsonIgnore
     public boolean isSuccess() {
         return Objects.equals(bizCode, BizCodeEnum.SUCCESS.getVal());
     }
 
+    /**
+     * 成功时返回 {@link #data}；失败时通过 {@code supplier} 构造并抛出运行时异常。
+     *
+     * @param supplier 失败时接收 {@code (bizCode, message)} 并返回异常的函数
+     * @return 成功时的业务数据
+     * @param <E> 抛出的异常类型
+     */
     @JsonIgnore
-    public T resolveData(BiFunction<Integer, String, RuntimeException> supplier) {
+    public <E extends RuntimeException> T resolveData(BiFunction<Integer, String, E> supplier) {
         if (isSuccess()) {
             return data;
         }

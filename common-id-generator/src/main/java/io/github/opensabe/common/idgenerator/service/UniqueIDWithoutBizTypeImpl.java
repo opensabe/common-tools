@@ -34,6 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 import io.github.opensabe.common.executor.ThreadPoolFactory;
 import io.github.opensabe.common.idgenerator.exception.IdGenerateException;
 
+/**
+ * 无业务类型前缀的全局唯一 ID 生成实现，基于 Redis 自增序列与 Redisson 分布式锁。
+ */
 public class UniqueIDWithoutBizTypeImpl implements UniqueIDWithouBizType {
 
     private static final Long MAX_SEQUENCE_NUM = 10000000L;

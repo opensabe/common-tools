@@ -15,6 +15,9 @@
  */
 package io.github.opensabe.spring.boot.starter.socketio;
 
+/**
+ * Socket.IO 客户端公共会话属性键常量。
+ */
 public interface CommonAttribute {
     String PLATFORM = "platform";
     String OPERATOR_ID = "operId";

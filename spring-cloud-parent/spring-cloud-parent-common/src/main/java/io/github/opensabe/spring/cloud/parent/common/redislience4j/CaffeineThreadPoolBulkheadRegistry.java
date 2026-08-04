@@ -29,9 +29,23 @@ import io.github.resilience4j.core.registry.RegistryEventConsumer;
 
 import static java.util.Collections.emptyMap;
 
+/**
+ * 基于 Caffeine 存储的 {@link io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry} 实现。
+ * <p>
+ * 替代默认 InMemory 实现，支持条目过期与 AutoCloseable 资源回收。
+ *
+ * @see io.github.resilience4j.core.registry.AbstractRegistry
+ */
 public class CaffeineThreadPoolBulkheadRegistry extends CaffeineResilienceRegistry<ThreadPoolBulkhead, ThreadPoolBulkheadConfig> implements ThreadPoolBulkheadRegistry {
 
 
+    /**
+     * 构造 Registry。
+     *
+     * @param configs 命名配置
+     * @param registryEventConsumers 事件消费者
+     * @param tags 全局标签
+     */
     public CaffeineThreadPoolBulkheadRegistry(Map<String, ThreadPoolBulkheadConfig> configs, RegistryEventConsumer<ThreadPoolBulkhead> registryEventConsumers, Map<String, String> tags) {
         super(configs, () -> ThreadPoolBulkheadConfig.ofDefaults(), registryEventConsumers, tags);
     }

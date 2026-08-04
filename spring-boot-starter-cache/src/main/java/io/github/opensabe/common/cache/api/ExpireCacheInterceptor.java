@@ -32,6 +32,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  */
 public class ExpireCacheInterceptor extends CacheInterceptor {
 
+/** cacheResolver。 */
     private final ExpireCacheResolver cacheResolver;
     private final Map<Method, Boolean> map = new ConcurrentHashMap<>();
 

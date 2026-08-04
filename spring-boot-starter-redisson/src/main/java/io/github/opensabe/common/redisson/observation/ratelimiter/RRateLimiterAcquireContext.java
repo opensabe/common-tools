@@ -20,18 +20,46 @@ import java.util.concurrent.TimeUnit;
 import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * 限流器 acquire 操作的 Observation 上下文。
+ */
 
 @Getter
 @Setter
 public class RRateLimiterAcquireContext extends Observation.Context {
+    /**
+     * 限流器名称
+     */
     private final String rateLimiterName;
+    /**
+     * 当前线程名
+     */
     private final String threadName;
+    /**
+     * 请求的许可数
+     */
     private final long permits;
+    /**
+     * 等待超时时间
+     */
     private final long timeout;
+    /**
+     * 超时时间单位
+     */
     private final TimeUnit timeUnit;
 
+    /**
+     * 是否成功获取许可
+     */
     private boolean rateLimiterAcquiredSuccessfully;
 
+    /**
+     * @param rateLimiterName 限流器名称
+     * @param threadName 当前线程名
+     * @param permits 请求的许可数
+     * @param timeout 等待超时时间
+     * @param timeUnit 超时时间单位
+     */
     public RRateLimiterAcquireContext(String rateLimiterName, String threadName, long permits, long timeout, TimeUnit timeUnit) {
         this.rateLimiterName = rateLimiterName;
         this.threadName = threadName;

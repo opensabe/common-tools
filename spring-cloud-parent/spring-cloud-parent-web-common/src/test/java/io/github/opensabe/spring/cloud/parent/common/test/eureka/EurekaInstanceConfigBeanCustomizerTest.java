@@ -18,6 +18,7 @@ package io.github.opensabe.spring.cloud.parent.common.test.eureka;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -45,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         },
         classes = EurekaInstanceConfigBeanCustomizerTest.TestConfiguration.class
 )
+@DisplayName("Eureka实例配置定制器测试")
 public class EurekaInstanceConfigBeanCustomizerTest {
 
     @Autowired
@@ -53,32 +55,34 @@ public class EurekaInstanceConfigBeanCustomizerTest {
     private TestEurekaInstanceConfigBeanCustomizer testCustomizer;
 
     @Test
+    @DisplayName("自定义EurekaInstanceConfigBeanCustomizer应被执行")
     void testCustomEurekaInstanceConfigBeanCustomizerExecution() {
         // 重置执行状态
         TestEurekaInstanceConfigBeanCustomizer.reset();
 
         // 验证自定义的 customizer 被正确注入
-        assertNotNull(testCustomizer, "TestEurekaInstanceConfigBeanCustomizer 应该被正确注入");
+        assertNotNull(testCustomizer, "TestEurekaInstanceConfigBeanCustomizer should be injected");
         assertTrue(testCustomizer instanceof EurekaInstanceConfigBeanCustomizer,
-                "testCustomizer 应该实现 EurekaInstanceConfigBeanCustomizer 接口");
+                "testCustomizer should implement EurekaInstanceConfigBeanCustomizer");
 
         // 手动执行 customizer
         testCustomizer.customize(eurekaInstanceConfigBean);
 
         // 验证 customizer 被执行
         assertTrue(TestEurekaInstanceConfigBeanCustomizer.isExecuted(),
-                "TestEurekaInstanceConfigBeanCustomizer 应该被执行");
+                "TestEurekaInstanceConfigBeanCustomizer should have run");
 
         // 验证 metadata 被正确设置
         Map<String, String> metadata = eurekaInstanceConfigBean.getMetadataMap();
         assertTrue(metadata.containsKey(TestEurekaInstanceConfigBeanCustomizer.getTestKey()),
-                "metadata 应该包含测试键");
+                "metadata should contain test key");
         assertEquals(TestEurekaInstanceConfigBeanCustomizer.getTestValue(),
                 metadata.get(TestEurekaInstanceConfigBeanCustomizer.getTestKey()),
-                "metadata 中的测试值应该正确");
+                "metadata test value should match");
     }
 
     @Test
+    @DisplayName("EurekaInstanceConfigBean metadata可读写")
     void testEurekaInstanceConfigBeanMetadataManipulation() {
         // 测试 metadata 操作
         Map<String, String> metadata = eurekaInstanceConfigBean.getMetadataMap();
@@ -89,14 +93,14 @@ public class EurekaInstanceConfigBeanCustomizerTest {
         metadata.put(testKey, testValue);
 
         // 验证数据被正确添加
-        assertTrue(metadata.containsKey(testKey), "metadata 应该包含测试键");
-        assertEquals(testValue, metadata.get(testKey), "metadata 中的测试值应该正确");
+        assertTrue(metadata.containsKey(testKey), "metadata should contain test key");
+        assertEquals(testValue, metadata.get(testKey), "metadata test value should match");
 
-        // 验证 metadata 大小
-        assertTrue(metadata.size() > 0, "metadata 应该不为空");
+        assertTrue(metadata.size() > 0, "metadata should not be empty");
     }
 
     @Test
+    @DisplayName("多个Customizer应依次执行")
     void testMultipleCustomizersExecution() {
         // 测试多个 customizer 的执行
         TestEurekaInstanceConfigBeanCustomizer.reset();
@@ -111,29 +115,28 @@ public class EurekaInstanceConfigBeanCustomizerTest {
 
         // 验证两个 customizer 都被执行
         assertTrue(TestEurekaInstanceConfigBeanCustomizer.isExecuted(),
-                "至少一个 TestEurekaInstanceConfigBeanCustomizer 应该被执行");
+                "at least one TestEurekaInstanceConfigBeanCustomizer should have run");
 
         // 验证 metadata 包含预期的数据
         Map<String, String> metadata = eurekaInstanceConfigBean.getMetadataMap();
         assertTrue(metadata.containsKey(TestEurekaInstanceConfigBeanCustomizer.getTestKey()),
-                "metadata 应该包含测试键");
+                "metadata should contain test key");
     }
 
     @Test
+    @DisplayName("EurekaInstanceConfigBean基本属性可访问")
     void testEurekaInstanceConfigBeanProperties() {
-        // 验证 EurekaInstanceConfigBean 的基本属性
-        assertNotNull(eurekaInstanceConfigBean, "EurekaInstanceConfigBean 应该被正确注入");
+        assertNotNull(eurekaInstanceConfigBean, "EurekaInstanceConfigBean should be injected");
 
-        // 验证 metadataMap 不为 null
         Map<String, String> metadata = eurekaInstanceConfigBean.getMetadataMap();
-        assertNotNull(metadata, "metadataMap 不应该为 null");
+        assertNotNull(metadata, "metadataMap should not be null");
 
         // 验证可以添加和获取 metadata
         String testKey = "property-test-key";
         String testValue = "property-test-value";
         metadata.put(testKey, testValue);
 
-        assertEquals(testValue, metadata.get(testKey), "应该能够正确获取添加的 metadata");
+        assertEquals(testValue, metadata.get(testKey), "metadata value should round-trip");
     }
 
     @SpringBootApplication

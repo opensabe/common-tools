@@ -19,17 +19,26 @@ import com.alibaba.ttl.TransmittableThreadLocal;
 
 import tk.mybatis.mapper.entity.IDynamicTableName;
 
+/**
+ * ArchivedTable。
+ */
 public abstract class ArchivedTable implements IDynamicTableName {
     private static TransmittableThreadLocal<Boolean> currentIsHistory = new TransmittableThreadLocal<>();
 
+    /**
+     * @param isHistory 待设置值
+     */
     public static void setIsHistory(boolean isHistory) {
         currentIsHistory.set(isHistory);
     }
 
+    /** tableName。 */
     protected abstract String tableName();
 
+    /** historyTableName。 */
     protected abstract String historyTableName();
 
+    /** {@inheritDoc} */
     @Override
     public String getDynamicTableName() {
         Boolean aBoolean = currentIsHistory.get();

@@ -19,17 +19,17 @@ import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
- * @author changhongwei
- * @date 2025/1/21 17:20
- * @description:
+ * GeoPlaces 地理编码服务 Observation 指标与标签文档。
  */
 public enum LocationDocumentation implements ObservationDocumentation {
     LOCATION {
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "location.geocode";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends LocationConvention> getDefaultConvention() {
             return LocationConvention.class;
@@ -38,36 +38,42 @@ public enum LocationDocumentation implements ObservationDocumentation {
 
     public enum LocationTag implements KeyName {
         METHOD_NAME {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "location.method.name";
             }
         },
         REQUEST_PARAMS {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "location.request.params";
             }
         },
         RESPONSE {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "location.response";
             }
         },
         EXECUTION_TIME {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "location.execution.time";
             }
         },
         LOCATION_SUCCESSFULLY {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "location.successfully";
             }
         },
         THROWABLE {
+            /** {@inheritDoc} */
             @Override
             public String asString() {
                 return "location.throwable";

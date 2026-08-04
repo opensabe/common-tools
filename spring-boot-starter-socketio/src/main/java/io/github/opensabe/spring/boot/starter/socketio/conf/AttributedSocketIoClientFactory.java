@@ -28,6 +28,9 @@ import com.google.common.collect.Maps;
 import io.github.opensabe.spring.boot.starter.socketio.AttributedSocketIoClient;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * AttributedSocketIoClientFactory。
+ */
 @Log4j2
 public class AttributedSocketIoClientFactory {
     private final Map<SocketIOClient, AttributedSocketIoClient> cache = Maps.newConcurrentMap();
@@ -69,10 +72,16 @@ public class AttributedSocketIoClientFactory {
         return attributedSocketIoClient;
     }
 
+    /**
+     * @return attributedSocketIoClient
+     */
     public AttributedSocketIoClient getAttributedSocketIoClient(SocketIOClient socketIOClient) {
         return cache.get(socketIOClient);
     }
 
+    /**
+     * @return socketIoClientUserId
+     */
     public String getSocketIoClientUserId(SocketIOClient socketIOClient) {
         AttributedSocketIoClient attributedSocketIoClient = cache.get(socketIOClient);
         if (attributedSocketIoClient != null) {

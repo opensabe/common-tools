@@ -23,12 +23,19 @@ import io.github.opensabe.common.redisson.annotation.RedissonSemaphore;
 import io.github.opensabe.common.redisson.aop.old.ExtraNamePointcut;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 
+/**
+ * {@link RedissonSemaphore} 切点，缓存方法级信号量属性。
+ */
 public class RedissonSemaphoreCachedPointcut extends ExtraNamePointcut<RedissonSemaphoreProperties> {
 
+    /**
+     * @param evaluator 方法参数 SpEL 求值器
+     */
     public RedissonSemaphoreCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
         super(evaluator);
     }
 
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("removal")
     protected RedissonSemaphoreProperties computeRedissonProperties(Method method, Class<?> clazz) {

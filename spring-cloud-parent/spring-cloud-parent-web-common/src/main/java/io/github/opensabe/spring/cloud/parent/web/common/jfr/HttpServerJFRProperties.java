@@ -20,9 +20,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Servlet HTTP 服务器请求 JFR 事件配置属性。
+ * <p>
+ * 绑定前缀 {@code spring.servlet.jfr}。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "spring.servlet.jfr")
 public class HttpServerJFRProperties {
+    /**
+     * 是否启用 HTTP 服务器请求 JFR 事件生成，默认 {@code true}。
+     */
     private boolean enabled = true;
 }

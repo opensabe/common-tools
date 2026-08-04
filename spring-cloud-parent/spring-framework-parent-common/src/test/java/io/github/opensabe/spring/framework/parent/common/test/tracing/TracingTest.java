@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
@@ -34,8 +35,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Log4j2
 @SpringBootTest(
-        classes = TracingTest.Main.class
+        classes = TracingTest.Main.class,
+        properties = {
+                "management.tracing.sampling.probability=1.0"
+        }
 )
+@AutoConfigureTracing
 @DisplayName("链路追踪测试")
 public class TracingTest {
     @Autowired
@@ -49,31 +54,31 @@ public class TracingTest {
         var parent = Observation.start("parent", observationRegistry);
         parent.scoped(() -> {
             logger.info("parent");
-            //获取当前 Observation
+            // Get current Observation
             Observation current = unifiedObservationFactory.getCurrentObservation();
             assertTrue(current == parent);
-            //验证日志 Context 中有放入对应的 key
+            // Verify MDC contains expected trace keys
             String parentLoggerTraceId = MDC.get("traceId");
             String parentLoggerSpanId = MDC.get("spanId");
-            //验证从当前 Observation 获取的 TracingContext 中的 Span 与日志 Context 中的一致
+            // Verify span from Observation matches MDC
             Assertions.assertEquals(parentLoggerTraceId, UnifiedObservationFactory.getTraceContext(current).traceId());
             Assertions.assertEquals(parentLoggerSpanId, UnifiedObservationFactory.getTraceContext(current).spanId());
-            //判断 Observation
+            // Assert Observation state
             assertThat(observationRegistry)
                     .hasRemainingCurrentObservationSameAs(parent);
             var child = Observation.start("child", observationRegistry);
             child.scoped(() -> {
                 logger.info("child");
-                //验证日志 Context 中有放入对应的 key
+                // Verify MDC contains expected trace keys
                 String childLoggerTraceId = MDC.get("traceId");
                 String childLoggerSpanId = MDC.get("spanId");
-                //判断 Observation
+                // Assert Observation state
                 assertThat(observationRegistry)
                         .hasRemainingCurrentObservationSameAs(child)
                         .doesNotHaveRemainingCurrentObservationSameAs(parent);
-                //获取当前 Observation
+                // Get current Observation
                 Observation currentChild = unifiedObservationFactory.getCurrentObservation();
-                //验证从当前 Observation 获取的 TracingContext 中的 Span 与日志 Context 中的一致
+                // Verify span from Observation matches MDC
                 Assertions.assertEquals(childLoggerTraceId, UnifiedObservationFactory.getTraceContext(currentChild).traceId());
                 Assertions.assertEquals(childLoggerSpanId, UnifiedObservationFactory.getTraceContext(currentChild).spanId());
                 Assertions.assertEquals(parentLoggerTraceId, childLoggerTraceId);

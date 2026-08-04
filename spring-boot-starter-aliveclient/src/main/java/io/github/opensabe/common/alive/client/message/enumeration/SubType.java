@@ -15,15 +15,23 @@
  */
 package io.github.opensabe.common.alive.client.message.enumeration;
 
+/**
+ * SubType 枚举。
+ * <p>订阅类型。</p>
+ */
 public enum SubType {
     SUB(1),
     UNSUB(2);
+/** val 字段。 */
     private int val;
 
     SubType(int val) {
         this.val = val;
     }
 
+/**
+ * getVal 方法。
+ */
     public int getVal() {
         return val;
     }

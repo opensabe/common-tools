@@ -20,6 +20,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * SchedulerProperties 配置属性。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "scheduler.job")

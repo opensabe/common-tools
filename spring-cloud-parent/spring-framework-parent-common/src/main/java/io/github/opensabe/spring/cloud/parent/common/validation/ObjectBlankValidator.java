@@ -28,8 +28,9 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.NotBlank;
 
-;
-
+/**
+ * 扩展 {@link NotBlank}：除字符串外，对集合、Map、数组等类型判“非空”。
+ */
 public class ObjectBlankValidator implements ConstraintValidator<NotBlank, Object> {
 
     @Override
@@ -37,6 +38,12 @@ public class ObjectBlankValidator implements ConstraintValidator<NotBlank, Objec
         return isNotEmpty(value);
     }
 
+    /**
+     * 按类型判断是否非空：字符串非 blank，集合/Map/数组非 empty，其他非 null 类型视为有效。
+     *
+     * @param o 待检值
+     * @return 是否非空
+     */
     private boolean isNotEmpty(Object o) {
         if (o == null) return false;
         if (o instanceof String) {

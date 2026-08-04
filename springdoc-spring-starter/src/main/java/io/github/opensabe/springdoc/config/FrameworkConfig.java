@@ -26,10 +26,17 @@ import io.github.opensabe.springdoc.converters.EnumModelConverter;
 /**
  * @author heng.ma
  */
+/**
+ * FrameworkConfig 类。
+ * <p>Framework Config。</p>
+ */
 @ConditionalOnClass(IntValueEnum.class)
 @Configuration(proxyBeanMethods = false)
 public class FrameworkConfig {
 
+/**
+ * enumModelConverter 方法。
+ */
     @Bean
     @ConditionalOnMissingBean
     public EnumModelConverter enumModelConverter() {

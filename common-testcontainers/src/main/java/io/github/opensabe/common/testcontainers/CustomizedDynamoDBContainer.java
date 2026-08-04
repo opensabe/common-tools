@@ -24,6 +24,9 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 
 import lombok.SneakyThrows;
 
+/**
+ * CustomizedDynamoDBContainer Testcontainers 容器封装。
+ */
 public class CustomizedDynamoDBContainer extends GenericContainer<CustomizedDynamoDBContainer> {
     public static final int DYNAMODB_PORT = 8000;
 

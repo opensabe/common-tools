@@ -19,6 +19,9 @@ import jdk.jfr.Event;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * BaseEvent JFR 事件。
+ */
 @Getter
 @Setter
 public class BaseEvent extends Event {

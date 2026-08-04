@@ -21,13 +21,15 @@ import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @author heng.ma
+ * {@link io.github.opensabe.common.redisson.annotation.slock.SLock} 组合锁 AOP Advisor。
  */
 @RequiredArgsConstructor
 public class SLockAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
+    /** SLock 切点。 */
     private final SLockPointcut pointcut;
 
+    /** {@inheritDoc} */
     @Override
     public Pointcut getPointcut() {
         return pointcut;

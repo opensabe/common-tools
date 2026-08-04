@@ -20,9 +20,14 @@ import java.util.Map;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.DisplayName;
 
+/**
+ * httpbin /anything 响应 DTO（测试辅助）。
+ */
 @NoArgsConstructor
 @Data
+@DisplayName("httpbin响应DTO")
 public class HttpBinAnythingResponse {
     private Map<String, List<String>> args;
     private String data;

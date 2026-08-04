@@ -33,18 +33,24 @@ import lombok.SneakyThrows;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * DynamodbTypeHandler 测试。
+ */
 @DisplayName("DynamoDB类型处理器测试")
 public class DynamodbTypeHandlerTest extends BaseMybatisTest {
+    /** dynamodbTypeHandler Mapper。 */
     @Autowired
     private DynamodbTypeHandlerMapper dynamodbTypeHandlerMapper;
+    /** keyValueDynamoDb 服务。 */
     @Autowired
     private KeyValueDynamoDbService keyValueDynamoDbService;
+    /** dynamicRoutingDataSource。 */
     @Autowired
     private DynamicRoutingDataSource dynamicRoutingDataSource;
 
+    @DisplayName("测试DynamoDB类型处理器 - 验证数据存储和查询")
     @Test
     @SneakyThrows
-    @DisplayName("测试DynamoDB类型处理器 - 验证数据存储和查询")
     public void testDynamodyTypeHandler() {
         var dynamodbPO = new DynamodbPO();
         dynamodbPO.setId("DynamodbTypeHandlerTestPO1");

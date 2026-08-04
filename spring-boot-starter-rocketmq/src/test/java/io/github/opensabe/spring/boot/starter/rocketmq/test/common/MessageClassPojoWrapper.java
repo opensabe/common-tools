@@ -22,10 +22,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * MQ 测试 class 消息包装类。
+ */
 @Data
 @Builder
 @AllArgsConstructor
 public class MessageClassPojoWrapper {
+/** messageClassPojo。 */
     private final MessageClassPojo messageClassPojo;
+/** countDownLatch。 */
     private final CountDownLatch countDownLatch;
 }

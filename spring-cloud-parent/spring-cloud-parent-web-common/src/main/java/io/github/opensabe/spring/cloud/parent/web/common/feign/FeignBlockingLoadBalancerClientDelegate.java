@@ -60,6 +60,14 @@ public class FeignBlockingLoadBalancerClientDelegate implements Client {
         this.unifiedObservationFactory = unifiedObservationFactory;
     }
 
+    /**
+     * 延迟获取 LoadBalancerClient 后委托 {@link FeignBlockingLoadBalancerClientExtend} 执行请求。
+     *
+     * @param request HTTP 请求
+     * @param options 请求选项
+     * @return HTTP 响应
+     * @throws IOException 底层 IO 异常
+     */
     @Override
     public Response execute(Request request, Request.Options options) throws IOException {
         if (feignBlockingLoadBalancerClient == null) {

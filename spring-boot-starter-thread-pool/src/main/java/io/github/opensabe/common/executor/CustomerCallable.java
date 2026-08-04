@@ -26,12 +26,19 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * CustomerCallable。
+ */
 @Log4j2
 public class CustomerCallable<T> implements JFRecordable<T>, Traceable<T>, Callable<T> {
+/** callable。 */
     private final Callable<T> callable;
+/** threadTaskJFREvent。 */
     private final ThreadTaskJFREvent threadTaskJFREvent;
+/** observation。 */
     @Getter
     private final Observation observation;
+/** observationRegistry。 */
     private final ObservationRegistry observationRegistry;
 
     public CustomerCallable(UnifiedObservationFactory unifiedObservationFactory, Callable<T> callable) {
@@ -52,16 +59,19 @@ public class CustomerCallable<T> implements JFRecordable<T>, Traceable<T>, Calla
 //        observation.stop();
     }
 
+    /** {@inheritDoc} */
     @Override
     public ThreadTaskJFREvent getEvent() {
         return this.threadTaskJFREvent;
     }
 
+    /** {@inheritDoc} */
     @Override
     public T inRecord() {
         return trace();
     }
 
+    /** {@inheritDoc} */
     @SneakyThrows
     @Override
     public T inTrace() {
@@ -73,6 +83,7 @@ public class CustomerCallable<T> implements JFRecordable<T>, Traceable<T>, Calla
         }
     }
 
+    /** {@inheritDoc} — 执行 Callable 逻辑。 */
     @Override
     public T call() {
         return record();

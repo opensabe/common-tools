@@ -26,6 +26,13 @@ import org.redisson.api.RFuture;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.observation.RObjectDelegate;
 import io.micrometer.observation.Observation;
+/**
+ * 带 Micrometer 观测的 {@link org.redisson.api.RExpirable} 装饰器。
+ *
+ * <p>同步 expire/clearExpire 路径记录 EXPIRE observation；异步方法仍直接委托。
+ *
+ * @param <T> 底层 RExpirable 类型
+ */
 
 public class ObservedRExpirable<T extends RExpirable> extends RObjectDelegate<T> implements RExpirable {
     protected final UnifiedObservationFactory unifiedObservationFactory;

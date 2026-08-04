@@ -31,18 +31,24 @@ import lombok.Setter;
 public class LocationContext extends Observation.Context {
 
     // 方法名称
+/** methodName。 */
     private String methodName;
 
     // 请求参数
+/** requestParams。 */
     private Object requestParams;
 
     // 响应结果
+/** response。 */
     private Object response;
 
     // 执行时间（毫秒）
+/** executionTime。 */
     private long executionTime;
 
+/** successful。 */
     private boolean successful;
+/** throwable。 */
     private Throwable throwable;
 
     public LocationContext(String methodName, Object requestParams, Object response, long executionTime, boolean successful, Throwable throwable) {

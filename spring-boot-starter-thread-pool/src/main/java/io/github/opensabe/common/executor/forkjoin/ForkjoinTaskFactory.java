@@ -23,8 +23,12 @@ import java.util.function.Function;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.micrometer.observation.Observation;
 
+/**
+ * ForkjoinTaskFactory。
+ */
 public class ForkjoinTaskFactory {
 
+/** unifiedObservation 工厂。 */
     private final UnifiedObservationFactory unifiedObservationFactory;
 
     public ForkjoinTaskFactory(UnifiedObservationFactory unifiedObservationFactory) {
@@ -61,6 +65,7 @@ public class ForkjoinTaskFactory {
         return new BatchRecursiveTask<>(capacity, list, function, combiner, observation);
     }
 
+    /** recursiveBatchTask。 */
     public <T, R> BatchRecursiveTask<T, R> recursiveBatchTask(int capacity, List<T> list, Function<List<T>, R> function, BinaryOperator<R> reducer) {
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         return new BatchRecursiveTask<>(capacity, list, function, reducer, observation);
@@ -112,6 +117,7 @@ public class ForkjoinTaskFactory {
         return new AggregateRecursiveTask<>(capacity, list, transformer, combiner, observation);
     }
 
+    /** reducerListableTask。 */
     public <T, V> TraceableRecursiveTask<V> reducerListableTask(int capacity, List<T> list, Function<T, V> transformer, BinaryOperator<V> reducer) {
         Observation observation = unifiedObservationFactory.getCurrentOrCreateEmptyObservation();
         return new AggregateRecursiveTask<>(capacity, list, transformer, reducer, observation);

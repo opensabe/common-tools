@@ -34,6 +34,7 @@ import lombok.extern.log4j.Log4j2;
 public class MQLocalTransactionListener implements RocketMQLocalTransactionListener {
     public static final String MSG_HEADER_TRANSACTION_LISTENER = "CustomizedTransactionListener";
 
+/** uniqueRocketMQLocalTransactionListeners。 */
     private final Map<String, UniqueRocketMQLocalTransactionListener> uniqueRocketMQLocalTransactionListeners;
 
     public MQLocalTransactionListener(List<UniqueRocketMQLocalTransactionListener> uniqueRocketMQLocalTransactionListeners) {
@@ -41,6 +42,9 @@ public class MQLocalTransactionListener implements RocketMQLocalTransactionListe
                 .stream().collect(Collectors.toMap(UniqueRocketMQLocalTransactionListener::name, v -> v));
     }
 
+    /**
+     * @return uniqueRocketMQLocalTransactionListener
+     */
     private UniqueRocketMQLocalTransactionListener getUniqueRocketMQLocalTransactionListener(Message message) {
         Object transactionListenerName = message.getHeaders().get(MSG_HEADER_TRANSACTION_LISTENER);
         if (transactionListenerName == null) {
@@ -57,6 +61,7 @@ public class MQLocalTransactionListener implements RocketMQLocalTransactionListe
         return uniqueRocketMQLocalTransactionListener;
     }
 
+    /** {@inheritDoc} */
     @Override
     public RocketMQLocalTransactionState executeLocalTransaction(Message message, Object o) {
         log.info("MQLocalTransactionListener-executeLocalTransaction: message: {}, o: {}", message, o);
@@ -64,6 +69,7 @@ public class MQLocalTransactionListener implements RocketMQLocalTransactionListe
                 .executeLocalTransaction(message, o);
     }
 
+    /** {@inheritDoc} */
     @Override
     public RocketMQLocalTransactionState checkLocalTransaction(Message message) {
         log.info("MQLocalTransactionListener-checkLocalTransaction: message: {}", message);

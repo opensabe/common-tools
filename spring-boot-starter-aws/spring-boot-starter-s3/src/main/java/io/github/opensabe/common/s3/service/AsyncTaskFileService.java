@@ -19,6 +19,9 @@ import java.io.File;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+/**
+ * AsyncTaskFileService。
+ */
 public interface AsyncTaskFileService {
 
     /**

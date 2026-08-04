@@ -23,13 +23,20 @@ import io.github.opensabe.common.redisson.annotation.RedissonLock;
 import io.github.opensabe.common.redisson.aop.old.ExtraNamePointcut;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 
+/**
+ * 旧版 {@link io.github.opensabe.common.redisson.annotation.RedissonLock} 切点，缓存方法级锁属性。
+ */
 public class RedissonLockCachedPointcut extends ExtraNamePointcut<RedissonLockProperties> {
 
 
+    /**
+     * @param evaluator 方法参数 SpEL 求值器
+     */
     public RedissonLockCachedPointcut(MethodArgumentsExpressEvaluator evaluator) {
         super(evaluator);
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("removal")
     protected RedissonLockProperties computeRedissonProperties(Method method, Class<?> clazz) {
         RedissonLock l = method.getAnnotation(RedissonLock.class);

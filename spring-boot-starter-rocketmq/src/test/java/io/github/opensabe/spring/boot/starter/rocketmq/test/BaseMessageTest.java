@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BaseMessageTest {
 
     @Test
-    @DisplayName("测试简单对象消息 - 带包装器")
+    @DisplayName("测试Map对象消息 - 不带包装器")
     void testSimple() {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -45,7 +45,6 @@ public class BaseMessageTest {
     }
 
     @Test
-    @DisplayName("测试简单对象消息 - 不带包装器")
     void testSimpleWithoutWrapper() {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -54,7 +53,6 @@ public class BaseMessageTest {
     }
 
     @Test
-    @DisplayName("测试列表对象消息 - 带包装器")
     void testList() {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -63,7 +61,6 @@ public class BaseMessageTest {
     }
 
     @Test
-    @DisplayName("测试列表对象消息 - 不带包装器")
     void testListWithoutWrapper() {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -72,7 +69,6 @@ public class BaseMessageTest {
     }
 
     @Test
-    @DisplayName("测试Map对象消息 - 带包装器")
     void testMap() {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -81,7 +77,6 @@ public class BaseMessageTest {
     }
 
     @Test
-    @DisplayName("测试Map对象消息 - 不带包装器")
     void testMapWithoutWrapper() {
         MessageExt ext = new MessageExt();
         ext.putUserProperty("CORE_VERSION", "v2");
@@ -108,11 +103,13 @@ public class BaseMessageTest {
                 }
                 """;
 
+        /** {@inheritDoc} */
         @Override
         public void onMessage(MessageExt ext) {
             onBaseMessage(convert(ext));
         }
 
+        /** {@inheritDoc} */
         @Override
         protected void onBaseMessage(BaseMessage<User> baseMQMessage) {
             User user = baseMQMessage.getData();
@@ -150,11 +147,13 @@ public class BaseMessageTest {
                 ]
                 """;
 
+        /** {@inheritDoc} */
         @Override
         public void onMessage(MessageExt ext) {
             onBaseMessage(convert(ext));
         }
 
+        /** {@inheritDoc} */
         @Override
         protected void onBaseMessage(BaseMessage<List<User>> baseMQMessage) {
             List<User> list = baseMQMessage.getData();
@@ -216,11 +215,13 @@ public class BaseMessageTest {
                 }
                 """;
 
+        /** {@inheritDoc} */
         @Override
         public void onMessage(MessageExt ext) {
             onBaseMessage(convert(ext));
         }
 
+        /** {@inheritDoc} */
         @Override
         protected void onBaseMessage(BaseMessage<Map<String, List<User>>> baseMQMessage) {
             Map<String, List<User>> map = baseMQMessage.getData();

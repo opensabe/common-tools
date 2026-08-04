@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 
@@ -49,7 +48,6 @@ import lombok.extern.log4j.Log4j2;
 @SpringBootTest(
         classes = Log4j2SecretTest.Main.class
 )
-@AutoConfigureObservability
 @DisplayName("Log4j2敏感信息过滤测试")
 public class Log4j2SecretTest {
     private static final String SECRET = "secretString-Log4j2SecretTest";

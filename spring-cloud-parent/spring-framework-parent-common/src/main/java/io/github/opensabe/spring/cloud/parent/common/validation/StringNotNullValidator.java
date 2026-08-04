@@ -21,7 +21,9 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.NotNull;
 
-
+/**
+ * 强化 {@link NotNull} 对 {@link String} 的语义：除非 null 外还要求非 blank。
+ */
 public class StringNotNullValidator implements ConstraintValidator<NotNull, String> {
 
     @Override

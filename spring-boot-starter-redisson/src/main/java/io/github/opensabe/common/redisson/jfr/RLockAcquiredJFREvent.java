@@ -22,6 +22,9 @@ import jdk.jfr.Label;
 import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * 分布式锁获取操作的 JFR 事件，记录锁名、等待/租约参数与获取结果。
+ */
 
 @Setter
 @Getter

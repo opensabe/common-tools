@@ -40,7 +40,7 @@ class RespUtilTest {
     @Test
     @DisplayName("测试成功响应 - 带数据")
     void testSuccWithData() {
-        String testData = "测试数据";
+        String testData = "test-data";
         BaseRsp<String> response = RespUtil.succ(testData);
         assertEquals(BizCodeEnum.SUCCESS.getVal(), response.getBizCode());
         assertEquals(testData, response.getInnerMsg());
@@ -51,7 +51,7 @@ class RespUtilTest {
     @Test
     @DisplayName("测试成功响应 - 带数据到data字段")
     void testSuccess() {
-        String testData = "测试数据";
+        String testData = "test-data";
         BaseRsp<String> response = RespUtil.success(testData);
         assertEquals(BizCodeEnum.SUCCESS.getVal(), response.getBizCode());
         assertEquals(BizCodeEnum.SUCCESS.getDefaultMsg(), response.getInnerMsg());
@@ -62,7 +62,7 @@ class RespUtilTest {
     @Test
     @DisplayName("测试成功响应 - 带消息")
     void testSuccWithMessage() {
-        String succMsg = "成功消息";
+        String succMsg = "success-msg";
         BaseRsp<Void> response = RespUtil.succ(succMsg);
         assertEquals(BizCodeEnum.SUCCESS.getVal(), response.getBizCode());
         assertEquals(succMsg, response.getInnerMsg());
@@ -73,8 +73,8 @@ class RespUtilTest {
     @Test
     @DisplayName("测试成功响应 - 带内部消息和用户消息")
     void testSuccWithInnerAndUserMessage() {
-        String innerMsg = "内部成功消息";
-        String userMsg = "用户成功消息";
+        String innerMsg = "inner-success-msg";
+        String userMsg = "user-success-msg";
         BaseRsp<Void> response = RespUtil.succ(innerMsg, userMsg);
         assertEquals(BizCodeEnum.SUCCESS.getVal(), response.getBizCode());
         assertEquals(innerMsg, response.getInnerMsg());
@@ -85,7 +85,7 @@ class RespUtilTest {
     @Test
     @DisplayName("测试失败响应 - 带消息")
     void testFail() {
-        String failMsg = "失败消息";
+        String failMsg = "fail-msg";
         BaseRsp<Void> response = RespUtil.fail(failMsg);
         assertEquals(BizCodeEnum.FAIL.getVal(), response.getBizCode());
         assertEquals(failMsg, response.getInnerMsg());
@@ -96,8 +96,8 @@ class RespUtilTest {
     @Test
     @DisplayName("测试失败响应 - 带内部消息和用户消息")
     void testFailWithInnerAndUserMessage() {
-        String innerMsg = "内部失败消息";
-        String userMsg = "用户失败消息";
+        String innerMsg = "inner-fail-msg";
+        String userMsg = "user-fail-msg";
         BaseRsp<Void> response = RespUtil.fail(innerMsg, userMsg);
         assertEquals(BizCodeEnum.FAIL.getVal(), response.getBizCode());
         assertEquals(innerMsg, response.getInnerMsg());
@@ -109,8 +109,8 @@ class RespUtilTest {
     @DisplayName("测试失败响应 - 带业务码")
     void testFailWithBizCode() {
         int bizCode = 10001;
-        String innerMsg = "内部失败消息";
-        String userMsg = "用户失败消息";
+        String innerMsg = "inner-fail-msg";
+        String userMsg = "user-fail-msg";
         BaseRsp<Void> response = RespUtil.fail(bizCode, innerMsg, userMsg);
         assertEquals(bizCode, response.getBizCode());
         assertEquals(innerMsg, response.getInnerMsg());
@@ -121,7 +121,7 @@ class RespUtilTest {
     @Test
     @DisplayName("测试无效响应 - 带消息")
     void testInvalid() {
-        String invalidMsg = "无效消息";
+        String invalidMsg = "invalid-msg";
         BaseRsp<Void> response = RespUtil.invalid(invalidMsg);
         assertEquals(BizCodeEnum.INVALID.getVal(), response.getBizCode());
         assertEquals(invalidMsg, response.getInnerMsg());
@@ -132,8 +132,8 @@ class RespUtilTest {
     @Test
     @DisplayName("测试无效响应 - 带内部消息和用户消息")
     void testInvalidWithInnerAndUserMessage() {
-        String innerMsg = "内部无效消息";
-        String userMsg = "用户无效消息";
+        String innerMsg = "inner-invalid-msg";
+        String userMsg = "user-invalid-msg";
         BaseRsp<Void> response = RespUtil.invalid(innerMsg, userMsg);
         assertEquals(BizCodeEnum.INVALID.getVal(), response.getBizCode());
         assertEquals(innerMsg, response.getInnerMsg());
@@ -144,7 +144,7 @@ class RespUtilTest {
     @Test
     @DisplayName("测试资源未找到响应 - 带消息")
     void testResNotFound() {
-        String notFoundMsg = "资源未找到消息";
+        String notFoundMsg = "not-found-msg";
         BaseRsp<Void> response = RespUtil.resNotFound(notFoundMsg);
         assertEquals(BizCodeEnum.RESOURCE_NOT_FOUND.getVal(), response.getBizCode());
         assertEquals(notFoundMsg, response.getInnerMsg());
@@ -155,8 +155,8 @@ class RespUtilTest {
     @Test
     @DisplayName("测试资源未找到响应 - 带内部消息和用户消息")
     void testResNotFoundWithInnerAndUserMessage() {
-        String innerMsg = "内部资源未找到消息";
-        String userMsg = "用户资源未找到消息";
+        String innerMsg = "inner-not-found-msg";
+        String userMsg = "user-not-found-msg";
         BaseRsp<Void> response = RespUtil.resNotFound(innerMsg, userMsg);
         assertEquals(BizCodeEnum.RESOURCE_NOT_FOUND.getVal(), response.getBizCode());
         assertEquals(innerMsg, response.getInnerMsg());
@@ -167,7 +167,7 @@ class RespUtilTest {
     @Test
     @DisplayName("测试状态错误响应 - 带消息")
     void testBadState() {
-        String badStateMsg = "状态错误消息";
+        String badStateMsg = "bad-state-msg";
         BaseRsp<Void> response = RespUtil.badState(badStateMsg);
         assertEquals(BizCodeEnum.BAD_STATE.getVal(), response.getBizCode());
         assertEquals(badStateMsg, response.getInnerMsg());
@@ -178,8 +178,8 @@ class RespUtilTest {
     @Test
     @DisplayName("测试状态错误响应 - 带内部消息和用户消息")
     void testBadStateWithInnerAndUserMessage() {
-        String innerMsg = "内部状态错误消息";
-        String userMsg = "用户状态错误消息";
+        String innerMsg = "inner-bad-state-msg";
+        String userMsg = "user-bad-state-msg";
         BaseRsp<Void> response = RespUtil.badState(innerMsg, userMsg);
         assertEquals(BizCodeEnum.BAD_STATE.getVal(), response.getBizCode());
         assertEquals(innerMsg, response.getInnerMsg());
@@ -190,7 +190,7 @@ class RespUtilTest {
     @Test
     @DisplayName("测试系统错误响应 - 带消息")
     void testError() {
-        String errorMsg = "系统错误消息";
+        String errorMsg = "error-msg";
         BaseRsp<Void> response = RespUtil.error(errorMsg);
         assertEquals(BizCodeEnum.ERROR.getVal(), response.getBizCode());
         assertEquals(errorMsg, response.getInnerMsg());
@@ -201,8 +201,8 @@ class RespUtilTest {
     @Test
     @DisplayName("测试系统错误响应 - 带内部消息和用户消息")
     void testErrorWithInnerAndUserMessage() {
-        String innerMsg = "内部系统错误消息";
-        String userMsg = "用户系统错误消息";
+        String innerMsg = "inner-error-msg";
+        String userMsg = "user-error-msg";
         BaseRsp<Void> response = RespUtil.error(innerMsg, userMsg);
         assertEquals(BizCodeEnum.ERROR.getVal(), response.getBizCode());
         assertEquals(innerMsg, response.getInnerMsg());

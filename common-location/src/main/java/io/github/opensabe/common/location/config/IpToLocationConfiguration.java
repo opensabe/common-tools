@@ -36,6 +36,9 @@ import io.github.opensabe.common.location.service.WorldCityService;
 import io.github.opensabe.common.location.vo.GeoLocationData;
 import io.github.opensabe.common.location.vo.WorldCityData;
 
+/**
+ * IpToLocationConfiguration Spring 配置类。
+ */
 @Configuration(proxyBeanMethods = false)
 public class IpToLocationConfiguration {
 

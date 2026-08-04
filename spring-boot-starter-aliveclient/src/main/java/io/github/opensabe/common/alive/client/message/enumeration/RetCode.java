@@ -15,6 +15,10 @@
  */
 package io.github.opensabe.common.alive.client.message.enumeration;
 
+/**
+ * RetCode 枚举。
+ * <p>返回码。</p>
+ */
 public enum RetCode {
     SUCCESS(1),
     FAIL(2),
@@ -22,12 +26,16 @@ public enum RetCode {
     PARAM_ERR(4),
     NO_AUTH(5);
 
+/** val 字段。 */
     private int val;
 
     RetCode(int val) {
         this.val = val;
     }
 
+/**
+ * getVal 方法。
+ */
     public int getVal() {
         return val;
     }

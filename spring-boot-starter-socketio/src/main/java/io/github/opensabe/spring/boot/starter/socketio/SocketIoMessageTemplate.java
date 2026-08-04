@@ -23,9 +23,13 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.protocol.Packet;
 
+/**
+ * SocketIoMessageTemplate。
+ */
 public class SocketIoMessageTemplate {
     public static final String USER_ID_ROOM_PREFIX = "uid:";
 
+/** server。 */
     private final SocketIOServer server;
 
     public SocketIoMessageTemplate(SocketIOServer server) {
@@ -54,19 +58,23 @@ public class SocketIoMessageTemplate {
         this.server.getRoomOperations(USER_ID_ROOM_PREFIX + uid).send(packet, ackCallback);
     }
 
+    /** sendEventToUser。 */
     public void sendEventToUser(String uid, String name, SocketIOClient excludedClient, Object... data) {
         this.server.getRoomOperations(USER_ID_ROOM_PREFIX + uid).sendEvent(name, excludedClient, data);
     }
 
+    /** sendEventToUser。 */
     public void sendEventToUser(String uid, String name, Object... data) {
         this.server.getRoomOperations(USER_ID_ROOM_PREFIX + uid).sendEvent(name, data);
     }
 
 
+    /** sendEventToUser。 */
     public <T> void sendEventToUser(String uid, String name, Object data, BroadcastAckCallback<T> ackCallback) {
         this.server.getRoomOperations(USER_ID_ROOM_PREFIX + uid).sendEvent(name, data, ackCallback);
     }
 
+    /** sendEventToUser。 */
     public <T> void sendEventToUser(String uid, String name, Object data, SocketIOClient excludedClient, BroadcastAckCallback<T> ackCallback) {
         this.server.getRoomOperations(USER_ID_ROOM_PREFIX + uid).sendEvent(name, data, excludedClient, ackCallback);
     }
@@ -93,19 +101,23 @@ public class SocketIoMessageTemplate {
         this.server.getRoomOperations(topic).send(packet, ackCallback);
     }
 
+    /** sendEventToTopic。 */
     public void sendEventToTopic(String topic, String name, SocketIOClient excludedClient, Object... data) {
         this.server.getRoomOperations(topic).sendEvent(name, excludedClient, data);
     }
 
+    /** sendEventToTopic。 */
     public void sendEventToTopic(String topic, String name, Object... data) {
         this.server.getRoomOperations(topic).sendEvent(name, data);
     }
 
 
+    /** sendEventToTopic。 */
     public <T> void sendEventToTopic(String topic, String name, Object data, BroadcastAckCallback<T> ackCallback) {
         this.server.getRoomOperations(topic).sendEvent(name, data, ackCallback);
     }
 
+    /** sendEventToTopic。 */
     public <T> void sendEventToTopic(String topic, String name, Object data, SocketIOClient excludedClient, BroadcastAckCallback<T> ackCallback) {
         this.server.getRoomOperations(topic).sendEvent(name, data, excludedClient, ackCallback);
     }

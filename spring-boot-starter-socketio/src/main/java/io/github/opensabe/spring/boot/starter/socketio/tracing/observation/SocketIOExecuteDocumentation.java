@@ -25,19 +25,25 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
 
+/**
+ * SocketIOExecute Observation 文档。
+ */
 public enum SocketIOExecuteDocumentation implements ObservationDocumentation, ObservationCov {
 
     SOCKET_EXECUTE_CONNECT {
+        /** {@inheritDoc} */
         @Override
         public ObservationConvention getConvention() {
             return SocketIOExecuteObservationConnectConvention.defaultConvention;
         }
 
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "socketio.execute.connect";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return SocketIOExecuteObservationConnectConvention.class;
@@ -46,16 +52,19 @@ public enum SocketIOExecuteDocumentation implements ObservationDocumentation, Ob
     },
 
     SOCKET_EXECUTE_DISCONNECT {
+        /** {@inheritDoc} */
         @Override
         public ObservationConvention getConvention() {
             return SocketIOExecuteObservationConnectConvention.defaultConvention;
         }
 
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "socketio.execute.disConnect";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return SocketIOExecuteObservationConnectConvention.class;
@@ -63,16 +72,19 @@ public enum SocketIOExecuteDocumentation implements ObservationDocumentation, Ob
 
     },
     SOCKET_EXECUTE_ON_EVENT {
+        /** {@inheritDoc} */
         @Override
         public ObservationConvention getConvention() {
             return SocketIOExecuteObservationConvention.defaultConvention;
         }
 
+        /** {@inheritDoc} */
         @Override
         public String getName() {
             return "socketio.execute.event";
         }
 
+        /** {@inheritDoc} */
         @Override
         public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
             return SocketIOExecuteObservationConvention.class;
@@ -81,6 +93,7 @@ public enum SocketIOExecuteDocumentation implements ObservationDocumentation, Ob
     private static final Map<String, SocketIOExecuteDocumentation> MAP = Map.of(OnConnect.class.getName(), SOCKET_EXECUTE_CONNECT,
             OnDisconnect.class.getName(), SOCKET_EXECUTE_DISCONNECT, OnEvent.class.getName(), SOCKET_EXECUTE_ON_EVENT);
 
+    /** get。 */
     public static SocketIOExecuteDocumentation get(String name) {
         return MAP.get(name);
     }

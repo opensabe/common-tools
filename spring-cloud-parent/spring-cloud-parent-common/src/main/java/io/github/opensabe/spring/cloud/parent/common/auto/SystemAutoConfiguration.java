@@ -20,6 +20,11 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.common.config.SystemConfiguration;
 
+/**
+ * 系统监控与密钥脱敏自动配置入口。
+ * <p>
+ * 注册内存 RSS 监控、Secret 属性源脱敏等 Bean。
+ */
 @AutoConfiguration
 @Import(SystemConfiguration.class)
 public class SystemAutoConfiguration {

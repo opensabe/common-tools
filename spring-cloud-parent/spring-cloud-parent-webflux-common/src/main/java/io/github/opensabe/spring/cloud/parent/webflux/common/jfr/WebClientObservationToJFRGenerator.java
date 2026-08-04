@@ -24,6 +24,9 @@ import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 将 WebClient {@link ClientRequestObservationContext} Observation 转换为 {@link WebClientRequestJFREvent}。
+ */
 @Log4j2
 public class WebClientObservationToJFRGenerator extends ObservationToJFRGenerator<ClientRequestObservationContext> {
     private final WebClientJFRConfigurationProperties properties;
@@ -32,6 +35,7 @@ public class WebClientObservationToJFRGenerator extends ObservationToJFRGenerato
         this.properties = properties;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Class<ClientRequestObservationContext> getContextClazz() {
         return ClientRequestObservationContext.class;
@@ -53,11 +57,13 @@ public class WebClientObservationToJFRGenerator extends ObservationToJFRGenerato
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldCommitOnStop(ClientRequestObservationContext context) {
         return shouldCommit(context);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean shouldGenerateOnStart(ClientRequestObservationContext context) {
         return shouldGenerate(context);
@@ -98,11 +104,13 @@ public class WebClientObservationToJFRGenerator extends ObservationToJFRGenerato
         webClientRequestJFREvent.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void commitOnStop(ClientRequestObservationContext context) {
         commit(context);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void generateOnStart(ClientRequestObservationContext context) {
         generate(context);

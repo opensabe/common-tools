@@ -15,12 +15,17 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.web.common.config.UndertowXNIOConfiguration;
-import io.github.opensabe.spring.cloud.parent.web.common.config.WebServerConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 
+import io.github.opensabe.spring.cloud.parent.web.common.config.WebServerConfiguration;
+
+/**
+ * Web 服务器相关自动配置入口。
+ * <p>
+ * 导入 {@link WebServerConfiguration}，注册 MVC、优雅关闭、JFR 观测与密钥校验等 Web 层 Bean。
+ */
 @AutoConfiguration
-@Import({WebServerConfiguration.class, UndertowXNIOConfiguration.class})
+@Import({WebServerConfiguration.class})
 public class UndertowAutoConfiguration {
 }

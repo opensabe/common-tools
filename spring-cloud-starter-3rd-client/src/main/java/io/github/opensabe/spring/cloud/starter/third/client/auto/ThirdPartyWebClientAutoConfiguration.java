@@ -20,6 +20,10 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.starter.third.client.conf.ThirdPartyWebClientConfiguration;
 
+/**
+ * ThirdPartyWebClientAutoConfiguration 类。
+ * <p>Third Party Web Client Auto Configuration。</p>
+ */
 @Import(ThirdPartyWebClientConfiguration.class)
 @Configuration(proxyBeanMethods = false)
 public class ThirdPartyWebClientAutoConfiguration {

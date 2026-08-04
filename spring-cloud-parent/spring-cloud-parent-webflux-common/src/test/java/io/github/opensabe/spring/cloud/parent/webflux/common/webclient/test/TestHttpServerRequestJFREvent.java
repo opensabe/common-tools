@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -29,8 +30,8 @@ import org.moditect.jfrunit.JfrEventTest;
 import org.moditect.jfrunit.JfrEvents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -54,14 +55,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @JfrEventTest
 @Log4j2
 @SpringJUnitConfig
-@AutoConfigureObservability
+@AutoConfigureWebTestClient
 @SpringBootTest(
         classes = TestHttpServerRequestJFREvent.TestConfiguration.class,
         properties = {
+                "management.tracing.sampling.probability=1.0",
                 "eureka.client.enabled=false",
         },
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -69,7 +72,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 //jfr 测试需要串行，因为收集的是进程纬度的数据，如果并行会导致数据错乱
 @Execution(ExecutionMode.SAME_THREAD)
 //JFR 测试最好在本地做
+@AutoConfigureTracing
 @Disabled
+@DisplayName("WebFlux HTTP服务端JFR事件测试")
 public class TestHttpServerRequestJFREvent {
     public JfrEvents jfrEvents = new JfrEvents();
     @Autowired
@@ -77,6 +82,7 @@ public class TestHttpServerRequestJFREvent {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    @DisplayName("HttpServerRequest JFR事件字段")
     @Test
     public void test() {
         jfrEvents.reset();

@@ -28,6 +28,9 @@ import io.github.opensabe.common.mybatis.configuration.TypeHandlerSpringHolderCo
 import io.github.opensabe.common.typehandler.OBSService;
 import io.github.opensabe.common.typehandler.OBSTypeEnum;
 
+/**
+ * OBSTypeHandler。
+ */
 public abstract class OBSTypeHandler extends JSONTypeHandler {
 
     public OBSTypeHandler(Class<?> type) {
@@ -59,36 +62,45 @@ public abstract class OBSTypeHandler extends JSONTypeHandler {
         }
     }
 
+    /**
+     * @return obsService
+     */
     public OBSService getObsService() {
         return TypeHandlerSpringHolderConfiguration.getService(type());
     }
 
+    /** genId。 */
     public String genId() {
         return TypeHandlerSpringHolderConfiguration.getUniqueID().getUniqueId(type().getIdShortName());
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object getNullableResult(ResultSet rs, String columnName) throws SQLException {
         var key = rs.getString(columnName);
         return transform(key);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         var key = rs.getString(columnIndex);
         return transform(key);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         var key = cs.getString(columnIndex);
         return transform(key);
     }
 
+    /** type。 */
     protected abstract OBSTypeEnum type();
 
 
+    /** transform。 */
     private Object transform(String key) {
         if (StringUtils.isNotBlank(key)) {
             var json = getObsService().select(key);

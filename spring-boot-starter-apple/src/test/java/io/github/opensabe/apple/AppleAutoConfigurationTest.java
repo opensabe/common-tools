@@ -40,7 +40,8 @@ import com.apple.itunes.storekit.model.TransactionInfoResponse;
 import com.apple.itunes.storekit.verification.SignedDataVerifier;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import io.github.opensabe.apple.appstoreconnectapi.AppleStoreConnectAPIClient;
 import io.github.opensabe.apple.appstoreconnectapi.inapppurchasesv2.InAppPurchasesV2Response;
@@ -49,6 +50,9 @@ import io.github.opensabe.apple.appstoreconnectapi.subscriptiongroup.Subscriptio
 import static org.assertj.core.api.Assertions.assertThat;
 
 //todo 在 github action 里面加入 secret，之后通过环境变量读取
+/**
+ * Apple Starter 自动配置与 API 集成测试（需外部密钥，默认禁用）。
+ */
 @Disabled
 @DisplayName("Apple自动配置测试")
 public class AppleAutoConfigurationTest {
@@ -87,6 +91,9 @@ public class AppleAutoConfigurationTest {
             )
             .withConfiguration(AutoConfigurations.of(AppleAutoConfiguration.class));
 
+    /**
+     * 启用内购配置时应创建属性 Bean 与核心客户端。
+     */
     @Test
     @DisplayName("测试Apple自动配置 - 验证Bean创建和属性配置")
     public void appleAutoConfigurationTest() {
@@ -106,6 +113,9 @@ public class AppleAutoConfigurationTest {
                 });
     }
 
+    /**
+     * 应能解析 App 收据并解码交易信息。
+     */
     @Test
     @DisplayName("测试Apple内购收据解码 - 验证收据解析功能")
     public void appleInPurchaseReceiptDecodeTest() {
@@ -122,6 +132,9 @@ public class AppleAutoConfigurationTest {
                 });
     }
 
+    /**
+     * 应能解码订阅初始购买通知载荷。
+     */
     @Test
     @DisplayName("测试Apple内购通知解码 - 订阅初始购买")
     public void appleInPurchaseNotifyDecodeSubscribedInitialBuyTest() {
@@ -141,6 +154,9 @@ public class AppleAutoConfigurationTest {
                 });
     }
 
+    /**
+     * 应能解码续费通知载荷。
+     */
     @Test
     @DisplayName("测试Apple内购通知解码 - 续费通知")
     public void appleInPurchaseNotifyDecodeDidRenewTest() {
@@ -155,6 +171,9 @@ public class AppleAutoConfigurationTest {
                 });
     }
 
+    /**
+     * 应能解码自愿过期通知载荷。
+     */
     @Test
     @DisplayName("测试Apple内购通知解码 - 自愿过期")
     public void appleInPurchaseNotifyDecodeExpiredVoluntaryTest() {
@@ -166,6 +185,9 @@ public class AppleAutoConfigurationTest {
                 });
     }
 
+    /**
+     * 禁用内购配置时不应创建 ReceiptUtility Bean。
+     */
     @Test
     @DisplayName("测试Apple自动配置禁用 - 验证Bean不创建")
     public void appleAutoConfigurationNoAutoConfigurationTest() {
@@ -175,6 +197,9 @@ public class AppleAutoConfigurationTest {
                 });
     }
 
+    /**
+     * 根证书资源应可正常加载。
+     */
     @Test
     @DisplayName("测试根证书加载 - 验证证书文件存在")
     public void rootCertificateTest() {
@@ -183,6 +208,9 @@ public class AppleAutoConfigurationTest {
     }
 
 
+    /**
+     * Store Connect API 客户端应可调用内购与订阅接口。
+     */
     @Test
     @DisplayName("测试Apple Store Connect API客户端 - 验证API调用")
     public void appleStoreConnectApiClientTest() {
@@ -199,6 +227,9 @@ public class AppleAutoConfigurationTest {
     }
 
 
+    /**
+     * 内购 Bearer Token 生成器应能产出令牌。
+     */
     @Test
     @DisplayName("测试内购签名 - 验证Bearer Token生成")
     public void useInPurchaseSign() {
@@ -212,6 +243,9 @@ public class AppleAutoConfigurationTest {
         System.out.println(s);
     }
 
+    /**
+     * Apple 登录客户端密钥生成器应能产出令牌。
+     */
     @Test
     @DisplayName("测试Apple登录签名 - 验证客户端密钥生成")
     public void useAppleLoginSign() {
@@ -227,6 +261,9 @@ public class AppleAutoConfigurationTest {
         System.out.println(appleLoginClientSecretAuthenticator.generateToken());
     }
 
+    /**
+     * 启用登录配置时应创建 Web/iOS 登录客户端 Bean。
+     */
     @Test
     @DisplayName("测试Apple登录Bean - 验证登录相关Bean创建")
     public void appleLoginBeanTest() {
@@ -238,28 +275,40 @@ public class AppleAutoConfigurationTest {
         });
     }
 
+    /**
+     * 使用授权码换取 Apple 登录 Token。
+     */
     @Test
+    @DisplayName("Apple登录授权码换Token")
     public void authTokenTest() {
         contextRunner.run(context -> {
             AppleLoginAPIClient appleWebLoginAPIClient = context.getBean("appleWebLoginAPIClient", AppleLoginAPIClient.class);
             String code = "";
             AppleLoginAPIClient.TokenResponse tokenResponse = appleWebLoginAPIClient.authToken(code);
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = JsonMapper.builder().build();
             System.out.println(objectMapper.writeValueAsString(tokenResponse));
         });
     }
 
+    /**
+     * 获取 Apple 登录公钥列表。
+     */
     @Test
+    @DisplayName("Apple登录公钥列表")
     public void authKeysTest() {
         contextRunner.run(context -> {
             AppleLoginAPIClient appleWebLoginAPIClient = context.getBean("appleWebLoginAPIClient", AppleLoginAPIClient.class);
             AppleLoginAPIClient.AuthKeys authKeys = appleWebLoginAPIClient.authKeys();
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = JsonMapper.builder().build();
             System.out.println(objectMapper.writeValueAsString(authKeys));
         });
     }
 
+    /**
+     * 解码 Apple 登录 id_token 并读取标准声明。
+     */
     @Test
+    @DisplayName("Apple登录id_token解码")
     public void decodeIdTokenTest() {
         String idToken = "${idToken}";
         DecodedJWT decode = JWT.decode(idToken);
@@ -270,7 +319,11 @@ public class AppleAutoConfigurationTest {
         String email = decode.getClaims().get("email").asString();
     }
 
+    /**
+     * 使用授权码验证 Apple 登录用户。
+     */
     @Test
+    @DisplayName("Apple登录用户验证")
     public void verifyUserTest() {
         contextRunner.run(context -> {
             assertThat(context).hasBean("appleWebLoginUtility");

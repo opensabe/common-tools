@@ -15,6 +15,8 @@
  */
 package io.github.opensabe.common.mybatis.test;
 
+import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +27,17 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import lombok.extern.log4j.Log4j2;
 
 
+/**
+ * TestObservation。
+ */
+@DisplayName("Observation测试")
 @Log4j2
 public class TestObservation extends BaseMybatisTest {
 
+    /** user 管理器。 */
     @Autowired
     private UserManager userManager;
+    /** unifiedObservation 工厂。 */
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 

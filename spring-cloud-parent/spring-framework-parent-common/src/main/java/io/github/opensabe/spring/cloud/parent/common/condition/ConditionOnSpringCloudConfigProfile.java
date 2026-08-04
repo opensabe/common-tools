@@ -29,6 +29,10 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
+ * 基于 {@code spring.cloud.config.profile} 的条件装配注解，语义类似 {@link org.springframework.context.annotation.Profile}。
+ * <p>
+ * 由 {@link SpringCloudProfileCondition} 评估是否匹配。
+ *
  * @see org.springframework.context.annotation.Profile
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -36,16 +40,27 @@ import org.springframework.util.StringUtils;
 @Documented
 @Conditional(SpringCloudProfileCondition.class)
 public @interface ConditionOnSpringCloudConfigProfile {
+    /** 待匹配的 profile 表达式数组。 */
     String[] value();
 
+    /** profile 匹配谓词，默认精确相等。 */
     Predicate predicate() default Predicate.equals;
 
+    /**
+     * {@code spring.cloud.config.profile} 与注解 {@link #value()} 的匹配策略。
+     */
     enum Predicate {
 
+        /** 精确相等（支持逗号分隔多值任一命中）。 */
         equals(Objects::equals),
 
+        /** 子串包含（如 {@code au-online}、{@code us-online} 均命中 {@code online}）。 */
+        contains((actual, pattern) -> actual != null && pattern != null && actual.contains(pattern)),
+
+        /** 正则匹配。 */
         regex((s, s2) -> s.matches(s2)),
 
+        /** Ant 风格路径匹配（分隔符 {@code -}）。 */
         ant((s, s2) -> new AntPathMatcher("-").match(s2, s)),
         ;
 
@@ -55,9 +70,19 @@ public @interface ConditionOnSpringCloudConfigProfile {
             this.predicate = predicate;
         }
 
+        /**
+         * 判断 {@code s}（实际 profile，可逗号分隔）是否与模式 {@code s2} 匹配。
+         *
+         * @param s  实际 profile 值
+         * @param s2 注解中的模式
+         * @return 是否匹配
+         */
         public boolean matches(String s, String s2) {
+            if (!StringUtils.hasText(s)) {
+                return false;
+            }
             return Arrays.stream(StringUtils.commaDelimitedListToStringArray(StringUtils.trimAllWhitespace(s)))
-                    .anyMatch(s3 -> predicate.apply(s3, s2));
+                    .anyMatch(s3 -> Boolean.TRUE.equals(predicate.apply(s3, s2)));
         }
     }
 }

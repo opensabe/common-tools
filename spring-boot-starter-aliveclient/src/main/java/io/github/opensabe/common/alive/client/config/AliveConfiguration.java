@@ -35,14 +35,23 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import static io.github.opensabe.common.alive.client.config.AliveProperties.ROCKET_CLIENT_NAME;
 
 
+/**
+ * AliveConfiguration 类。
+ * <p>Alive 推送Configuration。</p>
+ */
 //@Log4j2
 @Configuration(proxyBeanMethods = false)
 public class AliveConfiguration {
+/** aliveProperties 字段。 */
     @Autowired
     private AliveProperties aliveProperties;
+/** unifiedObservationFactory 字段。 */
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+/**
+ * rocketAliveClient 方法。
+ */
     @Primary
     @Bean(ROCKET_CLIENT_NAME)
     @ConditionalOnProperty(prefix = "alive.push", name = "rocketmq.name-server")

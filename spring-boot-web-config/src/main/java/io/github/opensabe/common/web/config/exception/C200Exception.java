@@ -24,8 +24,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import io.github.opensabe.common.web.config.base.ErrResponse;
 import io.github.opensabe.common.web.config.base.ErrorUtil;
 
+/**
+ * C200Exception 类。
+ * <p>C200异常。</p>
+ */
 @ResponseStatus(HttpStatus.OK)
 public class C200Exception extends RESTFull2xxBaseException implements Serializable {
+/** serialVersionUID 字段。 */
     private static final long serialVersionUID = -2312393803704717855L;
 
     public C200Exception(String message) {

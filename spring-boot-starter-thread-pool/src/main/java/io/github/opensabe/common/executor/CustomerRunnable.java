@@ -22,12 +22,18 @@ import io.micrometer.tracing.TraceContext;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * CustomerRunnable。
+ */
 @Log4j2
 public class CustomerRunnable implements JFRecordable<Void>, Traceable<Void>, Runnable {
+/** runnable。 */
     private final Runnable runnable;
 
+/** observation。 */
     @Getter
     private final Observation observation;
+/** threadTaskJFREvent。 */
     private final ThreadTaskJFREvent threadTaskJFREvent;
 
     public CustomerRunnable(UnifiedObservationFactory unifiedObservationFactory, Runnable runnable) {
@@ -46,17 +52,20 @@ public class CustomerRunnable implements JFRecordable<Void>, Traceable<Void>, Ru
         threadTaskJFREvent.begin();
     }
 
+    /** {@inheritDoc} */
     @Override
     public ThreadTaskJFREvent getEvent() {
         return this.threadTaskJFREvent;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Void inRecord() {
         return trace();
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public Void inTrace() {
         try {
@@ -69,6 +78,7 @@ public class CustomerRunnable implements JFRecordable<Void>, Traceable<Void>, Ru
         return null;
     }
 
+    /** {@inheritDoc} — 执行任务逻辑。 */
     @Override
     public void run() {
         record();

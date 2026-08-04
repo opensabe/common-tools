@@ -38,22 +38,29 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 
+/**
+ * TypeHandler 测试。
+ */
 @DisplayName("MyBatis类型处理器测试")
 public class TypeHandlerTest {
 
     private static final String COL_NAME = "Test";
+/** TEST_POJO。 */
     private static final TestPOJO TEST_POJO =
             new TestPOJO("key", "val", List.of(new TestPOJO("key", "val", null)));
     ResultSet rs;
 
+    /**
+     * @param up 待设置值
+     */
     @BeforeEach
     public void setup() throws Exception {
         rs = Mockito.mock(ResultSet.class);
         Mockito.when(rs.next()).thenReturn(true).thenReturn(false);
     }
 
+    @DisplayName("验证jSONTypeHandler_InsertJSON_ExpectInserted")
     @Test
-    @DisplayName("测试JSON类型处理器 - 插入JSON对象")
     public void testJSONTypeHandler_InsertJSON_ExpectInserted() throws Exception {
         AtomicReference<String> actual = new AtomicReference<>();
         PreparedStatement ps = Mockito.mock(PreparedStatement.class);
@@ -69,8 +76,8 @@ public class TypeHandlerTest {
         assertEqual(TEST_POJO, JSONObject.parseObject(actual.get(), TestPOJO.class));
     }
 
+    @DisplayName("验证jSONTypeHandler_InsertNull_ExpectNull")
     @Test
-    @DisplayName("测试JSON类型处理器 - 插入null值")
     public void testJSONTypeHandler_InsertNull_ExpectNull() throws Exception {
         AtomicReference<String> res = new AtomicReference<>();
         PreparedStatement ps = Mockito.mock(PreparedStatement.class);
@@ -87,22 +94,23 @@ public class TypeHandlerTest {
 
     }
 
+    @DisplayName("验证jSONTypeHandler_NormalJSON_ExpectMatch")
     @Test
-    @DisplayName("测试JSON类型处理器 - 正常JSON反序列化")
     public void testJSONTypeHandler_NormalJSON_ExpectMatch() throws Exception {
         Mockito.when(rs.getString(COL_NAME)).thenReturn(JSONObject.toJSONString(TEST_POJO));
         TestPOJO actual = (TestPOJO) new JSONTypeHandler(TestPOJO.class).getNullableResult(rs, COL_NAME);
         assertEqual(TEST_POJO, actual);
     }
 
+    @DisplayName("验证jSONTypeHandler_NullValue_ExpectNull")
     @Test
-    @DisplayName("测试JSON类型处理器 - null值反序列化")
     public void testJSONTypeHandler_NullValue_ExpectNull() throws Exception {
         Mockito.when(rs.getString(COL_NAME)).thenReturn(null);
         TestPOJO res = (TestPOJO) new JSONTypeHandler(TestPOJO.class).getNullableResult(rs, COL_NAME);
         Assertions.assertNull(res);
     }
 
+    /** assertEqual。 */
     private void assertEqual(TestPOJO expect, TestPOJO actual) {
         Assertions.assertEquals(expect.getKey(), actual.getKey());
         Assertions.assertEquals(expect.getVal(), actual.getVal());
@@ -118,8 +126,11 @@ public class TypeHandlerTest {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class TestPOJO {
+/** key。 */
         private String key;
+/** val。 */
         private String val;
+/** testPOJOS。 */
         private List<TestPOJO> testPOJOS;
     }
 }

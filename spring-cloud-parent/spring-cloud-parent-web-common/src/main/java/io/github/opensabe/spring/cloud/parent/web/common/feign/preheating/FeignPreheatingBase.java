@@ -17,7 +17,17 @@ package io.github.opensabe.spring.cloud.parent.web.common.feign.preheating;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
+/**
+ * Feign 客户端预热基础接口。
+ * <p>
+ * 预热 FeignClient 可继承此接口并在应用就绪后调用 {@link #heartbeat()} 触发首次请求。
+ */
 public interface FeignPreheatingBase {
+    /**
+     * 调用健康检查端点完成预热。
+     *
+     * @return 健康检查响应体
+     */
     @GetMapping("/actuator/health")
     String heartbeat();
 }

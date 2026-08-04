@@ -20,12 +20,13 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -57,11 +58,13 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
-@AutoConfigureObservability
+@AutoConfigureWebTestClient
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
         properties = {
+                "management.tracing.sampling.probability=1.0",
                 "spring.main.allow-circular-references=true",
                 "eureka.client.enabled=false",
                 "webclient.configs.testService.baseUrl=http://testService",
@@ -82,6 +85,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         },
         classes = TestGatewayObservation.MockConfig.class
 )
+@AutoConfigureTracing
+@DisplayName("Gateway观测链路测试")
 public class TestGatewayObservation extends CommonMicroServiceTest {
     private static final String serviceId = "testService";
     //不同的测试方法的类对象不是同一个对象，会重新生成，保证互相没有影响
@@ -109,6 +114,7 @@ public class TestGatewayObservation extends CommonMicroServiceTest {
         loadBalancerClientFactoryInstance.setServiceInstanceListSupplier(serviceInstanceListSupplier);
     }
 
+    @DisplayName("Gateway请求携带Observation与trace")
     @Test
     public void testObservation() {
         //验证从 Spring Cloud Gateway 到后端服务的调用，是否会传递 traceId

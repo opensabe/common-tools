@@ -24,6 +24,9 @@ import io.github.opensabe.common.location.vo.IpLocation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * IpApiHttpFetchIpInfoService 服务接口/实现。
+ */
 public class IpApiHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<IpApiHttpFetchIpInfoService.Response> {
     @Override
     protected Class<Response> clazz() {
@@ -60,9 +63,12 @@ public class IpApiHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<
                 .build();
     }
 
+    /**
+ * Response。
+ */
     @NoArgsConstructor
     @Data
-    public static class Response {
+public static class Response {
 
         @JsonProperty("ip")
         private String ip;

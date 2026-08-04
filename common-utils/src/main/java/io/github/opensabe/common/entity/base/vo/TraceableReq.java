@@ -20,13 +20,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Traceable request format
- * Extends this to enhance traceability
+ * 可追踪请求基类，携带来源系统、traceId 与时间戳。
  */
 @Getter
 @Setter
 public class TraceableReq {
-    private String src;                               // src system SrcEnum.val
-    private String traceId;                           // traceId for auditing
-    private long ts;                                  // current system timestamp
+    /** 来源系统标识（{@code SrcEnum.val}）。 */
+    private String src;
+    /** 审计用 traceId。 */
+    private String traceId;
+    /** 当前系统时间戳（毫秒）。 */
+    private long ts;
 }

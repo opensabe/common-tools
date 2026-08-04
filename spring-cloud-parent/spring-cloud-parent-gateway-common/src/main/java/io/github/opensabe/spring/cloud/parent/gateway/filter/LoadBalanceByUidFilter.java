@@ -50,6 +50,7 @@ public class LoadBalanceByUidFilter extends AbstractTracedFilter {
     @Autowired
     private GatewayLoadBalanceByUidProperties gatewayLoadBalanceByUidProperties;
 
+    /** {@inheritDoc} */
     @Override
     public Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -66,12 +67,14 @@ public class LoadBalanceByUidFilter extends AbstractTracedFilter {
         return chain.filter(exchange);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int ordered() {
         //顺序需要在负载均衡之前
         return ReactiveLoadBalancerClientFilter.LOAD_BALANCER_CLIENT_FILTER_ORDER - 1;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean extraCondition(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();

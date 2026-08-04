@@ -33,6 +33,7 @@ import io.micrometer.observation.Observation;
  */
 public class MapListableRecursiveTask<T, R> extends SegmentRecursiveTask<T, List<R>> {
 
+/** transformer。 */
     private final Function<T, R> transformer;
 
     public MapListableRecursiveTask(int capacity, List<T> list, Function<T, R> transformer, Observation observation) {
@@ -40,6 +41,7 @@ public class MapListableRecursiveTask<T, R> extends SegmentRecursiveTask<T, List
         this.transformer = transformer;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected List<R> compute0() {
         var task = segmentation();
@@ -49,11 +51,13 @@ public class MapListableRecursiveTask<T, R> extends SegmentRecursiveTask<T, List
         return aggregate(invokeAll(task).stream().map(ListableRecursiveTask::join));
     }
 
+    /** {@inheritDoc} */
     @Override
     protected List<R> aggregate(Stream<List<R>> result) {
         return result.flatMap(List::stream).collect(Collectors.toList());
     }
 
+    /** {@inheritDoc} */
     @Override
     protected SegmentRecursiveTask<T, List<R>> clone(List<T> current) {
         return new MapListableRecursiveTask<>(capacity, current, transformer, observation);

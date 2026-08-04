@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
@@ -38,13 +38,15 @@ import io.micrometer.tracing.TraceContext;
 import lombok.extern.log4j.Log4j2;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @JfrEventTest
-@AutoConfigureObservability
 @SpringBootTest(properties = {
-        "management.tracing.sampling.probability=1",
-})
+                "management.tracing.sampling.probability=1.0",
+        "management.tracing.sampling.probability=1",})
+@AutoConfigureTracing
 @Log4j2
+@DisplayName("第三方WebClient集成测试")
 public class TestThirdPartyWebClient extends CommonMicroServiceTest {
 
     @Autowired
@@ -60,6 +62,7 @@ public class TestThirdPartyWebClient extends CommonMicroServiceTest {
     /**
      * 测试发出请求 Header 中包含 Accept-Encoding: gzip
      */
+    @DisplayName("gzip压缩响应解码")
     @Test
     public void testCompressed() {
         WebClient webClient = thirdPartyWebClientNamedContextFactory.getWebClient("http-bin");
@@ -68,6 +71,7 @@ public class TestThirdPartyWebClient extends CommonMicroServiceTest {
         Assertions.assertTrue(accept.contains("gzip"));
     }
 
+    @DisplayName("第三方WebClient Observation传播")
     @Test
     public void testObservation() {
         WebClient webClient = thirdPartyWebClientNamedContextFactory.getWebClient("http-bin");

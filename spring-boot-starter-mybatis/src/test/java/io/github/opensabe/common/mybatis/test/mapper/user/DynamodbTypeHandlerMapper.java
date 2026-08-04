@@ -24,8 +24,17 @@ import io.github.opensabe.common.mybatis.base.BaseMapper;
 import io.github.opensabe.common.mybatis.test.po.DynamodbPO;
 import io.github.opensabe.common.mybatis.types.DynamoDbTypeHandler;
 
+/**
+ * DynamoDB TypeHandler MyBatis Mapper 测试接口。
+ */
 public interface DynamodbTypeHandlerMapper extends BaseMapper<DynamodbPO> {
 
+    /**
+     * 按 ID 查询（{@code order_info} 经 {@link DynamoDbTypeHandler}）。
+     *
+     * @param id 主键
+     * @return PO 实例
+     */
     @Results({
             @Result(column = "order_info", property = "orderInfo", typeHandler = DynamoDbTypeHandler.class)
     })

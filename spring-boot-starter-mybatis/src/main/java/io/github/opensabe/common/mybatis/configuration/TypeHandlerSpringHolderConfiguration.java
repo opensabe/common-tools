@@ -32,8 +32,12 @@ import io.github.opensabe.common.utils.SpringUtil;
 public class TypeHandlerSpringHolderConfiguration {
 
     private static final Map<OBSTypeEnum, OBSService> OBS_SERVICES = new HashMap<>();
+/** uniqueID。 */
     private static UniqueID uniqueID;
 
+    /**
+     * @return service
+     */
     public static OBSService getService(OBSTypeEnum type) {
         if (OBS_SERVICES.containsKey(type)) {
             return OBS_SERVICES.get(type);
@@ -46,6 +50,9 @@ public class TypeHandlerSpringHolderConfiguration {
         return service;
     }
 
+    /**
+     * @return uniqueID
+     */
     public static UniqueID getUniqueID() {
         if (Objects.isNull(uniqueID)) {
             uniqueID = SpringUtil.getBean(UniqueID.class);

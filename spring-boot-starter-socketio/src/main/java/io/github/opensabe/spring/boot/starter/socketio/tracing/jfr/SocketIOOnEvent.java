@@ -24,6 +24,9 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Socket.IO OnEvent 事件 JFR 记录。
+ */
 @Getter
 @Setter
 @Category({"observation", "Socket-OnEvent"})
@@ -31,12 +34,16 @@ import lombok.Setter;
 @StackTrace(value = false)
 public class SocketIOOnEvent extends Event {
 
+/** traceId。 */
     private String traceId;
 
+/** spanId。 */
     private String spanId;
 
+/** sessionId。 */
     private String sessionId;
 
+/** eventName。 */
     private String eventName;
 
     public SocketIOOnEvent(SocketIOClient socketIOClient, String eventName) {

@@ -20,6 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * BufferedCountDownLatchElement。
+ */
 @Log4j2
 public abstract class BufferedCountDownLatchElement extends BufferedElement {
     private final CountDownLatch countDownLatch = new CountDownLatch(1);

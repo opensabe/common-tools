@@ -20,6 +20,12 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.cloud.parent.common.config.CustomizedEurekaConfiguration;
 
+/**
+ * Eureka 实例注册定制自动配置入口。
+ * <p>
+ * 注册 {@link io.github.opensabe.spring.cloud.parent.common.eureka.EurekaInstanceConfigBeanCustomizer}
+ * 扩展链，支持向 metadata 注入节点与可用区信息。
+ */
 @AutoConfiguration
 @Import({CustomizedEurekaConfiguration.class})
 public class CustomizedEurekaAutoConfiguration {

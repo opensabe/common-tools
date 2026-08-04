@@ -34,6 +34,7 @@ public class DynamoDbTypeHandler extends OBSTypeHandler {
         super(type);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected OBSTypeEnum type() {
         return OBSTypeEnum.DYNAMODB;

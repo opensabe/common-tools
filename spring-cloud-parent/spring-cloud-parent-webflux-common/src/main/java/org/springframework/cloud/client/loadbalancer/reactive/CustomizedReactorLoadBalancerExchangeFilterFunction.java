@@ -104,6 +104,7 @@ public class CustomizedReactorLoadBalancerExchangeFilterFunction implements Load
         this.transformers = transformers;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction next) {
         URI originalUrl = clientRequest.url();
@@ -164,6 +165,13 @@ public class CustomizedReactorLoadBalancerExchangeFilterFunction implements Load
         });
     }
 
+    /**
+     * 选择服务实例并附带 Observation 上下文。
+     *
+     * @param serviceId 服务 ID
+     * @param request   负载均衡请求
+     * @return 实例选择结果
+     */
     protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<RequestDataContext> request) {
         ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory.getInstance(serviceId);
         if (loadBalancer == null) {

@@ -18,10 +18,20 @@ package io.github.opensabe.common.utils;
 import java.text.ParseException;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+/**
+ * {@link DateUtil} 时区字符串解析测试。
+ */
+@DisplayName("DateUtil 时区解析测试")
 class DateUtilTests {
+
+    /**
+     * 各时区格式字符串应正确转换为 epoch 毫秒。
+     */
     @Test
+    @DisplayName("时区字符串转时间戳")
     void changeTimeZoneStringToStamp() throws ParseException {
         Assertions.assertEquals(DateUtil.changeTimeZoneStringToStamp("2019-03-13 15:54:00 GMT+0800"), 1552463640000L);
         Assertions.assertEquals(DateUtil.changeTimeZoneStringToStamp("2019-03-13 05:02:46 UTC"), 1552453366000L);

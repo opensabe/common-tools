@@ -20,14 +20,22 @@ import io.github.opensabe.common.utils.GzipUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * A utility class to encode message
+ * RocketMQ 消息体编解码工具：超大消息 Gzip+Base64 压缩，并提供日志截断。
  */
 @Slf4j
 public class MQMessageUtil {
 
-    private static final int MAX_MESSAGE_SIZE = 1024 * 1024; /* aka 1MB */
+    /** 单条消息最大字节数（1MB）。 */
+    private static final int MAX_MESSAGE_SIZE = 1024 * 1024;
+    /** 压缩消息前缀标记。 */
     private static final String COMPRESSED_PREFIX = "compressed.";
 
+    /**
+     * 编码字符串消息；超过 {@link #MAX_MESSAGE_SIZE} 时压缩并加前缀。
+     *
+     * @param message 原始消息
+     * @return 编码后的消息
+     */
     public static String encode(String message) {
         if (message == null || message.getBytes().length < MAX_MESSAGE_SIZE) {
             return message;
@@ -43,17 +51,22 @@ public class MQMessageUtil {
     }
 
     /**
-     * if message size < {@link #MAX_MESSAGE_SIZE} compress and base64-encode the message and add prefix {@link #COMPRESSED_PREFIX}
-     * the encoded data: `{@link #COMPRESSED_PREFIX}{@param message}`
+     * 编码 {@link BaseMQMessage} 的 {@code data} 字段。
      *
-     * @param message message to be encoded
-     * @return encoded message
+     * @param message 待编码信封
+     * @return 同一信封实例（{@code data} 已替换）
      */
     public static BaseMQMessage encode(BaseMQMessage message) {
         message.setData(encode(message.getData()));
         return message;
     }
 
+    /**
+     * 解码字符串消息；带 {@link #COMPRESSED_PREFIX} 前缀时解压。
+     *
+     * @param message 编码消息
+     * @return 解码后的明文
+     */
     public static String decode(String message) {
         if (message == null || !message.startsWith(COMPRESSED_PREFIX)) {
             return message;
@@ -63,17 +76,22 @@ public class MQMessageUtil {
     }
 
     /**
-     * if the message is prefixed with {@link #COMPRESSED_PREFIX}
-     * remove the prefix and base64-decode and decompress the message
+     * 解码 {@link BaseMQMessage} 的 {@code data} 字段。
      *
-     * @param message message to be decoded
-     * @return decoded message
+     * @param message 待解码信封
+     * @return 同一信封实例（{@code data} 已替换）
      */
     public static BaseMQMessage decode(BaseMQMessage message) {
         message.setData(decode(message.getData()));
         return message;
     }
 
+    /**
+     * 截断过长消息体用于日志输出（保留首尾各 1000 字符）。
+     *
+     * @param body 原始消息体
+     * @return 截断后的文本，{@code null} 输入返回 {@code null}
+     */
     public static String trimBodyForLog(String body) {
         if (body == null) {
             return null;

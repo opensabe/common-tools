@@ -25,9 +25,10 @@ import com.apple.itunes.storekit.client.APIException;
 import com.apple.itunes.storekit.client.BearerTokenAuthenticator;
 import com.apple.itunes.storekit.model.ErrorPayload;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import io.github.opensabe.apple.appstoreconnectapi.inapppurchasesv2.InAppPurchasesV2Response;
 import io.github.opensabe.apple.appstoreconnectapi.subscriptiongroup.SubscriptionGroupsResponse;
@@ -40,33 +41,66 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+/**
+ * App Store Connect API（{@code api.appstoreconnect.apple.com}）轻量客户端。
+ * <p>
+ * 基于 Apple {@link BearerTokenAuthenticator} 与 OkHttp；当前暴露内购 V2 与订阅组查询。
+ */
 public class AppleStoreConnectAPIClient {
+
+    /** App Store Connect API 根 URL。 */
     private static final String BASE_URL = "https://api.appstoreconnect.apple.com";
+
+    /** JSON 请求体 MediaType。 */
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
+    /** HTTP 客户端。 */
     private final OkHttpClient httpClient;
+
+    /** JWT Bearer 令牌生成器。 */
     private final BearerTokenAuthenticator bearerTokenAuthenticator;
+
+    /** 解析自 {@link #BASE_URL} 的基址。 */
     private final HttpUrl urlBase = HttpUrl.parse(BASE_URL);
+
+    /** Jackson 3 映射器。 */
     private final ObjectMapper objectMapper;
 
+    /** App Store 应用 numeric ID。 */
     private final Long appleStoreId;
 
+    /**
+     * @param signingKey 私钥材料
+     * @param keyId 密钥 ID
+     * @param issuerId Issuer ID
+     * @param bundleId Bundle ID
+     * @param appStoreId App Store 应用 ID
+     */
     public AppleStoreConnectAPIClient(String signingKey, String keyId, String issuerId, String bundleId, Long appStoreId) {
         this.bearerTokenAuthenticator = new BearerTokenAuthenticator(signingKey, keyId, issuerId, bundleId);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         this.httpClient = builder.build();
-        this.objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
+        this.objectMapper = JsonMapper.builder()
+                .changeDefaultVisibility(v -> v
                         .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                         .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withCreatorVisibility(JsonAutoDetect.Visibility.NONE))
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, Boolean.FALSE);
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
         this.appleStoreId = appStoreId;
     }
 
-
+    /**
+     * 构造带 Bearer 认证的 HTTP 请求并执行。
+     *
+     * @param path API 路径
+     * @param method HTTP 方法
+     * @param queryParameters 查询参数
+     * @param body 可选 JSON 请求体
+     * @return 原始响应（调用方须关闭）
+     */
     private Response makeRequest(String path, String method, Map<String, List<String>> queryParameters, Object body) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.addHeader("Authorization", "Bearer " + bearerTokenAuthenticator.generateToken());
@@ -89,29 +123,46 @@ public class AppleStoreConnectAPIClient {
         return getResponse(requestBuilder.build());
     }
 
+    /**
+     * 同步执行 OkHttp 调用。
+     *
+     * @param request 请求
+     * @return 响应
+     */
     private Response getResponse(Request request) throws IOException {
         Call call = httpClient.newCall(request);
         return call.execute();
     }
 
+    /**
+     * 执行 API 调用并解析 JSON；非 2xx 时解析 {@link ErrorPayload} 并抛出 {@link APIException}。
+     *
+     * @param path 路径
+     * @param method 方法
+     * @param queryParameters 查询参数
+     * @param body 请求体
+     * @param clazz 响应类型
+     * @param <T> 响应类型
+     * @return 反序列化结果
+     * @throws IOException IO 错误
+     * @throws APIException Apple API 错误
+     */
     private <T> T makeHttpCall(String path, String method, Map<String, List<String>> queryParameters, Object body, Class<T> clazz) throws IOException, APIException {
         try (Response r = makeRequest(path, method, queryParameters, body)) {
             if (r.code() >= 200 && r.code() < 300) {
                 if (clazz.equals(Void.class)) {
                     return null;
                 }
-                // Success
                 ResponseBody responseBody = r.body();
                 if (responseBody == null) {
                     throw new RuntimeException("Response code was 2xx but no body returned");
                 }
                 try {
                     return objectMapper.readValue(responseBody.charStream(), clazz);
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     throw new APIException(r.code(), e);
                 }
             } else {
-                // Best effort to decode the body
                 try {
                     ResponseBody responseBody = r.body();
                     if (responseBody != null) {
@@ -132,40 +183,26 @@ public class AppleStoreConnectAPIClient {
         }
     }
 
+    /**
+     * 列出应用的内购 V2 产品。
+     *
+     * @return 内购 V2 响应
+     * @throws APIException API 错误
+     * @throws IOException IO 错误
+     */
     public InAppPurchasesV2Response inAppPurchasesV2() throws APIException, IOException {
         return makeHttpCall("/v1/apps/" + appleStoreId + "/inAppPurchasesV2", "GET", Map.of(), null, InAppPurchasesV2Response.class);
     }
 
-
+    /**
+     * 列出订阅组下的订阅产品。
+     *
+     * @param productGroupId 订阅组 ID
+     * @return 订阅组响应
+     * @throws APIException API 错误
+     * @throws IOException IO 错误
+     */
     public SubscriptionGroupsResponse subscriptions(String productGroupId) throws APIException, IOException {
         return makeHttpCall("/v1/subscriptionGroups/" + productGroupId + "/subscriptions", "GET", Map.of(), null, SubscriptionGroupsResponse.class);
     }
-//    /**
-//     * 官网文档的JWT方式 自己实现
-//     * @return
-//     * @throws NoSuchAlgorithmException
-//     * @throws InvalidKeySpecException
-//     */
-//    private String buildAuthorizationToken() throws NoSuchAlgorithmException, InvalidKeySpecException {
-//        LinkedHashMap<String, Object> jwtHeader = new LinkedHashMap<>();
-//        jwtHeader.put("alg", "ES256");
-//        jwtHeader.put("kid", this.getKeyId());
-//        jwtHeader.put("typ", "JWT");
-//
-//        LinkedHashMap<String, Object> jwtPayload = new LinkedHashMap<>();
-//        jwtPayload.put("iss", this.getIssuerId());
-//        long currentTimeSecond = System.currentTimeMillis() / 1000L;
-//        jwtPayload.put("iat", currentTimeSecond);
-//        jwtPayload.put("exp", currentTimeSecond + 20 * 60);
-//        jwtPayload.put("aud", "appstoreconnect-v1");
-//
-//        byte[] derEncodedSigningKey = Base64.getDecoder().decode(this.getSigningKey());
-//        KeyFactory keyFactory = KeyFactory.getInstance("EC");
-//        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(derEncodedSigningKey);
-//        String sign = JWT.create()
-//                .withHeader(jwtHeader)
-//                .withPayload(jwtPayload)
-//                .sign(Algorithm.ECDSA256((ECPrivateKey) keyFactory.generatePrivate(keySpec)));
-//        return sign;
-//    }
 }

@@ -17,17 +17,17 @@ package io.github.opensabe.spring.cloud.parent.common.test.log4j2;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import io.github.opensabe.spring.cloud.parent.common.config.Log4j2Configuration;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 @SpringJUnitConfig
-@AutoConfigureObservability
 @SpringBootTest(
         properties = {
                 "eureka.client.enabled=false",
@@ -36,6 +36,8 @@ import io.github.opensabe.spring.cloud.parent.common.config.Log4j2Configuration;
         classes = Log4j2PrometheusMetricsTest.Main.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
+@AutoConfigureTestRestTemplate
+@DisplayName("Log4j2 Prometheus指标端点测试")
 public class Log4j2PrometheusMetricsTest {
     private final TestRestTemplate testRestTemplate;
 
@@ -44,6 +46,7 @@ public class Log4j2PrometheusMetricsTest {
         this.testRestTemplate = testRestTemplate;
     }
 
+    @DisplayName("metrics端点暴露Prometheus格式指标")
     @Test
     public void testMetricsEndpoint() {
         // 这里可以添加对 /actuator/prometheus 端点的测试

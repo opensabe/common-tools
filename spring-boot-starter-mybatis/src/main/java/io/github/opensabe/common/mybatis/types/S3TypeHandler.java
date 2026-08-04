@@ -34,6 +34,7 @@ public class S3TypeHandler extends OBSTypeHandler {
         super(type);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected OBSTypeEnum type() {
         return OBSTypeEnum.S3;

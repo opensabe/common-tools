@@ -43,10 +43,18 @@ public class ClientResponseRetryOperator implements UnaryOperator<Publisher<Clie
         this.observation = observation;
     }
 
+    /**
+     * 创建 ClientResponse 重试 Operator。
+     *
+     * @param retry       重试策略
+     * @param observation 当前 Observation
+     * @return Operator 实例
+     */
     public static ClientResponseRetryOperator of(Retry retry, Observation observation) {
         return new ClientResponseRetryOperator(retry, observation);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Publisher<ClientResponse> apply(Publisher<ClientResponse> publisher) {
         if (publisher instanceof Mono) {

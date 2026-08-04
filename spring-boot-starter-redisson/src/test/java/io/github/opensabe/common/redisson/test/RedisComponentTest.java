@@ -15,7 +15,6 @@
  */
 package io.github.opensabe.common.redisson.test;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.observation.ObservedRedissonClient;
 import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
 import io.github.opensabe.common.utils.SpringUtil;
@@ -23,13 +22,14 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.micrometer.observation.autoconfigure.ObservationAutoConfiguration;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -42,15 +42,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.github.opensabe.common.redisson.observation.ObservedRedissonClient;
-import io.github.opensabe.common.redisson.test.common.BaseRedissonTest;
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 /**
- * 检查组件是否生效
- *
- * @author heng.ma
+ * Redisson 组件装配测试：ObservedRedissonClient 替换、Lettuce 连接池与 Observation 传播。
  */
+@AutoConfigureTestRestTemplate
 @Import(RedisComponentTest.Config.class)
+@DisplayName("Redisson 组件装配测试")
 public class RedisComponentTest extends BaseRedissonTest {
 
     private final RedissonClient redissonClient;
@@ -122,11 +122,13 @@ public class RedisComponentTest extends BaseRedissonTest {
     @Log4j2
     @RestController
     public static class TestController {
+        static final AtomicBoolean hadObservation = new AtomicBoolean(false);
 
         @GetMapping("/test")
         public String test() {
             Observation observation = SpringUtil.getBean(UnifiedObservationFactory.class).getCurrentObservation();
             log.info("----------------run------------------"+observation);
+            hadObservation.set(observation != null && observation != Observation.NOOP);
             return "test";
         }
     }
@@ -139,32 +141,33 @@ public class RedisComponentTest extends BaseRedissonTest {
     }
 
     /**
-     * 因为JFR单元测试默认没有打开，如果RedissonClientBeanPostProcessor没有生效不能及时检查到
-     * 这个单元测试是为了确保RedissonClientBeanPostProcessor中的RedissonClient被替换为ObservedRedissonClient
+     * RedissonClient 须被替换为 {@link ObservedRedissonClient}。
      */
     @Test
+    @DisplayName("RedissonClient 被包装为 ObservedRedissonClient")
     void testRedissonClient() {
         Assertions.assertInstanceOf(ObservedRedissonClient.class, redissonClient);
     }
 
     /**
-     * 这个单元测试是为了确保RedissonAutoConfigurationV2中的连接池没有覆盖掉LettuceConnectionFactory的配置
+     * RedisConnectionFactory 须为 Lettuce 实现，不被 Redisson 覆盖。
      */
     @Test
+    @DisplayName("RedisConnectionFactory 为 Lettuce 实现")
     void testRedisConnectionFactory() {
         Assertions.assertInstanceOf(LettuceConnectionFactory.class, redisConnectionFactory);
     }
 
 
     /**
-     * 以前的bug，手写adviser时，如果依赖了redisTemplate，会导致observation失效
-     * 但是目前observation只在servlet环境下生效，在webflux环境下不生效
+     * 手写 Adviser 依赖 RedisTemplate 时 Servlet 环境下 Observation 仍可用。
      */
     @Test
+    @DisplayName("Servlet 请求链路 Observation 不被 Adviser 破坏")
     void testObservation () {
+        TestController.hadObservation.set(false);
         ResponseEntity<String> entity = restTemplate.getForEntity("/test", String.class);
         Assertions.assertEquals("test", entity.getBody());
-        Assertions.assertTrue(CustomerHandler.called.get());
-
+        Assertions.assertTrue(TestController.hadObservation.get());
     }
 }

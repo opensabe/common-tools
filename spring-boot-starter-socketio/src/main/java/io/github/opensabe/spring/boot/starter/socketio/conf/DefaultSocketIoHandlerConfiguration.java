@@ -44,6 +44,7 @@ import lombok.extern.log4j.Log4j2;
 @Order(Ordered.HIGHEST_PRECEDENCE + 1000)
 @Configuration(proxyBeanMethods = false)
 public class DefaultSocketIoHandlerConfiguration {
+    /** attributedSocketIoClient 工厂。 */
     @Autowired
     private AttributedSocketIoClientFactory attributedSocketIoClientFactory;
 
@@ -91,6 +92,7 @@ public class DefaultSocketIoHandlerConfiguration {
         request.sendAckData(BaseAck.builder().b(BizCodeEnum.SUCCESS.getVal()).build());
     }
 
+    /** unsub。 */
     @OnEvent("unsub")
     public void unsub(SocketIOClient client, AckRequest request, String topic) {
         client.leaveRoom(topic);

@@ -19,6 +19,9 @@ import java.security.MessageDigest;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * MD5Util 工具类。
+ */
 @Log4j2
 public class MD5Util {
     private static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',

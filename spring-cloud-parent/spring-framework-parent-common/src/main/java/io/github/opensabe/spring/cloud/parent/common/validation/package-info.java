@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * spring validate
+ * Bean Validation 扩展约束、校验器与校验分组。
  */
 package io.github.opensabe.spring.cloud.parent.common.validation;

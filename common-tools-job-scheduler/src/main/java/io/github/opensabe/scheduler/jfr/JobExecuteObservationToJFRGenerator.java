@@ -20,6 +20,9 @@ import io.github.opensabe.common.jfr.ObservationToJFRGenerator;
 import io.github.opensabe.scheduler.observation.JobExecuteContext;
 import io.micrometer.tracing.handler.TracingObservationHandler;
 
+/**
+ * JobExecuteObservationToJFRGenerator 调度任务。
+ */
 public class JobExecuteObservationToJFRGenerator extends ObservationToJFRGenerator<JobExecuteContext> {
 
 

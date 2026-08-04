@@ -25,10 +25,15 @@ import io.github.opensabe.common.s3.service.FileService;
 import io.github.opensabe.common.typehandler.OBSService;
 import io.github.opensabe.common.typehandler.OBSTypeEnum;
 
+/**
+ * S3OBSService。
+ */
 public class S3OBSService implements OBSService {
 
+/** s3SyncFile 服务。 */
     private final FileService s3SyncFileService;
 
+/** fileName。 */
     private final String fileName;
 
     public S3OBSService(FileService s3SyncFileService, S3Properties properties, String defaultOperId) {
@@ -47,17 +52,20 @@ public class S3OBSService implements OBSService {
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public OBSTypeEnum type() {
         return OBSTypeEnum.S3;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void insert(String key, String json) {
         var name = String.format(fileName, key);
         s3SyncFileService.putObjectAssignedPath(json.getBytes(StandardCharsets.UTF_8), name, MediaType.APPLICATION_JSON_VALUE);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String select(String key) {
         var name = String.format(fileName, key);

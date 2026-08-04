@@ -32,16 +32,21 @@ import io.github.opensabe.common.mybatis.test.mapper.user.UserMapper;
 import io.github.opensabe.common.mybatis.test.po.User;
 import io.github.opensabe.common.mybatis.test.service.UserMapperService;
 
+/**
+ * ReadOnly 测试。
+ */
 @DisplayName("只读数据源测试")
 public class ReadOnlyTest extends BaseMybatisTest {
 
+    /** user Mapper。 */
     @Autowired
     private UserMapper userMapper;
+    /** userMapper 服务。 */
     @Autowired
     private UserMapperService userMapperService;
 
-    @Test
     @DisplayName("测试Mapper只读数据源 - 验证主从分离")
+    @Test
     public void testMapperReadOnly() {
         userMapper.insertSelective(new User("ReadOnlyTest-testMapperReadOnly-id", "first name", "last name", new Timestamp(System.currentTimeMillis()), null));
         var list = userMapper.selectReadOnly();
@@ -51,8 +56,8 @@ public class ReadOnlyTest extends BaseMybatisTest {
         Assertions.assertNotNull(user);
     }
 
+    @DisplayName("验证baseServiceReadOnly")
     @Test
-    @DisplayName("测试基础服务只读数据源 - 验证主从分离")
     public void testBaseServiceReadOnly() {
         var record = new User("ReadOnlyTest-testBaseServiceReadOnly-id", "first name", "last name", new Timestamp(System.currentTimeMillis()), null);
         userMapperService.insertSelective(record);
@@ -63,8 +68,8 @@ public class ReadOnlyTest extends BaseMybatisTest {
         Assertions.assertEquals(user, record);
     }
 
-    @Test
     @DisplayName("测试循环只读数据源 - 验证主从分离的稳定性")
+    @Test
     public void testLoopReadOnly() {
         for (int i = 0; i < 10; i++) {
             userMapper.insertSelective(new User("ReadOnlyTest-testLoopReadOnly-id" + i, "first name", "last name", new Timestamp(System.currentTimeMillis()), null));
@@ -77,8 +82,8 @@ public class ReadOnlyTest extends BaseMybatisTest {
         }
     }
 
-    @Test
     @DisplayName("测试多线程只读数据源 - 验证并发场景下的主从分离")
+    @Test
     public void testThreadReadOnly() throws InterruptedException, ExecutionException {
         var executor = Executors.newFixedThreadPool(5);
         List<Future> list = new ArrayList<>(50);

@@ -25,9 +25,13 @@ import io.github.opensabe.common.mybatis.monitor.MonitorTransactionAspect;
 import io.github.opensabe.common.mybatis.properties.SqlSessionFactoryProperties;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 
+/**
+ * Monitor Spring 配置类。
+ */
 @Configuration(proxyBeanMethods = false)
 public class MonitorConfiguration {
 
+    /** monitorTransactionAspect。 */
     @Bean
     public MonitorTransactionAspect monitorTransactionAspect() {
         return new MonitorTransactionAspect();
@@ -43,11 +47,13 @@ public class MonitorConfiguration {
         return new SQLExecuteJFRGenerator();
     }
 
+    /** connectionJFRGenerator。 */
     @Bean
     public ConnectionJFRGenerator connectionJFRGenerator() {
         return new ConnectionJFRGenerator();
     }
 
+    /** databaseSecretProvider。 */
     @Bean
     public DatabaseSecretProvider databaseSecretProvider(GlobalSecretManager globalSecretManager, SqlSessionFactoryProperties sqlSessionFactoryProperties) {
         return new DatabaseSecretProvider(globalSecretManager, sqlSessionFactoryProperties);

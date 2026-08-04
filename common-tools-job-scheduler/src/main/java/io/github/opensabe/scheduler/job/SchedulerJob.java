@@ -21,6 +21,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * SchedulerJob 调度任务。
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -38,6 +38,11 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import io.github.opensabe.common.redisson.config.MultiRedisProperties;
 import io.github.opensabe.common.redisson.exceptions.RedissonClientException;
 import lombok.extern.log4j.Log4j2;
+/**
+ * Multi-Redis 场景下的 Lettuce {@link org.springframework.data.redis.connection.RedisConnectionFactory} 实现。
+ *
+ * <p>通过 {@link ThreadLocal} 路由到命名 Redis 实例，并在同实例多连接间轮询。
+ */
 
 @Log4j2
 public class MultiRedisLettuceConnectionFactory
@@ -51,6 +56,11 @@ public class MultiRedisLettuceConnectionFactory
         this.positionMap = new ConcurrentHashMap<>();
     }
 
+    /**
+     * 设置当前线程要路由到的 Redis 实例名。
+     *
+     * @param currentRedis 配置中的 Redis 实例名
+     */
     public void setCurrentRedis(String currentRedis) {
         if (!connectionFactoryMap.containsKey(currentRedis)) {
             throw new RedissonClientException("invalid currentRedis: " + currentRedis + ", it does not exists in configuration");

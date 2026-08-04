@@ -34,6 +34,9 @@ import org.springframework.http.HttpHeaders;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * IpUtil 工具类。
+ */
 @Log4j2
 public class IpUtil {
 

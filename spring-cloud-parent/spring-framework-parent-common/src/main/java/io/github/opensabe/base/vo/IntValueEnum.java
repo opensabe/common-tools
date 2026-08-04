@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public interface IntValueEnum {
 
+    /** 枚举常量数组缓存，避免重复反射 {@link Class#getEnumConstants()}。 */
     Map<Class<? extends Enum<?>>, Object[]> VALUES = new ConcurrentHashMap<>();
 
     /**
@@ -48,6 +49,15 @@ public interface IntValueEnum {
         return objects;
     }
 
+    /**
+     * 按整型值解析枚举常量。
+     *
+     * @param enumClass 枚举类型
+     * @param value     整型值
+     * @param <E>       枚举类型
+     * @return 匹配的枚举常量
+     * @throws IllegalArgumentException 无匹配值时
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <E extends IntValueEnum> E of(Class<E> enumClass, int value) {
         E[] values = (E[]) IntValueEnum.values((Class) enumClass);
@@ -59,6 +69,11 @@ public interface IntValueEnum {
         throw new IllegalArgumentException("No enum constant " + enumClass.getCanonicalName() + " for value " + value);
     }
 
+    /**
+     * 枚举对应的整型值，JSON 序列化时使用该值。
+     *
+     * @return 整型值
+     */
     @JsonValue
     Integer getValue();
 

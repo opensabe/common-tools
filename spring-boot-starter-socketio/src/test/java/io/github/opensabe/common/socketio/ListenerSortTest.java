@@ -28,7 +28,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -55,7 +54,6 @@ import lombok.extern.log4j.Log4j2;
         "eureka.client.enabled=false",
 })
 @JfrEventTest
-@AutoConfigureObservability
 @ExtendWith(SingleRedisIntegrationTest.class)
 @DisplayName("SocketIO监听器排序测试")
 public class ListenerSortTest {
@@ -65,6 +63,9 @@ public class ListenerSortTest {
     private static final String USER_ID = "u1";
     public static List<String> list = new CopyOnWriteArrayList<>();
 
+    /**
+     * @param properties 待设置值
+     */
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
         SingleRedisIntegrationTest.setProperties(registry);
@@ -99,16 +100,19 @@ public class ListenerSortTest {
 
     public static class Conf {
 
+        /** listener1。 */
         @Bean
         public Listener1 listener1() {
             return new Listener1();
         }
 
+        /** listener2。 */
         @Bean
         public Listener2 listener2() {
             return new Listener2();
         }
 
+        /** listener3。 */
         @Bean
         public Listener3 listener3() {
             return new Listener3();
@@ -118,6 +122,7 @@ public class ListenerSortTest {
     @Order(3)
     public static class Listener1 {
 
+        /** onEvent。 */
         @OnEvent("aa")
         public void onEvent(SocketIOClient client, AckRequest request, String a) {
             log.info("listener1 receive event aa data {}", a);
@@ -128,6 +133,7 @@ public class ListenerSortTest {
     @Order(2)
     public static class Listener2 {
 
+        /** onEvent。 */
         @OnEvent("aa")
         public void onEvent(SocketIOClient client, AckRequest request, String a) {
             log.info("listener2 receive event aa data {}", a);
@@ -138,6 +144,7 @@ public class ListenerSortTest {
     @Order(1)
     public static class Listener3 {
 
+        /** onEvent。 */
         @OnEvent("aa")
         public void onEvent(SocketIOClient client, AckRequest request, String a) {
             log.info("listener3 receive event aa data {}", a);

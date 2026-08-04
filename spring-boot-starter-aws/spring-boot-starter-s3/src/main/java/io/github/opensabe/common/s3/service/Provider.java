@@ -15,6 +15,9 @@
  */
 package io.github.opensabe.common.s3.service;
 
+/**
+ * S3 文件服务提供者标记接口。
+ */
 @FunctionalInterface
 public interface Provider<T> {
 

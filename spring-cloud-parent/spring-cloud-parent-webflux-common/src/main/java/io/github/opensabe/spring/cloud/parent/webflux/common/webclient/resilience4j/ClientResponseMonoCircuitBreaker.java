@@ -27,6 +27,9 @@ import reactor.core.publisher.Operators;
 
 import static io.github.resilience4j.circuitbreaker.CallNotPermittedException.createCallNotPermittedException;
 
+/**
+ * 对 {@link Mono}{@code <ClientResponse>} 应用 Resilience4j 断路器的 {@link MonoOperator}。
+ */
 public class ClientResponseMonoCircuitBreaker extends MonoOperator<ClientResponse, ClientResponse> {
     private final CircuitBreaker circuitBreaker;
     private final ServiceInstance serviceInstance;
@@ -39,6 +42,7 @@ public class ClientResponseMonoCircuitBreaker extends MonoOperator<ClientRespons
         this.webClientProperties = webClientProperties;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void subscribe(CoreSubscriber<? super ClientResponse> actual) {
         if (circuitBreaker.tryAcquirePermission()) {

@@ -18,9 +18,13 @@ package io.github.opensabe.common.redisson.aop.lock;
 import io.github.opensabe.common.redisson.aop.AbstractRedissonAdvisor;
 
 /**
- * redisson 切点通知
+ * 旧版 {@link io.github.opensabe.common.redisson.annotation.RedissonLock} 分布式锁 AOP Advisor。
  */
 public class RedissonLockAdvisor extends AbstractRedissonAdvisor<RedissonLockProperties> {
+
+    /**
+     * @param redissonLockCachedPointcut 锁切点
+     */
     public RedissonLockAdvisor(RedissonLockCachedPointcut redissonLockCachedPointcut) {
         super(redissonLockCachedPointcut);
     }

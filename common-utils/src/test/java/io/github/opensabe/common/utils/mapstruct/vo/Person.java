@@ -20,6 +20,9 @@ import java.util.List;
 import io.github.opensabe.mapstruct.core.Binding;
 import lombok.Data;
 
+/**
+ * MapStruct 测试用 Person 实体（含嵌套类型）。
+ */
 @Data
 @Binding(PersonRecord.class)
 public class Person {
@@ -30,6 +33,9 @@ public class Person {
 
     private List<Book> books;
 
+    /**
+     * 地址信息。
+     */
     @Data
     public static class Address {
         private String code;
@@ -37,6 +43,9 @@ public class Person {
         private String name;
     }
 
+    /**
+     * 书籍信息。
+     */
     @Data
     public static class Book {
         private String name;

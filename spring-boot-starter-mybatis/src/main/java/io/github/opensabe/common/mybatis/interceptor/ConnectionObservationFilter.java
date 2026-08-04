@@ -42,6 +42,7 @@ import io.micrometer.observation.Observation;
  */
 public class ConnectionObservationFilter extends FilterAdapter {
 
+/** dataSourceProxy。 */
     private DataSourceProxy dataSourceProxy;
 
     /**
@@ -51,14 +52,19 @@ public class ConnectionObservationFilter extends FilterAdapter {
             .expireAfterWrite(Duration.ofSeconds(1))
             .build();
 
+/** observation 工厂。 */
     private UnifiedObservationFactory observationFactory;
 
+    /** {@inheritDoc} */
     @Override
     public void init(DataSourceProxy dataSource) {
         super.init(dataSource);
         this.dataSourceProxy = dataSource;
     }
 
+    /**
+     * @return observationFactory
+     */
     public UnifiedObservationFactory getObservationFactory() {
         if (Objects.isNull(observationFactory) && Objects.nonNull(SpringUtil.getApplicationContext())) {
             observationFactory = SpringUtil.getBean(UnifiedObservationFactory.class);

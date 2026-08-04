@@ -20,10 +20,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.cache.autoconfigure.CacheManagerCustomizers;
+import org.springframework.boot.cache.autoconfigure.CacheProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.util.StringUtils;
@@ -34,8 +34,7 @@ import io.github.opensabe.common.cache.api.CompositeCacheManager;
 import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
 
 /**
- * 根据<code>CachesProperties</code>,创建cacheManager添加到
- * <code>CompositedCacheManager</code>中
+ * 根据 {@link CachesProperties} 创建 Caffeine {@link CacheManager} 并注册到 {@link CompositeCacheManager}。
  *
  * @author heng.ma
  * @see CachesProperties
@@ -43,17 +42,36 @@ import io.github.opensabe.common.cache.caffeine.DynamicCaffeineCacheManager;
 @ConditionalOnClass(Caffeine.class)
 public class CaffeineConfiguration implements InitializingBean {
 
+    /**
+     * 自定义缓存属性。
+     */
     private final CachesProperties cachesProperties;
+
+    /**
+     * Spring Cache manager 定制器集合。
+     */
     private final CacheManagerCustomizers customizers;
+
+    /**
+     * 聚合 Caffeine/Redis 后端的组合 manager。
+     */
     private final CompositeCacheManager compositeCacheManager;
 
+    /**
+     * @param cachesProperties      缓存属性
+     * @param customizers           manager 定制器
+     * @param compositeCacheManager 组合 cache manager
+     */
     public CaffeineConfiguration(CachesProperties cachesProperties, CacheManagerCustomizers customizers, CompositeCacheManager compositeCacheManager) {
         this.cachesProperties = cachesProperties;
         this.customizers = customizers;
         this.compositeCacheManager = compositeCacheManager;
     }
 
-
+    /**
+     * 初始化动态 Caffeine manager 及 {@code caches.custom} 中类型为 CAFFEINE 的预定义 manager，
+     * 并合并注册到 {@link CompositeCacheManager}。
+     */
     @Override
     public void afterPropertiesSet() {
         List<CacheManager> cacheManagers = new ArrayList<>();
@@ -69,11 +87,22 @@ public class CaffeineConfiguration implements InitializingBean {
         compositeCacheManager.setCacheManagers(cacheManagers);
     }
 
+    /**
+     * 创建并定制 {@link DynamicCaffeineCacheManager}，供 {@link io.github.opensabe.common.cache.api.Expire} 动态 TTL 使用。
+     *
+     * @return 已应用 {@link CacheManagerCustomizers} 的动态 Caffeine manager
+     */
     public DynamicCaffeineCacheManager dynamicCaffeineCacheManager() {
         DynamicCaffeineCacheManager cacheManager = new DynamicCaffeineCacheManager(cachesProperties);
         return customizers.customize(cacheManager);
     }
 
+    /**
+     * 根据单条 {@link CacheProperties} 构建标准 {@link CaffeineCacheManager}（非动态 TTL）。
+     *
+     * @param properties 缓存属性
+     * @return 已定制的 {@link CaffeineCacheManager}
+     */
     private CacheManager caffeineCacheManager(CacheProperties properties) {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
         if (properties != null) {

@@ -15,11 +15,15 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.undertow;
 
-import org.springframework.core.Ordered;
+import io.github.opensabe.common.executor.GracefulShutdownHandler;
 
 /**
- * 优雅关闭处理，在所有 servlet 请求处理完后，调用的
+ * Undertow 优雅关闭处理器（已废弃）。
+ * <p>
+ * Undertow 移除后请改用 {@link GracefulShutdownHandler}；保留本接口仅为二进制兼容。
+ *
+ * @deprecated 请使用 {@link GracefulShutdownHandler} 替代
  */
-public interface UndertowGracefulShutdownHandler extends Ordered {
-    void gracefullyShutdown();
+@Deprecated
+public interface UndertowGracefulShutdownHandler extends GracefulShutdownHandler {
 }

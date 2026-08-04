@@ -28,6 +28,9 @@ import io.github.opensabe.base.code.BizCodeEnum;
 import io.github.opensabe.spring.cloud.parent.common.handler.ErrorMessage;
 import io.github.opensabe.spring.cloud.parent.common.handler.FrontendException;
 
+/**
+ * 终端/前台参数校验工具：失败时抛出 {@link FrontendException}，支持 i18n 消息模板与占位符。
+ */
 @SuppressWarnings("unused")
 public class FrontendCheckUtils {
 
@@ -37,7 +40,7 @@ public class FrontendCheckUtils {
      *
      * @param expression   要判断的表达式
      * @param message      返回前端的message
-     * @param innerMessage 后天打印的日志
+     * @param innerMessage 后台打印的日志
      * @param data         BaseResp中的data
      * @param args         message国际化所需的占位符参数
      * @throws FrontendException 如果表达式为false
@@ -49,6 +52,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("false, _, _, _ -> fail")
     public static <T extends ErrorMessage> void isTrue(boolean expression, T message, String innerMessage, Object... args) {
         if (!expression) {
@@ -56,6 +60,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("false, _, _, _ -> fail")
     public static <T extends ErrorMessage> void isTrue(boolean expression, T message, Object data, Object... args) {
         if (!expression) {
@@ -63,6 +68,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("false, _, _ -> fail")
     public static <T extends ErrorMessage> void isTrue(boolean expression, T message, Object... args) {
         if (!expression) {
@@ -70,6 +76,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("false, _, _, _, _ -> fail")
     public static void isTrue(boolean expression, String message, String innerMessage, Object data, Object... args) {
         if (!expression) {
@@ -77,6 +84,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("false, _, _, _ -> fail")
     public static void isTrue(boolean expression, String message, String innerMessage, Object... args) {
         if (!expression) {
@@ -84,6 +92,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("false, _, _ -> fail")
     public static void isTrue(boolean expression, String message, Object... args) {
         if (!expression) {
@@ -91,6 +100,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("false, _, _, _ -> fail")
     public static void isTrue(boolean expression, String message, Object data, Object... args) {
         if (!expression) {
@@ -104,7 +114,7 @@ public class FrontendCheckUtils {
      *
      * @param expression   要判断的表达式
      * @param message      返回前端的message
-     * @param innerMessage 后天打印的日志
+     * @param innerMessage 后台打印的日志
      * @param data         BaseResp中的data
      * @param args         message国际化所需的占位符参数
      * @throws FrontendException 如果表达式为true
@@ -116,6 +126,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("true, _, _, _ -> fail")
     public static <T extends ErrorMessage> void isFalse(boolean expression, T message, String innerMessage, Object... args) {
         if (expression) {
@@ -123,6 +134,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("true, _, _, _ -> fail")
     public static <T extends ErrorMessage> void isFalse(boolean expression, T message, Object data, Object... args) {
         if (expression) {
@@ -130,6 +142,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("true, _, _ -> fail")
     public static <T extends ErrorMessage> void isFalse(boolean expression, T message, Object... args) {
         if (expression) {
@@ -137,6 +150,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("true, _, _, _, _ -> fail")
     public static void isFalse(boolean expression, String message, String innerMessage, Object data, Object... args) {
         if (expression) {
@@ -144,6 +158,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("true, _, _, _ -> fail")
     public static void isFalse(boolean expression, String message, String innerMessage, Object... args) {
         if (expression) {
@@ -151,6 +166,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("true, _, _, _ -> fail")
     public static void isFalse(boolean expression, String message, Object data, Object... args) {
         if (expression) {
@@ -158,6 +174,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("true, _, _ -> fail")
     public static void isFalse(boolean expression, String message, Object... args) {
         if (expression) {
@@ -171,7 +188,7 @@ public class FrontendCheckUtils {
      *
      * @param src          要判断的对象
      * @param message      返回前端的message
-     * @param innerMessage 后天打印日志
+     * @param innerMessage 后台打印日志
      * @param data         BaseRsp中的data
      * @param args         message国际化需要的占位符参数
      * @throws FrontendException 如果对象为空
@@ -184,6 +201,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _, _ -> fail")
     public static void notNull(Object src, String message, String innerMessage, Object data, Object... args) {
         if (Objects.isNull(src)) {
@@ -191,6 +209,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Object src, T message, String innerMessage, Object... args) {
         if (Objects.isNull(src)) {
@@ -198,6 +217,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Object src, T message, Object data, Object... args) {
         if (Objects.isNull(src)) {
@@ -205,6 +225,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Object src, T message, Object... args) {
         if (Objects.isNull(src)) {
@@ -212,6 +233,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static void notNull(Object src, String message, String innerMessage, Object... args) {
         if (Objects.isNull(src)) {
@@ -219,6 +241,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static void notNull(Object src, String message, Object data, Object... args) {
         if (Objects.isNull(src)) {
@@ -226,6 +249,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _ -> fail")
     public static void notNull(Object src, String message, Object... args) {
         if (Objects.isNull(src)) {
@@ -239,7 +263,7 @@ public class FrontendCheckUtils {
      *
      * @param collection   要判断的集合
      * @param message      返回前端的message
-     * @param innerMessage 后天打印日志
+     * @param innerMessage 后台打印日志
      * @param data         BaseRsp中的data
      * @param args         message国际化需要的占位符参数
      * @throws FrontendException 如果对象为空
@@ -252,6 +276,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _, _ -> fail")
     public static void notNull(Collection<?> collection, String message, String innerMessage, Object data, Object... args) {
         if (CollectionUtils.isEmpty(collection)) {
@@ -259,6 +284,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Collection<?> collection, T message, String innerMessage, Object... args) {
         if (CollectionUtils.isEmpty(collection)) {
@@ -266,6 +292,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Collection<?> collection, T message, Object data, Object... args) {
         if (CollectionUtils.isEmpty(collection)) {
@@ -273,6 +300,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Collection<?> collection, T message, Object... args) {
         if (CollectionUtils.isEmpty(collection)) {
@@ -280,6 +308,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static void notNull(Collection<?> collection, String message, String innerMessage, Object... args) {
         if (CollectionUtils.isEmpty(collection)) {
@@ -287,6 +316,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _ , _-> fail")
     public static void notNull(Collection<?> collection, String message, Object data, Object... args) {
         if (CollectionUtils.isEmpty(collection)) {
@@ -294,6 +324,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _ , _-> fail")
     public static void notNull(Collection<?> collection, String message, Object... args) {
         if (CollectionUtils.isEmpty(collection)) {
@@ -307,7 +338,7 @@ public class FrontendCheckUtils {
      *
      * @param map          要判断的map
      * @param message      返回前端的message
-     * @param innerMessage 后天打印日志
+     * @param innerMessage 后台打印日志
      * @param data         BaseRsp中的data
      * @param args         message国际化需要的占位符参数
      * @throws FrontendException 如果对象为空
@@ -320,6 +351,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _, _ -> fail")
     public static void notNull(Map<?, ?> map, String message, String innerMessage, Object data, Object... args) {
         if (MapUtils.isEmpty(map)) {
@@ -327,6 +359,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Map<?, ?> map, T message, String innerMessage, Object... args) {
         if (MapUtils.isEmpty(map)) {
@@ -334,6 +367,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Map<?, ?> map, T message, Object data, Object... args) {
         if (MapUtils.isEmpty(map)) {
@@ -341,6 +375,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(Map<?, ?> map, T message, Object... args) {
         if (MapUtils.isEmpty(map)) {
@@ -348,6 +383,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static void notNull(Map<?, ?> map, String message, String innerMessage, Object... args) {
         if (MapUtils.isEmpty(map)) {
@@ -355,6 +391,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static void notNull(Map<?, ?> map, String message, Object data, Object... args) {
         if (MapUtils.isEmpty(map)) {
@@ -362,6 +399,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _ -> fail")
     public static void notNull(Map<?, ?> map, String message, Object... args) {
         if (MapUtils.isEmpty(map)) {
@@ -375,7 +413,7 @@ public class FrontendCheckUtils {
      *
      * @param src          要判断的字符串
      * @param message      返回前端的message
-     * @param innerMessage 后天打印日志用
+     * @param innerMessage 后台打印日志用
      * @param data         返回给前端的结果
      * @param args         国际化占位符参数
      * @throws FrontendException 如果字符串为空
@@ -388,6 +426,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(String src, T message, String innerMessage, Object... args) {
         if (StringUtils.isBlank(src)) {
@@ -395,6 +434,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _, _ -> fail")
     public static void notNull(String src, String message, String innerMessage, Object data, Object... args) {
         if (StringUtils.isBlank(src)) {
@@ -402,6 +442,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(String src, T message, Object data, Object... args) {
         if (StringUtils.isBlank(src)) {
@@ -409,6 +450,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _ -> fail")
     public static <T extends ErrorMessage> void notNull(String src, T message, Object... args) {
         if (StringUtils.isBlank(src)) {
@@ -416,6 +458,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _, _ -> fail")
     public static void notNull(String src, String message, String innerMessage, Object... args) {
         if (StringUtils.isBlank(src)) {
@@ -423,6 +466,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _, _ , _-> fail")
     public static void notNull(String src, String message, Object data, Object... args) {
         if (StringUtils.isBlank(src)) {
@@ -430,6 +474,7 @@ public class FrontendCheckUtils {
         }
     }
 
+    /** 见完整参数重载。 */
     @Contract("null, _ , _-> fail")
     public static void notNull(String src, String message, Object... args) {
         if (StringUtils.isBlank(src)) {

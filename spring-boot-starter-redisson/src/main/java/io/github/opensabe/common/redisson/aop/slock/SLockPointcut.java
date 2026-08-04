@@ -27,15 +27,19 @@ import io.github.opensabe.common.redisson.aop.AbstractRedissonCachePointcut;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 
 /**
- * @author heng.ma
+ * {@link SLock} 切点，通过 {@link org.springframework.core.annotation.AnnotatedElementUtils} 合并查找注解。
  */
 public class SLockPointcut extends AbstractRedissonCachePointcut<SLockProperties> {
 
 
+    /**
+     * @param evaluator 方法参数 SpEL 求值器
+     */
     public SLockPointcut(MethodArgumentsExpressEvaluator evaluator) {
         super(evaluator);
     }
 
+    /** {@inheritDoc} */
     @Nullable
     @Override
     protected SLockProperties findProperties(Method method, Class<?> targetClass) {

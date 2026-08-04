@@ -21,15 +21,33 @@ import io.github.opensabe.common.redisson.aop.old.ExtraNameProperties;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import lombok.Getter;
 
+/**
+ * {@link RedissonRateLimiter} 注解运行时属性。
+ */
 public class RedissonRateLimiterProperties extends ExtraNameProperties {
+
+    /** 原始限流注解。 */
     @Getter
     private final RedissonRateLimiter redissonRateLimiter;
 
+    /**
+     * 通过已废弃的 {@link RedissonRateLimiterName} 参数解析名称。
+     *
+     * @param redissonRateLimiter 限流注解
+     * @param redissonRateLimiterName 参数名称注解
+     * @param parameterIndex 参数索引
+     */
     public RedissonRateLimiterProperties(RedissonRateLimiter redissonRateLimiter, RedissonRateLimiterName redissonRateLimiterName, int parameterIndex) {
         super(redissonRateLimiterName.prefix(), redissonRateLimiter.name(), parameterIndex, redissonRateLimiterName.expression());
         this.redissonRateLimiter = redissonRateLimiter;
     }
 
+    /**
+     * 通过注解 {@link RedissonRateLimiter#name()} SpEL 解析名称。
+     *
+     * @param evaluator SpEL 求值器
+     * @param redissonRateLimiter 限流注解
+     */
     public RedissonRateLimiterProperties(MethodArgumentsExpressEvaluator evaluator, RedissonRateLimiter redissonRateLimiter) {
         super(evaluator, redissonRateLimiter.prefix(), redissonRateLimiter.name());
         this.redissonRateLimiter = redissonRateLimiter;

@@ -42,16 +42,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * @author heng.ma
+ * {@link SLock} 方法拦截器：支持单锁与多锁（{@link MLock}）加锁。
  */
 @Log4j2
 @RequiredArgsConstructor
 public class SLockInterceptor implements MethodInterceptor {
 
+    /** Redisson 客户端。 */
     private final RedissonClient redissonClient;
 
+    /** SLock 切点。 */
     private final SLockPointcut pointcut;
 
+    /** {@inheritDoc} */
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Method method = invocation.getMethod();
@@ -97,7 +100,10 @@ public class SLockInterceptor implements MethodInterceptor {
 
 
     /**
-     * 释放锁，如果释放失败，重试
+     * 释放锁；Redisson 内部线程池拒绝时退避重试。
+     *
+     * @param lock 待释放锁
+     * @param method 被拦截方法（日志用）
      */
     private void release(RLock lock, Method method) {
         boolean locked = lock.isLocked() && lock.isHeldByCurrentThread();
@@ -109,7 +115,7 @@ public class SLockInterceptor implements MethodInterceptor {
                 break;
             } catch (Throwable e) {
                 log.fatal("error during release redisson lock {}, {}, count: {}", lock.getName(), e.getMessage(), count, e);
-                //如果是线程池拒绝（Redisson 的线程池可能会满，可能用的是 common ForkJoinPool，而你又刚好使用 common ForkJoinPool 提交了很多 io 任务，例如 parallelStream 里面有 io），则重试
+                // Retry on thread-pool rejection (Redisson may use a saturated common ForkJoinPool)
                 if (e instanceof RejectedExecutionException) {
                     locked = lock.isLocked() && lock.isHeldByCurrentThread();
                     count++;
@@ -125,24 +131,35 @@ public class SLockInterceptor implements MethodInterceptor {
         }
     }
 
+    /**
+     * 多锁组合包装，继承 {@link RedissonMultiLock} 并定制 {@link #tryLock} lease 行为。
+     */
     static class MLock extends RedissonMultiLock {
+
+        /** 底层锁列表。 */
         private final List<RLock> locks;
 
+        /**
+         * @param locks 待组合的锁
+         */
         MLock(RLock... locks) {
             super(locks);
             this.locks = Arrays.asList(locks);
         }
 
+        /** {@inheritDoc} — 逗号拼接各锁名。 */
         @Override
         public String getName() {
             return locks.stream().map(RLock::getName).collect(Collectors.joining(","));
         }
 
+        /** {@inheritDoc} — 所有子锁均 locked 时返回 {@code true}。 */
         @Override
         public boolean isLocked() {
             return locks.stream().map(RLock::isLocked).reduce(true, (a, b) -> a && b);
         }
 
+        /** {@inheritDoc} — 获取全部子锁后为各锁设置统一 lease。 */
         @Override
         public boolean tryLock(long waitTime, long leaseTime, TimeUnit unit) throws InterruptedException {
             long newLeaseTime = -1;

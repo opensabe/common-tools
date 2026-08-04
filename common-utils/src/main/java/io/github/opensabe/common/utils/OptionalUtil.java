@@ -19,6 +19,9 @@ package io.github.opensabe.common.utils;
 
 import java.util.function.Supplier;
 
+/**
+ * {@link java.util.Optional} 安全取值工具，异常或 null 时返回默认值。
+ */
 //@Log4j2
 public class OptionalUtil {
     /**

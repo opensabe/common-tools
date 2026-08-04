@@ -18,6 +18,11 @@ package io.github.opensabe.spring.cloud.parent.common.auto;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+/**
+ * 全局定时任务自动配置入口。
+ * <p>
+ * 为引用本 starter 的服务启用 {@code @Scheduled} 支持。
+ */
 @EnableScheduling
 @AutoConfiguration
 public class SchedulingAutoConfiguration {

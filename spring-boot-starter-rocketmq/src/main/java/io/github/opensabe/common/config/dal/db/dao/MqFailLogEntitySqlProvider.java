@@ -19,8 +19,12 @@ import org.apache.ibatis.jdbc.SQL;
 
 import io.github.opensabe.common.config.dal.db.entity.MqFailLogEntity;
 
+/**
+ * MQ 失败日志 MyBatis SQL 动态生成器。
+ */
 public class MqFailLogEntitySqlProvider {
 
+    /** insertSelective。 */
     public String insertSelective(MqFailLogEntity record) {
         SQL sql = new SQL();
         sql.INSERT_INTO("t_common_mq_fail_log");

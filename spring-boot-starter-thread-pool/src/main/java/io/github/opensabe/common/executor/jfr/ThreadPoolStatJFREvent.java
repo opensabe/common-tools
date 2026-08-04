@@ -24,18 +24,29 @@ import jdk.jfr.Event;
 import jdk.jfr.Label;
 import lombok.Getter;
 
+/**
+ * ThreadPoolStat JFR 事件。
+ */
 @Category({"Thread Pool"})
 @Label("Thead Pool Stat")
 @SuppressFBWarnings("URF_UNREAD_FIELD")
 public class ThreadPoolStatJFREvent extends Event {
 
+/** name。 */
     private String name;
+/** type。 */
     private String type;
+/** corePoolSize。 */
     private int corePoolSize;
+/** largestPoolSize。 */
     private int largestPoolSize;
+/** maximumPoolSize。 */
     private int maximumPoolSize;
+/** activeCount。 */
     private int activeCount;
+/** poolSize。 */
     private int poolSize;
+/** queueSize。 */
     @Getter
     private int queueSize;
 

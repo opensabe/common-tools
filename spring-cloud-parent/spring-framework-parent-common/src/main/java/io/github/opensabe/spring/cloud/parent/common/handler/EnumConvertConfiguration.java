@@ -19,9 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.common.collect.MapMaker;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -32,6 +30,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.google.common.collect.MapMaker;
 
 import io.github.opensabe.base.vo.IntValueEnum;
 
@@ -45,11 +45,18 @@ import io.github.opensabe.base.vo.IntValueEnum;
 public class EnumConvertConfiguration {
 
     private static final IntValueEnumConverter CONVERTER = new IntValueEnumConverter();
+    /** 已注册 {@link ConversionService} 的弱引用集合，防止重复注册 converter。 */
     private static final Set<ConversionService> REGISTERED_SERVICES = Collections
             .newSetFromMap(new MapMaker()
                     .weakKeys()
                     .makeMap());
 
+    /**
+     * 判断字符串是否为纯整数字符串。
+     *
+     * @param s 待检字符串
+     * @return 是否为可解析的整数
+     */
     public static boolean isInteger(String s) {
         if (StringUtils.isBlank(s)) {
             return false;
@@ -62,29 +69,44 @@ public class EnumConvertConfiguration {
         return true;
     }
 
+    /**
+     * 为每个 {@link WebDataBinder} 注册 {@link IntValueEnumConverter}（同一 {@link ConversionService} 仅注册一次）。
+     *
+     * @param dataBinder 数据绑定器
+     */
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
         ConversionService service = dataBinder.getConversionService();
         if (service instanceof ConverterRegistry registry) {
-            //避免内存泄漏：检查是否已经注册过，防止不断创建新的converter实例放入
+            // Avoid duplicate converter registration across repeated InitBinder calls
             if (REGISTERED_SERVICES.add(service)) {
                 registry.addConverter(CONVERTER);
             }
         }
     }
 
+    /**
+     * {@link IntValueEnum} 的条件泛型转换器：支持 int/数字字符串/枚举名。
+     */
     public static class IntValueEnumConverter implements ConditionalGenericConverter {
+        /** {@inheritDoc} */
         @Override
         public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
             return IntValueEnum.class.isAssignableFrom(targetType.getType());
         }
 
+        /** {@inheritDoc} */
         @Override
         public Set<ConvertiblePair> getConvertibleTypes() {
             return Set.of(new ConvertiblePair(String.class, IntValueEnum.class), new ConvertiblePair(Integer.class, IntValueEnum.class));
         }
 
 
+        /**
+         * 将 int/数字字符串/枚举名转为 {@link IntValueEnum}。
+         *
+         * @return 匹配的枚举常量，{@code source} 为 null 时返回 null
+         */
         @Override
         @SuppressWarnings({"rawtypes", "unchecked"})
         public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

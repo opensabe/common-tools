@@ -20,6 +20,10 @@ import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.spring.boot.starter.otel.exporter.configuration.CustomizedOtelConfiguration;
 
+/**
+ * CustomizedOtelExporterAutoConfiguration 类。
+ * <p>CustomizedOpenTelemetryExporterAutoConfiguration。</p>
+ */
 @Import(CustomizedOtelConfiguration.class)
 @AutoConfiguration
 public class CustomizedOtelExporterAutoConfiguration {

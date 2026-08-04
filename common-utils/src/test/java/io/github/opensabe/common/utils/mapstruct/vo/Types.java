@@ -24,6 +24,9 @@ import io.github.opensabe.mapstruct.core.Binding;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Types。
+ */
 @Getter
 @Setter
 @Binding(TypesDto.class)

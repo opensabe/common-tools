@@ -21,6 +21,9 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 
 import lombok.SneakyThrows;
 
+/**
+ * CustomizedHttpBinContainer Testcontainers 容器封装。
+ */
 public class CustomizedHttpBinContainer extends GenericContainer<CustomizedHttpBinContainer> {
 
     public static final int HTTP_BIN_PORT = 8080;

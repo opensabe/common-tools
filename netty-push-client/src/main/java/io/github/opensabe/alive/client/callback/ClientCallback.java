@@ -20,9 +20,16 @@ import java.util.Set;
 import io.github.opensabe.alive.protobuf.Message;
 
 /**
+ * Alive 推送客户端异步操作完成回调。
+ *
  * @author lone
  */
 public interface ClientCallback {
 
+    /**
+     * 推送或请求完成时回调。
+     *
+     * @param response 服务端响应集合
+     */
     void opComplete(Set<Message.Response> response);
 }

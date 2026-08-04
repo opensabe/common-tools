@@ -20,6 +20,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import io.github.opensabe.scheduler.job.SchedulerJob;
 
+/**
+ * MisfireQueue。
+ */
 public class MisfireQueue {
 
     private static final Queue<SchedulerJob> QUEUE = new ConcurrentLinkedDeque<>();

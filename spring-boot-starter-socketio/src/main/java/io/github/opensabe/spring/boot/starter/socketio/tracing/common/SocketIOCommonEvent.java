@@ -19,6 +19,9 @@ import com.corundumstudio.socketio.SocketIOClient;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
+/**
+ * Socket.IO 通用事件 JFR 基类。
+ */
 public interface SocketIOCommonEvent {
     SocketIOClient currentSocketIOClient();
 

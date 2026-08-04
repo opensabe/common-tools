@@ -18,6 +18,7 @@ package io.github.opensabe.spring.cloud.parent.web.common.test.feign;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -30,11 +31,13 @@ import io.github.opensabe.spring.cloud.parent.web.common.feign.OpenfeignUtil;
 import io.github.opensabe.spring.cloud.parent.web.common.feign.RetryableMethod;
 
 /**
- * Util 类静态方法测试
+ * OpenfeignUtil 静态方法单元测试。
  */
 @Execution(ExecutionMode.CONCURRENT)
+@DisplayName("OpenFeign工具类测试")
 public class OpenfeignUtilTest {
     @Test
+    @DisplayName("GET请求应判定为可重试")
     public void testGetMethod() {
         Request request = Mockito.mock(Request.class);
         Mockito.when(request.httpMethod()).thenReturn(Request.HttpMethod.GET);
@@ -53,18 +56,21 @@ public class OpenfeignUtilTest {
     }
 
     @Test
+    @DisplayName("无注解POST请求不可重试")
     public void testPostMethod() throws Exception {
         Request testSimple = getPostRequest(SimpleClass.class.getMethod("testSimple"));
         Assertions.assertFalse(OpenfeignUtil.isRetryableRequest(testSimple));
     }
 
     @Test
+    @DisplayName("方法级RetryableMethod注解使POST可重试")
     public void testAnnotatedMethod() throws Exception {
         Request testAnnotated = getPostRequest(SimpleClass.class.getMethod("testAnnotated"));
         Assertions.assertTrue(OpenfeignUtil.isRetryableRequest(testAnnotated));
     }
 
     @Test
+    @DisplayName("类级RetryableMethod注解使POST可重试")
     public void testAnnotatedClass() throws Exception {
         Request testSimple = getPostRequest(AnnotatedClass.class.getMethod("testSimple"));
         Assertions.assertTrue(OpenfeignUtil.isRetryableRequest(testSimple));

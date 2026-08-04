@@ -30,6 +30,7 @@ import io.micrometer.observation.Observation;
  * @author heng.ma
  */
 public class BatchRecursiveAction<T> extends SegmentRecursiveTask<T, Void> {
+/** batchConsumer。 */
     protected Consumer<List<T>> batchConsumer;
 
     protected BatchRecursiveAction(int capacity, List<T> list, Consumer<List<T>> batchConsumer, Observation observation) {
@@ -37,6 +38,7 @@ public class BatchRecursiveAction<T> extends SegmentRecursiveTask<T, Void> {
         this.batchConsumer = batchConsumer;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected Void compute0() {
         var tasks = segmentation();
@@ -48,11 +50,13 @@ public class BatchRecursiveAction<T> extends SegmentRecursiveTask<T, Void> {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected Void aggregate(Stream<Void> result) {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected SegmentRecursiveTask<T, Void> clone(List<T> current) {
         return new BatchRecursiveAction<>(capacity, current, batchConsumer, observation);

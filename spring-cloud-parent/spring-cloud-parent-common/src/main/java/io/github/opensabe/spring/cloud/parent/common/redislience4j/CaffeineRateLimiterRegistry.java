@@ -30,9 +30,23 @@ import io.github.resilience4j.ratelimiter.internal.AtomicRateLimiter;
 
 import static java.util.Collections.emptyMap;
 
+/**
+ * 基于 Caffeine 存储的 {@link io.github.resilience4j.ratelimiter.RateLimiterRegistry} 实现。
+ * <p>
+ * 替代默认 InMemory 实现，支持条目过期与 AutoCloseable 资源回收。
+ *
+ * @see io.github.resilience4j.core.registry.AbstractRegistry
+ */
 public class CaffeineRateLimiterRegistry extends CaffeineResilienceRegistry<RateLimiter, RateLimiterConfig> implements RateLimiterRegistry {
 
 
+    /**
+     * 构造 Registry。
+     *
+     * @param configs 命名配置
+     * @param registryEventConsumers 事件消费者
+     * @param tags 全局标签
+     */
     public CaffeineRateLimiterRegistry(Map<String, RateLimiterConfig> configs, RegistryEventConsumer<RateLimiter> registryEventConsumers, Map<String, String> tags) {
         super(configs, () -> RateLimiterConfig.ofDefaults(), registryEventConsumers, tags);
     }

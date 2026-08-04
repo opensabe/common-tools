@@ -20,9 +20,18 @@ import java.util.List;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * 根据对象，决定负载均衡到哪个
+ * 亲和性负载均衡策略。
+ * <p>
+ * 根据请求上下文中的 affinity key 对象，从候选实例中选定目标。
  */
 public interface AffinityLoadBalancer {
 
+    /**
+     * 按 affinity 对象选择目标实例。
+     *
+     * @param serviceInstances 候选实例列表
+     * @param o affinity key 对象
+     * @return 选中的实例
+     */
     ServiceInstance execute(List<ServiceInstance> serviceInstances, Object o);
 }

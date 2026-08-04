@@ -17,12 +17,13 @@ package io.github.opensabe.scheduler;
 
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.moditect.jfrunit.JfrEventTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -31,8 +32,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import io.github.opensabe.common.testcontainers.integration.SingleRedisIntegrationTest;
 import io.github.opensabe.scheduler.server.SchedulerServer;
 
+/**
+ * 调度器集成测试（Redis Testcontainers）。
+ */
 @JfrEventTest
-@AutoConfigureObservability
 @ExtendWith({
         SpringExtension.class,
         SingleRedisIntegrationTest.class,
@@ -43,6 +46,7 @@ import io.github.opensabe.scheduler.server.SchedulerServer;
         "eureka.client.enabled=false"
 },
         classes = TestTask.App.class)
+@DisplayName("调度器集成测试（Redis）")
 public class TestTask {
 
     @Autowired
@@ -55,7 +59,11 @@ public class TestTask {
         SingleRedisIntegrationTest.setProperties(registry);
     }
 
+    /**
+     * 启动调度容器后，定时任务应在超时前至少执行一次。
+     */
     @Test
+    @DisplayName("调度容器启动后定时任务可执行")
     public void testContainer() throws InterruptedException {
         schedulerServer.getJobs().keySet().forEach(System.out::println);
         int count = 0;
@@ -64,6 +72,7 @@ public class TestTask {
             TimeUnit.SECONDS.sleep(1);
             count++;
         }
+        Assertions.assertTrue(templeTask.run, "TempleTask should have executed");
     }
 
     @SpringBootApplication

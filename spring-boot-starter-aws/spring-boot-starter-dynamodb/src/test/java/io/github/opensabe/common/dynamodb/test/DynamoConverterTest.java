@@ -17,6 +17,7 @@ package io.github.opensabe.common.dynamodb.test;
 
 import java.lang.annotation.Annotation;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.Association;
@@ -24,7 +25,7 @@ import org.springframework.data.mapping.model.AbstractPersistentProperty;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
-import org.springframework.data.util.TypeInformation;
+import org.springframework.data.core.TypeInformation;
 
 import io.github.opensabe.common.dynamodb.test.common.DynamicdbStarter;
 import io.github.opensabe.common.dynamodb.typehandler.DynamodbConverter;
@@ -34,42 +35,54 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @author heng.ma
+ * DynamoDB 属性转换器读写测试。
  */
+@DisplayName("DynamoDB属性转换器测试")
 public class DynamoConverterTest extends DynamicdbStarter {
 
+    /** converter。 */
     @Autowired
     private DynamodbConverter converter;
 
+    /**
+     * 嵌套 record 属性应能序列化后再反序列化为等价对象。
+     */
+    @DisplayName("验证isIdProperty")
     @Test
     void testConvert() throws NoSuchFieldException {
         BasicPersistentEntity entity = new BasicPersistentEntity<>(TypeInformation.of(Entity.class));
         entity.addPersistentProperty(new AbstractPersistentProperty(Property.of(TypeInformation.of(Entity.class), Entity.class.getDeclaredField("child")), entity, SimpleTypeHolder.DEFAULT) {
+            /** {@inheritDoc} */
             @Override
             public boolean isIdProperty() {
                 return false;
             }
 
+            /** {@inheritDoc} */
             @Override
             public boolean isVersionProperty() {
                 return false;
             }
 
+            /** {@inheritDoc} */
             @Override
             public boolean isAnnotationPresent(Class annotationType) {
                 return false;
             }
 
+            /** {@inheritDoc} */
             @Override
             public Annotation findPropertyOrOwnerAnnotation(Class annotationType) {
                 return null;
             }
 
+            /** {@inheritDoc} */
             @Override
             public Annotation findAnnotation(Class annotationType) {
                 return null;
             }
 
+            /** {@inheritDoc} */
             @Override
             protected Association createAssociation() {
                 return null;
@@ -86,10 +99,13 @@ public class DynamoConverterTest extends DynamicdbStarter {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Entity {
+/** name。 */
         private String name;
 
+/** age。 */
         private Integer age;
 
+/** child。 */
         private Child child;
     }
 

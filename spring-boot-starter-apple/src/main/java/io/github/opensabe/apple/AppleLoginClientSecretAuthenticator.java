@@ -27,13 +27,34 @@ import java.util.Base64;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+/**
+ * Sign In with Apple {@code client_secret} JWT 生成器。
+ * <p>
+ * 使用 ES256 签名，audience 固定为 {@code https://appleid.apple.com}，有效期 5 分钟。
+ */
 public class AppleLoginClientSecretAuthenticator {
+
+    /** Apple ID OAuth audience。 */
     private static final String APPLE_LOGIN_AUDIENCE = "https://appleid.apple.com";
+
+    /** 解析后的 EC 私钥。 */
     private final ECPrivateKey signingKey;
+
+    /** Team / 发行者 ID。 */
     private String issuerId;
+
+    /** 私钥 ID。 */
     private String keyId;
+
+    /** 应用 Bundle ID（JWT subject）。 */
     private String bundleId;
 
+    /**
+     * @param issuerId   Team / 发行者 ID
+     * @param keyId      私钥 ID
+     * @param bundleId   应用 Bundle ID
+     * @param signingKey PKCS#8 私钥 PEM 或 DER Base64
+     */
     AppleLoginClientSecretAuthenticator(String issuerId, String keyId, String bundleId, String signingKey) {
         try {
             signingKey = signingKey.replace("-----BEGIN PRIVATE KEY-----", "").replaceAll("\\R+", "").replace("-----END PRIVATE KEY-----", "");
@@ -76,6 +97,11 @@ public class AppleLoginClientSecretAuthenticator {
         this.bundleId = bundleId;
     }
 
+    /**
+     * 生成 OAuth {@code client_secret} JWT。
+     *
+     * @return 已签名的 client_secret 字符串
+     */
     public String generateToken() {
         Instant now = Instant.now();
         return JWT.create()

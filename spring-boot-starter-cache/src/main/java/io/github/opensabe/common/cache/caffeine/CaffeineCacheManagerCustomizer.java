@@ -15,33 +15,41 @@
  */
 package io.github.opensabe.common.cache.caffeine;
 
-import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
+import org.springframework.boot.cache.autoconfigure.CacheManagerCustomizer;
 import org.springframework.cache.caffeine.CaffeineCache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
- * <code>caffeine</code>在创建缓存最后一步时，可以修改创建行为，
- * 该实例对所有通过<code>@Expire</code>创建的<code>caffeine</code>生效。
- * 包括<code>CachesProperties</code>预定义的cacheName
- * <p><b><code>caffeine</code>重复添加配置会报错，
- * 因此使用时需要注意一下{@link #createCache(String, Caffeine, boolean)}的name是否预先定义了配置
- * </b</p>
+ * {@link DynamicCaffeineCacheManager} 的 Caffeine 构建定制扩展点。
+ * <p>
+ * 在创建缓存的最后一步可修改 Caffeine 行为；对所有通过 {@link io.github.opensabe.common.cache.api.Expire}
+ * 创建的 Caffeine 缓存生效，包括 {@link io.github.opensabe.common.cache.config.CachesProperties} 预定义的 cache 名称。
+ * </p>
+ * <p><b>注意：Caffeine 重复添加相同配置会报错，调用 {@link #createCache(String, Caffeine, boolean)}
+ * 时需确认 {@code name} 是否已在属性中预定义过 spec。</b></p>
  *
  * @author heng.ma
  */
 public interface CaffeineCacheManagerCustomizer extends CacheManagerCustomizer<DynamicCaffeineCacheManager> {
+
+    /**
+     * 向动态 manager 注册 {@link #createCache(String, Caffeine, boolean)} 回调。
+     *
+     * @param cacheManager 待定制的 {@link DynamicCaffeineCacheManager}
+     */
     @Override
     default void customize(DynamicCaffeineCacheManager cacheManager) {
         cacheManager.onCaffeine((name, caffeine) -> createCache(name, caffeine, cacheManager.isAllowNullValues()));
     }
 
     /**
-     * 自定义创建Cache实例，可以添加监听器，设置引用类型等
+     * 自定义创建 {@link CaffeineCache} 实例，可添加监听器、设置引用类型等。
      *
-     * @param name     cacheName
-     * @param caffeine CacheBuilder
-     * @return spring cache instance of CaffeineCache
+     * @param name             缓存名称
+     * @param caffeine         Caffeine 构建器
+     * @param allowNullValues  是否缓存 {@code null} 值
+     * @return Spring {@link CaffeineCache} 实例
      */
     CaffeineCache createCache(String name, Caffeine<Object, Object> caffeine, boolean allowNullValues);
 }

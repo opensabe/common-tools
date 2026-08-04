@@ -22,11 +22,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
+/**
+ * App Store Connect API Spring 配置。
+ * <p>
+ * 在 {@code apple.store.connect.enable=true} 时注册 {@link AppleStoreConnectAPIClient}。
+ */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "apple.store.connect.enable", matchIfMissing = false, havingValue = "true")
 @EnableConfigurationProperties(AppleStoreConnectProperties.class)
 public class AppleStoreConnectConfiguration {
 
+    /**
+     * App Store Connect API 客户端 Bean。
+     *
+     * @param appleStoreConnectProperties Store Connect 配置属性
+     * @return {@link AppleStoreConnectAPIClient} 实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public AppleStoreConnectAPIClient appleStoreConnectAPIClient(AppleStoreConnectProperties appleStoreConnectProperties) {

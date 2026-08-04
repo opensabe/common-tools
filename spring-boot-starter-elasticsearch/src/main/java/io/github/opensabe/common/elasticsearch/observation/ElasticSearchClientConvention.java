@@ -19,19 +19,25 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
+/**
+ * Elasticsearch 客户端 Observation 命名与标签约定。
+ */
 public class ElasticSearchClientConvention implements ObservationConvention<ElasticSearchClientObservationContext> {
     public static final ElasticSearchClientConvention DEFAULT = new ElasticSearchClientConvention();
 
+    /** {@inheritDoc} */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof ElasticSearchClientObservationContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getLowCardinalityKeyValues(ElasticSearchClientObservationContext context) {
         return KeyValues.empty();
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getHighCardinalityKeyValues(ElasticSearchClientObservationContext context) {
         return KeyValues.of(

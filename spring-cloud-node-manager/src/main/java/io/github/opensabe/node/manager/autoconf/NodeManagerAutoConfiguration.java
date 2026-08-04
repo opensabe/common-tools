@@ -25,9 +25,19 @@ import io.github.opensabe.node.manager.config.NodeManagerConfiguration;
 @Import({
         NodeManagerConfiguration.class
 })
+/**
+ * NodeManagerAutoConfiguration 类。
+ * <p>节点ManagerAutoConfiguration。</p>
+ */
 @AutoConfiguration
 public class NodeManagerAutoConfiguration {
 
+/**
+ * nodeManagerInitializeListener 方法。
+ */
+/**
+ * nodeManagerInitializeListener 方法。
+ */
     @Bean
     public NodeManagerInitializeListener nodeManagerInitializeListener() {
         return new NodeManagerInitializeListener();

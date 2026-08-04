@@ -21,6 +21,10 @@ import io.github.opensabe.alive.client.Response;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;
 import io.github.opensabe.alive.client.exception.AliveClientTimeoutException;
 
+/**
+ * BaseResponseFuture 接口。
+ * <p>Base响应Future。</p>
+ */
 public interface BaseResponseFuture {
 
     Response get0() throws InterruptedException, AliveClientExecutionException;

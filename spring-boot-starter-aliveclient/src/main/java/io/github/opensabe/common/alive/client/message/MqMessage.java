@@ -15,5 +15,9 @@
  */
 package io.github.opensabe.common.alive.client.message;
 
+/**
+ * MqMessage 类。
+ * <p>MQ 消息。</p>
+ */
 public class MqMessage {
 }

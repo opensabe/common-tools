@@ -24,6 +24,9 @@ import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * JobExecuteContext 调度任务。
+ */
 @Setter
 @Getter
 public class JobExecuteContext extends Observation.Context {

@@ -25,13 +25,13 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
@@ -57,11 +57,18 @@ import io.micrometer.observation.ObservationRegistry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
-@SpringBootTest
-@AutoConfigureObservability
+/**
+ * OpenFeign 线程池隔离测试：不同微服务 Bulkhead 独立、满池不影响其他服务。
+ */
+@AutoConfigureTracing
+@SpringBootTest(properties = {
+        "management.tracing.sampling.probability=1.0"
+})
 @ActiveProfiles("threadpool")
 @EnableFeignClients
+@DisplayName("OpenFeign 线程池隔离测试")
 public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
 
     static final String TEST_SERVICE_1 = "ThreadPoolTestService1";
@@ -156,11 +163,10 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
     }
 
     /**
-     * 测试一个服务的线程池已满，但是其他服务不受影响
-     *
-     * @throws InterruptedException
+     * 某服务线程池满时不应影响其他 Feign 客户端调用。
      */
     @Test
+    @DisplayName("单服务线程池满时其他服务不受影响")
     void testOneServiceThreadPoolAlreadyFulledButOtherServiceNotAffect() throws InterruptedException {
         //防止断路器影响"
         circuitBreakerRegistry.getAllCircuitBreakers().forEach(CircuitBreaker::reset);
@@ -193,11 +199,10 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
     }
 
     /**
-     * 测试不同微服务的线程不一样
-     *
-     * @throws InterruptedException
+     * 不同微服务的 Feign 请求应在不同 Bulkhead 线程上执行。
      */
     @Test
+    @DisplayName("不同微服务使用不同线程池线程")
     void testDifferentServiceWithDifferentThread() throws InterruptedException {
         //防止断路器影响
         circuitBreakerRegistry.getAllCircuitBreakers().forEach(CircuitBreaker::reset);
@@ -228,9 +233,10 @@ public class TestOpenFeignClientTheadPool extends CommonMicroServiceTest {
     }
 
     /**
-     * 测试线程池隔离的实际配置
+     * 验证各 Feign contextId 对应 Bulkhead 核心/最大线程数与队列配置。
      */
     @Test
+    @DisplayName("验证线程池隔离配置与 Bulkhead 参数")
     void testConfigureThreadPool() {
         //防止断路器影响
         circuitBreakerRegistry.getAllCircuitBreakers().forEach(CircuitBreaker::reset);

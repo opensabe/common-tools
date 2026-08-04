@@ -1,6 +1,6 @@
 # Spring-boot-starter-elasticsearch 使用文档
 
-由于ES对于版本比较敏感，而且spring-data-elasticsearch对于咱们的需求搜索权重设计不太友好，所以编写这个模块，直接暴露 RestHighLevelClient
+由于ES对于版本比较敏感，而且spring-data-elasticsearch对于咱们的需求搜索权重设计不太友好，所以编写这个模块，直接暴露 ElasticsearchClient（Java API Client）
 
 ## 使用说明
 
@@ -19,16 +19,16 @@ spring:
     elasticsearch:
       addresses: 172.31.64.194:9200,172.31.64.193:9200
 ```
-获取RestHighLevelClient
+获取 ElasticsearchClient
 ```
 @Autowired
-private RestHighLevelClient client;
+private ElasticsearchClient client;
 ```
 
 client参考文档：
 
-1. [Get Started](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-getting-started-initialization.html)
-2. [JavaDocs](https://artifacts.elastic.co/javadoc/org/elasticsearch/client/elasticsearch-rest-high-level-client/7.0.1/index.html)
+1. [Java API Client getting started](https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/getting-started-java.html)
+2. [Java API Client Javadoc](https://artifacts.elastic.co/javadoc/co/elastic/clients/elasticsearch-java/current/index.html)
 
 ## Observation
 

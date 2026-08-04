@@ -21,13 +21,18 @@ import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 
 import io.github.opensabe.spring.cloud.parent.common.CommonConstant;
 
+/**
+ * SocketIoEurekaMetadataModifier。
+ */
 public class SocketIoEurekaMetadataModifier implements BeanPostProcessor {
+/** server 配置属性。 */
     private final SocketIoServerProperties serverProperties;
 
     public SocketIoEurekaMetadataModifier(SocketIoServerProperties serverProperties) {
         this.serverProperties = serverProperties;
     }
 
+    /** {@inheritDoc} — Bean 初始化后处理。 */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof EurekaInstanceConfigBean) {

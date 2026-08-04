@@ -28,80 +28,131 @@ import io.github.opensabe.common.cache.test.entity.ItemObject;
 import io.github.opensabe.common.cache.test.storage.MockStorage;
 import lombok.AllArgsConstructor;
 
+/**
+ * 缓存集成测试用 {@link CacheService}：封装 Caffeine/Redis 各类 {@code @Cacheable} 场景。
+ */
 @Service
 @AllArgsConstructor
 public class CacheService {
 
+/** storage。 */
     private MockStorage storage;
 
+    /**
+     * @return data
+     */
     @Cacheable(value = "test_caffeine")
     public Map<Long, ItemObject> getData() {
         return storage.getData();
     }
 
+    /**
+     * @return caffeineExpire
+     */
     @Expire(5)
     @Cacheable(value = "test_caffeine")
     public ItemObject getCaffeineExpire(Long id, String field) {
         return storage.getItem(id);
     }
 
+    /** deleteCaffeine。 */
     @CacheEvict(value = "test_caffeine")
     public void deleteCaffeine(Long id, String field) {
         storage.deleteItem(id);
     }
 
-    @CacheEvict(value = "test_redis")
+    /** deleteRedis。 */
+    @CacheEvict(value = "test_redis", key = "#id + ':' + #field")
     public void deleteRedis(Long id, String field) {
         storage.deleteItem(id);
     }
 
+    /**
+     * @return redisExpire
+     */
     @Expire(5)
     @Cacheable(value = "test_redis")
     public ItemObject getRedisExpire(Long id, String field) {
         return storage.getItem(id);
     }
 
+    /**
+     * Same cache name + key as {@link #getRedisExpireLong}, different TTL — used to verify
+     * {@code @CacheEvict} without {@code @Expire} fans out across all TTL-scoped Redis caches.
+     */
+    @Expire(5)
+    @Cacheable(value = "test_redis", key = "#id + ':' + #field")
+    public ItemObject getRedisExpireTtl5(Long id, String field) {
+        return storage.getItem(id);
+    }
+
+    /**
+     * @return redisExpireTtl30
+     */
+    @Expire(30)
+    @Cacheable(value = "test_redis", key = "#id + ':' + #field")
+    public ItemObject getRedisExpireTtl30(Long id, String field) {
+        return storage.getItem(id);
+    }
+
+    /** geAssignmentExpire。 */
     @Expire(value = 5, cacheType = CacheType.CAFFEINE)
     @Cacheable(value = "test_redis")
     public ItemObject geAssignmentExpire(Long id, String field) {
         return storage.getItem(id);
     }
 
+    /**
+     * @return itemFromCaffeineWithoutKey
+     */
     @Cacheable(value = "test_caffeine")
     public ItemObject getItemFromCaffeineWithoutKey(Long id, String field) {
         return storage.getItem(id);
     }
 
+    /**
+     * @return itemFromCaffeine
+     */
     @Cacheable(value = "test_caffeine", key = "#id")
     public ItemObject getItemFromCaffeine(Long id) {
         return storage.getItem(id);
     }
 
+    /**
+     * @return itemFromRedis
+     */
     @Cacheable(value = "test_redis", key = "'test_redis:'+#id")
     public String getItemFromRedis(Long id) {
         return storage.getItem(id).getName();
     }
 
+    /**
+     * @return itemFromRedis2
+     */
     @Cacheable(value = "test_redis2", key = "'test_redis2:'+#id")
     public String getItemFromRedis2(Long id) {
         return storage.getItem(id).getName();
     }
 
+    /** updateItemFromCaffeine。 */
     @CachePut(value = "test_caffeine", key = "#id")
     public ItemObject updateItemFromCaffeine(Long id) {
         return storage.getItem(id);
     }
 
+    /** updateItemFromRedis。 */
     @CachePut(value = "test_redis", key = "'test_redis:'+#id")
     public String updateItemFromRedis(Long id) {
         return storage.getItem(id).getName();
     }
 
+    /** deleteItemFromCaffeine。 */
     @CacheEvict(value = "test_caffeine", key = "#id")
     public void deleteItemFromCaffeine(Long id) {
         storage.deleteItem(id);
     }
 
+    /** deleteItemFromRedis。 */
     @CacheEvict(value = "test_redis", key = "'test_redis:'+#id")
     public void deleteItemFromRedis(Long id) {
         storage.deleteItem(id);
@@ -110,6 +161,7 @@ public class CacheService {
     //错误示范
     //Production Redis 禁止了 Keys 命令， 因此@CacheEvict 没有指定Key的情况下 方法不能使用
     //一定会报错
+    /** deleteAllItemFromRedis。 */
     @CacheEvict(value = "test_redis")
     public void deleteAllItemFromRedis() {
     }

@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+/**
+ * IpUtilTest 单元/集成测试。
+ */
 @DisplayName("IP地址工具类测试")
 public class IpUtilTest {
 

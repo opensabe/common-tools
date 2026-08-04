@@ -25,8 +25,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -54,7 +54,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@AutoConfigureObservability
+@AutoConfigureWebTestClient
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
         properties = {
@@ -73,6 +73,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         },
         classes = TestGateway.MockConfig.class
 )
+@DisplayName("Spring Cloud Gateway集成测试")
 public class TestGateway extends CommonMicroServiceTest {
     private static final String serviceId = "testService";
     @LocalServerPort

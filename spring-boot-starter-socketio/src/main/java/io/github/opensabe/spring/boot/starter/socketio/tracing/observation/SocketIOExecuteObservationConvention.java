@@ -19,21 +19,27 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
+/**
+ * SocketIOExecuteObservation Observation 约定。
+ */
 public class SocketIOExecuteObservationConvention implements ObservationConvention<SocketIOExecuteContext> {
     public static SocketIOExecuteObservationConvention defaultConvention = new SocketIOExecuteObservationConvention();
 
     private final String tagSessionId = "sessionId";
 
+    /** {@inheritDoc} */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof SocketIOExecuteContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getLowCardinalityKeyValues(SocketIOExecuteContext context) {
         return KeyValues.of("socketio", "execute");
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getHighCardinalityKeyValues(SocketIOExecuteContext context) {
         return KeyValues.of(tagSessionId, context.getSessionId());

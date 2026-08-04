@@ -32,16 +32,19 @@ public class SQLExecuteObservationConvention implements ObservationConvention<SQ
     private final String tagSuccess = "success";
     private final String tagTransactionId = "transactionId";
 
+    /** {@inheritDoc} */
     @Override
     public boolean supportsContext(Observation.Context context) {
         return context instanceof SQLExecuteContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getLowCardinalityKeyValues(SQLExecuteContext context) {
         return KeyValues.of(tagMethod, context.getMethod());
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyValues getHighCardinalityKeyValues(SQLExecuteContext context) {
         return KeyValues.of(tagMethod, context.getMethod())

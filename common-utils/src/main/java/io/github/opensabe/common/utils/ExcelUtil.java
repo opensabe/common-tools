@@ -27,6 +27,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import io.github.opensabe.common.utils.json.JsonUtil;
 
+/**
+ * ExcelUtil 工具类。
+ */
 public class ExcelUtil {
     public static <T> byte[] transfer(List<T> objects) {
         HSSFWorkbook wb = null;

@@ -15,15 +15,21 @@
  */
 package io.github.opensabe.common.auto;
 
-import io.github.opensabe.common.config.ExceptionConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Import;
 
+import io.github.opensabe.common.config.ExceptionConfiguration;
 import io.github.opensabe.common.config.ExtendValidatorConfigure;
 
+/**
+ * Bean Validation 与全局异常处理相关的 Spring Boot 自动配置入口。
+ * <p>
+ * 在 Spring Boot 默认 {@link org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration}
+ * 之前加载，以便注册扩展约束校验器与统一异常处理器。
+ */
 @AutoConfiguration
 @Import({ExtendValidatorConfigure.class, ExceptionConfiguration.class})
-@AutoConfigureBefore(org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration.class)
+@AutoConfigureBefore(org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration.class)
 public class ValidationAutoConfiguration {
 }

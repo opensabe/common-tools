@@ -24,7 +24,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SimpleTask {
+public @/**
+ * SimpleTask 实现类。
+ */
+interface SimpleTask {
     /**
      * job名字，不设置默认为类名
      *

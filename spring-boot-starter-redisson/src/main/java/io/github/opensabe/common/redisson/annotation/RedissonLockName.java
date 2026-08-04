@@ -25,9 +25,11 @@ import java.lang.annotation.Target;
 import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
 
 /**
- * 分布式锁名称注解
+ * 标注方法参数以动态解析分布式锁名称（已废弃）。
+ * <p>
+ * 锁名由 {@link #prefix()} 与参数值或 {@link #expression()} SpEL 表达式拼接而成。
  *
- * @deprecated use {@link io.github.opensabe.common.redisson.annotation.slock.RedissonLock} instead
+ * @deprecated 请改用 {@link io.github.opensabe.common.redisson.annotation.slock.RedissonLock#name()}
  */
 @Deprecated(forRemoval = true, since = "2.0.0")
 @Documented
@@ -35,8 +37,9 @@ import io.github.opensabe.common.redisson.annotation.slock.RedissonLock;
 @Target({ElementType.PARAMETER})
 public @interface RedissonLockName {
 
-
+    /** 锁名前缀，默认 {@link io.github.opensabe.common.redisson.annotation.slock.RedissonLock#DEFAULT_PREFIX}。 */
     String prefix() default RedissonLock.DEFAULT_PREFIX;
 
+    /** 作用于标注参数的 SpEL 模板表达式；为空则直接使用参数 {@code toString()}。 */
     String expression() default "";
 }

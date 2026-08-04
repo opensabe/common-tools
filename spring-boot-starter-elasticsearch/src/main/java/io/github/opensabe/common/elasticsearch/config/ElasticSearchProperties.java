@@ -19,9 +19,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
 
+/**
+ * Elasticsearch 连接与集群配置属性，绑定 {@code spring.data.elasticsearch} 前缀。
+ */
 @ConfigurationProperties(prefix = "spring.data.elasticsearch")
 @Data
 public class ElasticSearchProperties {
+/** addresses。 */
     private String addresses;
     private Boolean secure = false;
 }

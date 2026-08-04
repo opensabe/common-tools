@@ -34,12 +34,16 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.geoplaces.GeoPlacesClient;
 
 
+/**
+ * AwsGeoPlaces Spring 配置类。
+ */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "aws.location.enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(GeoPlacesProperties.class)
 public class AwsGeoPlacesConfiguration {
 
+/** geoPlaces 配置属性。 */
     private final GeoPlacesProperties geoPlacesProperties;
 
 
@@ -62,6 +66,7 @@ public class AwsGeoPlacesConfiguration {
                 .build();
     }
 
+    /** validateProperties。 */
     private void validateProperties(GeoPlacesProperties properties) {
         if (Objects.isNull(properties.getAccessKey()) || Objects.isNull(properties.getSecretKey())) {
             throw new IllegalArgumentException("AWS access key and secret key must be provided.");
@@ -71,12 +76,14 @@ public class AwsGeoPlacesConfiguration {
         }
     }
 
+    /** geocodeService。 */
     @Bean
     public GeocodeService geocodeService(GeoPlacesClient geoPlacesClient, UnifiedObservationFactory unifiedObservationFactory) {
         log.info("GeocodeService bean is being created");
         return new AwsLocationGeocodeService(geoPlacesClient, unifiedObservationFactory);
     }
 
+    /** locationObservationToJFRGenerator。 */
     @Bean
     public LocationObservationToJFRGenerator locationObservationToJFRGenerator() {
         return new LocationObservationToJFRGenerator();

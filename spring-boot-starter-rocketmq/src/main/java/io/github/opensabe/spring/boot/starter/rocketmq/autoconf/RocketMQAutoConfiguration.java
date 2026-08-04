@@ -21,6 +21,9 @@ import org.springframework.context.annotation.Import;
 import io.github.opensabe.spring.boot.starter.rocketmq.configuration.MQExtendConfig;
 import io.github.opensabe.spring.boot.starter.rocketmq.configuration.MQProducerConfiguration;
 
+/**
+ * RocketMQ Starter 自动配置入口。
+ */
 @Configuration(proxyBeanMethods = false)
 @Import({MQProducerConfiguration.class, MQExtendConfig.class})
 public class RocketMQAutoConfiguration {

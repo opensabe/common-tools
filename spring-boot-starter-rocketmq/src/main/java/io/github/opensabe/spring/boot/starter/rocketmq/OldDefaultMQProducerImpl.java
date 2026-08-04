@@ -50,13 +50,19 @@ import static io.github.opensabe.spring.boot.starter.rocketmq.MQMessageUtil.trim
  */
 @Log4j2
 public class OldDefaultMQProducerImpl implements MQProducer {
+/** srcName。 */
     private final String srcName;
+/** unifiedObservation 工厂。 */
     private final UnifiedObservationFactory unifiedObservationFactory;
+/** rocketMQTemplate。 */
     private final RocketMQTemplate rocketMQTemplate;
 
+/** persistent。 */
     private final MessagePersistent persistent;
+/** uniqueID。 */
     private final UniqueID uniqueID;
 
+/** globalSecret 管理器。 */
     private final GlobalSecretManager globalSecretManager;
 
     public OldDefaultMQProducerImpl(String srcName, UnifiedObservationFactory unifiedObservationFactory, RocketMQTemplate rocketMQTemplate, MessagePersistent persistent, UniqueID uniqueID, GlobalSecretManager globalSecretManager) {
@@ -69,111 +75,133 @@ public class OldDefaultMQProducerImpl implements MQProducer {
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o) {
         send(topic, o, null, false);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, Long time) {
         send(topic, o, null, false, time);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, MQSendConfig mqSendConfig) {
         send(topic, o, null, false, mqSendConfig);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o) {
         send(topic, o, null, true, null, null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o, Long time) {
         send(topic, o, null, true, time, null, null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o, MQSendConfig mqSendConfig) {
         send(topic, o, null, true, null, mqSendConfig);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, boolean isAsync) {
         send(topic, o, null, isAsync);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, boolean isAsync, Long time) {
         send(topic, o, null, isAsync, time);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, boolean isAsync, MQSendConfig mqSendConfig) {
         send(topic, o, null, isAsync, mqSendConfig);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o, SendCallback sendCallback) {
         send(topic, o, null, true, sendCallback, null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o, SendCallback sendCallback, Long time) {
         send(topic, o, null, true, time, sendCallback, null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o, SendCallback sendCallback, MQSendConfig mqSendConfig) {
         send(topic, o, null, true, sendCallback, mqSendConfig);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, String hashKey) {
         send(topic, o, hashKey, false);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, String hashKey, Long time) {
         send(topic, o, hashKey, false, time);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, String hashKey, MQSendConfig mqSendConfig) {
         send(topic, o, hashKey, false, mqSendConfig);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o, String hashKey, SendCallback sendCallback) {
         send(topic, o, hashKey, true, sendCallback, null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o, String hashKey, SendCallback sendCallback, Long time) {
         send(topic, o, hashKey, true, time, sendCallback, null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendAsync(String topic, Object o, String hashKey, SendCallback sendCallback, MQSendConfig mqSendConfig) {
         send(topic, o, hashKey, true, sendCallback, mqSendConfig);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, String hashKey, boolean isAsync) {
         send(topic, o, hashKey, isAsync, null, null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, String hashKey, boolean isAsync, Long time) {
         send(topic, o, hashKey, isAsync, time, null, null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, String hashKey, boolean isAsync, MQSendConfig mqSendConfig) {
         send(topic, o, hashKey, isAsync, null, mqSendConfig);
     }
 
+    /** handleSendResult。 */
     private void handleSendResult(
             MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString,
             BaseMQMessage baseMQMessage, MessageProduceContext messageProduceContext, Observation observation,
@@ -207,6 +235,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
         observation.stop();
     }
 
+    /** handleSendException。 */
     private void handleSendException(
             MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString,
             BaseMQMessage baseMQMessage, MessageProduceContext messageProduceContext,
@@ -221,11 +250,13 @@ public class OldDefaultMQProducerImpl implements MQProducer {
         observation.stop();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, String hashKey, boolean isAsync, SendCallback sendCallback, MQSendConfig mqSendConfig) {
         send(topic, o, hashKey, isAsync, null, sendCallback, mqSendConfig);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(String topic, Object o, String hashKey, boolean isAsync, Long time, SendCallback sendCallback, MQSendConfig mqSendConfig) {
         if (Objects.isNull(mqSendConfig)) {
@@ -275,6 +306,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
             if (isAsync) {
                 SendCallback sendCallbackForAsync = new SendCallback() {
+                    /** {@inheritDoc} */
                     @Override
                     public void onSuccess(SendResult sendResult) {
                         handleSendResult(
@@ -283,6 +315,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
                         );
                     }
 
+                    /** {@inheritDoc} */
                     @Override
                     public void onException(Throwable throwable) {
                         handleSendException(
@@ -323,6 +356,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendWithInTransaction(String topic, Object body, Object transactionObj, UniqueRocketMQLocalTransactionListener uniqueRocketMQLocalTransactionListener) {
         MessageProduceContext messageProduceContext = new MessageProduceContext(topic);
@@ -364,6 +398,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public SendResult sendWithoutRetry(String topic, String hashKey, String baseMQMessage, String traceIdString) {
         Message<?> message = MessageBuilder.withPayload(baseMQMessage).setHeader("KEYS", traceIdString).build();
@@ -385,6 +420,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
         return sendResult;
     }
 
+    /** failThenPersist。 */
     private void failThenPersist(MQSendConfig mqSendConfig, String topic, String hashKey, String traceIdString, BaseMQMessage baseMQMessage) {
         if (mqSendConfig.getPersistence()) {
             String baseMQMessageJson = JsonUtil.toJSONString(baseMQMessage);

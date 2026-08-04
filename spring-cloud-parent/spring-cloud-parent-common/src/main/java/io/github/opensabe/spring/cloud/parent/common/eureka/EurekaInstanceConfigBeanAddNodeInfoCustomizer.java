@@ -22,17 +22,26 @@ import io.github.opensabe.common.utils.AlarmUtil;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 将环境变量中 NODE_NAME、AZ_NAME 加入 eureka 注册实例信息中的 metadata
- * NODE_NAME、AZ_NAME 是运维团队在 k8s pod 中加入的环境变量
+ * 向 Eureka metadata 注入 K8s 节点名与可用区。
+ * <p>
+ * 分别读取环境变量 {@code NODE_NAME} 与 {@code ZONE}，由运维在 Pod 中注入。
  */
 @Log4j2
 public class EurekaInstanceConfigBeanAddNodeInfoCustomizer implements EurekaInstanceConfigBeanCustomizer {
+    /** metadata 中 K8s 节点名字段键。 */
     public static final String K8S_NODE_INFO = "k8s-node-info";
+    /** metadata 中可用区字段键。 */
     public static final String K8S_AZ_INFO = "az-info";
+    /** 未配置可用区时的默认值。 */
     public static final String DEFAULT_AZ_INFO = "unknown";
     private static final String SYSTEM_VARIABLE = "NODE_NAME";
     private static final String SYSTEM_AZ_VARIABLE = "ZONE";
 
+    /**
+     * 读取环境变量并写入 metadata。
+     *
+     * @param eurekaInstanceConfigBean Eureka 实例配置
+     */
     @Override
     public void customize(EurekaInstanceConfigBean eurekaInstanceConfigBean) {
         String nodeName = System.getenv(SYSTEM_VARIABLE);

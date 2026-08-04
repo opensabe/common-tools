@@ -28,6 +28,9 @@ import io.github.opensabe.scheduler.listener.JobListeners;
 import io.github.opensabe.scheduler.utils.MisfireQueue;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * MisfireJobServer 调度任务。
+ */
 @Log4j2
 public class MisfireJobServer implements Runnable {
 

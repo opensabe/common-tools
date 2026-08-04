@@ -19,6 +19,10 @@ import java.util.Set;
 
 import io.github.opensabe.common.alive.client.message.Response;
 
+/**
+ * ClientCallback 接口。
+ * <p>Client回调。</p>
+ */
 public interface ClientCallback {
     void opComplete(Set<Response> response);
 }

@@ -27,10 +27,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * 代替之前的注解
- *
- * @author heng.ma
- * @see org.redisson.api.RedissonClient#getLock(String)
+ * 声明 Redisson 可重入锁（{@link org.redisson.api.RedissonClient#getLock(String)}）。
+ * <p>
+ * 替代旧版 {@link io.github.opensabe.common.redisson.annotation.RedissonLock} 注解。
  */
 @Documented
 @Inherited
@@ -39,6 +38,7 @@ import org.springframework.core.annotation.AliasFor;
 @SLock(name = "", lockFeature = SLock.LockFeature.DEFAULT)
 public @interface RedissonLock {
 
+    /** 默认锁键前缀。 */
     String DEFAULT_PREFIX = "redisson:lock:";
 
     /**
@@ -49,6 +49,7 @@ public @interface RedissonLock {
     @AliasFor(annotation = SLock.class)
     String[] name();
 
+    /** 锁键前缀。 */
     @AliasFor(annotation = SLock.class)
     String prefix() default DEFAULT_PREFIX;
 
@@ -71,6 +72,7 @@ public @interface RedissonLock {
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
 
+    /** 加锁策略。 */
     @AliasFor(annotation = SLock.class)
     SLock.LockType lockType() default SLock.LockType.BLOCK_LOCK;
 

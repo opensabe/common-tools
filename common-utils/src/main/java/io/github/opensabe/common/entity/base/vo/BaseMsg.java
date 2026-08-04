@@ -19,14 +19,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Basic MQ message format
+ * MQ 消息基类，携带 traceId、时间戳、来源与业务动作。
+ *
+ * @param <T> 消息体数据类型
  */
 @Getter
 @Setter
 public class BaseMsg<T> {
-    private String traceId;                         // traceId for auditing
-    private Long ts;                                // current system timestamp
-    private String src;                             // src system SrcEnum.val
-    private String action;                          // customized action
-    private T data;                                 // content data
+    /** 审计用 traceId。 */
+    private String traceId;
+    /** 当前系统时间戳（毫秒）。 */
+    private Long ts;
+    /** 来源系统标识（{@code SrcEnum.val}）。 */
+    private String src;
+    /** 业务动作标识。 */
+    private String action;
+    /** 消息体数据。 */
+    private T data;
 }

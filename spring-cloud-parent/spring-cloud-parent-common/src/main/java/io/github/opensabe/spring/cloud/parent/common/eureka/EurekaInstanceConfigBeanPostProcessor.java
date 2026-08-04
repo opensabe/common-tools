@@ -22,15 +22,27 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 
 /**
- * 实现 EurekaInstanceConfigBeanCustomizer 在 EurekaInstanceConfigBean 初始化之后修改
+ * {@link EurekaInstanceConfigBeanCustomizer} 的后置处理器。
+ * <p>
+ * 在 {@link EurekaInstanceConfigBean} 初始化完成后依次调用所有定制器。
  */
 public class EurekaInstanceConfigBeanPostProcessor implements BeanPostProcessor {
     private final List<EurekaInstanceConfigBeanCustomizer> eurekaInstanceConfigBeanCustomizers;
 
+    /**
+     * @param eurekaInstanceConfigBeanCustomizers 已注册的定制器列表
+     */
     public EurekaInstanceConfigBeanPostProcessor(List<EurekaInstanceConfigBeanCustomizer> eurekaInstanceConfigBeanCustomizers) {
         this.eurekaInstanceConfigBeanCustomizers = eurekaInstanceConfigBeanCustomizers;
     }
 
+    /**
+     * 对 {@link EurekaInstanceConfigBean} 应用全部定制器。
+     *
+     * @param bean 待处理的 Bean
+     * @param beanName Bean 名称
+     * @return 处理后的 Bean
+     */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof EurekaInstanceConfigBean) {

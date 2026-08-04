@@ -18,6 +18,9 @@ package io.github.opensabe.scheduler.listener;
 import io.github.opensabe.scheduler.conf.JobStatus;
 import io.github.opensabe.scheduler.job.SchedulerJob;
 
+/**
+ * JobStartedListener 任务监听器。
+ */
 public interface JobStartedListener extends JobListener {
 
     default void jobStarted(SchedulerJob job) {

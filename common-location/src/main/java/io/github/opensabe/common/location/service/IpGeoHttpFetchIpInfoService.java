@@ -24,6 +24,9 @@ import io.github.opensabe.common.location.vo.IpLocation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * IpGeoHttpFetchIpInfoService 服务接口/实现。
+ */
 public class IpGeoHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<IpGeoHttpFetchIpInfoService.Response> {
     @Override
     protected Class<Response> clazz() {
@@ -59,9 +62,12 @@ public class IpGeoHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<
                 .build();
     }
 
+    /**
+ * Response。
+ */
     @NoArgsConstructor
     @Data
-    public static class Response {
+public static class Response {
         @JsonProperty("ip")
         private String ip;
         @JsonProperty("hostname")
@@ -115,9 +121,12 @@ public class IpGeoHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<
         @JsonProperty("time_zone")
         private TimeZoneDTO timeZone;
 
+        /**
+ * CurrencyDTO 数据传输对象。
+ */
         @NoArgsConstructor
         @Data
-        public static class CurrencyDTO {
+public static class CurrencyDTO {
             @JsonProperty("code")
             private String code;
             @JsonProperty("name")
@@ -126,9 +135,12 @@ public class IpGeoHttpFetchIpInfoService extends AbstractHttpFetchIpInfoService<
             private String symbol;
         }
 
+        /**
+ * TimeZoneDTO 数据传输对象。
+ */
         @NoArgsConstructor
         @Data
-        public static class TimeZoneDTO {
+public static class TimeZoneDTO {
             @JsonProperty("name")
             private String name;
             @JsonProperty("offset")

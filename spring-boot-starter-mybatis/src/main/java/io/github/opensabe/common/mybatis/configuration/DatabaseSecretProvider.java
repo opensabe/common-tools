@@ -26,7 +26,11 @@ import io.github.opensabe.common.mybatis.properties.SqlSessionFactoryProperties;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.common.secret.SecretProvider;
 
+/**
+ * DatabaseSecretProvider。
+ */
 public class DatabaseSecretProvider extends SecretProvider {
+/** sqlSessionFactory 配置属性。 */
     private final SqlSessionFactoryProperties sqlSessionFactoryProperties;
 
     protected DatabaseSecretProvider(GlobalSecretManager globalSecretManager, SqlSessionFactoryProperties sqlSessionFactoryProperties) {
@@ -34,21 +38,25 @@ public class DatabaseSecretProvider extends SecretProvider {
         this.sqlSessionFactoryProperties = sqlSessionFactoryProperties;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected String name() {
         return "spring-boot-starter-mybatis";
     }
 
+    /** {@inheritDoc} */
     @Override
     protected long reloadTimeInterval() {
         return 1;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected TimeUnit reloadTimeIntervalUnit() {
         return TimeUnit.DAYS;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected Map<String, Set<String>> reload() {
         Map<String, Set<String>> result = Maps.newHashMap();

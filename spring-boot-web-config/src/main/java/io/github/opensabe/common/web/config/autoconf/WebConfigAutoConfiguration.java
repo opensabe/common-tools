@@ -24,6 +24,10 @@ import io.github.opensabe.common.web.config.interceptor.CommonAop;
 import io.github.opensabe.common.web.config.interceptor.ResponseAdvice;
 import io.github.opensabe.common.web.config.interceptor.ValidatorAdvice;
 
+/**
+ * WebConfigAutoConfiguration 类。
+ * <p>WebConfig 自动配置。</p>
+ */
 //@Configuration(proxyBeanMethods = false)
 @AutoConfiguration
 @Import({

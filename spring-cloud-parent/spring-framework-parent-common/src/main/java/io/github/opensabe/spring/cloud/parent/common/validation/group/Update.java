@@ -18,5 +18,8 @@ package io.github.opensabe.spring.cloud.parent.common.validation.group;
 
 import jakarta.validation.groups.Default;
 
+/**
+ * 更新（Update）场景的校验分组，继承 {@link Default}。
+ */
 public interface Update extends Default {
 }

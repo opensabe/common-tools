@@ -32,16 +32,29 @@ import com.apple.itunes.storekit.migration.ReceiptUtility;
 import com.apple.itunes.storekit.model.Environment;
 import com.apple.itunes.storekit.verification.SignedDataVerifier;
 
+/**
+ * Apple 内购 Spring 配置（兼容旧版 {@link AppleProperties} 绑定）。
+ *
+ * @see AppleInPurchaseConfiguration
+ * @deprecated 请迁移至 {@link AppleInPurchaseConfiguration} 与 {@link AppleInPurchaseProperties}
+ */
+@Deprecated
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "apple.in-purchase.enable", matchIfMissing = false)
 @EnableConfigurationProperties(AppleProperties.class)
 public class AppleConfiguration {
 
+    /** Apple 根证书 classpath 路径集合。 */
     public static final Set<String> ROOT_CERTIFICATE_PATH = Set.of("apple/cer/root/AppleComputerRootCertificate.cer",
             "apple/cer/root/AppleIncRootCertificate.cer",
             "apple/cer/root/AppleRootCA-G2.cer",
             "apple/cer/root/AppleRootCA-G3.cer");
 
+    /**
+     * 加载 Apple 根证书输入流集合。
+     *
+     * @return 根证书 {@link InputStream} 集合
+     */
     public static Set<InputStream> getRootCertificates() {
         Set<InputStream> rootCertificates = ROOT_CERTIFICATE_PATH.stream()
                 .map(path -> {
@@ -56,12 +69,19 @@ public class AppleConfiguration {
         return rootCertificates;
     }
 
+    /**
+     * @return {@link ReceiptUtility} 实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public ReceiptUtility receiptUtility() {
         return new ReceiptUtility();
     }
 
+    /**
+     * @param appleProperties 内购配置属性
+     * @return {@link AppStoreServerAPIClient} 实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public AppStoreServerAPIClient appStoreServerAPIClient(AppleProperties appleProperties) {
@@ -73,6 +93,10 @@ public class AppleConfiguration {
         return new AppStoreServerAPIClient(signingKey, keyId, issuerId, bundleId, environment);
     }
 
+    /**
+     * @param appleProperties 内购配置属性
+     * @return {@link SignedDataVerifier} 实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public SignedDataVerifier signedDataVerifier(AppleProperties appleProperties) {

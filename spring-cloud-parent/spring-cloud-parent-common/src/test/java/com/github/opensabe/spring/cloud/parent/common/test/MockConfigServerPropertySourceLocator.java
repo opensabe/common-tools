@@ -27,8 +27,14 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Mock Config Server 属性源定位器。
+ * <p>
+ * 提供可编程的加密属性，供 Secret 解密集成测试使用。
+ */
 public class MockConfigServerPropertySourceLocator implements PropertySourceLocator {
 
+    /** 内存中的 Mock 属性表。 */
     private static final Map<String, Object> properties = new ConcurrentHashMap<>();
 
     @Override

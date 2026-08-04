@@ -20,11 +20,12 @@ import java.util.Map;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -56,7 +57,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@AutoConfigureObservability
+@AutoConfigureWebTestClient
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
         properties = {
@@ -75,6 +76,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         },
         classes = TestRequestIsTheSame.MockConfig.class
 )
+@DisplayName("Gateway请求体缓存一致性测试")
 public class TestRequestIsTheSame extends CommonMicroServiceTest {
     private final String serviceId = "testService";
     @LocalServerPort
@@ -119,6 +121,7 @@ public class TestRequestIsTheSame extends CommonMicroServiceTest {
         requests = new DefaultRequest[3];
     }
 
+    @DisplayName("重试时DefaultRequest请求体保持不变")
     @Test
     public void test() {
         when(loadBalancerClientFactory.getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class)).thenReturn(loadBalancerClientFactoryInstance);

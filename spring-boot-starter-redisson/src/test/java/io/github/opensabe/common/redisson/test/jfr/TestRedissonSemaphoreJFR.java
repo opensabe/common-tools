@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -39,11 +40,17 @@ import jdk.jfr.consumer.RecordedEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @Import(TestRedissonSemaphoreJFR.Config.class)
 //JFR 测试最好在本地做
+@AutoConfigureTracing
 @Disabled
+/**
+ * Redisson 信号量 JFR 事件录制测试（当前禁用）。
+ */
+@DisplayName("Redisson信号量JFR事件测试")
 public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     public JfrEvents jfrEvents = new JfrEvents();
@@ -52,6 +59,7 @@ public class TestRedissonSemaphoreJFR extends BaseRedissonTest {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    @DisplayName("信号量tryAcquire JFR录制")
     @Test
     public void testTryAcquire() throws InterruptedException {
         Thread[] threads = new Thread[THREAD_COUNT];

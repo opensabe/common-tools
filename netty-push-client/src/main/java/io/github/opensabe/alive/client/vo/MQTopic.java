@@ -18,6 +18,10 @@ package io.github.opensabe.alive.client.vo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * MQTopic 枚举。
+ * <p>MQ 主题。</p>
+ */
 @Getter
 @AllArgsConstructor
 public enum MQTopic {
@@ -28,5 +32,6 @@ public enum MQTopic {
 
     ;
 
+/** MQ 主题名。 */
     private String topic;
 }

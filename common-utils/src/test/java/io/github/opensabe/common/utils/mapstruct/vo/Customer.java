@@ -21,6 +21,9 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Customer。
+ */
 @Getter
 @Setter
 public class Customer {

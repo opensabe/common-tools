@@ -20,9 +20,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Gateway JFR 事件配置属性。
+ * <p>
+ * 绑定前缀 {@code spring.cloud.gateway.jfr}。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties("spring.cloud.gateway.jfr")
 public class GatewayJFRProperties {
+    /**
+     * 是否启用 Gateway JFR 事件，默认 {@code true}。
+     */
     private boolean enabled = true;
 }

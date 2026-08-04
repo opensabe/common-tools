@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -42,12 +43,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 
 @JfrEventTest
 @Import(TestRedissonLockJFR.Config.class)
 @Execution(ExecutionMode.SAME_THREAD)
 //JFR 测试最好在本地做
+@AutoConfigureTracing
 @Disabled
+/**
+ * Redisson 分布式锁 JFR 事件录制测试（当前禁用）：验证 blockLock / tryLock 的 trace 与 JFR 字段。
+ */
+@DisplayName("Redisson分布式锁JFR事件测试")
 public class TestRedissonLockJFR extends BaseRedissonTest {
     private static final int COUNT_OF_THREADS = 12;
     public JfrEvents jfrEvents = new JfrEvents();
@@ -56,6 +63,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
     @Autowired
     private UnifiedObservationFactory unifiedObservationFactory;
 
+    @DisplayName("阻塞锁正常获取与释放JFR录制")
     @Test
     public void testBlockLockNormal() {
         Thread[] threads = new Thread[COUNT_OF_THREADS];
@@ -117,6 +125,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
         assertEquals(COUNT_OF_THREADS, rLockReleasedJFREvents.stream().map(recordedEvent -> recordedEvent.getString("spanId")).distinct().count());
     }
 
+    @DisplayName("阻塞锁异常路径JFR录制")
     @Test
     public void testBlockLockException() {
         Thread[] threads = new Thread[COUNT_OF_THREADS];
@@ -178,6 +187,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
         assertEquals(COUNT_OF_THREADS, rLockReleasedJFREvents.stream().map(recordedEvent -> recordedEvent.getString("spanId")).distinct().count());
     }
 
+    @DisplayName("tryLock正常获取JFR录制")
     @Test
     public void testTryLockNormal() {
         Thread[] threads = new Thread[COUNT_OF_THREADS];
@@ -240,6 +250,7 @@ public class TestRedissonLockJFR extends BaseRedissonTest {
         assertEquals(COUNT_OF_THREADS, rLockReleasedJFREvents.stream().map(recordedEvent -> recordedEvent.getString("spanId")).distinct().count());
     }
 
+    @DisplayName("tryLock等待超时JFR录制")
     @Test
     public void testTryLockWaitTimeOut() {
         Thread[] threads = new Thread[COUNT_OF_THREADS];

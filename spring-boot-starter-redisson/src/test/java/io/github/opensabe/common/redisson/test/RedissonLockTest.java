@@ -18,6 +18,7 @@ package io.github.opensabe.common.redisson.test;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -39,6 +40,10 @@ import lombok.NoArgsConstructor;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Import(RedissonLockTest.Config.class)
+/**
+ * Redisson 分布式锁 AOP 集成测试：阻塞/try 锁、锁名解析与并发计数。
+ */
+@DisplayName("Redisson 分布式锁集成测试")
 public class RedissonLockTest extends BaseRedissonTest {
     private static final int THREAD_COUNT = 10;
     private static final int ADD_COUNT = 10000;
@@ -56,11 +61,13 @@ public class RedissonLockTest extends BaseRedissonTest {
     @Autowired
     private TestRedissonLockInterface2 testRedissonLockInterface2;
 
+    @DisplayName("AOP 切面顺序配置校验")
     @Test
     public void testAopConfiguration() {
         Assertions.assertEquals(redissonAopConfiguration.getOrder(), BaseRedissonTest.AOP_ORDER);
     }
 
+    @DisplayName("多线程无锁/阻塞锁/tryLock 并发计数")
     @Test
     public void testMultipleLock() throws InterruptedException {
         testRedissonLockClass.reset();
@@ -279,6 +286,7 @@ public class RedissonLockTest extends BaseRedissonTest {
         Assertions.assertEquals(testRedissonLockClassExtends.getCount(), THREAD_COUNT * ADD_COUNT);
     }
 
+    @DisplayName("block 属性阻塞锁行为")
     @Test
     public void testBlockProperty() throws InterruptedException {
         testRedissonLockClass.reset();
@@ -286,6 +294,7 @@ public class RedissonLockTest extends BaseRedissonTest {
         testRedissonLockClass.testRedissonLockNameProperty(Student.builder().id("111111").build(), "zhx");
     }
 
+    @DisplayName("block 属性阻塞锁行为（扩展场景）")
     @Test
     public void testBlockProperty1() throws InterruptedException {
         testRedissonLockClass.reset();
@@ -293,12 +302,14 @@ public class RedissonLockTest extends BaseRedissonTest {
         testRedissonLockClass.testRedissonLockNameProperty1(Student.builder().id("111111").build(), "zhx");
     }
 
+    @DisplayName("锁租约时间自动释放")
     @Test
     public void testLockTime() throws InterruptedException {
         testRedissonLockClass.reset();
         testRedissonLockClass.testLockTime("same");
     }
 
+    @DisplayName("tryLock 等待超时抛异常")
     @Test
     public void testWaitTime() throws InterruptedException {
         testRedissonLockClass.reset();
@@ -315,6 +326,7 @@ public class RedissonLockTest extends BaseRedissonTest {
         assertThrows(RedissonClientException.class, () -> testRedissonLockClass.testWaitTime("same"));
     }
 
+    @DisplayName("多锁名 SpEL 表达式解析")
     @Test
     public void testMultiNameLock() throws InterruptedException {
         testRedissonLockClass.reset();

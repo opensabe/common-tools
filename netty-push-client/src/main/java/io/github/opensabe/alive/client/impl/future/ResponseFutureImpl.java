@@ -22,34 +22,54 @@ import io.github.opensabe.alive.client.ResponseFuture;
 import io.github.opensabe.alive.client.exception.AliveClientExecutionException;
 import io.github.opensabe.alive.client.exception.AliveClientTimeoutException;
 
+/**
+ * ResponseFutureImpl 类。
+ * <p>响应FutureImpl。</p>
+ */
 public class ResponseFutureImpl implements ResponseFuture {
 
+/** future 字段。 */
     private BaseResponseFuture future;
 
     public ResponseFutureImpl(BaseResponseFuture future) {
         this.future = future;
     }
 
+/**
+ * get0 方法。
+ */
     private Response get0() throws InterruptedException, AliveClientExecutionException {
         return future.get0();
     }
 
+/**
+ * get0 方法。
+ */
     private Response get0(long timeout, TimeUnit unit)
             throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         return future.get0(timeout, unit);
     }
 
+/**
+ * get 方法。
+ */
     @Override
     public Response get() throws InterruptedException, AliveClientExecutionException {
         return get0();
     }
 
+/**
+ * get 方法。
+ */
     @Override
     public Response get(long timeout, TimeUnit unit)
             throws InterruptedException, AliveClientExecutionException, AliveClientTimeoutException {
         return get0(timeout, unit);
     }
 
+/**
+ * getUninterruptibly 方法。
+ */
     @Override
     public Response getUninterruptibly() throws AliveClientExecutionException {
         while (true) {
@@ -61,6 +81,9 @@ public class ResponseFutureImpl implements ResponseFuture {
         }
     }
 
+/**
+ * getUninterruptibly 方法。
+ */
     @Override
     public Response getUninterruptibly(long timeout, TimeUnit unit) throws AliveClientExecutionException, AliveClientTimeoutException {
         if (timeout == 0) {

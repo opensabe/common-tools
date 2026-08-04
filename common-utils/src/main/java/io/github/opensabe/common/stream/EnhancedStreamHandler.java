@@ -27,6 +27,9 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * EnhancedStreamHandler 处理器。
+ */
 public class EnhancedStreamHandler<T> implements InvocationHandler {
     private static final Method ENHANCED_DISTINCT;
     /**
@@ -101,6 +104,9 @@ public class EnhancedStreamHandler<T> implements InvocationHandler {
         return proxy;
     }
 
+    /**
+     * 去重键包装，组合元素与自定义 hash/equals。
+     */
     private static final class Key<E> {
         private final E e;
         private final ToIntFunction<E> hashCode;

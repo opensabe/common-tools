@@ -29,47 +29,64 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tk.mybatis.mapper.annotation.ColumnType;
 
+/**
+ * 活动测试 PO。
+ */
 @Getter
 @Setter
 @Table(name = "t_activity")
 public class Activity {
 
+/** activityId。 */
     @Id
     private String activityId;
 
+/** displaySetting。 */
     @ColumnType(typeHandler = JSONTypeHandler.class)
     private Display displaySetting;
 
+/** bizType。 */
     @ColumnType(typeHandler = JSONTypeHandler.class)
     private List<Integer> bizType;
 
+/** configSetting。 */
     @ColumnType(typeHandler = JSONTypeHandler.class)
     private Configs configSetting;
 
     @Getter
     @Setter
     public static class DisplaySetting {
+/** label。 */
         private String label;
 
+/** displayInList。 */
         private boolean displayInList;
 
+/** displayInAz。 */
         private boolean displayInAz;
 
+/** title。 */
         private String title;
 
+/** link。 */
         private String link;
 
+/** image。 */
         private String image;
 
+/** startTime。 */
         private Date startTime;
 
+/** endTime。 */
         private Date endTime;
     }
 
     @Setter
     @Getter
     public static class Config {
+/** val。 */
         private String val;
+/** displaySettings。 */
         private List<DisplaySetting> displaySettings;
     }
 

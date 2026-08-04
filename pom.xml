@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <groupId>io.github.opensabe-tech</groupId>
     <artifactId>common-tools</artifactId>
-    <version>2.0.9</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 
@@ -55,7 +55,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>2025.0.0</version>
+                <version>2025.1.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -204,14 +204,21 @@
                         <version>3.6.0</version>
                         <executions>
                             <execution>
+                                <id>checkstyle-check</id>
                                 <phase>verify</phase>
                                 <goals>
-                                    <goal>checkstyle</goal>
+                                    <!--
+                                      Use check (not checkstyle report): the report goal resolves the
+                                      parent POM site descriptor from Maven Central and flakes on HTTP 429.
+                                    -->
+                                    <goal>check</goal>
                                 </goals>
                             </execution>
                         </executions>
                         <configuration>
                             <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                            <failOnViolation>true</failOnViolation>
                             <enableRSS>false</enableRSS>
                             <configLocation>/checkstyle.xml</configLocation>
                             <excludes>**/module-info.java</excludes>

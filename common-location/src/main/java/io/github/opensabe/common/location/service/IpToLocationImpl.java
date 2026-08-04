@@ -34,6 +34,9 @@ import io.github.opensabe.common.location.vo.IpLocation;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * IpToLocationImpl 实现类。
+ */
 @Log4j2
 public class IpToLocationImpl implements IpToLocation {
 

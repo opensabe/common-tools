@@ -18,9 +18,13 @@ package io.github.opensabe.common.redisson.aop.ratelimiter;
 import io.github.opensabe.common.redisson.aop.AbstractRedissonAdvisor;
 
 /**
- * redisson 切点通知
+ * {@link io.github.opensabe.common.redisson.annotation.RedissonRateLimiter} 限流 AOP Advisor。
  */
 public class RedissonRateLimiterAdvisor extends AbstractRedissonAdvisor<RedissonRateLimiterProperties> {
+
+    /**
+     * @param redissonRateLimiterCachedPointcut 限流切点
+     */
     public RedissonRateLimiterAdvisor(RedissonRateLimiterCachedPointcut redissonRateLimiterCachedPointcut) {
         super(redissonRateLimiterCachedPointcut);
     }

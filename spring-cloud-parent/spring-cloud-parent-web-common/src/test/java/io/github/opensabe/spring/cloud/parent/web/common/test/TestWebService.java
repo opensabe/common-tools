@@ -28,11 +28,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 /**
  * 测试可以正常创建一个微服务
@@ -69,7 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @Log4j2
 @SpringJUnitConfig
-@AutoConfigureObservability
 @SpringBootTest(
         properties = {
                 "eureka.client.enabled=false",
@@ -79,6 +79,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         classes = TestWebService.TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
+@AutoConfigureTestRestTemplate
+@DisplayName("Web服务集成测试")
 public class TestWebService {
     private static final String SECRET = "secretString";
     /**
@@ -87,6 +89,7 @@ public class TestWebService {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
+    @DisplayName("基础TestController接口调用")
     @Test
     public void testTestService() {
         //spring boot test 调用接口
@@ -102,6 +105,7 @@ public class TestWebService {
         assertNotEquals(threadName2, threadName3);
     }
 
+    @DisplayName("AllType对象序列化与反序列化")
     @Test
     public void testAllType() {
         TestService.AllTypeObjExtend obj = TestService.AllTypeObjExtend.builder()
@@ -166,6 +170,7 @@ public class TestWebService {
                 obj.getPrice());
     }
 
+    @DisplayName("AllTypeRecord序列化与反序列化")
     @Test
     public void testAllTypeRecord() {
         TestService.AllTypeRecord obj = new TestService.AllTypeRecord(
@@ -192,12 +197,14 @@ public class TestWebService {
         assertEquals(obj, result);
     }
 
+    @DisplayName("LocalDateTime序列化为时间戳")
     @Test
     public void testSerializeLocalDataTime() {
         String str = testRestTemplate.getForObject("/local-data-time/serialize", String.class);
         assertTrue(str.matches("^\\d+$"));
     }
 
+    @DisplayName("时间戳反序列化为LocalDateTime")
     @Test
     public void testDeSerializeLocalDataTime() {
         long now = System.currentTimeMillis();
@@ -207,6 +214,7 @@ public class TestWebService {
         assertEquals(now, str);
     }
 
+    @DisplayName("敏感串过滤与SecretProvider")
     @Test
     public void testSecret() throws InterruptedException {
         ResponseEntity<String> forEntity = testRestTemplate.getForEntity("/test-secret-string", String.class);
@@ -234,11 +242,12 @@ public class TestWebService {
     /**
      * 测试ExtendValidatorConfigure中扩展的验证功能
      */
+    @DisplayName("扩展校验器配置生效")
     @Test
     public void testExtendValidatorConfigure() {
         // 测试@NotBlank注解的扩展验证 - 正常情况
         TestService.ValidationTestRequest validRequest = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList("item1", "item2"),
                 java.util.Map.of("key1", "value1"),
                 new String[]{"array1", "array2"}
@@ -248,7 +257,7 @@ public class TestWebService {
                 "/test-validation", validRequest, TestService.ValidationTestRequest.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("测试名称", response.getBody().getName());
+        assertEquals("test-name", response.getBody().getName());
 
         // 测试@NotBlank注解的扩展验证 - 空字符串应该失败
         TestService.ValidationTestRequest invalidRequest1 = new TestService.ValidationTestRequest(
@@ -261,11 +270,11 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse1 = testRestTemplate.postForEntity(
                 "/test-validation", invalidRequest1, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse1.getBody().getBizCode());
-        assertTrue(errorResponse1.getBody().getMessage().contains("名称不能为空"));
+        assertTrue(errorResponse1.getBody().getMessage().contains("name must not be blank"));
 
         // 测试@NotBlank注解的扩展验证 - 空列表应该失败
         TestService.ValidationTestRequest invalidRequest2 = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList(),
                 java.util.Map.of("key1", "value1"),
                 new String[]{"array1", "array2"}
@@ -274,11 +283,11 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse2 = testRestTemplate.postForEntity(
                 "/test-validation", invalidRequest2, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse2.getBody().getBizCode());
-        assertTrue(errorResponse2.getBody().getMessage().contains("列表不能为空"));
+        assertTrue(errorResponse2.getBody().getMessage().contains("list must not be blank"));
 
         // 测试@NotBlank注解的扩展验证 - 空映射应该失败
         TestService.ValidationTestRequest invalidRequest3 = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList("item1", "item2"),
                 java.util.Map.of(),
                 new String[]{"array1", "array2"}
@@ -287,11 +296,11 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse3 = testRestTemplate.postForEntity(
                 "/test-validation", invalidRequest3, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse3.getBody().getBizCode());
-        assertTrue(errorResponse3.getBody().getMessage().contains("映射不能为空"));
+        assertTrue(errorResponse3.getBody().getMessage().contains("map must not be blank"));
 
         // 测试@NotBlank注解的扩展验证 - 空数组应该失败
         TestService.ValidationTestRequest invalidRequest4 = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList("item1", "item2"),
                 java.util.Map.of("key1", "value1"),
                 new String[]{}
@@ -300,17 +309,18 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse4 = testRestTemplate.postForEntity(
                 "/test-validation", invalidRequest4, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse4.getBody().getBizCode());
-        assertTrue(errorResponse4.getBody().getMessage().contains("数组不能为空"));
+        assertTrue(errorResponse4.getBody().getMessage().contains("array must not be blank"));
     }
 
     /**
      * 测试@NotNull注解的强化验证（对String类型要求非空且非空白）
      */
+    @DisplayName("NotNull字符串校验")
     @Test
     public void testNotNullStringValidation() {
         // 测试@NotNull注解的强化验证 - 正常情况
         TestService.ValidationTestRequest validRequest = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList("item1", "item2"),
                 java.util.Map.of("key1", "value1"),
                 new String[]{"array1", "array2"}
@@ -319,7 +329,7 @@ public class TestWebService {
         ResponseEntity<String> response = testRestTemplate.postForEntity(
                 "/test-validation-notnull-string", validRequest, String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().contains("验证通过"));
+        assertTrue(response.getBody().contains("validation passed"));
 
         // 测试@NotNull注解的强化验证 - 空字符串应该失败
         TestService.ValidationTestRequest invalidRequest1 = new TestService.ValidationTestRequest(
@@ -332,7 +342,7 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse1 = testRestTemplate.postForEntity(
                 "/test-validation-notnull-string", invalidRequest1, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse1.getBody().getBizCode());
-        assertTrue(errorResponse1.getBody().getMessage().contains("名称不能为空"));
+        assertTrue(errorResponse1.getBody().getMessage().contains("name must not be blank"));
 
         // 测试@NotNull注解的强化验证 - 空白字符串应该失败
         TestService.ValidationTestRequest invalidRequest2 = new TestService.ValidationTestRequest(
@@ -345,17 +355,18 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse2 = testRestTemplate.postForEntity(
                 "/test-validation-notnull-string", invalidRequest2, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse2.getBody().getBizCode());
-        assertTrue(errorResponse2.getBody().getMessage().contains("名称不能为空"));
+        assertTrue(errorResponse2.getBody().getMessage().contains("name must not be blank"));
     }
 
     /**
      * 测试@NotBlank注解对Object类型的扩展验证
      */
+    @DisplayName("NotBlank对象校验")
     @Test
     public void testNotBlankObjectValidation() {
         // 测试@NotBlank注解对Object类型的扩展验证 - 正常情况
         TestService.ValidationTestRequest validRequest = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList("item1", "item2"),
                 java.util.Map.of("key1", "value1"),
                 new String[]{"array1", "array2"}
@@ -364,11 +375,11 @@ public class TestWebService {
         ResponseEntity<String> response = testRestTemplate.postForEntity(
                 "/test-validation-notblank-object", validRequest, String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().contains("验证通过"));
+        assertTrue(response.getBody().contains("validation passed"));
 
         // 测试@NotBlank注解对Object类型的扩展验证 - 空列表应该失败
         TestService.ValidationTestRequest invalidRequest1 = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList(),
                 java.util.Map.of("key1", "value1"),
                 new String[]{"array1", "array2"}
@@ -377,11 +388,11 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse1 = testRestTemplate.postForEntity(
                 "/test-validation-notblank-object", invalidRequest1, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse1.getBody().getBizCode());
-        assertTrue(errorResponse1.getBody().getMessage().contains("列表不能为空"));
+        assertTrue(errorResponse1.getBody().getMessage().contains("list must not be blank"));
 
         // 测试@NotBlank注解对Object类型的扩展验证 - 空映射应该失败
         TestService.ValidationTestRequest invalidRequest2 = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList("item1", "item2"),
                 java.util.Map.of(),
                 new String[]{"array1", "array2"}
@@ -390,11 +401,11 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse2 = testRestTemplate.postForEntity(
                 "/test-validation-notblank-object", invalidRequest2, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse2.getBody().getBizCode());
-        assertTrue(errorResponse2.getBody().getMessage().contains("映射不能为空"));
+        assertTrue(errorResponse2.getBody().getMessage().contains("map must not be blank"));
 
         // 测试@NotBlank注解对Object类型的扩展验证 - 空数组应该失败
         TestService.ValidationTestRequest invalidRequest3 = new TestService.ValidationTestRequest(
-                "测试名称", 25,
+                "test-name", 25,
                 java.util.Arrays.asList("item1", "item2"),
                 java.util.Map.of("key1", "value1"),
                 new String[]{}
@@ -403,13 +414,14 @@ public class TestWebService {
         ResponseEntity<BaseRsp> errorResponse3 = testRestTemplate.postForEntity(
                 "/test-validation-notblank-object", invalidRequest3, BaseRsp.class);
         assertEquals(BizCodeEnum.INVALID.code(), errorResponse3.getBody().getBizCode());
-        assertTrue(errorResponse3.getBody().getMessage().contains("数组不能为空"));
+        assertTrue(errorResponse3.getBody().getMessage().contains("array must not be blank"));
     }
 
     /**
      * 测试IntegerEnumedValidator的验证逻辑
      * 直接测试验证器的核心逻辑
      */
+    @DisplayName("IntegerEnumed校验逻辑")
     @Test
     public void testIntegerEnumedValidatorLogic() {
         // 模拟IntegerEnumedValidator的验证逻辑
@@ -428,12 +440,13 @@ public class TestWebService {
         // 测试null值（根据IntegerEnumedValidator的实现，null值应该通过验证）
         assertTrue(true); // null值应该通过验证
 
-        log.info("IntegerEnumedValidator逻辑测试通过");
+        log.info("IntegerEnumedValidator logic test passed");
     }
 
     /**
      * 综合测试IntegerEnumedValue的完整验证流程
      */
+    @DisplayName("IntegerEnumed完整请求流程")
     @Test
     public void testIntegerEnumedValueCompleteFlow() {
         // 测试所有有效值
@@ -442,7 +455,7 @@ public class TestWebService {
             ResponseEntity<String> response = testRestTemplate.postForEntity(
                     "/test-validation-integer-enum-with-logic", request, String.class);
             assertEquals(HttpStatus.OK, response.getStatusCode());
-            assertTrue(response.getBody().contains("验证通过: 状态=" + i));
+            assertTrue(response.getBody().contains("validation passed: status=" + i));
         }
 
         // 测试null值
@@ -450,7 +463,7 @@ public class TestWebService {
         ResponseEntity<String> nullResponse = testRestTemplate.postForEntity(
                 "/test-validation-integer-enum-with-logic", nullRequest, String.class);
         assertEquals(HttpStatus.OK, nullResponse.getStatusCode());
-        assertTrue(nullResponse.getBody().contains("验证通过: 状态=null"));
+        assertTrue(nullResponse.getBody().contains("validation passed: status=null"));
 
         // 测试边界值
         int[] invalidValues = {0, 4, -1, 100, -100};
@@ -462,7 +475,7 @@ public class TestWebService {
             assertTrue(invalidResponse.getBody().getMessage().contains("status allowed in [1, 2, 3]"));
         }
 
-        log.info("IntegerEnumedValue完整验证流程测试通过");
+        log.info("IntegerEnumedValue full validation flow test passed");
     }
 
     @SpringBootApplication
@@ -604,22 +617,22 @@ public class TestWebService {
 
         @PostMapping("/test-validation-notblank-object")
         public String testValidationNotBlankObject(@RequestBody @jakarta.validation.Valid ValidationTestRequest request) {
-            return "验证通过: " + request.getName();
+            return "validation passed: " + request.getName();
         }
 
         @PostMapping("/test-validation-notnull-string")
         public String testValidationNotNullString(@RequestBody @jakarta.validation.Valid ValidationTestRequest request) {
-            return "验证通过: " + request.getName();
+            return "validation passed: " + request.getName();
         }
 
         @PostMapping("/test-validation-integer-enum")
         public String testValidationIntegerEnum(@RequestBody @jakarta.validation.Valid IntegerEnumTestRequest request) {
-            return "验证通过: 状态=" + request.getStatus();
+            return "validation passed: status=" + request.getStatus();
         }
 
         @PostMapping("/test-validation-integer-enum-with-logic")
         public String testValidationIntegerEnumWithLogic(@RequestBody @jakarta.validation.Valid IntegerEnumTestRequest request) {
-            return "验证通过: 状态=" + request.getStatus();
+            return "validation passed: status=" + request.getStatus();
         }
 
         @Data
@@ -676,19 +689,19 @@ public class TestWebService {
         @NoArgsConstructor
         @AllArgsConstructor
         public static class ValidationTestRequest {
-            @jakarta.validation.constraints.NotBlank(message = "名称不能为空")
+            @jakarta.validation.constraints.NotBlank(message = "name must not be blank")
             private String name;
 
-            @jakarta.validation.constraints.NotNull(message = "年龄不能为空")
+            @jakarta.validation.constraints.NotNull(message = "age must not be null")
             private Integer age;
 
-            @jakarta.validation.constraints.NotBlank(message = "列表不能为空")
+            @jakarta.validation.constraints.NotBlank(message = "list must not be blank")
             private java.util.List<String> stringList;
 
-            @jakarta.validation.constraints.NotBlank(message = "映射不能为空")
+            @jakarta.validation.constraints.NotBlank(message = "map must not be blank")
             private java.util.Map<String, Object> dataMap;
 
-            @jakarta.validation.constraints.NotBlank(message = "数组不能为空")
+            @jakarta.validation.constraints.NotBlank(message = "array must not be blank")
             private String[] stringArray;
         }
 

@@ -27,22 +27,35 @@ public class PhoneNumber {
     String type;
     String number;
 
+    /**
+     * @return type
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * @param type 待设置值
+     */
     public void setType(String type) {
         this.type = type;
     }
 
+    /**
+     * @return number
+     */
     public String getNumber() {
         return number;
     }
 
+    /**
+     * @param number 待设置值
+     */
     public void setNumber(String number) {
         this.number = number;
     }
 
+    /** {@inheritDoc} — 返回字符串表示。 */
     @Override
     public String toString() {
         return "PhoneNumber{" +

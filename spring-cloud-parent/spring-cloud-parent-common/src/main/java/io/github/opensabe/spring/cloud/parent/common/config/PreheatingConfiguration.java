@@ -17,9 +17,9 @@ package io.github.opensabe.spring.cloud.parent.common.config;
 
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.autoconfigure.endpoint.expose.EndpointExposure;
-import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.health.actuate.endpoint.HealthEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,15 +28,25 @@ import io.github.opensabe.spring.cloud.parent.common.preheating.PreheatingProper
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 预热配置
+ * 应用预热配置。
+ * <p>
+ * 在 {@code preheating.enabled=true} 且 Health 端点已通过 Web 暴露时，
+ * 注册延迟 {@link org.springframework.boot.context.event.ApplicationReadyEvent} 完成的预热监听器。
  */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(PreheatingProperties.class)
 public class PreheatingConfiguration {
+
+    /**
+     * 注册应用就绪延迟预热监听器。
+     * <p>
+     * 要求 Health 端点 Web 暴露，以便在预热阶段对本机发起健康检查请求。
+     *
+     * @return 延迟 ApplicationReady 事件监听器
+     */
     @Bean
     @ConditionalOnProperty(value = "preheating.enabled", matchIfMissing = false, havingValue = "true")
-    //必须通过 http 暴露 health 端口才启用
     @ConditionalOnAvailableEndpoint(endpoint = HealthEndpoint.class, exposure = EndpointExposure.WEB)
     public DelayApplicationReadyEventListener delayApplicationReadyEventListener() {
         return new DelayApplicationReadyEventListener();

@@ -31,6 +31,12 @@ import org.springframework.cache.annotation.Cacheable;
 
 import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 
+/**
+ * 组合式分布式锁元注解，承载锁名称、特性与加锁策略。
+ * <p>
+ * 通常通过 {@link RedissonLock}、{@link FairLock} 等组合注解间接使用，
+ * 由 {@link io.github.opensabe.common.redisson.aop.slock.SLockInterceptor} 拦截执行。
+ */
 @Documented
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -38,60 +44,52 @@ import io.github.opensabe.common.redisson.exceptions.RedissonLockException;
 public @interface SLock {
 
     /**
-     * 锁的名称表达式
+     * 锁名称 SpEL 表达式数组；支持多锁组合。
      *
      * @see Cacheable#cacheNames()
      */
     String[] name();
 
+    /** 锁键前缀，默认 {@link RedissonLock#DEFAULT_PREFIX}。 */
     String prefix() default RedissonLock.DEFAULT_PREFIX;
 
-    /**
-     * 锁等待时间
-     */
+    /** tryLock 最长等待时间。 */
     long waitTime() default 1000;
 
-    /**
-     * 锁最长持有时间
-     */
+    /** 锁 lease 时间；-1 表示看门狗续期。 */
     long leaseTime() default -1;
 
-    /**
-     * 时间单位
-     */
+    /** {@link #waitTime()} 与 {@link #leaseTime()} 的时间单位。 */
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
-
+    /** 加锁策略。 */
     LockType lockType() default LockType.BLOCK_LOCK;
 
+    /** Redisson 锁实现特性。 */
     LockFeature lockFeature() default LockFeature.DEFAULT;
 
+    /** 自旋锁退避策略，仅 {@link LockFeature#SPIN} 生效。 */
     BackOffType backOffType() default BackOffType.EXPONENTIAL;
 
-    /**
-     * 这个参数在 LockFeature = SPIN， BackOffType = CONSTANT 使用
-     */
+    /** 固定退避间隔（毫秒），{@link LockFeature#SPIN} + {@link BackOffType#CONSTANT}。 */
     long backOffDelay() default 64L;
 
-    /**
-     * 以下三个参数在 LockFeature = SPIN， BackOffType = EXPONENTIAL 使用
-     */
+    /** 指数退避最大间隔（毫秒）。 */
     long backOffMaxDelay() default 128;
 
+    /** 指数退避初始间隔（毫秒）。 */
     long backOffInitialDelay() default 1;
 
+    /** 指数退避乘数。 */
     int backOffMultiplier() default 2;
 
-    /**
-     * 这个参数在 LockFeature = READ_WRITE 使用
-     */
+    /** 读写锁模式，仅 {@link LockFeature#READ_WRITE} 生效。 */
     ReadOrWrite readOrWrite() default ReadOrWrite.READ;
 
+    /** 加锁行为。 */
     enum LockType {
 
-        /**
-         * @see org.redisson.api.RLock#lock(long, TimeUnit)
-         */
+        /** 阻塞加锁。 @see org.redisson.api.RLock#lock(long, TimeUnit) */
         BLOCK_LOCK {
             @Override
             public boolean lock(SLock content, RLock lock) {
@@ -99,22 +97,14 @@ public @interface SLock {
                 return true;
             }
         },
-        /**
-         * try lock，不等待，直接返回
-         *
-         * @see org.redisson.api.RLock#tryLock()
-         */
+        /** tryLock 不等待。 @see org.redisson.api.RLock#tryLock() */
         TRY_LOCK_NOWAIT {
             @Override
             public boolean lock(SLock content, RLock lock) {
                 return lock.tryLock();
             }
         },
-        /**
-         * try lock，包含等待
-         *
-         * @see org.redisson.api.RLock#tryLock(long, long, TimeUnit)
-         */
+        /** tryLock 带等待。 @see org.redisson.api.RLock#tryLock(long, long, TimeUnit) */
         TRY_LOCK {
             @Override
             public boolean lock(SLock content, RLock lock) {
@@ -126,41 +116,40 @@ public @interface SLock {
             }
         };
 
+        /**
+         * 执行加锁逻辑。
+         *
+         * @param content 注解实例
+         * @param lock 锁对象
+         * @return 是否成功加锁
+         */
         public abstract boolean lock(SLock content, RLock lock);
     }
 
+    /** Redisson 锁实现类型。 */
     enum LockFeature {
-        /**
-         * @see org.redisson.api.RedissonClient#getLock(String)
-         */
+        /** 可重入锁。 */
         DEFAULT {
             @Override
             public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return redissonClient.getLock(name);
             }
         },
-        /**
-         * @see org.redisson.api.RedissonClient#getFairLock(String)
-         */
+        /** 公平锁。 */
         FAIR {
             @Override
             public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return redissonClient.getFairLock(name);
             }
         },
-        /**
-         * @see org.redisson.api.RedissonClient#getSpinLock(String)
-         * @see org.redisson.api.RedissonClient#getSpinLock(String, LockOptions.BackOff)
-         */
+        /** 自旋锁。 */
         SPIN {
             @Override
             public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
                 return redissonClient.getSpinLock(name, content.backOffType().backOff(content));
             }
         },
-        /**
-         * @see org.redisson.api.RedissonClient#getReadWriteLock(String)
-         */
+        /** 读写锁。 */
         READ_WRITE {
             @Override
             public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
@@ -168,9 +157,7 @@ public @interface SLock {
             }
         },
 
-        /**
-         * @see RedissonClient#getFencedLock(String)
-         */
+        /** 栅栏锁。 */
         FENCED {
             @Override
             public RLock getLock(String name, SLock content, RedissonClient redissonClient) {
@@ -178,14 +165,21 @@ public @interface SLock {
             }
         };
 
+        /**
+         * 按锁特性从 {@link RedissonClient} 获取 {@link RLock}。
+         *
+         * @param name 已解析锁键
+         * @param content 注解实例
+         * @param redissonClient 客户端
+         * @return 锁对象
+         */
         public abstract RLock getLock(String name, SLock content, RedissonClient redissonClient);
     }
 
 
+    /** 自旋锁退避算法。 */
     enum BackOffType {
-        /**
-         * @see LockOptions.ConstantBackOff
-         */
+        /** 固定间隔。 @see LockOptions.ConstantBackOff */
         CONSTANT {
             @Override
             LockOptions.BackOff backOff(SLock content) {
@@ -193,9 +187,7 @@ public @interface SLock {
                         .delay(content.backOffDelay());
             }
         },
-        /**
-         * @see LockOptions.ExponentialBackOff
-         */
+        /** 指数退避。 @see LockOptions.ExponentialBackOff */
         EXPONENTIAL {
             @Override
             LockOptions.BackOff backOff(SLock content) {
@@ -207,13 +199,18 @@ public @interface SLock {
         },
         ;
 
+        /**
+         * 构建 Redisson 退避配置。
+         *
+         * @param content 注解实例
+         * @return 退避策略
+         */
         abstract LockOptions.BackOff backOff(SLock content);
     }
 
+    /** 读写锁子锁类型。 */
     enum ReadOrWrite {
-        /**
-         * @see org.redisson.api.RReadWriteLock#readLock()
-         */
+        /** 读锁。 @see org.redisson.api.RReadWriteLock#readLock() */
         READ {
             @Override
             RLock transform(RReadWriteLock lock) {
@@ -221,9 +218,7 @@ public @interface SLock {
             }
         },
 
-        /**
-         * @see org.redisson.api.RReadWriteLock#writeLock()
-         */
+        /** 写锁。 @see org.redisson.api.RReadWriteLock#writeLock() */
         WRITE {
             @Override
             RLock transform(RReadWriteLock lock) {
@@ -232,6 +227,12 @@ public @interface SLock {
         },
         ;
 
+        /**
+         * 从读写锁提取子锁。
+         *
+         * @param lock 读写锁
+         * @return 读锁或写锁
+         */
         abstract RLock transform(RReadWriteLock lock);
     }
 

@@ -23,6 +23,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Gateway 重试过滤器配置属性。
+ * <p>
+ * 绑定前缀 {@code spring.cloud.gateway.retry}。
+ */
 @Data
 @NoArgsConstructor
 @ConfigurationProperties("spring.cloud.gateway.retry")

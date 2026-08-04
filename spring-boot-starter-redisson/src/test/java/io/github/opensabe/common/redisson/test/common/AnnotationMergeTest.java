@@ -18,6 +18,7 @@ package io.github.opensabe.common.redisson.test.common;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
@@ -27,10 +28,14 @@ import io.github.opensabe.common.redisson.annotation.slock.SLock;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Redisson 锁注解在类/方法继承与合并场景下的解析测试。
+ *
  * @author heng.ma
  */
+@DisplayName("锁注解合并解析测试")
 public class AnnotationMergeTest {
 
+    @DisplayName("方法级合并注解 name 解析")
     @Test
     void testAnnotationName() throws NoSuchMethodException {
         Method method = App.class.getMethod("doSomething");
@@ -39,6 +44,7 @@ public class AnnotationMergeTest {
                 .containsExactly("parentMethod");
     }
 
+    @DisplayName("子类继承父类类级注解")
     @Test
     void testChildClass() throws NoSuchMethodException {
         SLock set = AnnotatedElementUtils.findMergedAnnotation(App.class, SLock.class);
@@ -49,6 +55,7 @@ public class AnnotationMergeTest {
 
     }
 
+    @DisplayName("子类方法覆盖父类方法注解合并")
     @Test
     void testChildMethod() throws NoSuchMethodException {
         Method method = Child.class.getMethod("doSomething");

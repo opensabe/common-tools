@@ -26,6 +26,9 @@ import jdk.jfr.Timespan;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * 线程池任务执行 JFR 事件，记录 traceId、排队与运行耗时（默认阈值 100ms）。
+ */
 @SuppressWarnings("unused")
 @Category({"Executor Service"})
 @Label("Thread Task JFR (default Threshold 100ms)")
@@ -35,42 +38,51 @@ import lombok.Setter;
 @SuppressFBWarnings("URF_UNREAD_FIELD")
 public class ThreadTaskJFREvent extends Event {
 
+    /** 链路 traceId。 */
     @Getter
     private final String traceId;
 
+    /** 链路 spanId。 */
     @Getter
     private final String spanId;
 
+    /** 任务提交到线程池的时间戳（毫秒）。 */
     @Getter
     @Label("taskSubmitStartTime")
-//    @Timestamp(value = Timestamp.MILLISECONDS_SINCE_EPOCH)
     @Description("the time when the task starts to be put in the thread pool")
     private final long submitTaskStartTime;
 
+    /** 任务开始运行的时间戳（毫秒）。 */
     @Setter
     @Getter
     @Label("taskRunStartTime")
-//    @Timestamp(value = Timestamp.MILLISECONDS_SINCE_EPOCH)
     @Description("the time when the task starts to run")
     private long taskRunStartTime;
 
+    /** 任务运行结束的时间戳（毫秒）。 */
     @Setter
     @Getter
     @Label("taskRunEndTime")
-//    @Timestamp(value = Timestamp.MILLISECONDS_SINCE_EPOCH)
     @Description("the time when the task has finished")
     private long taskRunEndTime;
 
+    /** 排队等待耗时（毫秒）。 */
     @Setter
     @Timespan(value = Timespan.MILLISECONDS)
     @Description("the time-consuming of the span of the task with the lifecycle of the running state without queuing")
     private long taskQueueTimeDuration;
 
+    /** 实际运行耗时（毫秒）。 */
     @Setter
     @Timespan(value = Timespan.MILLISECONDS)
     @Description("the time-consuming of the span of the task with the lifecycle of queuing")
     private long taskRunTimeDuration;
 
+    /**
+     * @param submitStartTime 提交时间戳
+     * @param traceId         traceId
+     * @param spanId          spanId
+     */
     public ThreadTaskJFREvent(long submitStartTime, String traceId, String spanId) {
         this.submitTaskStartTime = submitStartTime;
         this.traceId = traceId;

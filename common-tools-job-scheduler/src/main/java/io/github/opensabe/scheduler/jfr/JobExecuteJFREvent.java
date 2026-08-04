@@ -24,6 +24,9 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * JobExecuteJFREvent 调度任务。
+ */
 @Setter
 @Getter
 @Category({"observation", "task-center", "job-execute"})

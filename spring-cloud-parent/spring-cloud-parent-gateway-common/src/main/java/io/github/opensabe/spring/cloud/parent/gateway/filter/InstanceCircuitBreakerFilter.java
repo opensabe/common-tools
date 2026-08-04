@@ -43,6 +43,7 @@ public class InstanceCircuitBreakerFilter extends AbstractTracedFilter {
     @Autowired
     private CircuitBreakerRegistry circuitBreakerRegistry;
 
+    /** {@inheritDoc} */
     @Override
     public Mono<Void> traced(ServerWebExchange exchange, GatewayFilterChain chain) {
         URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
@@ -67,6 +68,7 @@ public class InstanceCircuitBreakerFilter extends AbstractTracedFilter {
         return chain.filter(exchange).transform(CircuitBreakerOperator.of(circuitBreaker));
     }
 
+    /** {@inheritDoc} */
     @Override
     public int ordered() {
         try {

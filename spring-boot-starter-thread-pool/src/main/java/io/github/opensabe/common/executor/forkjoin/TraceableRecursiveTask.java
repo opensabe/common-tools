@@ -25,10 +25,15 @@ import io.micrometer.observation.Observation;
 import io.micrometer.tracing.TraceContext;
 import lombok.Getter;
 
+/**
+ * TraceableRecursiveTask。
+ */
 public abstract class TraceableRecursiveTask<V> extends RecursiveTask<V> implements JFRecordable<V>, Traceable<V> {
 
+/** observation。 */
     @Getter
     protected final Observation observation;
+/** event。 */
     private final ThreadTaskJFREvent event;
 
     public TraceableRecursiveTask(Observation observation) {
@@ -46,23 +51,28 @@ public abstract class TraceableRecursiveTask<V> extends RecursiveTask<V> impleme
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public ThreadTaskJFREvent getEvent() {
         return event;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected V compute() {
         return record();
     }
 
+    /** compute0。 */
     protected abstract V compute0();
 
+    /** {@inheritDoc} */
     @Override
     public V inRecord() {
         return trace();
     }
 
+    /** {@inheritDoc} */
     @Override
     public V inTrace() {
         return compute0();

@@ -17,17 +17,20 @@ package io.github.opensabe.common.jackson;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
- * 时间戳序列化模块
+ * Jackson 模块：为 {@link LocalDateTime} 注册毫秒时间戳序列化/反序列化器。
+ * <p>
+ * long 与 {@link LocalDateTime} 互转时精度为毫秒，亚毫秒部分会被忽略；生成时间时建议
+ * {@code LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)}。
  */
 public class TimestampModule extends SimpleModule {
 
+    /**
+     * 注册 {@link TimestampLocalDateTimeSerializer} 与 {@link LongToLocalDateTimeDeserializer}。
+     */
     public TimestampModule() {
-        //LocalDateTime 与 Long 序列化，反序列化，会转换为毫秒时间戳，毫秒以下的时间戳会被忽略
-        //所以，LocalDateTime 最好在生成的时候 truncate 到毫秒，比如：
-        //LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         addSerializer(LocalDateTime.class, TimestampLocalDateTimeSerializer.getINSTANCE());
         addDeserializer(LocalDateTime.class, LongToLocalDateTimeDeserializer.getINSTANCE());
     }

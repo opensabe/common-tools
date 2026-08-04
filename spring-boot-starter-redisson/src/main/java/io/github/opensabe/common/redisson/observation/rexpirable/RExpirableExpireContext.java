@@ -18,14 +18,29 @@ package io.github.opensabe.common.redisson.observation.rexpirable;
 import io.micrometer.observation.Observation;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * RExpirable 过期设置操作的 Observation 上下文。
+ */
 
 @Getter
 @Setter
 public class RExpirableExpireContext extends Observation.Context {
+    /**
+     * 可过期对象名称
+     */
     private final String expirableName;
+    /**
+     * 当前线程名
+     */
     private final String threadName;
+    /**
+     * 过期操作描述
+     */
     private final String expire;
 
+    /**
+     * 是否成功设置过期
+     */
     private boolean expireSetSuccessfully;
 
     public RExpirableExpireContext(String expirableName, String threadName, String expire) {

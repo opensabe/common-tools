@@ -16,6 +16,10 @@
 package io.github.opensabe.alive.client.exception;
 
 
+/**
+ * AliveClientTimeoutException 类。
+ * <p>Alive 推送ClientTimeoutException。</p>
+ */
 public class AliveClientTimeoutException extends Exception {
 
     /**

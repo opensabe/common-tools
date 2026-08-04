@@ -16,15 +16,18 @@
 package io.github.opensabe.common.redisson.autoconfig;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.redisson.config.LettuceConfiguration;
 
 /**
- * Lettuce
+ * Lettuce 客户端自动配置。
+ * <p>
+ * 在 Spring Data Redis 与多 Redis 自动配置之前注册 {@link LettuceConfiguration}，
+ * 以便为 Lettuce {@link io.lettuce.core.resource.ClientResources} 注入 Micrometer 追踪与延迟采集。
  */
-@AutoConfiguration(before = {RedisAutoConfiguration.class, MultiRedisAutoConfiguration.class})
+@AutoConfiguration(before = {DataRedisAutoConfiguration.class, MultiRedisAutoConfiguration.class})
 @Import(LettuceConfiguration.class)
 public class LettuceAutoConfiguration {
 }

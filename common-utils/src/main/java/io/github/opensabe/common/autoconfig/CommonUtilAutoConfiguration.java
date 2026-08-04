@@ -16,13 +16,18 @@
 package io.github.opensabe.common.autoconfig;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
 
-import io.github.opensabe.common.config.SpringCommonUtilConfiguration;
-
+/**
+ * common-utils 自动配置占位。
+ * <p>
+ * {@link io.github.opensabe.common.config.SpringCommonUtilConfiguration} 已由
+ * {@code spring-framework-parent-common} 的
+ * {@link io.github.opensabe.common.auto.SpringCustomizedAutoConfiguration} 注册，
+ * 此处不再重复 {@code @Import}，避免双重装配。
+ *
+ * @deprecated 无独立 Bean；保留类名以免破坏外部对 auto-config 入口的引用，后续小版本可删除。
+ */
+@Deprecated(since = "3.0.0", forRemoval = true)
 @AutoConfiguration
-@Import({
-        SpringCommonUtilConfiguration.class,
-})
 public class CommonUtilAutoConfiguration {
 }

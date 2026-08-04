@@ -23,6 +23,11 @@ import io.github.opensabe.common.redisson.config.MultiRedisConnectionFactoryConf
 import io.github.opensabe.common.redisson.config.MultiRedisProperties;
 import io.github.opensabe.common.redisson.config.RedisConfiguration;
 
+/**
+ * 多 Redis 自动配置入口。
+ * <p>
+ * 在 {@link RedissonAutoConfiguration} 之前注册多连接工厂与通用 Redis 配置。
+ */
 @AutoConfiguration(before = RedissonAutoConfiguration.class)
 @Import({MultiRedisConnectionFactoryConfiguration.class, RedisConfiguration.class})
 @EnableConfigurationProperties(MultiRedisProperties.class)

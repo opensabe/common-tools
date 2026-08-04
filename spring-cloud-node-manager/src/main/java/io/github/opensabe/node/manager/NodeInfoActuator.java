@@ -22,17 +22,26 @@ import io.github.opensabe.base.RespUtil;
 import io.github.opensabe.base.vo.BaseRsp;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * NodeInfoActuator 类。
+ * <p>节点InfoActuator。</p>
+ */
 @Log4j2
 @Endpoint(id = NodeInfoActuator.PATH)
 public class NodeInfoActuator {
+/** PATH 字段。 */
     public static final String PATH = "node-id";
 
+/** nodeManager 字段。 */
     private final NodeManager nodeManager;
 
     public NodeInfoActuator(NodeManager nodeManager) {
         this.nodeManager = nodeManager;
     }
 
+/**
+ * getNodeId 方法。
+ */
     @ReadOperation
     public BaseRsp<Integer> getNodeId() {
         log.info("NodeInfoActuator-getNodeId {}", nodeManager.getNodeId());

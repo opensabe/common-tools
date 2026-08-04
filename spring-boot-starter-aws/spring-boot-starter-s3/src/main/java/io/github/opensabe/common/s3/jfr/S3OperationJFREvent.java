@@ -23,20 +23,29 @@ import jdk.jfr.StackTrace;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * S3Operation JFR 事件。
+ */
 @Setter
 @Getter
 @Category({"observation", "s3"})
 @Label("operation")
 @StackTrace(false)
 public class S3OperationJFREvent extends Event {
+/** fileName。 */
     @Label("file name")
     private String fileName;
+/** fileSize。 */
     @Label("file size")
     private long fileSize;
+/** operateType。 */
     @Label("operate type")
     private String operateType;
+/** success。 */
     private boolean success;
+/** traceId。 */
     private String traceId;
+/** spanId。 */
     private String spanId;
 
     public S3OperationJFREvent(S3OperationContext s3OperationContext) {

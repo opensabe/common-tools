@@ -25,9 +25,12 @@ import io.github.opensabe.spring.boot.starter.rocketmq.test.common.BaseRocketMQT
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * OldRocketMQProducer 测试。
+ */
 public class OldRocketMQProducerTest extends BaseRocketMQTest {
+    @DisplayName("验证mQProducerBeanInject")
     @Test
-    @DisplayName("验证MQProducer Bean 注入")
     public void testMQProducerBeanInject() {
         Assertions.assertNotNull(mqProducer);
         Assertions.assertInstanceOf(OldDefaultMQProducerImpl.class, mqProducer);

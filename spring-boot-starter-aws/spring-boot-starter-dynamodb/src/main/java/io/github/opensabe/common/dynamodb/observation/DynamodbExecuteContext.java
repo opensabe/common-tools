@@ -28,17 +28,24 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+/**
+ * DynamodbExecute Observation 上下文。
+ */
 @Getter
 @Setter
 @ToString
 public class DynamodbExecuteContext extends Observation.Context {
 
+/** method。 */
     private String method;
 
+/** hashKey。 */
     private String hashKey;
 
+/** rangeKey。 */
     private String rangeKey;
 
+/** expression。 */
     @Setter(AccessLevel.NONE)
     private String expression;
 
@@ -56,6 +63,9 @@ public class DynamodbExecuteContext extends Observation.Context {
         this.method = method;
     }
 
+    /**
+     * @param expression 待设置值
+     */
     public void setExpression(Expression expression) {
         Map<String, String> values = new HashMap<>(expression.expressionValues().size());
         expression.expressionValues().forEach((k, v) -> values.put(k, resolveAttributeValue(v)));
@@ -68,6 +78,7 @@ public class DynamodbExecuteContext extends Observation.Context {
         }
     }
 
+    /** resolveAttributeValue。 */
     private String resolveAttributeValue(AttributeValue value) {
         return switch (value.type()) {
             case S -> value.s();

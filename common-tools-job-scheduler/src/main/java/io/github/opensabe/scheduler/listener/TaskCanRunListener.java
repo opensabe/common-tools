@@ -22,6 +22,9 @@ import io.github.opensabe.scheduler.server.SchedulerServer;
 import io.github.opensabe.spring.cloud.parent.common.config.OnlyOnceApplicationListener;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * TaskCanRunListener 任务监听器。
+ */
 @Log4j2
 public class TaskCanRunListener extends OnlyOnceApplicationListener<ApplicationReadyEvent> {
 

@@ -15,6 +15,8 @@
  */
 package io.github.opensabe.common.dynamodb.test;
 
+import org.junit.jupiter.api.DisplayName;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,8 +38,10 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 /**
  * @author heng.ma
  */
+@DisplayName("EnhancedDynamodbClient测试")
 public class EnhancedDynamodbClientTest extends DynamicdbStarter {
 
+    /** dynamoDb 客户端。 */
     @Autowired
     private DynamoDbClient dynamoDbClient;
 

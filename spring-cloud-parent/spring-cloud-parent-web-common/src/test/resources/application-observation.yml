@@ -48,6 +48,9 @@ management:
     web:
       exposure:
         include: all
+  tracing:
+    sampling:
+      probability: 1.0
 
 eureka:
   client:

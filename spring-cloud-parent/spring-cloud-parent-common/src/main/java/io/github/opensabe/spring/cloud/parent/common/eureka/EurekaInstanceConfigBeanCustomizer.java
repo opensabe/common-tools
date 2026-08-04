@@ -18,8 +18,15 @@ package io.github.opensabe.spring.cloud.parent.common.eureka;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 
 /**
- * 可以在项目中添加 EurekaInstanceConfigBeanCustomizer 的实现 Bean 来修改 EurekaInstanceConfigBean 注册信息
+ * Eureka 实例注册信息定制 SPI。
+ * <p>
+ * 实现类注册为 Spring Bean 后，于 {@link EurekaInstanceConfigBean} 初始化完成后被调用。
  */
 public interface EurekaInstanceConfigBeanCustomizer {
+    /**
+     * 修改 Eureka 实例配置。
+     *
+     * @param eurekaInstanceConfigBean 待定制的实例配置 Bean
+     */
     void customize(EurekaInstanceConfigBean eurekaInstanceConfigBean);
 }

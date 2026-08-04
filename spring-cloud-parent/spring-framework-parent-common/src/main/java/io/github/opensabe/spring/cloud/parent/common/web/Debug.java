@@ -17,13 +17,17 @@ package io.github.opensabe.spring.cloud.parent.common.web;
 
 import lombok.Getter;
 
+/**
+ * 全局 debug 开关：控制异常响应等是否向客户端暴露详细错误信息。
+ */
 public class Debug {
-    /**
-     * 是否开启debug模式
-     */
+    /** 是否开启 debug 模式。 */
     @Getter
     private final boolean enabled;
 
+    /**
+     * @param enabled 是否开启 debug
+     */
     public Debug(boolean enabled) {
         this.enabled = enabled;
     }

@@ -22,18 +22,24 @@ import io.github.opensabe.spring.boot.starter.rocketmq.RocketMQTemplateBeanPostP
 import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageConsumeToJFRGenerator;
 import io.github.opensabe.spring.boot.starter.rocketmq.jfr.MessageProduceToJFRGenerator;
 
+/**
+ * RocketMQ 扩展配置 Bean。
+ */
 @Configuration
 public class MQExtendConfig {
+    /** rocketMQTemplateBeanPostProcessor。 */
     @Bean
     public RocketMQTemplateBeanPostProcessor rocketMQTemplateBeanPostProcessor() {
         return new RocketMQTemplateBeanPostProcessor();
     }
 
+    /** messageConsumeToJFRGenerator。 */
     @Bean
     public MessageConsumeToJFRGenerator messageConsumeToJFRGenerator() {
         return new MessageConsumeToJFRGenerator();
     }
 
+    /** messageProduceToJFRGenerator。 */
     @Bean
     public MessageProduceToJFRGenerator messageProduceToJFRGenerator() {
         return new MessageProduceToJFRGenerator();

@@ -22,6 +22,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * /proc/pid/smaps_rollup 内存映射指标的 JFR 事件。
+ */
 @Category({"Native Memory Tracking"})
 @Label("Smaps Rollup")
 @NoArgsConstructor

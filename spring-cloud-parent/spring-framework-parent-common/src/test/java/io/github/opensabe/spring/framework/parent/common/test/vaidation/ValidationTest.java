@@ -26,7 +26,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -35,7 +34,6 @@ import java.util.Set;
 
 
 @Log4j2
-@AutoConfigureObservability
 @DisplayName("测试自定义的Validation注解是否生效")
 @SpringBootTest(classes = ValidationTest.App.class)
 public class ValidationTest {

@@ -77,14 +77,16 @@ import io.github.resilience4j.timelimiter.event.TimeLimiterEvent;
 import static java.util.Optional.ofNullable;
 
 /**
- * 自己创建resilience4j相关组件的registry，代替InMemoryXXX
+ * Resilience4j 组件 Registry 配置。
+ * <p>
+ * 以 Caffeine 后端 Registry 替代默认 InMemory 实现，并按 Spring Boot 属性注册实例。
  *
  * @author maheng
  */
 public class Resilience4jConfiguration {
 
     /**
-     * Retry
+     * Retry Registry 配置。
      *
      * @author maheng
      */
@@ -142,7 +144,7 @@ public class Resilience4jConfiguration {
 
 
     /**
-     * 断路器
+     * CircuitBreaker Registry 配置。
      *
      * @author maheng
      */
@@ -214,7 +216,7 @@ public class Resilience4jConfiguration {
 
 
     /**
-     * 实例隔离
+     * Bulkhead（信号量隔离）Registry 配置。
      *
      * @author maheng
      */
@@ -270,7 +272,7 @@ public class Resilience4jConfiguration {
     }
 
     /**
-     * 线程隔离
+     * ThreadPoolBulkhead（线程池隔离）Registry 配置。
      *
      * @author maheng
      */
@@ -337,7 +339,7 @@ public class Resilience4jConfiguration {
     }
 
     /**
-     * 限流器，不常用，一般使用redisson限流器
+     * RateLimiter Registry 配置（较少使用，生产限流多用 Redisson）。
      *
      * @author maheng
      */
@@ -401,7 +403,7 @@ public class Resilience4jConfiguration {
     }
 
     /**
-     * 限时
+     * TimeLimiter Registry 配置。
      *
      * @author maheng
      */
