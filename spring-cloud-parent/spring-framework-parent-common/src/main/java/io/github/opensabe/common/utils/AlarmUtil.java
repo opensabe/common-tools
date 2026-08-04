@@ -52,7 +52,7 @@ import lombok.extern.log4j.Log4j2;
 public class AlarmUtil {
 
     /** 集群/环境后缀，拼接在报警组标识后（如 {@code pmprod}）。 */
-    public static String cluster = "";
+    public static String clusterSuffix = "";
 
     /** 固定窗口 error 计数缓存：外层按 {@link Interval} 分桶，内层按 message 模板计数。 */
     private static final LoadingCache<Interval, LoadingCache<String, AtomicInteger>> ERROR_CACHE =
@@ -176,7 +176,7 @@ public class AlarmUtil {
     }
 
     /**
-     * 流式构建报警组集合，{@link #add(String)} 自动附加 {@link #cluster} 后缀。
+     * 流式构建报警组集合，{@link #add(String)} 自动附加 {@link AlarmUtil#clusterSuffix} 后缀。
      */
     public static class Group extends HashSet<String> {
 
@@ -199,12 +199,12 @@ public class AlarmUtil {
         }
 
         /**
-         * 使用 {@link #cluster} 作为后缀创建构建器。
+         * 使用 {@link AlarmUtil#clusterSuffix} 作为后缀创建构建器。
          *
          * @return Group 构建器
          */
         public static Group builder() {
-            return new Group(cluster);
+            return new Group(clusterSuffix);
         }
 
         @Override
@@ -274,7 +274,7 @@ public class AlarmUtil {
      * 从消息首个 {@code [group,...]} 片段解析报警组（支持精确与前后缀模糊匹配）。
      *
      * @param searchString 待检消息
-     * @return 解析到的报警组集合（含 {@link #cluster} 后缀）
+     * @return 解析到的报警组集合（含 {@link AlarmUtil#clusterSuffix} 后缀）
      */
     public static Set<String> extractGroup(String searchString) {
         Matcher matcher = EXTRACT_GROUP_PATTERN.matcher(searchString);
@@ -288,7 +288,7 @@ public class AlarmUtil {
                 s = s.trim().toLowerCase();
                 if (ALL_GROUPS.contains(s)) {
                     find = true;
-                    values.add(s+cluster);
+                    values.add(s + clusterSuffix);
                 } else {
                     for (String group : ALL_GROUPS) {
                         if (s.startsWith(group) || s.endsWith(group)) {
