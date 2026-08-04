@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.loadbalancer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -50,6 +51,53 @@ public class AzBalanceUtils {
         if (countOfTargetInstances == 0) {
             return new LinkedHashMap<>();
         }
+        Map<String, Integer> targetAzRequestMap = buildTargetAzRequestMap(
+                targetServiceInstanceMap, totalRequestCount, countOfTargetInstances);
+
+        //重新整流，保证同可用区调用：
+        //遍历 sourceserviceInstanceMap 中的可用区，优先满足同可用区调用，在 targetAzRequestMap 同可用区中扣减请求数量
+        //如果同可用区请求数量不够，则从其他可用区平均扣减
+        //Map 结构是 AzName -> (AzName -> RequestCount)
+        Map<String, Map<String, Integer>> finalAzRequestMap = new LinkedHashMap<>();
+        for (Map.Entry<String, List> sourceEntry : sourceserviceInstanceMap.entrySet()) {
+            String sourceAzName = sourceEntry.getKey();
+            int sourceRequestCount = sourceEntry.getValue().size() * eachInstanceRequestCount;
+            Map<String, Integer> azRequestMap = new LinkedHashMap<>();
+            //优先满足同可用区调用
+            if (targetAzRequestMap.containsKey(sourceAzName)) {
+                int availableRequests = targetAzRequestMap.get(sourceAzName);
+                if (availableRequests >= sourceRequestCount) {
+                    azRequestMap.put(sourceAzName, sourceRequestCount);
+                    targetAzRequestMap.put(sourceAzName, availableRequests - sourceRequestCount);
+                } else {
+                    azRequestMap.put(sourceAzName, availableRequests);
+                    targetAzRequestMap.put(sourceAzName, 0);
+                }
+            }
+            //如果同可用区请求数量不够，则从其他可用区按照剩余请求数量平均扣减
+            int remainingRequests = sourceRequestCount - azRequestMap.getOrDefault(sourceAzName, 0);
+            if (remainingRequests > 0) {
+                allocateRemainingFromOtherAzs(
+                        sourceAzName, remainingRequests, targetAzRequestMap, azRequestMap);
+            }
+            finalAzRequestMap.put(sourceAzName, azRequestMap);
+        }
+        return finalAzRequestMap;
+    }
+
+    /**
+     * 按目标可用区实例容量均摊总请求，并将余数按实例比例分配。
+     *
+     * @param targetServiceInstanceMap 目标可用区 → 实例列表
+     * @param totalRequestCount 源侧总请求数
+     * @param countOfTargetInstances 目标实例总数
+     * @return 目标可用区 → 可承接请求数
+     */
+    private static Map<String, Integer> buildTargetAzRequestMap(
+            Map<String, List> targetServiceInstanceMap,
+            int totalRequestCount,
+            int countOfTargetInstances
+    ) {
         //不能整除也没事，尽量均摊，但需要处理余数
         int countOfEachTargetInstanceRequest = totalRequestCount / countOfTargetInstances;
         int remainder = totalRequestCount % countOfTargetInstances;
@@ -82,118 +130,109 @@ public class AzBalanceUtils {
                 targetAzRequestMap.put(maxInstanceAz, targetAzRequestMap.get(maxInstanceAz) + (remainder - remainderDistributed));
             }
         }
+        return targetAzRequestMap;
+    }
 
-        //重新整流，保证同可用区调用：
-        //遍历 sourceserviceInstanceMap 中的可用区，优先满足同可用区调用，在 targetAzRequestMap 同可用区中扣减请求数量
-        //如果同可用区请求数量不够，则从其他可用区平均扣减
-        //Map 结构是 AzName -> (AzName -> RequestCount)
-        Map<String, Map<String, Integer>> finalAzRequestMap = new LinkedHashMap<>();
-        for (Map.Entry<String, List> sourceEntry : sourceserviceInstanceMap.entrySet()) {
-            String sourceAzName = sourceEntry.getKey();
-            int sourceRequestCount = sourceEntry.getValue().size() * eachInstanceRequestCount;
-            Map<String, Integer> azRequestMap = new LinkedHashMap<>();
-            //优先满足同可用区调用
-            if (targetAzRequestMap.containsKey(sourceAzName)) {
-                int availableRequests = targetAzRequestMap.get(sourceAzName);
-                if (availableRequests >= sourceRequestCount) {
-                    azRequestMap.put(sourceAzName, sourceRequestCount);
-                    targetAzRequestMap.put(sourceAzName, availableRequests - sourceRequestCount);
-                } else {
-                    azRequestMap.put(sourceAzName, availableRequests);
-                    targetAzRequestMap.put(sourceAzName, 0);
-                }
-            }
-            //如果同可用区请求数量不够，则从其他可用区按照剩余请求数量平均扣减
-            int remainingRequests = sourceRequestCount - azRequestMap.getOrDefault(sourceAzName, 0);
-            if (remainingRequests > 0) {
-                //使用更精确的分配算法，确保所有请求都被分配
-                //先计算总可用容量
-                int totalAvailableRequests = 0;
-                for (int requests : targetAzRequestMap.values()) {
-                    totalAvailableRequests += requests;
-                }
-                
-                if (totalAvailableRequests > 0) {
-                    //收集所有可用的目标可用区及其容量
-                    java.util.List<Map.Entry<String, Integer>> availableTargets = new java.util.ArrayList<>();
-                    for (Map.Entry<String, Integer> targetEntry : targetAzRequestMap.entrySet()) {
-                        String targetAzName = targetEntry.getKey();
-                        int availableRequests = targetEntry.getValue();
-                        if (availableRequests > 0 && !targetAzName.equals(sourceAzName)) {
-                            availableTargets.add(targetEntry);
-                        }
-                    }
-                    
-                    if (!availableTargets.isEmpty()) {
-                        //使用累加误差的方式，确保所有请求都被分配
-                        int totalAllocated = 0;
-                        int targetIndex = 0;
-                        
-                        for (Map.Entry<String, Integer> targetEntry : availableTargets) {
-                            String targetAzName = targetEntry.getKey();
-                            int availableRequests = targetEntry.getValue();
-                            
-                            //计算按比例分配的请求数量
-                            //使用累加误差的方式，确保总和等于 remainingRequests
-                            int allocatedRequests;
-                            if (targetIndex == availableTargets.size() - 1) {
-                                //最后一个可用区，补齐所有剩余请求
-                                allocatedRequests = remainingRequests - totalAllocated;
-                            } else {
-                                //按比例分配，使用长整型避免溢出
-                                long preciseAllocation = (long) availableRequests * remainingRequests / totalAvailableRequests;
-                                allocatedRequests = (int) preciseAllocation;
-                            }
-                            
-                            //确保不超过可用容量
-                            if (allocatedRequests > availableRequests) {
-                                allocatedRequests = availableRequests;
-                            }
-                            //确保不超过剩余请求
-                            if (allocatedRequests > remainingRequests - totalAllocated) {
-                                allocatedRequests = remainingRequests - totalAllocated;
-                            }
-                            //确保不为负数
-                            if (allocatedRequests < 0) {
-                                allocatedRequests = 0;
-                            }
-                            
-                            if (allocatedRequests > 0) {
-                                azRequestMap.put(targetAzName, azRequestMap.getOrDefault(targetAzName, 0) + allocatedRequests);
-                                targetAzRequestMap.put(targetAzName, availableRequests - allocatedRequests);
-                                totalAllocated += allocatedRequests;
-                            }
-                            
-                            targetIndex++;
-                            
-                            //如果已经分配完所有请求，退出循环
-                            if (totalAllocated >= remainingRequests) {
-                                break;
-                            }
-                        }
-                        
-                        //如果还有未分配的请求（由于舍入误差），分配给第一个有容量的可用区
-                        if (totalAllocated < remainingRequests) {
-                            for (Map.Entry<String, Integer> targetEntry : availableTargets) {
-                                String targetAzName = targetEntry.getKey();
-                                //使用更新后的容量值
-                                int availableRequests = targetAzRequestMap.get(targetAzName);
-                                if (availableRequests > 0) {
-                                    int additionalAllocation = Math.min(availableRequests, remainingRequests - totalAllocated);
-                                    azRequestMap.put(targetAzName, azRequestMap.getOrDefault(targetAzName, 0) + additionalAllocation);
-                                    targetAzRequestMap.put(targetAzName, availableRequests - additionalAllocation);
-                                    totalAllocated += additionalAllocation;
-                                    if (totalAllocated >= remainingRequests) {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            finalAzRequestMap.put(sourceAzName, azRequestMap);
+    /**
+     * 同可用区容量不足时，按剩余容量比例从其他可用区扣减并写入分配结果。
+     *
+     * @param sourceAzName 源可用区
+     * @param remainingRequests 仍需分配的请求数
+     * @param targetAzRequestMap 各目标可用区剩余容量（会被原地扣减）
+     * @param azRequestMap 当前源可用区的分配结果（会被原地写入）
+     */
+    private static void allocateRemainingFromOtherAzs(
+            String sourceAzName,
+            int remainingRequests,
+            Map<String, Integer> targetAzRequestMap,
+            Map<String, Integer> azRequestMap
+    ) {
+        //使用更精确的分配算法，确保所有请求都被分配
+        //先计算总可用容量
+        int totalAvailableRequests = 0;
+        for (int requests : targetAzRequestMap.values()) {
+            totalAvailableRequests += requests;
         }
-        return finalAzRequestMap;
+
+        if (totalAvailableRequests <= 0) {
+            return;
+        }
+        //收集所有可用的目标可用区及其容量
+        List<Map.Entry<String, Integer>> availableTargets = new ArrayList<>();
+        for (Map.Entry<String, Integer> targetEntry : targetAzRequestMap.entrySet()) {
+            String targetAzName = targetEntry.getKey();
+            int availableRequests = targetEntry.getValue();
+            if (availableRequests > 0 && !targetAzName.equals(sourceAzName)) {
+                availableTargets.add(targetEntry);
+            }
+        }
+
+        if (availableTargets.isEmpty()) {
+            return;
+        }
+        //使用累加误差的方式，确保所有请求都被分配
+        int totalAllocated = 0;
+        int targetIndex = 0;
+
+        for (Map.Entry<String, Integer> targetEntry : availableTargets) {
+            String targetAzName = targetEntry.getKey();
+            int availableRequests = targetEntry.getValue();
+
+            //计算按比例分配的请求数量
+            //使用累加误差的方式，确保总和等于 remainingRequests
+            int allocatedRequests;
+            if (targetIndex == availableTargets.size() - 1) {
+                //最后一个可用区，补齐所有剩余请求
+                allocatedRequests = remainingRequests - totalAllocated;
+            } else {
+                //按比例分配，使用长整型避免溢出
+                long preciseAllocation = (long) availableRequests * remainingRequests / totalAvailableRequests;
+                allocatedRequests = (int) preciseAllocation;
+            }
+
+            //确保不超过可用容量
+            if (allocatedRequests > availableRequests) {
+                allocatedRequests = availableRequests;
+            }
+            //确保不超过剩余请求
+            if (allocatedRequests > remainingRequests - totalAllocated) {
+                allocatedRequests = remainingRequests - totalAllocated;
+            }
+            //确保不为负数
+            if (allocatedRequests < 0) {
+                allocatedRequests = 0;
+            }
+
+            if (allocatedRequests > 0) {
+                azRequestMap.put(targetAzName, azRequestMap.getOrDefault(targetAzName, 0) + allocatedRequests);
+                targetAzRequestMap.put(targetAzName, availableRequests - allocatedRequests);
+                totalAllocated += allocatedRequests;
+            }
+
+            targetIndex++;
+
+            //如果已经分配完所有请求，退出循环
+            if (totalAllocated >= remainingRequests) {
+                break;
+            }
+        }
+
+        //如果还有未分配的请求（由于舍入误差），分配给第一个有容量的可用区
+        if (totalAllocated < remainingRequests) {
+            for (Map.Entry<String, Integer> targetEntry : availableTargets) {
+                String targetAzName = targetEntry.getKey();
+                //使用更新后的容量值
+                int availableRequests = targetAzRequestMap.get(targetAzName);
+                if (availableRequests > 0) {
+                    int additionalAllocation = Math.min(availableRequests, remainingRequests - totalAllocated);
+                    azRequestMap.put(targetAzName, azRequestMap.getOrDefault(targetAzName, 0) + additionalAllocation);
+                    targetAzRequestMap.put(targetAzName, availableRequests - additionalAllocation);
+                    totalAllocated += additionalAllocation;
+                    if (totalAllocated >= remainingRequests) {
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

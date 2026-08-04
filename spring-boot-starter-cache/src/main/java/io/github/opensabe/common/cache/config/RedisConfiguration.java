@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.boot.cache.autoconfigure.CacheManagerCustomizers;
 import org.springframework.boot.cache.autoconfigure.CacheProperties;
-import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;

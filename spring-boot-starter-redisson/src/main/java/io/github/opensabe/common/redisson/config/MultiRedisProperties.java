@@ -17,8 +17,8 @@ package io.github.opensabe.common.redisson.config;
 
 import java.util.Map;
 
-import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

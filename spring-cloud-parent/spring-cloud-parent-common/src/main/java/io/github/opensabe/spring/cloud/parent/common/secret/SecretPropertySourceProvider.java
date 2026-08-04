@@ -15,19 +15,24 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.secret;
 
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.common.secret.SecretProvider;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.*;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
+
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.common.secret.SecretProvider;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Secret 属性源脱敏 Provider。

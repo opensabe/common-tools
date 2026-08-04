@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.web.common.config.WebServerConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.spring.cloud.parent.web.common.config.WebServerConfiguration;
 
 /**
  * Web 服务器相关自动配置入口。

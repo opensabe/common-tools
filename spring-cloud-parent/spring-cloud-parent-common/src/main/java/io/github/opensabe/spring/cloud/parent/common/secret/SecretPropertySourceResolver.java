@@ -15,9 +15,13 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.secret;
 
-import io.github.opensabe.common.secret.Decryptor;
-import io.github.opensabe.common.utils.AesGcm128Util;
-import lombok.extern.log4j.Log4j2;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bootstrap.config.BootstrapPropertySource;
@@ -33,12 +37,9 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import io.github.opensabe.common.secret.Decryptor;
+import io.github.opensabe.common.utils.AesGcm128Util;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Config Server Secret 属性源解密器。
@@ -95,7 +96,7 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
         }
     }
 
-    private void decrypt (ConfigurableApplicationContext applicationContext) {
+    private void decrypt(ConfigurableApplicationContext applicationContext) {
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
         MutablePropertySources mutablePropertySources = environment.getPropertySources();
         //支持 多个secretPropertySource: bootstrapProperties-secretPropertySource-application-profile
@@ -125,7 +126,7 @@ public class SecretPropertySourceResolver implements ApplicationContextInitializ
 
     }
 
-    private String decryptValue (Object value) throws Exception {
+    private String decryptValue(Object value) throws Exception {
         if (Objects.isNull(value)) {
             return null;
         }

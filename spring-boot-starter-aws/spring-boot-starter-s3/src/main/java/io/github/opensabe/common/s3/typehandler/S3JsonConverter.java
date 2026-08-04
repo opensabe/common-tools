@@ -23,16 +23,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.convert.PropertyValueConverter;
 import org.springframework.data.convert.ValueConversionContext;
-import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.core.TypeInformation;
+import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.http.MediaType;
-
-import tools.jackson.core.type.TypeReference;
 
 import cn.hutool.core.codec.Hashids;
 import io.github.opensabe.common.s3.properties.S3Properties;
 import io.github.opensabe.common.s3.service.FileService;
 import io.github.opensabe.common.utils.json.JsonUtil;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * 将复杂属性以 JSON 文件存入 S3，持久化层仅保存对象键。

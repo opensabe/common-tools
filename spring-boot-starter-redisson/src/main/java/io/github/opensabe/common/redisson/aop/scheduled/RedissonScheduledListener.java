@@ -15,13 +15,16 @@
  */
 package io.github.opensabe.common.redisson.aop.scheduled;
 
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.MeterRegistry;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.RedissonShutdownException;
 import org.redisson.api.RLock;
@@ -31,11 +34,14 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.*;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.common.redisson.annotation.RedissonScheduled;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.log4j.Log4j2;
 
 
 /**
@@ -112,7 +118,7 @@ public class RedissonScheduledListener {
      * @param service 定时任务服务
      * @return 执行器包装
      */
-    private ExecutorWrapper wrapper (RedissonScheduledService service) {
+    private ExecutorWrapper wrapper(RedissonScheduledService service) {
         return new ExecutorWrapper(redissonClient, unifiedObservationFactory,
                 service, service.name(), service.initialDelay(),
                 service.fixedDelay(), service.stopOnceShutdown(), meterRegistry);
@@ -126,7 +132,7 @@ public class RedissonScheduledListener {
      * @param bean 目标 Bean
      * @return 执行器包装
      */
-    private ExecutorWrapper wrapper (String name, RedissonScheduled annotation, Method method, Object bean) {
+    private ExecutorWrapper wrapper(String name, RedissonScheduled annotation, Method method, Object bean) {
         return new ExecutorWrapper(redissonClient, unifiedObservationFactory, () -> method.invoke(bean), name, annotation.initialDelay(),
                 annotation.fixedDelay(), annotation.stopOnceShutdown(), meterRegistry);
     }
@@ -136,7 +142,7 @@ public class RedissonScheduledListener {
      *
      * @param service 刷新后的服务实例
      */
-    public void refresh (RedissonScheduledService service) {
+    public void refresh(RedissonScheduledService service) {
         ExecutorWrapper wrapper = map.get(service.name());
         if (Objects.isNull(wrapper)) {
             log.warn("RedissonScheduledBeanPostProcessor refresh task: {} failed, can't find ExecutorWrapper.", service.name());
@@ -279,7 +285,7 @@ public class RedissonScheduledListener {
          *
          * @param service 刷新后的服务
          */
-        void refresh (RedissonScheduledService service) {
+        void refresh(RedissonScheduledService service) {
             if (Objects.equals(this.name, service.name())) {
                 if (isStopped || this.scheduledThreadPoolExecutor.isShutdown()) {
                     log.info("RedissonScheduledBeanPostProcessor executor {} is stopped, ignore refresh", name);
@@ -292,7 +298,9 @@ public class RedissonScheduledListener {
                         // Do not interrupt in-flight task; new schedule takes effect on next run
                         this.future.cancel(false);
                     }
-                    this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task, (initialDelay = service.initialDelay()), (fixedDelay = service.fixedDelay()), TimeUnit.MILLISECONDS);
+                    this.initialDelay = service.initialDelay();
+                    this.fixedDelay = service.fixedDelay();
+                    this.future = scheduledThreadPoolExecutor.scheduleAtFixedRate(task, initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
                     log.info("RedissonScheduledBeanPostProcessor executor {} refresh with initialDelay: {}ms, fixedDelay: {}ms", name, initialDelay, fixedDelay);
                 }
                 this.stopOnceShutdown = service.stopOnceShutdown();

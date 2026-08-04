@@ -16,6 +16,7 @@
 package io.github.opensabe.paypal.dto;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

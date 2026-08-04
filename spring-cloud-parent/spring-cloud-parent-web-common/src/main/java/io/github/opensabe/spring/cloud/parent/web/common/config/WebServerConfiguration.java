@@ -15,18 +15,19 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.config;
 
+import java.util.List;
+
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+
 import io.github.opensabe.common.executor.GracefulShutdownHandler;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.spring.cloud.parent.web.common.handler.SecretCheckResponseAdvice;
 import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerJFRProperties;
 import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerRequestObservationToJFRGenerator;
 import io.github.opensabe.spring.cloud.parent.web.common.undertow.UndertowGracefulShutdownInitializer;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-
-import java.util.List;
 
 /**
  * Web 服务器通用配置。

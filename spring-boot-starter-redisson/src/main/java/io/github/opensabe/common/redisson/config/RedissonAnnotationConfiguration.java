@@ -15,6 +15,15 @@
  */
 package io.github.opensabe.common.redisson.config;
 
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.redisson.aop.lock.RedissonLockAdvisor;
 import io.github.opensabe.common.redisson.aop.lock.RedissonLockCachedPointcut;
@@ -31,17 +40,17 @@ import io.github.opensabe.common.redisson.aop.semaphore.RedissonSemaphoreInterce
 import io.github.opensabe.common.redisson.aop.slock.SLockAdvisor;
 import io.github.opensabe.common.redisson.aop.slock.SLockInterceptor;
 import io.github.opensabe.common.redisson.aop.slock.SLockPointcut;
-import io.github.opensabe.common.redisson.jfr.*;
+import io.github.opensabe.common.redisson.jfr.RExpirableExpireObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RLockAcquiredObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RLockForceReleaseObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RLockReleasedObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreAcquiredObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreModifiedObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RPermitSemaphoreReleasedObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RRateLimiterAcquireObservationToJFRGenerator;
+import io.github.opensabe.common.redisson.jfr.RRateLimiterSetRateObservationToJFRGenerator;
 import io.github.opensabe.common.redisson.util.MethodArgumentsExpressEvaluator;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Redisson 注解驱动 AOP 与 JFR 观测 Bean 注册中心。

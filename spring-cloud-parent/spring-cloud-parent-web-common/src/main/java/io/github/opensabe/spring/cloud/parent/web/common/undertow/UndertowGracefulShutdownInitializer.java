@@ -39,105 +39,103 @@ import lombok.extern.log4j.Log4j2;
 @SuppressFBWarnings("EI_EXPOSE_REP2")
 public class UndertowGracefulShutdownInitializer implements SmartLifecycle {
 
-	/**
-	 * 生命周期 phase，略低于 {@code WebServerGracefulShutdownLifecycle.SMART_LIFECYCLE_PHASE}，
-	 * 使本组件在 Web 服务器排水完成后再停止（phase 越高越先停止）。
-	 */
-	public static final int PHASE = Integer.MAX_VALUE - 1024 - 1;
+    /**
+     * 生命周期 phase，略低于 {@code WebServerGracefulShutdownLifecycle.SMART_LIFECYCLE_PHASE}，
+     * 使本组件在 Web 服务器排水完成后再停止（phase 越高越先停止）。
+     */
+    public static final int PHASE = Integer.MAX_VALUE - 1024 - 1;
 
-	/**
-	 * 待执行的优雅关闭处理器列表。
-	 */
-	private final List<GracefulShutdownHandler> gracefulShutdownHandlers;
+    /**
+     * 待执行的优雅关闭处理器列表。
+     */
+    private final List<GracefulShutdownHandler> gracefulShutdownHandlers;
 
-	/**
-	 * 标记生命周期是否处于运行状态。
-	 */
-	private final AtomicBoolean running = new AtomicBoolean(false);
+    /**
+     * 标记生命周期是否处于运行状态。
+     */
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
-	/**
-	 * 保证关闭处理器只执行一次的标志。
-	 */
-	private final AtomicBoolean shutdownStarted = new AtomicBoolean(false);
+    /**
+     * 保证关闭处理器只执行一次的标志。
+     */
+    private final AtomicBoolean shutdownStarted = new AtomicBoolean(false);
 
-	/**
-	 * @param gracefulShutdownHandlers 优雅关闭处理器列表
-	 */
-	public UndertowGracefulShutdownInitializer(List<GracefulShutdownHandler> gracefulShutdownHandlers) {
-		this.gracefulShutdownHandlers = gracefulShutdownHandlers;
-	}
+    /**
+     * @param gracefulShutdownHandlers 优雅关闭处理器列表
+     */
+    public UndertowGracefulShutdownInitializer(List<GracefulShutdownHandler> gracefulShutdownHandlers) {
+        this.gracefulShutdownHandlers = gracefulShutdownHandlers;
+    }
 
-	/**
-	 * 启动生命周期，标记为运行中。
-	 */
-	@Override
-	public void start() {
-		running.set(true);
-	}
+    /**
+     * 启动生命周期，标记为运行中。
+     */
+    @Override
+    public void start() {
+        running.set(true);
+    }
 
-	/**
-	 * 停止生命周期并执行所有优雅关闭处理器。
-	 */
-	@Override
-	public void stop() {
-		runHandlers();
-		running.set(false);
-	}
+    /**
+     * 停止生命周期并执行所有优雅关闭处理器。
+     */
+    @Override
+    public void stop() {
+        runHandlers();
+        running.set(false);
+    }
 
-	/**
-	 * 带回调的停止：先执行处理器，再通知调用方完成。
-	 *
-	 * @param callback 停止完成后的回调
-	 */
-	@Override
-	public void stop(Runnable callback) {
-		try {
-			stop();
-		}
-		finally {
-			callback.run();
-		}
-	}
+    /**
+     * 带回调的停止：先执行处理器，再通知调用方完成。
+     *
+     * @param callback 停止完成后的回调
+     */
+    @Override
+    public void stop(Runnable callback) {
+        try {
+            stop();
+        } finally {
+            callback.run();
+        }
+    }
 
-	/**
-	 * @return 是否处于运行状态
-	 */
-	@Override
-	public boolean isRunning() {
-		return running.get();
-	}
+    /**
+     * @return 是否处于运行状态
+     */
+    @Override
+    public boolean isRunning() {
+        return running.get();
+    }
 
-	/**
-	 * @return SmartLifecycle phase，控制与 Web 服务器排水的先后顺序
-	 */
-	@Override
-	public int getPhase() {
-		return PHASE;
-	}
+    /**
+     * @return SmartLifecycle phase，控制与 Web 服务器排水的先后顺序
+     */
+    @Override
+    public int getPhase() {
+        return PHASE;
+    }
 
-	/**
-	 * 按 {@link Ordered#getOrder()} 升序依次调用所有优雅关闭处理器。
-	 * <p>
-	 * 使用 {@link AtomicBoolean#compareAndSet} 保证只执行一次；单个处理器异常不会阻断后续处理器。
-	 */
-	private void runHandlers() {
-		if (!shutdownStarted.compareAndSet(false, true)) {
-			return;
-		}
-		log.info("WebServerGracefulShutdown start: gracefulShutdownHandlers size {}",
-				gracefulShutdownHandlers.size());
-		gracefulShutdownHandlers.stream()
-				.sorted(Comparator.comparing(Ordered::getOrder))
-				.forEach(handler -> {
-					String simpleName = handler.getClass().getSimpleName();
-					try {
-						log.info("WebServerGracefulShutdown {} start", simpleName);
-						handler.gracefullyShutdown();
-						log.info("WebServerGracefulShutdown {} end", simpleName);
-					}
-					catch (Throwable e) {
-						log.fatal("shutdown {} error", simpleName, e);
-					}
-				});
-	}
+    /**
+     * 按 {@link Ordered#getOrder()} 升序依次调用所有优雅关闭处理器。
+     * <p>
+     * 使用 {@link AtomicBoolean#compareAndSet} 保证只执行一次；单个处理器异常不会阻断后续处理器。
+     */
+    private void runHandlers() {
+        if (!shutdownStarted.compareAndSet(false, true)) {
+            return;
+        }
+        log.info("WebServerGracefulShutdown start: gracefulShutdownHandlers size {}",
+                gracefulShutdownHandlers.size());
+        gracefulShutdownHandlers.stream()
+                .sorted(Comparator.comparing(Ordered::getOrder))
+                .forEach(handler -> {
+                    String simpleName = handler.getClass().getSimpleName();
+                    try {
+                        log.info("WebServerGracefulShutdown {} start", simpleName);
+                        handler.gracefullyShutdown();
+                        log.info("WebServerGracefulShutdown {} end", simpleName);
+                    } catch (Throwable e) {
+                        log.fatal("shutdown {} error", simpleName, e);
+                    }
+                });
+    }
 }

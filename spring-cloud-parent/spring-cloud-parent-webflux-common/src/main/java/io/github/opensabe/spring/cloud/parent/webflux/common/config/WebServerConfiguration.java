@@ -15,9 +15,9 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.config;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.web.WebFluxPathResolver;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+
+import io.github.opensabe.spring.cloud.parent.webflux.common.web.WebFluxPathResolver;
 
 /**
  * WebFlux 服务器通用配置。
@@ -33,7 +33,7 @@ public class WebServerConfiguration {
      */
     @Bean
 //    @ConditionalOnMissingBean
-    public WebFluxPathResolver webFluxPathResolver () {
+    public WebFluxPathResolver webFluxPathResolver() {
         return new WebFluxPathResolver();
     }
 }

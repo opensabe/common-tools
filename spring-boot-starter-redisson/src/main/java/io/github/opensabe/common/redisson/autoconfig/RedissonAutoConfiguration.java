@@ -17,8 +17,8 @@ package io.github.opensabe.common.redisson.autoconfig;
 
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import io.github.opensabe.common.redisson.config.RedissonAnnotationConfiguration;

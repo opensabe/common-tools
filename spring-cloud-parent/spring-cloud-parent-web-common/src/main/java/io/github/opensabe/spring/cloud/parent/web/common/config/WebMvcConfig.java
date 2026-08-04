@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.config;
 
-import io.github.opensabe.spring.cloud.parent.common.web.ServletPathResolver;
+import java.util.List;
+
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
+import io.github.opensabe.spring.cloud.parent.common.web.ServletPathResolver;
 
 /**
  * Spring MVC 通用配置。

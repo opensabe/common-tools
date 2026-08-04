@@ -15,11 +15,12 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.web;
 
-import io.github.opensabe.spring.cloud.parent.common.web.Path;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
+
+import io.github.opensabe.spring.cloud.parent.common.web.Path;
 import reactor.core.publisher.Mono;
 
 /**

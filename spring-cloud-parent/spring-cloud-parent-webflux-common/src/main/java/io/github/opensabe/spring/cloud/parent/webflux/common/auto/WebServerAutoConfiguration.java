@@ -15,9 +15,10 @@
  */
 package io.github.opensabe.spring.cloud.parent.webflux.common.auto;
 
-import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebServerConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
+
+import io.github.opensabe.spring.cloud.parent.webflux.common.config.WebServerConfiguration;
 
 /**
  * WebFlux 服务器自动配置入口。

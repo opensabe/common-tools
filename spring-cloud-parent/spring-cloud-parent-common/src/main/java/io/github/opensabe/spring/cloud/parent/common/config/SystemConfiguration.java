@@ -15,11 +15,11 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.config;
 
-import io.github.opensabe.common.secret.GlobalSecretManager;
-import io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.github.opensabe.common.secret.GlobalSecretManager;
+import io.github.opensabe.spring.cloud.parent.common.secret.SecretPropertySourceProvider;
 import io.github.opensabe.spring.cloud.parent.common.system.MonitorMemoryRSS;
 import lombok.extern.log4j.Log4j2;
 
@@ -49,7 +49,7 @@ public class SystemConfiguration {
      * @return Secret 属性源 Provider
      */
     @Bean
-    public SecretPropertySourceProvider secretPropertySourceProvider (GlobalSecretManager globalSecretManager) {
+    public SecretPropertySourceProvider secretPropertySourceProvider(GlobalSecretManager globalSecretManager) {
         return new SecretPropertySourceProvider(globalSecretManager);
     }
 }

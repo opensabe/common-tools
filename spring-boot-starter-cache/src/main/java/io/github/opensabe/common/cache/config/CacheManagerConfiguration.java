@@ -16,9 +16,9 @@
 package io.github.opensabe.common.cache.config;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.cache.autoconfigure.CacheManagerCustomizer;
 import org.springframework.boot.cache.autoconfigure.CacheManagerCustomizers;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
 import io.github.opensabe.common.cache.api.CompositeCacheManager;

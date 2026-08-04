@@ -25,8 +25,6 @@ import org.springframework.data.convert.PropertyValueConverter;
 import org.springframework.data.convert.ValueConversionContext;
 import org.springframework.data.core.TypeInformation;
 
-import tools.jackson.core.type.TypeReference;
-
 import cn.hutool.core.codec.Hashids;
 import io.github.opensabe.common.dynamodb.service.DynamoDbBaseService;
 import io.github.opensabe.common.utils.json.JsonUtil;
@@ -37,6 +35,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * 将复杂属性序列化至 DynamoDB 转换表，持久化层仅保存 Hashids 主键。

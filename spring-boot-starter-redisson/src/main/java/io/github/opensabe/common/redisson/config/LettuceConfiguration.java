@@ -15,6 +15,14 @@
  */
 package io.github.opensabe.common.redisson.config;
 
+import java.time.Duration;
+
+import org.springframework.boot.data.redis.autoconfigure.ClientResourcesBuilderCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.data.util.Lazy;
+
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.lettuce.core.event.DefaultEventPublisherOptions;
 import io.lettuce.core.metrics.DefaultCommandLatencyCollector;
@@ -22,13 +30,6 @@ import io.lettuce.core.metrics.DefaultCommandLatencyCollectorOptions;
 import io.lettuce.core.tracing.MicrometerTracing;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
-import org.springframework.boot.data.redis.autoconfigure.ClientResourcesBuilderCustomizer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.data.util.Lazy;
-
-import java.time.Duration;
 
 /**
  * Lettuce {@link io.lettuce.core.resource.ClientResources} 定制配置。
