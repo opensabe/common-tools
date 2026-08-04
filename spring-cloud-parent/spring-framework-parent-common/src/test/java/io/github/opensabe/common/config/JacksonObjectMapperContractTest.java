@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,7 +51,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Spring Jackson / JsonUtil / SpringUtil 升级契约：验证自动配置桥接在无手动劫持下生效。
+ * <p>
+ * 必须 {@link Isolated}：本模块开启类级并行，{@link SpringUtil} / {@link JsonUtil} 为进程级静态持有；
+ * 与其它 {@code @SpringBootTest} 并发时会被后启动的 Context 覆盖，导致 {@code assertSame} 偶发失败。
  */
+@Isolated("SpringUtil/JsonUtil static holders")
 @SpringBootTest(classes = JacksonObjectMapperContractTest.App.class)
 @DisplayName("Jackson ObjectMapper ↔ JsonUtil 升级契约")
 class JacksonObjectMapperContractTest {

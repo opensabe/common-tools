@@ -60,7 +60,11 @@ public class ExceptionConfiguration {
     }
 
     /**
-     * 为全局异常处理器注入观测切面，记录异常处理过程的 Observation。
+     * 注册 {@link ExceptionHandlerObservationAop}：在 {@code @ExceptionHandler} 吞异常并返回统一错误包
+     * （常为 HTTP 200）时，仍将 {@link Throwable} 写入当前 Observation。
+     * <p>
+     * Boot / Micrometer 不会对「已处理异常」自动 {@code Observation#error}；在保留该响应约定时本 Bean 仍必要，
+     * 详见该类类注释。
      *
      * @param unifiedObservationFactory 延迟初始化的 Observation 工厂
      * @return 异常处理观测 AOP 切面
