@@ -54,6 +54,9 @@ public @interface ConditionOnSpringCloudConfigProfile {
         /** 精确相等（支持逗号分隔多值任一命中）。 */
         equals(Objects::equals),
 
+        /** 子串包含（如 {@code au-online}、{@code us-online} 均命中 {@code online}）。 */
+        contains((actual, pattern) -> actual != null && pattern != null && actual.contains(pattern)),
+
         /** 正则匹配。 */
         regex((s, s2) -> s.matches(s2)),
 
@@ -75,8 +78,11 @@ public @interface ConditionOnSpringCloudConfigProfile {
          * @return 是否匹配
          */
         public boolean matches(String s, String s2) {
+            if (!StringUtils.hasText(s)) {
+                return false;
+            }
             return Arrays.stream(StringUtils.commaDelimitedListToStringArray(StringUtils.trimAllWhitespace(s)))
-                    .anyMatch(s3 -> predicate.apply(s3, s2));
+                    .anyMatch(s3 -> Boolean.TRUE.equals(predicate.apply(s3, s2)));
         }
     }
 }

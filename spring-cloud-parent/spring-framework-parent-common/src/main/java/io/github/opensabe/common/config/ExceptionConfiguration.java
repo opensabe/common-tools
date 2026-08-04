@@ -36,25 +36,25 @@ import org.springframework.context.annotation.Configuration;
 public class ExceptionConfiguration {
 
     /**
-     * 非线上环境（profile 不含 {@code online}）启用调试模式。
+     * 非线上环境（{@code spring.cloud.config.profile} 不包含 {@code online}）启用调试模式。
      *
      * @return 开启调试的 {@link Debug} 实例
      */
     @Bean
     @ConditionalOnMissingBean(Debug.class)
-    @ConditionOnSpringCloudConfigProfile("!online")
+    @ConditionOnSpringCloudConfigProfile(value = "!online", predicate = ConditionOnSpringCloudConfigProfile.Predicate.contains)
     public Debug test() {
         return new Debug(true);
     }
 
     /**
-     * 线上环境（profile 为 {@code online}）关闭调试模式。
+     * 线上环境（profile 包含 {@code online}，如 {@code online}、{@code au-online}、{@code us-online}）关闭调试模式。
      *
      * @return 关闭调试的 {@link Debug} 实例
      */
     @Bean
     @ConditionalOnMissingBean(Debug.class)
-    @ConditionOnSpringCloudConfigProfile("online")
+    @ConditionOnSpringCloudConfigProfile(value = "online", predicate = ConditionOnSpringCloudConfigProfile.Predicate.contains)
     public Debug online() {
         return new Debug(false);
     }

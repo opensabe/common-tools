@@ -58,6 +58,18 @@ class ConditionOnSpringCloudConfigProfileIntegrationTest {
         public String multipleProfilesBean() {
             return "multiple";
         }
+
+        @Bean
+        @ConditionOnSpringCloudConfigProfile(value = "online", predicate = ConditionOnSpringCloudConfigProfile.Predicate.contains)
+        public String containsOnlineBean() {
+            return "contains-online";
+        }
+
+        @Bean
+        @ConditionOnSpringCloudConfigProfile(value = "!online", predicate = ConditionOnSpringCloudConfigProfile.Predicate.contains)
+        public String notContainsOnlineBean() {
+            return "not-contains-online";
+        }
     }
 
     @Nested
@@ -151,6 +163,66 @@ class ConditionOnSpringCloudConfigProfileIntegrationTest {
         @DisplayName("不匹配的profile不应注册multipleProfilesBean")
         void testMultipleProfilesNoMatch() {
             assertFalse(applicationContext.containsBean("multipleProfilesBean"));
+        }
+    }
+
+    @Nested
+    @DisplayName("contains谓词-au-online")
+    @SpringBootTest(properties = "spring.cloud.config.profile=au-online")
+    class ContainsAuOnlineTest {
+        @Autowired
+        private ApplicationContext applicationContext;
+
+        @Test
+        @DisplayName("au-online 应命中 contains online，不命中 !online")
+        void auOnlineContainsOnline() {
+            assertTrue(applicationContext.containsBean("containsOnlineBean"));
+            assertFalse(applicationContext.containsBean("notContainsOnlineBean"));
+        }
+    }
+
+    @Nested
+    @DisplayName("contains谓词-us-online")
+    @SpringBootTest(properties = "spring.cloud.config.profile=us-online")
+    class ContainsUsOnlineTest {
+        @Autowired
+        private ApplicationContext applicationContext;
+
+        @Test
+        @DisplayName("us-online 应命中 contains online")
+        void usOnlineContainsOnline() {
+            assertTrue(applicationContext.containsBean("containsOnlineBean"));
+            assertFalse(applicationContext.containsBean("notContainsOnlineBean"));
+        }
+    }
+
+    @Nested
+    @DisplayName("contains谓词-精确online")
+    @SpringBootTest(properties = "spring.cloud.config.profile=online")
+    class ContainsExactOnlineTest {
+        @Autowired
+        private ApplicationContext applicationContext;
+
+        @Test
+        @DisplayName("online 应命中 contains online")
+        void exactOnlineContainsOnline() {
+            assertTrue(applicationContext.containsBean("containsOnlineBean"));
+            assertFalse(applicationContext.containsBean("notContainsOnlineBean"));
+        }
+    }
+
+    @Nested
+    @DisplayName("contains谓词-非线上test")
+    @SpringBootTest(properties = "spring.cloud.config.profile=test")
+    class ContainsNonOnlineTest {
+        @Autowired
+        private ApplicationContext applicationContext;
+
+        @Test
+        @DisplayName("test 不应命中 contains online，应命中 !online")
+        void testDoesNotContainOnline() {
+            assertFalse(applicationContext.containsBean("containsOnlineBean"));
+            assertTrue(applicationContext.containsBean("notContainsOnlineBean"));
         }
     }
 } 
