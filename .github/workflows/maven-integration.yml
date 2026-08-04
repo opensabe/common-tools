@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up JDK 25
       uses: actions/setup-java@v4
       with:
@@ -35,6 +35,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Check license headers
-      run: mvn -B  license:check -P ci-check
+      run: mvn -B license:check -P ci-check
     - name: Build with Maven
       run: mvn -B clean verify -P ci-check
+      # Reduce flaky Central 429s on plugin/metadata downloads during CI
+      env:
+        MAVEN_OPTS: "-Dmaven.wagon.http.retryHandler.count=3"
