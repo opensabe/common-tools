@@ -15,10 +15,9 @@
  */
 package io.github.opensabe.common.config;
 
-import tools.jackson.databind.json.JsonMapper;
-
 import io.github.opensabe.common.utils.json.JsonUtil;
 import lombok.extern.log4j.Log4j2;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * 将 Boot 容器中的 {@link JsonMapper} 桥接到 {@link JsonUtil} 静态门面。

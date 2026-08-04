@@ -15,11 +15,8 @@
  */
 package io.github.opensabe.spring.cloud.parent.common.handler;
 
-import io.github.opensabe.base.code.BizCodeEnum;
-import io.github.opensabe.base.vo.BaseRsp;
-import io.github.opensabe.spring.cloud.parent.common.web.Path;
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.log4j.Log4j2;
+import java.util.Objects;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.validation.BindException;
@@ -30,7 +27,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
-import java.util.Objects;
+import io.github.opensabe.base.code.BizCodeEnum;
+import io.github.opensabe.base.vo.BaseRsp;
+import io.github.opensabe.spring.cloud.parent.common.web.Path;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.log4j.Log4j2;
 
 
 /**
@@ -139,7 +140,7 @@ public class GexceptionHandler implements PriorityOrdered {
      * @param fallbackMessage 无字段/全局错误时的回退消息
      * @return 参数非法响应
      */
-    private BaseRsp<Void> resolveBindingResult (BindingResult bindingResult, String fallbackMessage) {
+    private BaseRsp<Void> resolveBindingResult(BindingResult bindingResult, String fallbackMessage) {
         FieldError fieldError = bindingResult.getFieldError();
         String message = fallbackMessage;
         if (Objects.nonNull(fieldError)) {
@@ -156,7 +157,7 @@ public class GexceptionHandler implements PriorityOrdered {
      * @param fieldError 字段错误
      * @return 格式化消息
      */
-    private  String resolveFieldError (FieldError fieldError) {
+    private  String resolveFieldError(FieldError fieldError) {
         String objectName = fieldError.getObjectName();
         String nestedPath = fieldError.getField();
         String defaultMessage = fieldError.getDefaultMessage();
@@ -168,7 +169,7 @@ public class GexceptionHandler implements PriorityOrdered {
      * @param objectError 全局错误
      * @return 格式化消息
      */
-    private  String resolveGlobalError (ObjectError objectError) {
+    private  String resolveGlobalError(ObjectError objectError) {
         String objectName = objectError.getObjectName();
         String nestedPath = objectError.getCode();
         String defaultMessage = objectError.getDefaultMessage();

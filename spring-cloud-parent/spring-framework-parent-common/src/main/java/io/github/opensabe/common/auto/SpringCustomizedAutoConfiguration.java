@@ -21,10 +21,9 @@ import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import tools.jackson.databind.json.JsonMapper;
-
 import io.github.opensabe.common.config.JsonUtilSpringBridge;
 import io.github.opensabe.common.config.SpringCommonUtilConfiguration;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * 通用 Spring 工具与密钥相关自动配置入口。

@@ -19,11 +19,10 @@ import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomize
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.github.opensabe.common.jackson.TimestampModule;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.module.blackbird.BlackbirdModule;
-
-import io.github.opensabe.common.jackson.TimestampModule;
 
 /**
  * Jackson 模块与 JsonMapper 定制相关的 Spring 配置。

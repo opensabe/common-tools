@@ -19,11 +19,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
+import lombok.Getter;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueSerializer;
-
-import lombok.Getter;
 
 /**
  * 将 {@link LocalDateTime} 序列化为毫秒级 epoch 时间戳。

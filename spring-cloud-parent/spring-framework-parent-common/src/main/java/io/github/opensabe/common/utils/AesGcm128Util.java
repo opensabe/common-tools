@@ -15,26 +15,26 @@
  */
 package io.github.opensabe.common.utils;
 
-
-import org.springframework.util.Assert;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
-import java.util.Base64;
+
+import org.springframework.util.Assert;
 
 /**
  * AES-GCM-128 加解密工具（128 位密钥，内网场景）。
  * <p>
- * 线格式：Base64 编码的 {@code nonce(12) + tag(16) + ciphertext}；{@link #PSK} 可通过 {@link #setPSK(byte[])} 注入全局密钥。
+ * 线格式：Base64 编码的 {@code nonce(12) + tag(16) + ciphertext}；{@link #psk} 可通过 {@link #setPSK(byte[])} 注入全局密钥。
  */
 public class AesGcm128Util {
 
     /** 全局预共享密钥（16 字节），由 {@link #setPSK(byte[])} 设置。 */
-    private static volatile byte[] PSK = null;
+    private static volatile byte[] psk = null;
 
     /** JCA 算法名。 */
     private static final String ALGORITHM = "AES";
@@ -56,7 +56,7 @@ public class AesGcm128Util {
         if (psk == null || psk.length != 16) {
             throw new IllegalArgumentException("Invalid PSK length: " + psk.length);
         }
-        PSK = psk.clone();
+        AesGcm128Util.psk = psk.clone();
     }
 
     /**
@@ -145,7 +145,7 @@ public class AesGcm128Util {
     }
 
     /**
-     * 使用全局 {@link #PSK} 解密 Base64 密文包。
+     * 使用全局 {@link #psk} 解密 Base64 密文包。
      *
      * @param base64 Base64 编码密文包
      * @return 明文
@@ -153,7 +153,7 @@ public class AesGcm128Util {
      * @see #decryptBase64(byte[], String)
      */
     public static byte[] decryptBase64(String base64) throws Exception {
-        return decryptBase64(PSK, base64);
+        return decryptBase64(psk, base64);
     }
 
     /**
@@ -184,7 +184,7 @@ public class AesGcm128Util {
     }
 
     /**
-     * 使用全局 {@link #PSK} 加密并输出 Base64。
+     * 使用全局 {@link #psk} 加密并输出 Base64。
      *
      * @param nonce     随机数（12 字节）
      * @param plainData 明文
@@ -193,11 +193,11 @@ public class AesGcm128Util {
      * @see #encryptToBase64(byte[], byte[], byte[])
      */
     public static String encryptToBase64(byte[] nonce, byte[] plainData) throws Exception {
-        return encryptToBase64(PSK, nonce, plainData);
+        return encryptToBase64(psk, nonce, plainData);
     }
 
     /**
-     * 使用全局 {@link #PSK} 与随机 Nonce 加密并输出 Base64。
+     * 使用全局 {@link #psk} 与随机 Nonce 加密并输出 Base64。
      *
      * @param plainData 明文
      * @return Base64 编码结果
@@ -205,6 +205,6 @@ public class AesGcm128Util {
      * @see #encryptToBase64(byte[], byte[], byte[])
      */
     public static String encryptToBase64(byte[] plainData) throws Exception {
-        return encryptToBase64(PSK, generateNonce(), plainData);
+        return encryptToBase64(psk, generateNonce(), plainData);
     }
 }

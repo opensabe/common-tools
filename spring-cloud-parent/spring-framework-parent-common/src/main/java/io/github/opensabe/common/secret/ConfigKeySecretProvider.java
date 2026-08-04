@@ -15,15 +15,15 @@
  */
 package io.github.opensabe.common.secret;
 
-import lombok.Setter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import lombok.Setter;
 
 
 /**
@@ -48,7 +48,7 @@ public abstract class ConfigKeySecretProvider extends SecretProvider implements 
      *
      * @return 配置 property 键名集合
      */
-    protected abstract Set<String> keys ();
+    protected abstract Set<String> keys();
 
     /** {@inheritDoc} */
     @Override

@@ -15,7 +15,11 @@
  */
 package io.github.opensabe.common.secret;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * 标记敏感配置属性，供 {@link ConfigurationPropertiesSecretProvider} 等扫描并纳入脱敏过滤。

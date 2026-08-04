@@ -24,10 +24,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.MessageFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
@@ -52,7 +52,7 @@ import lombok.extern.log4j.Log4j2;
 public class AlarmUtil {
 
     /** 集群/环境后缀，拼接在报警组标识后（如 {@code pmprod}）。 */
-    public static String CLUSTER = "";
+    public static String cluster = "";
 
     /** 固定窗口 error 计数缓存：外层按 {@link Interval} 分桶，内层按 message 模板计数。 */
     private static final LoadingCache<Interval, LoadingCache<String, AtomicInteger>> ERROR_CACHE =
@@ -176,7 +176,7 @@ public class AlarmUtil {
     }
 
     /**
-     * 流式构建报警组集合，{@link #add(String)} 自动附加 {@link #CLUSTER} 后缀。
+     * 流式构建报警组集合，{@link #add(String)} 自动附加 {@link #cluster} 后缀。
      */
     public static class Group extends HashSet<String> {
 
@@ -194,22 +194,22 @@ public class AlarmUtil {
          * @param cluster 集群后缀
          * @return Group 构建器
          */
-        public static Group builder (String cluster) {
+        public static Group builder(String cluster) {
             return new Group(cluster);
         }
 
         /**
-         * 使用 {@link #CLUSTER} 作为后缀创建构建器。
+         * 使用 {@link #cluster} 作为后缀创建构建器。
          *
          * @return Group 构建器
          */
-        public static Group builder () {
-            return new Group(CLUSTER);
+        public static Group builder() {
+            return new Group(cluster);
         }
 
         @Override
         public boolean add(String string) {
-            return super.add(string+CLUSTER);
+            return super.add(string+cluster);
         }
 
         /** 添加产品（pm）组。 */
@@ -274,7 +274,7 @@ public class AlarmUtil {
      * 从消息首个 {@code [group,...]} 片段解析报警组（支持精确与前后缀模糊匹配）。
      *
      * @param searchString 待检消息
-     * @return 解析到的报警组集合（含 {@link #CLUSTER} 后缀）
+     * @return 解析到的报警组集合（含 {@link #cluster} 后缀）
      */
     public static Set<String> extractGroup(String searchString) {
         Matcher matcher = EXTRACT_GROUP_PATTERN.matcher(searchString);
@@ -288,7 +288,7 @@ public class AlarmUtil {
                 s = s.trim().toLowerCase();
                 if (ALL_GROUPS.contains(s)) {
                     find = true;
-                    values.add(s+CLUSTER);
+                    values.add(s+cluster);
                 } else {
                     for (String group : ALL_GROUPS) {
                         if (s.startsWith(group) || s.endsWith(group)) {

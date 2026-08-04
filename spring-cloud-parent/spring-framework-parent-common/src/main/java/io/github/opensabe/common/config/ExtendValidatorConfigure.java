@@ -19,14 +19,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import io.github.opensabe.spring.cloud.parent.common.validation.IntegerEnumedValidator;
-import io.github.opensabe.spring.cloud.parent.common.validation.ObjectBlankValidator;
-import io.github.opensabe.spring.cloud.parent.common.validation.StringNotNullValidator;
 import org.hibernate.validator.cfg.ConstraintMapping;
 import org.hibernate.validator.internal.engine.ConfigurationImpl;
 import org.springframework.boot.validation.autoconfigure.ValidationConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 
+import io.github.opensabe.spring.cloud.parent.common.validation.IntegerEnumedValidator;
+import io.github.opensabe.spring.cloud.parent.common.validation.ObjectBlankValidator;
+import io.github.opensabe.spring.cloud.parent.common.validation.StringNotNullValidator;
 import io.github.opensabe.spring.cloud.parent.common.validation.annotation.IntegerEnumedValue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

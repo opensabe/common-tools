@@ -15,14 +15,19 @@
  */
 package io.github.opensabe.common.config;
 
-import io.github.opensabe.common.observation.UnifiedObservationFactory;
-import io.github.opensabe.spring.cloud.parent.common.condition.ConditionOnSpringCloudConfigProfile;
-import io.github.opensabe.spring.cloud.parent.common.handler.*;
-import io.github.opensabe.spring.cloud.parent.common.web.Debug;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.condition.ConditionOnSpringCloudConfigProfile;
+import io.github.opensabe.spring.cloud.parent.common.handler.EnumConvertConfiguration;
+import io.github.opensabe.spring.cloud.parent.common.handler.ExceptionHandlerObservationAop;
+import io.github.opensabe.spring.cloud.parent.common.handler.GexceptionHandler;
+import io.github.opensabe.spring.cloud.parent.common.handler.I18nMessageResolver;
+import io.github.opensabe.spring.cloud.parent.common.handler.ThrowableHandler;
+import io.github.opensabe.spring.cloud.parent.common.web.Debug;
 
 /**
  * 全局异常处理与调试开关相关的 Spring 配置。

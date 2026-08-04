@@ -15,9 +15,18 @@
  */
 package io.github.opensabe.common.secret;
 
-import com.google.common.collect.Sets;
-import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.RecordComponent;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -29,13 +38,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.RecordComponent;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Sets;
+
+import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 
 /**
@@ -237,24 +243,24 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
      * @return 是否为简单类型
      */
     private boolean isSimpleType(Class<?> type) {
-        Package packageName;
-        if ((packageName = type.getPackage()) == null) {
+        Package packageName = type.getPackage();
+        if (packageName == null) {
             return false;
         }
-        return type.isPrimitive() ||
-               type == Boolean.class ||
-               type == Character.class ||
-               type == Byte.class ||
-               type == Short.class ||
-               type == Integer.class ||
-               type == Long.class ||
-               type == Float.class ||
-               type == Double.class ||
-               type == Void.class ||
-               type.isEnum() ||
-               packageName.getName().startsWith("java.") ||
-               packageName.getName().startsWith("javax.") ||
-               packageName.getName().startsWith("org.springframework.");
+        return type.isPrimitive()
+               || type == Boolean.class
+               || type == Character.class
+               || type == Byte.class
+               || type == Short.class
+               || type == Integer.class
+               || type == Long.class
+               || type == Float.class
+               || type == Double.class
+               || type == Void.class
+               || type.isEnum()
+               || packageName.getName().startsWith("java.")
+               || packageName.getName().startsWith("javax.")
+               || packageName.getName().startsWith("org.springframework.");
     }
 
     /**
@@ -264,8 +270,8 @@ public class ConfigurationPropertiesSecretProvider extends SecretProvider implem
      * @return 是否跳过
      */
     private boolean isSkipType(Class<?> type) {
-        Package packageName;
-        if ((packageName = type.getPackage()) == null) {
+        Package packageName = type.getPackage();
+        if (packageName == null) {
             return false;
         }
         return packageName.getName().startsWith("com.github.benmanes");

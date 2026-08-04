@@ -15,11 +15,11 @@
  */
 package io.github.opensabe.common.auto;
 
-import io.github.opensabe.common.config.ExceptionConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Import;
 
+import io.github.opensabe.common.config.ExceptionConfiguration;
 import io.github.opensabe.common.config.ExtendValidatorConfigure;
 
 /**
