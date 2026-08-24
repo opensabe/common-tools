@@ -16,9 +16,12 @@ import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.MessageFactory;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -171,10 +174,65 @@ public class AlarmUtil {
         }
     }
 
-    private static final Set<String> ALL_GROUPS = Set.of(
-            "pm", "op", "mk", "rd", "td", "ad", "pr", "fm", "qa", "cs", "frt", "and", "ios"
-    );
+    /**
+     * Alarm group whitelist. Preset groups are seeded at class load; callers may only append via
+     * {@link #registerGroup(String)} / {@link #registerGroups(String...)}.
+     */
+    private static final Set<String> ALL_GROUPS = ConcurrentHashMap.newKeySet();
+
+    static {
+        ALL_GROUPS.addAll(Set.of(
+                "pm", "op", "mk", "rd", "td", "ad", "pr", "fm", "qa", "cs", "frt", "and", "ios"
+        ));
+    }
+
     private static final Pattern EXTRACT_GROUP_PATTERN = Pattern.compile("\\[(.*?)\\]");
+
+    /**
+     * Register an additional alarm group. Idempotent; preset groups cannot be removed.
+     *
+     * @param group group name (will be trimmed and lower-cased)
+     * @throws IllegalArgumentException if blank or contains ',', '[', or ']'
+     */
+    public static void registerGroup(String group) {
+        ALL_GROUPS.add(normalizeAndValidateGroup(group));
+    }
+
+    /**
+     * Register multiple additional alarm groups. Idempotent.
+     *
+     * @param groups group names
+     * @throws IllegalArgumentException if any name is invalid
+     */
+    public static void registerGroups(String... groups) {
+        if (groups == null) {
+            throw new IllegalArgumentException("groups must not be null");
+        }
+        for (String group : groups) {
+            registerGroup(group);
+        }
+    }
+
+    /**
+     * Unmodifiable view of all registered alarm groups (preset + externally registered).
+     */
+    public static Set<String> getAllGroups() {
+        return Collections.unmodifiableSet(ALL_GROUPS);
+    }
+
+    private static String normalizeAndValidateGroup(String group) {
+        if (group == null || group.isBlank()) {
+            throw new IllegalArgumentException("group must not be null or blank");
+        }
+        String normalized = group.trim().toLowerCase(Locale.ROOT);
+        if (normalized.isEmpty()) {
+            throw new IllegalArgumentException("group must not be blank");
+        }
+        if (normalized.indexOf(',') >= 0 || normalized.indexOf('[') >= 0 || normalized.indexOf(']') >= 0) {
+            throw new IllegalArgumentException("group must not contain ',', '[' or ']': " + group);
+        }
+        return normalized;
+    }
 
     public static Set<String> extractGroup(String searchString) {
         // 创建 Matcher 对象
@@ -190,7 +248,7 @@ public class AlarmUtil {
             String content = matcher.group(1);
             // 根据逗号分割内容并放入集合中
             for (String s : content.split(",")) {
-                s = s.trim().toLowerCase();
+                s = s.trim().toLowerCase(Locale.ROOT);
                 // 如果匹配上组，则加入，并且标记找到了
                 if (ALL_GROUPS.contains(s)) {
                     find = true;
