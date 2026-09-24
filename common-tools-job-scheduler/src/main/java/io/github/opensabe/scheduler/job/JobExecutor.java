@@ -170,14 +170,42 @@ public class JobExecutor implements Runnable {
                 log.info("Job {} cannot get lock", schedulerJob.getJobName());
                 return true;
             }
-            return stringRedisTemplate.opsForHash().hasKey(SchedulerServerConfiguration.REDIS_JOB_MONITOR_KEY, schedulerJob.getJobId()) || stringRedisTemplate.opsForHash().hasKey(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_KEY, schedulerJob.getJobId()) || Objects.requireNonNull(stringRedisTemplate.opsForList().range(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_QUEUE_KEY, 0, -1)).contains(schedulerJob.getJobId());
+            return isOccupied(SchedulerServerConfiguration.REDIS_JOB_MONITOR_KEY)
+                    || isOccupied(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_KEY)
+                    || Objects.requireNonNull(stringRedisTemplate.opsForList().range(SchedulerServerConfiguration.REDIS_JOB_MISFIRE_QUEUE_KEY, 0, -1)).contains(schedulerJob.getJobId());
         } catch (InterruptedException e) {
             log.error("Job executor check job {} process status exception ", schedulerJob.getJobName(), e);
+            Thread.currentThread().interrupt();
         } finally {
             if (isLocked) {
                 lock.unlock();
             }
         }
         return true;
+    }
+
+    /**
+     * Occupancy is stored as expire-at millis in the hash value.
+     * Expired fields are treated as free so a failed HDEL (e.g. Redis READONLY) cannot mute the job forever.
+     */
+    private boolean isOccupied(String hashKey) {
+        Object raw = stringRedisTemplate.opsForHash().get(hashKey, schedulerJob.getJobId());
+        if (raw == null) {
+            return false;
+        }
+        try {
+            if (Long.parseLong(raw.toString()) > System.currentTimeMillis()) {
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Job {} occupancy value invalid, treat as occupied. key={}, value={}", schedulerJob.getJobName(), hashKey, raw);
+            return true;
+        }
+        try {
+            stringRedisTemplate.opsForHash().delete(hashKey, schedulerJob.getJobId());
+        } catch (Exception e) {
+            log.warn("Job {} clear expired occupancy failed, key={}", schedulerJob.getJobName(), hashKey, e);
+        }
+        return false;
     }
 }
