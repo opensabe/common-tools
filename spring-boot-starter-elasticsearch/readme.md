@@ -18,7 +18,27 @@ spring:
   data:
     elasticsearch:
       addresses: 172.31.64.194:9200,172.31.64.193:9200
+      # 可选：连接池与超时；不写则使用 ES RestClient 7.17.8 默认（见下表）
+      client:
+        max-conn-total: 100
+        max-conn-per-route: 50
+        connect-timeout: 5s
+        socket-timeout: 60s
+        connection-request-timeout: 5s
 ```
+
+### client 连接池与超时（`spring.data.elasticsearch.client`）
+
+未配置的字段保持 RestClient 默认，升级零配置无行为变化。默认值依据 Elasticsearch RestClient **7.17.8** `RestClientBuilder`。
+
+| YAML 键 | 作用 | 未配置时的有效默认 |
+|---------|------|-------------------|
+| `max-conn-total` | 整个客户端连接池最大连接总数 | **30** |
+| `max-conn-per-route` | 每个路由（通常对应单个 ES 节点）的最大连接数 | **10** |
+| `connect-timeout` | 建立 TCP 连接的超时 | **1s** |
+| `socket-timeout` | 连接建立后等待数据包的超时（含查询/写入） | **30s** |
+| `connection-request-timeout` | 从连接池借用连接的等待超时；池耗尽时超时失败 | **无限等待** |
+
 获取RestHighLevelClient
 ```
 @Autowired

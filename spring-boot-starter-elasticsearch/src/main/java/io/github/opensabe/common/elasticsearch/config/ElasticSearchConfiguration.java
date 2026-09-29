@@ -24,6 +24,8 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.RestClient;
@@ -91,58 +93,112 @@ public class ElasticSearchConfiguration implements DisposableBean {
             String[] split = s.split(":");
             httpHosts.add(new HttpHost(split[0], Integer.parseInt(split[1]), properties.getSecure() ? "https" : "http"));
         }
+        ElasticSearchProperties.Client client = properties.getClient() != null
+                ? properties.getClient()
+                : new ElasticSearchProperties.Client();
         return RestClient.builder(httpHosts.toArray(new HttpHost[0]))
-                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
-                        .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
-                            // Intercept request and modify the body
-                            if (request instanceof HttpEntityEnclosingRequest) {
-                                HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
-                                HttpEntity entity = entityRequest.getEntity();
-                                if (entity != null) {
-                                    String originalBody = EntityUtils.toString(entity);
-                                    FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(originalBody);
-                                    if (filterSecretStringResult.isFoundSensitiveString()) {
-                                        throw new RuntimeException("Sensitive string found in ES request");
+                .setRequestConfigCallback(requestConfigBuilder -> {
+                    applyRequestConfig(requestConfigBuilder, client);
+                    return requestConfigBuilder;
+                })
+                .setHttpClientConfigCallback(httpClientBuilder -> {
+                    httpClientBuilder
+                            .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                                // Intercept request and modify the body
+                                if (request instanceof HttpEntityEnclosingRequest) {
+                                    HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
+                                    HttpEntity entity = entityRequest.getEntity();
+                                    if (entity != null) {
+                                        String originalBody = EntityUtils.toString(entity);
+                                        FilterSecretStringResult filterSecretStringResult = globalSecretManager.filterSecretStringAndAlarm(originalBody);
+                                        if (filterSecretStringResult.isFoundSensitiveString()) {
+                                            throw new RuntimeException("Sensitive string found in ES request");
+                                        }
                                     }
                                 }
-                            }
-                        })
-                        .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
-                            String uri = request.getRequestLine().getUri();
-                            String params = "";
-                            if (uri.contains("?")) {
-                                String[] split = uri.split("\\?");
-                                uri = split[0];
-                                params = split[1];
-                            }
-                            ElasticSearchClientObservationContext observationContext = new ElasticSearchClientObservationContext(uri, params);
-                            Observation observation = ElasticSearchClientObservationDocumentation.CLIENT_REQUEST.start(
-                                    null,
-                                    ElasticSearchClientConvention.DEFAULT,
-                                    () -> observationContext,
-                                    unifiedObservationFactory.getObservationRegistry()
-                            );
-                            context.setAttribute("observation", observation);
-                            context.setAttribute("observationContext", observationContext);
-                            long incrementAndGet = COUNTER.incrementAndGet();
-                            context.setAttribute("counter", incrementAndGet);
-                            CACHE.put(incrementAndGet, observation);
-                        })
-                        .addInterceptorLast((HttpResponseInterceptor) (response, context) -> {
-                            ElasticSearchClientObservationContext observationContext = (ElasticSearchClientObservationContext) context.getAttribute("observationContext");
-                            Observation observation = (Observation) context.getAttribute("observation");
-                            observationContext.setResponse(response.toString());
-                            observation.stop();
-                            long counter = (long) context.getAttribute("counter");
-                            CACHE.invalidate(counter);
-                        })
-                        .setKeepAliveStrategy((httpResponse, httpContext) -> Duration.ofSeconds(10).toMillis())
-                        /* optionally perform some other configuration of httpClientBuilder here if needed */
-                        .setDefaultIOReactorConfig(IOReactorConfig.custom()
-                                /* optionally perform some other configuration of IOReactorConfig here if needed */
-                                .setSoKeepAlive(true)
-                                .build())
-                );
+                            })
+                            .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                                String uri = request.getRequestLine().getUri();
+                                String params = "";
+                                if (uri.contains("?")) {
+                                    String[] split = uri.split("\\?");
+                                    uri = split[0];
+                                    params = split[1];
+                                }
+                                ElasticSearchClientObservationContext observationContext = new ElasticSearchClientObservationContext(uri, params);
+                                Observation observation = ElasticSearchClientObservationDocumentation.CLIENT_REQUEST.start(
+                                        null,
+                                        ElasticSearchClientConvention.DEFAULT,
+                                        () -> observationContext,
+                                        unifiedObservationFactory.getObservationRegistry()
+                                );
+                                context.setAttribute("observation", observation);
+                                context.setAttribute("observationContext", observationContext);
+                                long incrementAndGet = COUNTER.incrementAndGet();
+                                context.setAttribute("counter", incrementAndGet);
+                                CACHE.put(incrementAndGet, observation);
+                            })
+                            .addInterceptorLast((HttpResponseInterceptor) (response, context) -> {
+                                ElasticSearchClientObservationContext observationContext = (ElasticSearchClientObservationContext) context.getAttribute("observationContext");
+                                Observation observation = (Observation) context.getAttribute("observation");
+                                observationContext.setResponse(response.toString());
+                                observation.stop();
+                                long counter = (long) context.getAttribute("counter");
+                                CACHE.invalidate(counter);
+                            })
+                            .setKeepAliveStrategy((httpResponse, httpContext) -> Duration.ofSeconds(10).toMillis())
+                            .setDefaultIOReactorConfig(IOReactorConfig.custom()
+                                    .setSoKeepAlive(true)
+                                    .build());
+                    applyHttpClientSettings(httpClientBuilder, client);
+                    return httpClientBuilder;
+                });
+    }
+
+    /**
+     * Apply connection-pool settings when configured. Unset fields leave RestClientBuilder defaults (30/10).
+     */
+    public static void applyHttpClientSettings(HttpAsyncClientBuilder httpClientBuilder, ElasticSearchProperties.Client client) {
+        if (client == null) {
+            return;
+        }
+        if (client.getMaxConnTotal() != null) {
+            httpClientBuilder.setMaxConnTotal(client.getMaxConnTotal());
+        }
+        if (client.getMaxConnPerRoute() != null) {
+            httpClientBuilder.setMaxConnPerRoute(client.getMaxConnPerRoute());
+        }
+    }
+
+    /**
+     * Apply timeout settings when configured. Unset fields leave RestClientBuilder defaults (1s/30s/infinite).
+     */
+    public static void applyRequestConfig(RequestConfig.Builder requestConfigBuilder, ElasticSearchProperties.Client client) {
+        if (client == null) {
+            return;
+        }
+        if (client.getConnectTimeout() != null) {
+            requestConfigBuilder.setConnectTimeout(toTimeoutMillis(client.getConnectTimeout(), "connect-timeout"));
+        }
+        if (client.getSocketTimeout() != null) {
+            requestConfigBuilder.setSocketTimeout(toTimeoutMillis(client.getSocketTimeout(), "socket-timeout"));
+        }
+        if (client.getConnectionRequestTimeout() != null) {
+            requestConfigBuilder.setConnectionRequestTimeout(
+                    toTimeoutMillis(client.getConnectionRequestTimeout(), "connection-request-timeout"));
+        }
+    }
+
+    public static int toTimeoutMillis(Duration duration, String name) {
+        if (duration == null) {
+            throw new IllegalArgumentException("spring.data.elasticsearch.client." + name + " must not be null");
+        }
+        long millis = duration.toMillis();
+        if (millis < 0 || millis > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(
+                    "spring.data.elasticsearch.client." + name + " out of range: " + duration);
+        }
+        return (int) millis;
     }
 
     @Bean
