@@ -18,6 +18,7 @@ package io.github.opensabe.youtobe.dto.list;
 import io.github.opensabe.youtobe.dto.YouToBeContentDetailsDTO;
 import io.github.opensabe.youtobe.dto.YouToBeSnippetDTO;
 import io.github.opensabe.youtobe.dto.YouToBeStatisticsDTO;
+import io.github.opensabe.youtobe.dto.YouToBeStatusDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -53,4 +54,6 @@ public class YouToBeListItemDTO {
     private YouToBeContentDetailsDTO contentDetails;
 
     private YouToBeStatisticsDTO statistics;
+
+    private YouToBeStatusDTO status;
 }
