@@ -96,8 +96,8 @@ public class YouToBeListService {
         int randomIndex = random.nextInt(properties.getKeys().size());
         sb.append("?key=").append(properties.getKeys().get(randomIndex));
 
-        // 这里固定请求的part为snippet,contentDetails,statistics
-        sb.append("&part=snippet,contentDetails,statistics");
+        // 这里固定请求的part为snippet,contentDetails,statistics,status
+        sb.append("&part=snippet,contentDetails,statistics,status");
 
         if (StringUtils.isNotBlank(reqDTO.getId())) {
             sb.append("&id=").append(reqDTO.getId());
