@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
@@ -33,17 +34,37 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.Environment;
 
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.K8sAzGumbelLoadBalancerChooser;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.LastOrNotEmptyServiceInstanceListSupplier;
+import io.github.opensabe.spring.cloud.parent.common.loadbalancer.LoadBalancerK8sAzBalanceProperties;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.SameZoneOnlyServiceInstanceListSupplier;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.CircuitBreakerExtractor;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(LoadBalancerK8sAzBalanceProperties.class)
 public class DefaultLoadBalancerConfiguration {
+
+    /**
+     * K8S AZ + Gumbel 选路策略 Bean；与 {@link LoadBalancerK8sAzBalanceProperties#enabled} 配合使用。
+     */
+    @Bean
+    public K8sAzGumbelLoadBalancerChooser k8sAzGumbelLoadBalancerChooser(
+            LoadBalancerK8sAzBalanceProperties loadBalancerK8sAzBalanceProperties,
+            Environment environment,
+            ObjectProvider<DiscoveryClient> discoveryClientProvider,
+            ObjectProvider<EurekaInstanceConfigBean> eurekaInstanceConfigBeanProvider) {
+        return new K8sAzGumbelLoadBalancerChooser(
+                loadBalancerK8sAzBalanceProperties,
+                environment,
+                discoveryClientProvider,
+                eurekaInstanceConfigBeanProvider);
+    }
 
     @Bean
     //有这个类代表有 spring-mvc 依赖
@@ -111,6 +132,9 @@ public class DefaultLoadBalancerConfiguration {
         );
     }
 
+    /**
+     * 默认负载均衡器；注入 K8S AZ 相关 Bean，由 {@link LoadBalancerK8sAzBalanceProperties#enabled} 决定是否走新分支。
+     */
     @Bean
     @Primary
     public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(
@@ -119,7 +143,9 @@ public class DefaultLoadBalancerConfiguration {
             LoadBalancerClientFactory loadBalancerClientFactory,
             CircuitBreakerExtractor circuitBreakerExtractor,
             CircuitBreakerRegistry circuitBreakerRegistry,
-            UnifiedObservationFactory unifiedObservationFactory
+            UnifiedObservationFactory unifiedObservationFactory,
+            LoadBalancerK8sAzBalanceProperties loadBalancerK8sAzBalanceProperties,
+            K8sAzGumbelLoadBalancerChooser k8sAzGumbelLoadBalancerChooser
     ) {
         String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
         return new TracedCircuitBreakerRoundRobinLoadBalancer(
@@ -128,6 +154,9 @@ public class DefaultLoadBalancerConfiguration {
                         loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name),
                 name,
                 circuitBreakerExtractor,
-                circuitBreakerRegistry, unifiedObservationFactory);
+                circuitBreakerRegistry,
+                unifiedObservationFactory,
+                loadBalancerK8sAzBalanceProperties,
+                k8sAzGumbelLoadBalancerChooser);
     }
 }
