@@ -52,6 +52,15 @@ Do not move or force-push existing tags.
 5. Never reuse a non-SNAPSHOT Maven Central version. If a tag/Release already
    exists for that version, cut the next patch instead.
 
+
+## Publish notes
+
+- Prefer **sequential** GitHub Releases (one line at a time). Parallel Central uploads can flake with `Bundle has content that does NOT have a .pom file` and missing `Pre Bundling` logs.
+- Keep `central-publishing-maven-plugin` at **0.11.0+** on every maintenance line (`maven-central` profile in root `pom.xml`).
+- If deploy fails with that pom-bundle error but the commit is correct, `gh run rerun <id>` is often enough; do not bump the artifact version.
+- Workflow success still leaves Central in "validated / manual publish" when auto-publish is off; finish at https://central.sonatype.com/publishing/deployments if needed.
+- Branch and tag names collide (`v1.0.4.28` etc.). Use explicit refspecs: `git push origin refs/tags/vX.Y.Z` and `git show refs/tags/vX.Y.Z:...`.
+
 ## Checklist
 
 ```
