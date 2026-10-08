@@ -391,7 +391,7 @@ public class OldDefaultMQProducerImpl implements MQProducer {
             MqFailLogEntity mqFailLogEntity = new MqFailLogEntity();
             mqFailLogEntity.setId(uniqueID.getUniqueId("remq"));
             mqFailLogEntity.setTopic(topic);
-            if (!StringUtils.isNotBlank(hashKey)) {
+            if (StringUtils.isNotBlank(hashKey)) {
                 mqFailLogEntity.setHashKey(hashKey);
             }
             mqFailLogEntity.setTraceId(traceIdString);
