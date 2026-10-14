@@ -1,3 +1,7 @@
+# Internal HTTP call authentication (observe & alert)
+
+See [docs/internal-call-security.md](../../docs/internal-call-security.md) for enablement, gray rollout, and troubleshooting.
+
 # SpringUtil
 
 如果之后再用 SpringUtil 这种工具，遇到 ApplicationContext 为空。那么估计是将这个 SpringUtils 放在 Bean 初始化里面用了。
