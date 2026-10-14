@@ -65,29 +65,35 @@ public class InternalCallInboundFilter extends OncePerRequestFilter implements O
     @Override
     protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        continueAfterProcessed(request, response, filterChain);
+        filterChain.doFilter(requestToContinue(request), response);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        HttpServletRequest toPass = resolveRequestToPass(request);
+        filterChain.doFilter(toPass, response);
+    }
+
+    /**
+     * Decide which request object to pass downstream. Never calls the filter chain —
+     * so downstream exceptions are not swallowed or re-dispatched.
+     */
+    private HttpServletRequest resolveRequestToPass(HttpServletRequest request) {
         try {
             if (!properties.isEnabled()
                     || properties.getInbound() == null
                     || !properties.getInbound().isEnabled()) {
-                filterChain.doFilter(request, response);
-                return;
+                return request;
             }
             if (Boolean.TRUE.equals(request.getAttribute(InternalCallAuthAttributes.PROCESSED))
                     || Boolean.TRUE.equals(request.getAttribute(InternalCallAuthAttributes.VERIFIED))) {
-                continueAfterProcessed(request, response, filterChain);
-                return;
+                return requestToContinue(request);
             }
             String rawPath = request.getRequestURI();
             String contextPath = request.getContextPath();
             if (pathMatcher.isExcluded(rawPath, contextPath)) {
-                filterChain.doFilter(request, response);
-                return;
+                return request;
             }
             if (!properties.hasSecretConfigured()) {
                 request.setAttribute(InternalCallAuthAttributes.PROCESSED, Boolean.TRUE);
@@ -97,8 +103,7 @@ public class InternalCallInboundFilter extends OncePerRequestFilter implements O
                         safePath(rawPath, contextPath),
                         null
                 );
-                filterChain.doFilter(new HeaderHidingRequest(request, mechanismNames()), response);
-                return;
+                return new HeaderHidingRequest(request, mechanismNames());
             }
 
             InternalCallProperties.Headers h = properties.getHeaders();
@@ -116,8 +121,7 @@ public class InternalCallInboundFilter extends OncePerRequestFilter implements O
                 request.setAttribute(InternalCallAuthAttributes.VERIFIED, Boolean.TRUE);
                 request.setAttribute(InternalCallAuthAttributes.CALLER_SERVICE, result.callerService());
                 request.setAttribute(InternalCallAuthAttributes.CALLER_IP, result.callerIp());
-                filterChain.doFilter(request, response);
-                return;
+                return request;
             }
             failureHandler.report(
                     result.reason(),
@@ -125,9 +129,9 @@ public class InternalCallInboundFilter extends OncePerRequestFilter implements O
                     safePath(rawPath, contextPath),
                     result.callerService() != null ? result.callerService() : callerService
             );
-            filterChain.doFilter(new HeaderHidingRequest(request, mechanismNames()), response);
+            return new HeaderHidingRequest(request, mechanismNames());
         } catch (Throwable t) {
-            log.warn("InternalCallInboundFilter-doFilterInternal: INTERNAL_ERROR: {}", t.toString());
+            log.warn("InternalCallInboundFilter-resolveRequestToPass: INTERNAL_ERROR: {}", t.toString());
             try {
                 request.setAttribute(InternalCallAuthAttributes.PROCESSED, Boolean.TRUE);
                 failureHandler.report(
@@ -139,17 +143,15 @@ public class InternalCallInboundFilter extends OncePerRequestFilter implements O
             } catch (Throwable ignored) {
                 // swallow
             }
-            filterChain.doFilter(new HeaderHidingRequest(request, mechanismNames()), response);
+            return new HeaderHidingRequest(request, mechanismNames());
         }
     }
 
-    private void continueAfterProcessed(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    private HttpServletRequest requestToContinue(HttpServletRequest request) {
         if (Boolean.TRUE.equals(request.getAttribute(InternalCallAuthAttributes.VERIFIED))) {
-            filterChain.doFilter(request, response);
-            return;
+            return request;
         }
-        filterChain.doFilter(new HeaderHidingRequest(request, mechanismNames()), response);
+        return new HeaderHidingRequest(request, mechanismNames());
     }
 
     private List<String> mechanismNames() {

@@ -59,11 +59,10 @@ public class InternalCallOutboundGatewayFilter extends AbstractTracedFilter {
                 || !properties.getOutbound().isEnabled()) {
             return chain.filter(exchange);
         }
-        String path = exchange.getRequest().getPath().value();
-        boolean excluded = pathMatcher.isExcluded(path, null);
-        boolean shouldSign = !excluded && shouldSign(exchange);
-
         try {
+            String path = exchange.getRequest().getPath().value();
+            boolean excluded = pathMatcher.isExcluded(path, null);
+            boolean shouldSign = !excluded && shouldSign(exchange);
             InternalCallSignedHeaders signed = null;
             if (shouldSign && properties.hasSecretConfigured()) {
                 Optional<InternalCallSignedHeaders> opt = signer.sign(
