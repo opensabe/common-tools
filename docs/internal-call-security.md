@@ -77,6 +77,8 @@ RestTemplate rt = InternalCallClients.decorate(new RestTemplate(), interceptor);
 - Public hosts are not signed; forged mechanism headers are still stripped when `enabled=true`.
 - Gateway access logs redact edge-token and sign values as `***`.
 - All Gateway instances must share the same secret and edge settings.
+- **v1 canonical does not bind METHOD/path.** A captured valid signature can be replayed to other paths within the clock-skew window (`skew-ms`, default 5 minutes). There is **no** distributed or in-process nonce store in v1 (by design); rely on skew + network isolation.
+- Request attribute `opensabe.internal-call.verified` is an audit/context marker only. **Do not** use it as the sole authorization decision.
 
 ## Reason codes
 
