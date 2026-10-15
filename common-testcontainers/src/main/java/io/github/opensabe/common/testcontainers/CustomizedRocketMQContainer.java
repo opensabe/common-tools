@@ -1,7 +1,6 @@
 package io.github.opensabe.common.testcontainers;
 
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.model.HostConfig;
 import lombok.SneakyThrows;
 import org.testcontainers.containers.GenericContainer;
 
@@ -15,12 +14,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * RocketMQ namesrv+broker in one container for integration tests.
  * <p>
- * On Linux (GitHub Actions) uses host network so clients talk to fixed 9876/10911
- * without Docker port remapping. Remapping {@code listenPort} to a random host port
- * makes VIP ({@code listenPort - 2}) collide with the namesrv mapping and breaks consume
- * even when produce still returns SEND_OK.
- * <p>
- * On non-Linux, binds coordinated host ports so VIP ({@code brokerPort - 2}) stays valid.
+ * Uses coordinated fixed host ports so that after {@code listenPort} is remapped to the
+ * host broker port, RocketMQ's VIP port ({@code listenPort - 2}) still lands on the
+ * published VIP mapping. Random Docker mappings make VIP collide with namesrv and break
+ * consume while produce can still return {@code SEND_OK}.
  */
 public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRocketMQContainer> {
     private static final int defaultBrokerPermission = 6;
@@ -28,31 +25,17 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
     public static final int BROKER_PORT = 10911;
     public static final int BROKER_VIP_PORT = BROKER_PORT - 2;
 
-    private final boolean hostNetwork;
     private final int namesrvHostPort;
     private final int brokerHostPort;
 
     public CustomizedRocketMQContainer() {
         super("apache/rocketmq:5.2.0");
-        this.hostNetwork = isLinux();
-        if (hostNetwork) {
-            this.namesrvHostPort = NAMESRV_PORT;
-            this.brokerHostPort = BROKER_PORT;
-            withCreateContainerCmdModifier(cmd -> cmd.withHostConfig(
-                    HostConfig.newHostConfig().withNetworkMode("host")));
-        } else {
-            HostPorts ports = HostPorts.allocate();
-            this.namesrvHostPort = ports.namesrv;
-            this.brokerHostPort = ports.broker;
-            addFixedExposedPort(namesrvHostPort, NAMESRV_PORT);
-            addFixedExposedPort(brokerHostPort, BROKER_PORT);
-            addFixedExposedPort(brokerHostPort - 2, BROKER_VIP_PORT);
-        }
-    }
-
-    private static boolean isLinux() {
-        String os = System.getProperty("os.name", "");
-        return os.toLowerCase().contains("linux");
+        HostPorts ports = HostPorts.allocate();
+        this.namesrvHostPort = ports.namesrv;
+        this.brokerHostPort = ports.broker;
+        addFixedExposedPort(namesrvHostPort, NAMESRV_PORT);
+        addFixedExposedPort(brokerHostPort, BROKER_PORT);
+        addFixedExposedPort(brokerHostPort - 2, BROKER_VIP_PORT);
     }
 
     @Override
@@ -68,13 +51,9 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
     @SneakyThrows
     protected void containerIsStarted(InspectContainerResponse containerInfo) {
         List<String> updateBrokerConfigCommands = new ArrayList<>();
-        // Advertise an address clients on the test JVM can reach.
-        updateBrokerConfigCommands.add(updateBrokerConfig("brokerIP1", clientHost()));
-        if (!hostNetwork) {
-            // Remap advertised listen port to the fixed host binding.
-            updateBrokerConfigCommands.add(updateBrokerConfig("listenPort", brokerHostPort));
-        }
-        // Avoid VIP (listenPort-2) which is easy to mis-map under Docker port publishing.
+        // Advertise host + fixed mapped broker port so JVM clients outside Docker can connect.
+        updateBrokerConfigCommands.add(updateBrokerConfig("brokerIP1", getHost()));
+        updateBrokerConfigCommands.add(updateBrokerConfig("listenPort", brokerHostPort));
         updateBrokerConfigCommands.add(updateBrokerConfig("vipChannelEnabled", "false"));
         updateBrokerConfigCommands.add(updateBrokerConfig("brokerPermission", defaultBrokerPermission));
 
@@ -91,7 +70,6 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
             Thread.sleep(1000);
         }
 
-        // Best-effort topic create so consumers have route info before the first send.
         try {
             ExecResult topicResult = execInContainer(
                     "/bin/sh",
@@ -105,15 +83,11 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
             System.out.println("updateTopic skipped: " + t.getMessage());
         }
 
-        waitForPortOpen(clientHost(), getNamesrvPort(), 60_000);
-        waitForPortOpen(clientHost(), brokerHostPort, 60_000);
-        System.out.println("RocketMQ namesrv ready at " + clientHost() + ":" + getNamesrvPort()
-                + ", broker advertised " + clientHost() + ":" + brokerHostPort
-                + (hostNetwork ? " (host network)" : " (fixed ports)"));
-    }
-
-    private String clientHost() {
-        return hostNetwork ? "127.0.0.1" : getHost();
+        waitForPortOpen(getHost(), namesrvHostPort, 60_000);
+        waitForPortOpen(getHost(), brokerHostPort, 60_000);
+        System.out.println("RocketMQ ready namesrv=" + getHost() + ":" + namesrvHostPort
+                + " broker=" + getHost() + ":" + brokerHostPort
+                + " vip=" + getHost() + ":" + (brokerHostPort - 2));
     }
 
     private String updateBrokerConfig(final String key, final Object val) {
@@ -139,9 +113,6 @@ public class CustomizedRocketMQContainer extends GenericContainer<CustomizedRock
         throw new IllegalStateException("Timed out waiting for " + host + ":" + port);
     }
 
-    /**
-     * Host ports where {@code brokerVip = broker - 2} matches RocketMQ VIP convention.
-     */
     private static final class HostPorts {
         final int namesrv;
         final int broker;
