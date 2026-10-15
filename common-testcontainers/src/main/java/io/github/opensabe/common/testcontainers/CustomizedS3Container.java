@@ -9,9 +9,14 @@ import java.util.concurrent.TimeUnit;
 
 public class CustomizedS3Container extends GenericContainer<CustomizedS3Container> {
     public static final int S3_PORT = 4566;
+    /**
+     * Pin past floating {@code :latest}. LocalStack images from 2026.03+ require
+     * {@code LOCALSTACK_AUTH_TOKEN}; 4.14.0 (pre-auth cutoff) still starts free for S3 tests.
+     */
+    private static final String LOCALSTACK_IMAGE = "localstack/localstack:4.14.0";
 
     public CustomizedS3Container() {
-        super("localstack/localstack");
+        super(LOCALSTACK_IMAGE);
     }
 
     @Override

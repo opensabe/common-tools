@@ -3,6 +3,8 @@ package io.github.opensabe.spring.cloud.parent.gateway.filter;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.opensabe.base.RespUtil;
+import io.github.opensabe.common.internalcall.InternalCallProperties;
+import io.github.opensabe.common.internalcall.InternalCallRequestHeaderSupport;
 import io.github.opensabe.common.utils.AlarmUtil;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.cloud.parent.gateway.common.CommonFilterUtil;
@@ -13,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -72,6 +75,8 @@ public class CommonLogFilter extends AbstractTracedFilter {
     private TracedPublisherFactory tracedPublisherFactory;
     @Autowired
     private GatewayLogProperties gatewayLogProperties;
+    @Autowired
+    private ObjectProvider<InternalCallProperties> internalCallProperties;
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
@@ -87,7 +92,7 @@ public class CommonLogFilter extends AbstractTracedFilter {
         RequestPath path = request.getPath();
         MultiValueMap<String, String> queryParams = request.getQueryParams();
         HttpMethod method = request.getMethod();
-        log.info("{} -> {}: header: {}; queryParams: {}", method, path, headers.toString(),
+        log.info("{} -> {}: header: {}; queryParams: {}", method, path, headersForLog(headers),
                 queryParams.entrySet().stream().map(e -> e.getKey() + ':' + e.getValue()).collect(Collectors.joining(",", "[", "]"))
         );
 
@@ -263,6 +268,14 @@ public class CommonLogFilter extends AbstractTracedFilter {
             }
         }
         return null;
+    }
+
+    private String headersForLog(HttpHeaders headers) {
+        InternalCallProperties props = internalCallProperties.getIfAvailable();
+        if (props == null) {
+            return headers.toString();
+        }
+        return InternalCallRequestHeaderSupport.redactForLog(headers, props).toString();
     }
 
     @Override
