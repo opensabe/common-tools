@@ -27,7 +27,8 @@ public class SingleRocketMQIntegrationTest implements BeforeAllCallback, Extensi
     }
 
     public static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("rocketmq.name-server", () -> "localhost:" + ROCKET_MQ_CONTAINER.getNamesrvPort());
+        // Prefer 127.0.0.1 so it matches brokerIP1 advertised by CustomizedRocketMQContainer.
+        registry.add("rocketmq.name-server", () -> "127.0.0.1:" + ROCKET_MQ_CONTAINER.getNamesrvPort());
     }
 
     @Override
