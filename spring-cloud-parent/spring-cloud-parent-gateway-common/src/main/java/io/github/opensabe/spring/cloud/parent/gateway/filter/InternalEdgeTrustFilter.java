@@ -151,8 +151,8 @@ public class InternalEdgeTrustFilter extends AbstractTracedFilter {
                     return inet;
                 }
             }
-        } catch (IllegalArgumentException ignored) {
-            // MockServerHttpRequest and other non-native wrappers
+        } catch (IllegalArgumentException | IllegalStateException ignored) {
+            // MockServerHttpRequest: "No running server, no native request"
         }
         return request.getRemoteAddress();
     }
