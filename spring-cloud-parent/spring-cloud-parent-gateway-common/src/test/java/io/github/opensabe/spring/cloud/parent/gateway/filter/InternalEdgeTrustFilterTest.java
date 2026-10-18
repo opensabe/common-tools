@@ -62,4 +62,13 @@ class InternalEdgeTrustFilterTest {
         assertTrue(passed.get());
         assertEquals(TraceIdFilter.ORDER + 2, filter.ordered());
     }
+
+    @Test
+    @DisplayName("Mock 无 native request 时 peerHost 回退到 remoteAddress")
+    void peerHostFallsBackWithoutNativeRequest() {
+        MockServerHttpRequest request = MockServerHttpRequest.get("http://gw/api")
+                .remoteAddress(new InetSocketAddress("10.9.8.7", 443))
+                .build();
+        assertEquals("10.9.8.7", InternalEdgeTrustFilter.peerHost(request));
+    }
 }

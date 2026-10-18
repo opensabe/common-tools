@@ -10,15 +10,19 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.server.HttpServerRequest;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 /**
  * Observe-only edge trust: TCP peer must be in trusted IPv4 CIDRs; optional edge-token.
+ * Peer is the Netty channel remote address when available (survives NATIVE forwarded-headers).
  */
 @Log4j2
 @Component
@@ -123,7 +127,7 @@ public class InternalEdgeTrustFilter extends AbstractTracedFilter {
     }
 
     static String peerHost(ServerHttpRequest request) {
-        InetSocketAddress remote = request.getRemoteAddress();
+        InetSocketAddress remote = tcpPeerAddress(request);
         if (remote == null) {
             return null;
         }
@@ -132,6 +136,25 @@ public class InternalEdgeTrustFilter extends AbstractTracedFilter {
             return null;
         }
         return address.getHostAddress();
+    }
+
+    /**
+     * Prefer Reactor Netty {@code connectionRemoteAddress()} (true TCP peer).
+     * Falls back to {@link ServerHttpRequest#getRemoteAddress()} for mocks / non-Netty.
+     */
+    static InetSocketAddress tcpPeerAddress(ServerHttpRequest request) {
+        try {
+            Object nativeRequest = ServerHttpRequestDecorator.getNativeRequest(request);
+            if (nativeRequest instanceof HttpServerRequest http) {
+                SocketAddress peer = http.connectionRemoteAddress();
+                if (peer instanceof InetSocketAddress inet) {
+                    return inet;
+                }
+            }
+        } catch (IllegalArgumentException ignored) {
+            // MockServerHttpRequest and other non-native wrappers
+        }
+        return request.getRemoteAddress();
     }
 
     @Override

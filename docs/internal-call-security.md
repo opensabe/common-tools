@@ -4,7 +4,7 @@ Low-cost, observe-first detection of unexpected Intranet HTTP hops. Default is *
 
 ## Enable (production)
 
-1. Deploy a build that includes this feature (common-tools `1.0.4.x` with the change).
+1. Deploy a build that includes this feature (common-tools `1.0.8.x` with the change).
 2. Configure a shared secret (and optionally `previous` for rotation):
 
 ```yaml
@@ -50,7 +50,7 @@ Recommended baseline: leave token empty; tighten Security Groups / NetworkPolicy
 |---|---|
 | `MISSING_HEADER` | Rolling deploy; RestTemplate not decorated; host not matched for WebClient |
 | `EXPIRED` | Clock skew between nodes |
-| `UNTRUSTED_EDGE` | Wrong `trusted-cidrs`; peer not LB/nginx |
+| `UNTRUSTED_EDGE` | Wrong `trusted-cidrs`; peer not LB/nginx. On cloud with `forward-headers-strategy=NATIVE`, edge uses Netty `connectionRemoteAddress()` (TCP peer), not XFF client IP. If the LB preserves client IP at L4, peer is still the public client — use SG/NetworkPolicy and/or `edge-token`. |
 | `BAD_SIGNATURE` | Secret mismatch / not rotated |
 | `UNSUPPORTED_PEER_IP` | IPv6 or IPv4-mapped peer (`::ffff:10.x`) |
 | `BAD_EDGE_TOKEN` | Token configured but nginx not injecting / wrong value |
