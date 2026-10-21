@@ -22,3 +22,4 @@ mvn clean install -DskipTests
 ## 4. 文档
 
 - AI：[`AGENTS.md`](./AGENTS.md)
+- Internal HTTP HMAC（observe-only）：[`docs/internal-call-security.md`](./docs/internal-call-security.md)
