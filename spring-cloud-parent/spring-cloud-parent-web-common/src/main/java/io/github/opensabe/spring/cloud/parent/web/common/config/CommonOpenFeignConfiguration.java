@@ -47,6 +47,7 @@ import io.github.opensabe.spring.cloud.parent.common.redislience4j.ThreadPoolBul
 import io.github.opensabe.spring.cloud.parent.web.common.feign.FeignBlockingLoadBalancerClientDelegate;
 import io.github.opensabe.spring.cloud.parent.web.common.feign.FeignRequestCircuitBreakerExtractor;
 import io.github.opensabe.spring.cloud.parent.web.common.feign.Resilience4jFeignClient;
+import io.github.opensabe.spring.cloud.parent.web.common.internalcall.InternalCallFeignSupport;
 import io.github.opensabe.spring.cloud.parent.web.common.jfr.FeignJFRProperties;
 import io.github.opensabe.spring.cloud.parent.web.common.jfr.FeignObservationToJFRGenerator;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadRegistry;
@@ -157,7 +158,8 @@ public class CommonOpenFeignConfiguration implements BeanPostProcessor {
             CircuitBreakerRegistry circuitBreakerRegistry,
             LoadBalancerClientFactory loadBalancerClientFactory,
             List<LoadBalancerFeignRequestTransformer> transformers,
-            UnifiedObservationFactory unifiedObservationFactory
+            UnifiedObservationFactory unifiedObservationFactory,
+            ObjectProvider<InternalCallFeignSupport> internalCallFeignSupport
     ) {
         return new FeignBlockingLoadBalancerClientDelegate(
                 new Resilience4jFeignClient(
@@ -165,7 +167,8 @@ public class CommonOpenFeignConfiguration implements BeanPostProcessor {
                         threadPoolBulkheadRegistry,
                         threadPoolBulkHeadDecorators,
                         circuitBreakerRegistry,
-                        unifiedObservationFactory
+                        unifiedObservationFactory,
+                        internalCallFeignSupport.getIfAvailable()
                 ),
                 loadBalancerClientProvider,
                 loadBalancerClientFactory,

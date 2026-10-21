@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.metrics.web.reactive.client.ObservationWebClientCustomizer;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -34,15 +35,21 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import io.github.opensabe.common.internalcall.CallerIdentityProvider;
+import io.github.opensabe.common.internalcall.InternalCallProperties;
+import io.github.opensabe.common.internalcall.InternalCallSigner;
+import io.github.opensabe.common.internalcall.InternalHostMatcher;
 import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.common.utils.json.JsonUtil;
 import io.github.opensabe.spring.cloud.parent.common.loadbalancer.TracedCircuitBreakerRoundRobinLoadBalancer;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.Resilience4jUtil;
+import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.InternalCallExchangeFilterFunction;
 import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.WebClientNamedContextFactory;
 import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilience4j.ClientResponseCircuitBreakerOperator;
 import io.github.opensabe.spring.cloud.parent.webflux.common.webclient.resilience4j.retry.ClientResponseRetryOperator;
@@ -95,7 +102,11 @@ public class WebClientDefaultConfiguration {
             RetryRegistry retryRegistry,
             CircuitBreakerRegistry circuitBreakerRegistry,
             ObservationWebClientCustomizer observationWebClientCustomizer,
-            UnifiedObservationFactory unifiedObservationFactory
+            UnifiedObservationFactory unifiedObservationFactory,
+            ObjectProvider<InternalCallProperties> internalCallProperties,
+            ObjectProvider<InternalCallSigner> internalCallSigner,
+            ObjectProvider<CallerIdentityProvider> callerIdentityProvider,
+            ObjectProvider<InternalHostMatcher> internalHostMatcher
     ) {
         String name = environment.getProperty(WebClientNamedContextFactory.PROPERTY_NAME);
         Map<String, WebClientConfigurationProperties.WebClientProperties> configs = webClientConfigurationProperties.getConfigs();
@@ -198,7 +209,8 @@ public class WebClientDefaultConfiguration {
 
         Retry finalRetry = retry;
         String finalServiceName = serviceName;
-        WebClient.Builder builder = getBuilder(lbFunction, circuitBreakerRegistry, unifiedObservationFactory, httpClient, finalRetry, finalServiceName, webClientProperties, baseUrl);
+        WebClient.Builder builder = getBuilder(lbFunction, circuitBreakerRegistry, unifiedObservationFactory, httpClient, finalRetry, finalServiceName, webClientProperties, baseUrl,
+                internalCallProperties, internalCallSigner, callerIdentityProvider, internalHostMatcher);
         //使用 observationWebClientCustomizer 定制化 builder，这样可以在链路自动添加 Observation 并且可以从 Context 获取
         observationWebClientCustomizer.customize(builder);
         return builder.build();
@@ -210,7 +222,11 @@ public class WebClientDefaultConfiguration {
             UnifiedObservationFactory unifiedObservationFactory,
             HttpClient httpClient, Retry finalRetry,
             String finalServiceName,
-            WebClientConfigurationProperties.WebClientProperties webClientProperties, String baseUrl
+            WebClientConfigurationProperties.WebClientProperties webClientProperties, String baseUrl,
+            ObjectProvider<InternalCallProperties> internalCallProperties,
+            ObjectProvider<InternalCallSigner> internalCallSigner,
+            ObjectProvider<CallerIdentityProvider> callerIdentityProvider,
+            ObjectProvider<InternalHostMatcher> internalHostMatcher
     ) {
         WebClient.Builder builder = WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
@@ -249,6 +265,9 @@ public class WebClientDefaultConfiguration {
                                 .transform(ClientResponseRetryOperator.of(finalRetry, (Observation) attribute.get()));
                     });
                 })
+                // Internal-call signing before LB rewrites the URL host
+                .filter(internalCallFilter(finalServiceName, internalCallProperties, internalCallSigner,
+                        callerIdentityProvider, internalHostMatcher))
                 //负载均衡器，改写url
                 .filter((clientRequest, exchangeFunction) -> {
                     return tracedFilter(clientRequest,
@@ -276,4 +295,22 @@ public class WebClientDefaultConfiguration {
                 }).baseUrl(baseUrl);
         return builder;
     }
+
+    private static ExchangeFilterFunction internalCallFilter(
+            String serviceName,
+            ObjectProvider<InternalCallProperties> propertiesProvider,
+            ObjectProvider<InternalCallSigner> signerProvider,
+            ObjectProvider<CallerIdentityProvider> callerProvider,
+            ObjectProvider<InternalHostMatcher> hostMatcherProvider
+    ) {
+        InternalCallProperties properties = propertiesProvider.getIfAvailable();
+        InternalCallSigner signer = signerProvider.getIfAvailable();
+        CallerIdentityProvider caller = callerProvider.getIfAvailable();
+        InternalHostMatcher hostMatcher = hostMatcherProvider.getIfAvailable();
+        if (properties == null || signer == null || caller == null || hostMatcher == null) {
+            return (request, next) -> next.exchange(request);
+        }
+        return new InternalCallExchangeFilterFunction(properties, signer, caller, hostMatcher, serviceName);
+    }
+
 }

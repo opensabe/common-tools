@@ -32,6 +32,7 @@ import io.github.opensabe.common.observation.UnifiedObservationFactory;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.Resilience4jUtil;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.ThreadPoolBulkHeadDecorated;
 import io.github.opensabe.spring.cloud.parent.common.redislience4j.ThreadPoolBulkHeadDecorator;
+import io.github.opensabe.spring.cloud.parent.web.common.internalcall.InternalCallFeignSupport;
 import io.github.opensabe.spring.cloud.parent.web.common.misc.SpecialHttpStatus;
 import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
@@ -49,6 +50,7 @@ public class Resilience4jFeignClient implements Client {
     private final ThreadPoolBulkHeadDecorator threadPoolBulkHeadDecorator;
     private final CircuitBreakerRegistry circuitBreakerRegistry;
     private final UnifiedObservationFactory unifiedObservationFactory;
+    private final InternalCallFeignSupport internalCallFeignSupport;
     private ApacheHttpClient apacheHttpClient;
 
 
@@ -59,11 +61,24 @@ public class Resilience4jFeignClient implements Client {
             CircuitBreakerRegistry circuitBreakerRegistry,
             UnifiedObservationFactory unifiedObservationFactory
     ) {
+        this(apacheHttpClient, threadPoolBulkheadRegistry, threadPoolBulkHeadDecorator,
+                circuitBreakerRegistry, unifiedObservationFactory, null);
+    }
+
+    public Resilience4jFeignClient(
+            ApacheHttpClient apacheHttpClient,
+            ThreadPoolBulkheadRegistry threadPoolBulkheadRegistry,
+            ThreadPoolBulkHeadDecorator threadPoolBulkHeadDecorator,
+            CircuitBreakerRegistry circuitBreakerRegistry,
+            UnifiedObservationFactory unifiedObservationFactory,
+            InternalCallFeignSupport internalCallFeignSupport
+    ) {
         this.apacheHttpClient = apacheHttpClient;
         this.threadPoolBulkheadRegistry = threadPoolBulkheadRegistry;
         this.circuitBreakerRegistry = circuitBreakerRegistry;
         this.threadPoolBulkHeadDecorator = threadPoolBulkHeadDecorator;
         this.unifiedObservationFactory = unifiedObservationFactory;
+        this.internalCallFeignSupport = internalCallFeignSupport;
     }
 
     @Override
@@ -132,7 +147,10 @@ public class Resilience4jFeignClient implements Client {
                                     metrics.getThreadPoolSize(),
                                     metrics.getQueueDepth()
                             );
-                            Response execute = apacheHttpClient.execute(request, options);
+                            Request toSend = internalCallFeignSupport == null
+                                    ? request
+                                    : internalCallFeignSupport.prepare(request);
+                            Response execute = apacheHttpClient.execute(toSend, options);
                             log.info("response: {} - {}", execute.status(), execute.reason());
                             return execute;
                         } catch (IOException e) {
