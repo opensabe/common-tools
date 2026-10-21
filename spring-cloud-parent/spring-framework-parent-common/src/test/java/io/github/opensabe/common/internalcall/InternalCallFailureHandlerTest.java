@@ -34,6 +34,9 @@ class InternalCallFailureHandlerTest {
                 InternalCallFailureReason.MISSING_HEADER, "10.0.0.1", "/api", "gw"));
         assertDoesNotThrow(() -> handler.report(
                 InternalCallFailureReason.MISSING_HEADER, "10.0.0.1", "/api", "gw"));
+        // 高基数 path 仍按 reason|peer|caller 去重
+        assertDoesNotThrow(() -> handler.report(
+                InternalCallFailureReason.MISSING_HEADER, "10.0.0.1", "/orders/123", "gw"));
     }
 
     @Test

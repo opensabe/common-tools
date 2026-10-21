@@ -141,6 +141,7 @@
                             <publishingServerId>ossrh</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>PUBLISHED</waitUntil>
+                            <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots/</centralSnapshotsUrl>
                         </configuration>
                     </plugin>
                 </plugins>

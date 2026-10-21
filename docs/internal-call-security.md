@@ -50,7 +50,7 @@ Recommended baseline: leave token empty; tighten Security Groups / NetworkPolicy
 |---|---|
 | `MISSING_HEADER` | Rolling deploy; RestTemplate not decorated; host not matched for WebClient |
 | `EXPIRED` | Clock skew between nodes |
-| `UNTRUSTED_EDGE` | Wrong `trusted-cidrs`; peer not LB/nginx. On cloud with `forward-headers-strategy=NATIVE`, edge uses Netty `connectionRemoteAddress()` (TCP peer), not XFF client IP. If the LB preserves client IP at L4, peer is still the public client — use SG/NetworkPolicy and/or `edge-token`. |
+| `UNTRUSTED_EDGE` | Wrong `trusted-cidrs`; peer not LB/nginx. On cloud with `forward-headers-strategy=NATIVE`, edge uses Netty `connectionRemoteAddress()` (TCP peer), not XFF client IP. If the LB preserves client IP at L4, peer is still the public client — fix TCP peer path / `trusted-cidrs` (or SG/NetworkPolicy). `edge-token` is checked only after CIDR match; it does **not** suppress `UNTRUSTED_EDGE`. |
 | `BAD_SIGNATURE` | Secret mismatch / not rotated |
 | `UNSUPPORTED_PEER_IP` | IPv6 or IPv4-mapped peer (`::ffff:10.x`) |
 | `BAD_EDGE_TOKEN` | Token configured but nginx not injecting / wrong value |

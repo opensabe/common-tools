@@ -58,7 +58,8 @@ public class InternalCallFailureHandler {
             String safePeer = truncate(peer, 128);
             String safePath = truncate(stripQuery(path), 256);
             String safeCaller = truncate(caller, 128);
-            String fingerprint = safeReason.name() + '|' + safePeer + '|' + safePath + '|' + safeCaller;
+            // path 不参与去重：/orders/{id} 等高基数路径会绕过去重
+            String fingerprint = safeReason.name() + '|' + safePeer + '|' + safeCaller;
             if (dedup.asMap().putIfAbsent(fingerprint, Boolean.TRUE) != null) {
                 return;
             }
