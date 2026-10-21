@@ -13,9 +13,9 @@ description: >-
 
 | Line | Latest released (branch = tag) | Next patch |
 |---|---|---|
-| main | `v2.1.2` (`2.1.2`) | cut `v2.1.X`, then leave main at `2.1.(X+1)-SNAPSHOT` |
-| 1.0.4 LTS | `v1.0.4.28` | `v1.0.4.29` |
-| 1.0.8 LTS | `v1.0.8.6` | `v1.0.8.7` |
+| main | `v2.1.4` (`2.1.4`) | cut `v2.1.X`, then leave main at `2.1.(X+1)-SNAPSHOT` |
+| 1.0.4 LTS | `v1.0.4.29` | `v1.0.4.30` |
+| 1.0.8 LTS | `v1.0.8.7` | `v1.0.8.8` |
 
 Update this table after every successful release.
 
@@ -32,10 +32,10 @@ Do not move or force-push existing tags.
 - Replace only the project version string. Do not change Spring Boot /
   Spring Cloud BOM versions.
 - main: release branch turns current `A.B.C-SNAPSHOT` into the next release
-  number (e.g. `2.1.1-SNAPSHOT` → `2.1.2`). After publish, advance main to
-  `2.1.3-SNAPSHOT` (one past the release), not `2.1.2-SNAPSHOT`.
+  number (e.g. `2.1.3-SNAPSHOT` → `2.1.4`). After publish, advance main to
+  `2.1.5-SNAPSHOT` (one past the release), not `2.1.4-SNAPSHOT`.
 - LTS tips are already release versions. New branch bumps the last segment
-  (`1.0.4.27` → `1.0.4.28`, `1.0.8.5` → `1.0.8.6`).
+  (`1.0.4.29` → `1.0.4.30`, `1.0.8.7` → `1.0.8.8`).
 
 ## Branch / tag / deploy
 
