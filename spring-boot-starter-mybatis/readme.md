@@ -526,7 +526,7 @@ public class ActivityService {
 <dependency>
 	<groupId>io.github.opensabe-tech</groupId>
 	<artifactId>spritest-boot-starter-mybatis</artifactId>
-	<version>2.1.6-SNAPSHOT</version>
+	<version>2.1.7-SNAPSHOT</version>
 </dependency>
 ```
 

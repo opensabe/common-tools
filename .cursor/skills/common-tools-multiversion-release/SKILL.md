@@ -13,7 +13,7 @@ description: >-
 
 | Line | Latest released (branch = tag) | Next patch |
 |---|---|---|
-| main | `v2.1.5` (`2.1.5`) | cut `v2.1.X`, then leave main at `2.1.(X+1)-SNAPSHOT` |
+| main | `v2.1.6` (`2.1.6`) | cut `v2.1.X`, then leave main at `2.1.(X+1)-SNAPSHOT` |
 | 1.0.4 LTS | `v1.0.4.30` | `v1.0.4.31` |
 | 1.0.8 LTS | `v1.0.8.8` | `v1.0.8.9` |
 
