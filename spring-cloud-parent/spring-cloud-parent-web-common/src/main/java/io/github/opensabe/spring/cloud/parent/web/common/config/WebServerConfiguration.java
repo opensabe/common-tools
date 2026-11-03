@@ -15,6 +15,7 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.config;
 
+import io.github.opensabe.common.http.HttpPathSecurityProperties;
 import io.github.opensabe.common.secret.GlobalSecretManager;
 import io.github.opensabe.spring.cloud.parent.web.common.handler.SecretCheckResponseAdvice;
 import io.github.opensabe.spring.cloud.parent.web.common.jfr.HttpServerJFRProperties;
@@ -42,8 +43,8 @@ public class WebServerConfiguration {
 
 
     @Bean
-    public WebMvcConfig webMvcConfig () {
-        return new WebMvcConfig();
+    public WebMvcConfig webMvcConfig(HttpPathSecurityProperties httpPathSecurityProperties) {
+        return new WebMvcConfig(httpPathSecurityProperties);
     }
 
     @Bean

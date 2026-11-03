@@ -74,6 +74,7 @@ public class QueryNormalizationFilter extends AbstractTracedFilter {
 
     @Override
     protected int ordered() {
-        return TraceIdFilter.ORDER + 1;
+        // After RejectSemicolonGatewayFilter (TraceIdFilter.ORDER + 1)
+        return TraceIdFilter.ORDER + 2;
     }
 }

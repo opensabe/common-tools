@@ -15,16 +15,36 @@
  */
 package io.github.opensabe.spring.cloud.parent.web.common.config;
 
-import io.github.opensabe.spring.cloud.parent.common.web.ServletPathResolver;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 import java.util.List;
 
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.util.UrlPathHelper;
+
+import io.github.opensabe.common.http.HttpPathSecurityProperties;
+import io.github.opensabe.spring.cloud.parent.common.web.ServletPathResolver;
+
 public class WebMvcConfig implements WebMvcConfigurer {
+
+    private final HttpPathSecurityProperties httpPathSecurityProperties;
+
+    public WebMvcConfig(HttpPathSecurityProperties httpPathSecurityProperties) {
+        this.httpPathSecurityProperties = httpPathSecurityProperties;
+    }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new ServletPathResolver());
+    }
+
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        if (httpPathSecurityProperties == null || !httpPathSecurityProperties.isKeepSemicolonInPath()) {
+            return;
+        }
+        UrlPathHelper urlPathHelper = new UrlPathHelper();
+        urlPathHelper.setRemoveSemicolonContent(false);
+        configurer.setUrlPathHelper(urlPathHelper);
     }
 }

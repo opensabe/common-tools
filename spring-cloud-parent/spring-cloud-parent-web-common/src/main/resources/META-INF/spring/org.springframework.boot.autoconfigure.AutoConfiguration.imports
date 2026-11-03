@@ -2,3 +2,4 @@ io.github.opensabe.spring.cloud.parent.web.common.auto.OpenFeignAutoConfiguratio
 io.github.opensabe.spring.cloud.parent.web.common.auto.UndertowAutoConfiguration
 io.github.opensabe.spring.cloud.parent.web.common.auto.FeignClientPreheatingAutoConfiguration
 io.github.opensabe.spring.cloud.parent.web.common.auto.InternalCallWebAutoConfiguration
+io.github.opensabe.spring.cloud.parent.web.common.auto.RejectSemicolonWebAutoConfiguration
