@@ -135,6 +135,9 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         running.set(false);
         cancelTasks();
         closeStreamOnly();
+        synchronized (windowLock) {
+            discardPendingWindow();
+        }
         started.set(false);
         publisher.setRepositoryAttached(false);
     }
@@ -272,6 +275,9 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
                 return;
             }
             synchronized (windowLock) {
+                if (!running.get() || destroyed.get()) {
+                    return;
+                }
                 seenEvents.add(eventName);
                 handler.accept(event);
             }
@@ -376,26 +382,46 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
                     + circuitBreaker.drainDropped();
         }
 
-        publisher.publishEventSeen(publishedSeen);
-        publisher.publishLabeled(JfrMetricsPublisher.ALLOC_SAMPLE_BY_CLASS, "class", allocClass);
-        publisher.publishLabeled(JfrMetricsPublisher.ALLOC_SAMPLE_BY_METHOD, "method", allocMethod);
-        publisher.publishLabeled(JfrMetricsPublisher.OUTSIDE_TLAB_BY_CLASS, "class", outside);
-        publisher.publishLabeled(JfrMetricsPublisher.ALLOC_REQ_GC_BY_METHOD, "method", reqGc);
-        publisher.publishLabeledMax(JfrMetricsPublisher.ALLOC_REQ_GC_MAX_BY_METHOD, "method", reqGc);
-        publisher.publishLabeled(JfrMetricsPublisher.OLD_OBJECT_SAMPLES, "class", oldObjects);
-        publisher.publishLabeled(JfrMetricsPublisher.EXECUTION_SAMPLES, "method", execution);
-        publisher.publishMonitor(nanosToMilliSnapshot(monitorWait), monitorCount);
-        publisher.setOldObjectHeap(heap);
-        publisher.setZStallSeconds(zStall);
-        publisher.setAggregatorKeys(
-                (long) allocClass.sums().size()
-                        + allocMethod.sums().size()
-                        + outside.sums().size()
-                        + reqGc.sums().size()
-                        + oldObjects.sums().size()
-                        + execution.sums().size()
-                        + monitorWait.sums().size());
-        publisher.addDropped(dropped);
+        try {
+            publisher.publishEventSeen(publishedSeen);
+            publisher.publishLabeled(JfrMetricsPublisher.ALLOC_SAMPLE_BY_CLASS, "class", allocClass);
+            publisher.publishLabeled(JfrMetricsPublisher.ALLOC_SAMPLE_BY_METHOD, "method", allocMethod);
+            publisher.publishLabeled(JfrMetricsPublisher.OUTSIDE_TLAB_BY_CLASS, "class", outside);
+            publisher.publishLabeled(JfrMetricsPublisher.ALLOC_REQ_GC_BY_METHOD, "method", reqGc);
+            publisher.publishLabeledMax(JfrMetricsPublisher.ALLOC_REQ_GC_MAX_BY_METHOD, "method", reqGc);
+            publisher.publishLabeled(JfrMetricsPublisher.OLD_OBJECT_SAMPLES, "class", oldObjects);
+            publisher.publishLabeled(JfrMetricsPublisher.EXECUTION_SAMPLES, "method", execution);
+            publisher.publishMonitor(nanosToMilliSnapshot(monitorWait), monitorCount);
+            publisher.setOldObjectHeap(heap);
+            publisher.setZStallSeconds(zStall);
+            publisher.setAggregatorKeys(
+                    (long) allocClass.sums().size()
+                            + allocMethod.sums().size()
+                            + outside.sums().size()
+                            + reqGc.sums().size()
+                            + oldObjects.sums().size()
+                            + execution.sums().size()
+                            + monitorWait.sums().size());
+            publisher.addDropped(dropped);
+        } catch (RuntimeException ex) {
+            // Keep the scheduled flush alive; this window's drained samples are dropped.
+            log.warn("JFR metrics window publish failed (continuing): {}", ex.toString());
+        }
+    }
+
+    private void discardPendingWindow() {
+        seenEvents.clear();
+        allocSampleByClass.drainTopN(topN);
+        allocSampleByMethod.drainTopN(topN);
+        outsideTlabByClass.drainTopN(topN);
+        allocReqGcByMethod.drainTopN(topN);
+        oldObjectByClass.drainTopN(topN);
+        executionByMethod.drainTopN(topN);
+        monitorWaitByKey.drainTopN(topN);
+        monitorCountByKey.drainTopN(topN);
+        zStallNanos.set(0L);
+        oldObjectHeap.set(0L);
+        circuitBreaker.drainDropped();
     }
 
     private static TopNWindowStore.Snapshot nanosToMilliSnapshot(TopNWindowStore.Snapshot nanos) {
