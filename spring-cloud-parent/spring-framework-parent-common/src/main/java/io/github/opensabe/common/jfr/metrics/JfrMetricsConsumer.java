@@ -197,8 +197,10 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             registerHandlers(stream);
             // Publish only on flush-interval; do not drain on every JFR chunk flush.
             stream.onError(error -> log.warn("JFR EventStream error: {}", error.toString()));
+            AtomicBoolean closedEarly = new AtomicBoolean(false);
             EventStream registered = stream;
             stream.onClose(() -> {
+                closedEarly.set(true);
                 if (streamRef.compareAndSet(registered, null)) {
                     publisher.setRepositoryAttached(false);
                 }
@@ -212,11 +214,12 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
                 closeQuietly(stream);
                 return;
             }
-            if (!running.get() || destroyed.get()) {
+            // onClose may have fired before CAS; refuse to keep a closed stream as attached.
+            if (closedEarly.get() || !running.get() || destroyed.get()) {
                 if (streamRef.compareAndSet(stream, null)) {
                     closeQuietly(stream);
-                    publisher.setRepositoryAttached(false);
                 }
+                publisher.setRepositoryAttached(false);
                 return;
             }
             publisher.setRepositoryAttached(true);
