@@ -55,4 +55,16 @@ class TopNWindowStoreTest {
         TopNWindowStore.Snapshot snapshot = store.drainTopN(5);
         assertEquals(100L, snapshot.maxes().get("m"));
     }
+
+    @Test
+    void ranksMaxIndependentlyFromSums() {
+        TopNWindowStore store = new TopNWindowStore(10);
+        store.add("small-sum-big-max", 1);
+        store.observeMax("small-sum-big-max", 1000);
+        store.add("big-sum-small-max", 500);
+        store.observeMax("big-sum-small-max", 2);
+        TopNWindowStore.Snapshot snapshot = store.drainTopN(1);
+        assertEquals(500L, snapshot.sums().get("big-sum-small-max"));
+        assertEquals(1000L, snapshot.maxes().get("small-sum-big-max"));
+    }
 }

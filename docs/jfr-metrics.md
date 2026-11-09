@@ -45,7 +45,7 @@ opensabe:
 | `jdk.OldObjectSample` | 开（默认无栈） | `jfr_old_object_samples_by_class`，`jfr_old_object_heap_bytes` |
 | `jdk.ObjectAllocationOutsideTLAB` | **关** | `jfr_outside_tlab_bytes_by_class` |
 | `jdk.AllocationRequiringGC` | **关** | `jfr_alloc_requiring_gc_bytes_by_method` / `_max_` |
-| `jdk.ZAllocationStall` | 开 | `jfr_z_allocation_stall_seconds`（非 ZGC 为空） |
+| `jdk.ZAllocationStall` | 开 | `jfr_z_allocation_stall_seconds`（启用后指标会注册；非 ZGC / 窗口无事件时为 **0**，0 不代表一定没有停顿） |
 
 面板空时先看：
 

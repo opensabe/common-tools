@@ -21,36 +21,18 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.config.MeterFilter;
 
 @AutoConfiguration
 @EnableConfigurationProperties(JfrMetricsProperties.class)
 public class JfrMetricsAutoConfiguration {
 
+    /**
+     * Do not use MeterFilter.maximumAllowableTags here: removed Top-N gauges would still
+     * permanently deny those tag values. Cardinality is bounded by publisher Top-N removal.
+     */
     @Bean
     @ConditionalOnProperty(prefix = "opensabe.jfr.metrics", name = "enabled", havingValue = "true")
     public JfrMetricsConsumer jfrMetricsConsumer(JfrMetricsProperties properties, MeterRegistry meterRegistry) {
-        int topN = Math.max(1, properties.getPublish().getTopN());
-        int maxTags = Math.max(topN + 10, 50);
-        meterRegistry.config()
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.ALLOC_SAMPLE_BY_CLASS, "class", maxTags, MeterFilter.deny()))
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.ALLOC_SAMPLE_BY_METHOD, "method", maxTags, MeterFilter.deny()))
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.OUTSIDE_TLAB_BY_CLASS, "class", maxTags, MeterFilter.deny()))
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.ALLOC_REQ_GC_BY_METHOD, "method", maxTags, MeterFilter.deny()))
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.ALLOC_REQ_GC_MAX_BY_METHOD, "method", maxTags, MeterFilter.deny()))
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.OLD_OBJECT_SAMPLES, "class", maxTags, MeterFilter.deny()))
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.EXECUTION_SAMPLES, "method", maxTags, MeterFilter.deny()))
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.MONITOR_WAIT, "method", maxTags, MeterFilter.deny()))
-                .meterFilter(MeterFilter.maximumAllowableTags(
-                        JfrMetricsPublisher.MONITOR_COUNT, "method", maxTags, MeterFilter.deny()));
         return new JfrMetricsConsumer(properties, meterRegistry);
     }
 }

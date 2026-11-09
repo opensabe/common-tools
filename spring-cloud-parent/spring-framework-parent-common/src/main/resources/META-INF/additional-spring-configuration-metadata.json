@@ -105,7 +105,7 @@
     {
       "name": "opensabe.jfr.metrics.consume.zgc-allocation-stall.enabled",
       "type": "java.lang.Boolean",
-      "description": "是否订阅 jdk.ZAllocationStall。非 ZGC 或未产生事件时面板为空。",
+      "description": "是否订阅 jdk.ZAllocationStall。启用后指标会注册；非 ZGC 或窗口无事件时值为 0（0 不代表一定没有停顿）。",
       "defaultValue": true
     }
   ]

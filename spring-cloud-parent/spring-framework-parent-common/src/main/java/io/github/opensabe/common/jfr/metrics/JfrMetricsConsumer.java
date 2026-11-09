@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -71,13 +72,9 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     private final TopNWindowStore monitorCountByKey;
     private final AtomicLong zStallNanos = new AtomicLong();
     private final AtomicLong oldObjectHeap = new AtomicLong();
+    private final Set<String> seenEvents = ConcurrentHashMap.newKeySet();
 
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread t = new Thread(r, "jfr-metrics-consumer");
-        t.setDaemon(true);
-        return t;
-    });
-
+    private final AtomicReference<ScheduledExecutorService> schedulerRef = new AtomicReference<>();
     private final AtomicReference<EventStream> streamRef = new AtomicReference<>();
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -85,9 +82,9 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     private final Map<String, Consumer<RecordedEvent>> handlers = new ConcurrentHashMap<>();
     private final Map<String, Long> trippedAt = new ConcurrentHashMap<>();
     private final AtomicLong streamTrippedAt = new AtomicLong(0L);
-    private ScheduledFuture<?> attachFuture;
-    private ScheduledFuture<?> flushFuture;
-    private ScheduledFuture<?> circuitFuture;
+    private volatile ScheduledFuture<?> attachFuture;
+    private volatile ScheduledFuture<?> flushFuture;
+    private volatile ScheduledFuture<?> circuitFuture;
     private long attachDeadlineNanos;
 
     public JfrMetricsConsumer(JfrMetricsProperties properties, MeterRegistry meterRegistry) {
@@ -110,10 +107,11 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
 
     @Override
     public void start() {
-        if (!properties.isEnabled() || !started.compareAndSet(false, true)) {
+        if (!properties.isEnabled() || destroyed.get() || !started.compareAndSet(false, true)) {
             return;
         }
         running.set(true);
+        ScheduledExecutorService scheduler = ensureScheduler();
         attachDeadlineNanos = System.nanoTime() + properties.getRepository().getAttachTimeout().toNanos();
         Duration retry = properties.getRepository().getRetryInterval();
         attachFuture = scheduler.scheduleWithFixedDelay(
@@ -125,9 +123,16 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         log.info("JFR metrics consumer started (passive EventStream only; process must already record to disk)");
     }
 
+    /**
+     * Stops consuming but keeps the bean restartable until {@link #destroy()}.
+     */
     @Override
     public void stop() {
-        destroy();
+        running.set(false);
+        cancelTasks();
+        closeStreamOnly();
+        started.set(false);
+        publisher.setRepositoryAttached(false);
     }
 
     @Override
@@ -135,8 +140,40 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         return running.get();
     }
 
+    private ScheduledExecutorService ensureScheduler() {
+        ScheduledExecutorService existing = schedulerRef.get();
+        if (existing != null && !existing.isShutdown()) {
+            return existing;
+        }
+        ScheduledExecutorService created = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "jfr-metrics-consumer");
+            t.setDaemon(true);
+            return t;
+        });
+        if (schedulerRef.compareAndSet(existing, created)) {
+            return created;
+        }
+        created.shutdownNow();
+        return schedulerRef.get();
+    }
+
+    private void cancelTasks() {
+        if (attachFuture != null) {
+            attachFuture.cancel(true);
+            attachFuture = null;
+        }
+        if (flushFuture != null) {
+            flushFuture.cancel(true);
+            flushFuture = null;
+        }
+        if (circuitFuture != null) {
+            circuitFuture.cancel(true);
+            circuitFuture = null;
+        }
+    }
+
     private void tryAttach() {
-        if (!running.get() || streamRef.get() != null) {
+        if (!running.get() || destroyed.get() || streamRef.get() != null) {
             return;
         }
         if (circuitBreaker.isStreamOpen()) {
@@ -153,27 +190,46 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             publisher.setRepositoryAttached(false);
             return;
         }
+        EventStream stream = null;
         try {
-            EventStream stream = EventStream.openRepository(Path.of(repository));
+            stream = EventStream.openRepository(Path.of(repository));
             stream.setReuse(true);
             registerHandlers(stream);
-            stream.onFlush(this::flushWindow);
+            // Publish only on flush-interval; do not drain on every JFR chunk flush.
             stream.onError(error -> log.warn("JFR EventStream error: {}", error.toString()));
+            EventStream registered = stream;
             stream.onClose(() -> {
-                streamRef.compareAndSet(stream, null);
-                publisher.setRepositoryAttached(false);
+                if (streamRef.compareAndSet(registered, null)) {
+                    publisher.setRepositoryAttached(false);
+                }
             });
             stream.startAsync();
-            if (streamRef.compareAndSet(null, stream)) {
-                publisher.setRepositoryAttached(true);
-                circuitBreaker.clearStream();
-                trippedAt.clear();
-                publisher.setStreamCircuitOpen(false);
-                log.info("Attached passive JFR EventStream to repository {}", repository);
-            } else {
-                stream.close();
+            if (!running.get() || destroyed.get()) {
+                closeQuietly(stream);
+                return;
             }
+            if (!streamRef.compareAndSet(null, stream)) {
+                closeQuietly(stream);
+                return;
+            }
+            if (!running.get() || destroyed.get()) {
+                if (streamRef.compareAndSet(stream, null)) {
+                    closeQuietly(stream);
+                    publisher.setRepositoryAttached(false);
+                }
+                return;
+            }
+            publisher.setRepositoryAttached(true);
+            circuitBreaker.clearStream();
+            for (String eventName : Map.copyOf(trippedAt).keySet()) {
+                circuitBreaker.clearEvent(eventName);
+                publisher.setCircuitOpen(eventName, false);
+            }
+            trippedAt.clear();
+            publisher.setStreamCircuitOpen(false);
+            log.info("Attached passive JFR EventStream to repository {}", repository);
         } catch (IOException ex) {
+            closeQuietly(stream);
             publisher.setRepositoryAttached(false);
             log.debug("Unable to open JFR repository {}: {}", repository, ex.toString());
         }
@@ -210,7 +266,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             if (!circuitBreaker.tryAcquire(eventName)) {
                 return;
             }
-            publisher.markEventSeen(eventName);
+            seenEvents.add(eventName);
             handler.accept(event);
         };
         handlers.put(eventName, wrapped);
@@ -245,7 +301,6 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     }
 
     private void onOldObject(RecordedEvent event) {
-        // Class is nested: object.type — not objectClass. lastKnownHeapUsage is global heap usage.
         if (event.hasField("object.type")) {
             RecordedClass type = event.getClass("object.type");
             if (type != null && type.getName() != null) {
@@ -278,7 +333,9 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (!running.get()) {
             return;
         }
-        publisher.resetEventSeen();
+        Set<String> publishedSeen = Set.copyOf(seenEvents);
+        seenEvents.clear();
+
         TopNWindowStore.Snapshot allocClass = allocSampleByClass.drainTopN(topN);
         TopNWindowStore.Snapshot allocMethod = allocSampleByMethod.drainTopN(topN);
         TopNWindowStore.Snapshot outside = outsideTlabByClass.drainTopN(topN);
@@ -288,6 +345,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         TopNWindowStore.Snapshot monitorWait = monitorWaitByKey.drainTopN(topN);
         TopNWindowStore.Snapshot monitorCount = monitorCountByKey.drainTopN(topN);
 
+        publisher.publishEventSeen(publishedSeen);
         publisher.publishLabeled(JfrMetricsPublisher.ALLOC_SAMPLE_BY_CLASS, "class", allocClass);
         publisher.publishLabeled(JfrMetricsPublisher.ALLOC_SAMPLE_BY_METHOD, "method", allocMethod);
         publisher.publishLabeled(JfrMetricsPublisher.OUTSIDE_TLAB_BY_CLASS, "class", outside);
@@ -318,9 +376,6 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
                         + circuitBreaker.drainDropped());
     }
 
-    /**
-     * Store monitor wait as milliseconds in the gauge; Grafana PromQL divides by 1000 for seconds.
-     */
     private static TopNWindowStore.Snapshot nanosToMilliSnapshot(TopNWindowStore.Snapshot nanos) {
         Map<String, Long> millis = new LinkedHashMap<>();
         nanos.sums().forEach((k, v) -> millis.put(k, v / 1_000_000L));
@@ -328,7 +383,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     }
 
     private void maintainCircuits() {
-        if (!running.get()) {
+        if (!running.get() || destroyed.get()) {
             return;
         }
         long now = System.nanoTime();
@@ -338,7 +393,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             publisher.setStreamCircuitOpen(true);
             if (streamRef.get() != null) {
                 closeStreamOnly();
-                streamTrippedAt.set(now);
+                streamTrippedAt.compareAndSet(0L, now);
             }
             return;
         }
@@ -346,6 +401,11 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (streamRef.get() == null && streamTrippedAt.get() > 0L) {
             if (now - streamTrippedAt.get() >= cooldown) {
                 circuitBreaker.clearStream();
+                for (String eventName : Map.copyOf(trippedAt).keySet()) {
+                    circuitBreaker.clearEvent(eventName);
+                    publisher.setCircuitOpen(eventName, false);
+                }
+                trippedAt.clear();
                 publisher.setStreamCircuitOpen(false);
                 streamTrippedAt.set(0L);
                 tryAttach();
@@ -398,12 +458,19 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     private void closeStreamOnly() {
         EventStream stream = streamRef.getAndSet(null);
         if (stream != null) {
-            try {
-                stream.close();
-            } catch (Exception ignored) {
-                // ignore close races
-            }
+            closeQuietly(stream);
             publisher.setRepositoryAttached(false);
+        }
+    }
+
+    private static void closeQuietly(EventStream stream) {
+        if (stream == null) {
+            return;
+        }
+        try {
+            stream.close();
+        } catch (Exception ignored) {
+            // ignore close races
         }
     }
 
@@ -412,17 +479,10 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (!destroyed.compareAndSet(false, true)) {
             return;
         }
-        running.set(false);
-        if (attachFuture != null) {
-            attachFuture.cancel(true);
+        stop();
+        ScheduledExecutorService scheduler = schedulerRef.getAndSet(null);
+        if (scheduler != null) {
+            scheduler.shutdownNow();
         }
-        if (flushFuture != null) {
-            flushFuture.cancel(true);
-        }
-        if (circuitFuture != null) {
-            circuitFuture.cancel(true);
-        }
-        closeStreamOnly();
-        scheduler.shutdownNow();
     }
 }

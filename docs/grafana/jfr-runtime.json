@@ -22,9 +22,11 @@
     {
       "title": "Repository attached",
       "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "jfr_metrics_repository_attached",
           "legendFormat": "attached",
           "refId": "A"
@@ -34,9 +36,11 @@
     {
       "title": "Alloc sample weight by class (Top)",
       "type": "table",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 10, "w": 12, "x": 0, "y": 4 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "topk(20, jfr_alloc_sample_weight_bytes_by_class)",
           "format": "table",
           "instant": true,
@@ -47,9 +51,11 @@
     {
       "title": "Alloc sample weight by method (Top)",
       "type": "table",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 10, "w": 12, "x": 12, "y": 4 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "topk(20, jfr_alloc_sample_weight_bytes_by_method)",
           "format": "table",
           "instant": true,
@@ -60,9 +66,11 @@
     {
       "title": "Old object samples by class",
       "type": "table",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "topk(20, jfr_old_object_samples_by_class)",
           "format": "table",
           "instant": true,
@@ -73,9 +81,11 @@
     {
       "title": "Old object global heap (lastKnownHeapUsage)",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "jfr_old_object_heap_bytes",
           "legendFormat": "heap",
           "refId": "A"
@@ -85,9 +95,11 @@
     {
       "title": "CPU hot methods (ExecutionSample)",
       "type": "table",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "topk(20, jfr_execution_samples_by_method)",
           "format": "table",
           "instant": true,
@@ -98,9 +110,11 @@
     {
       "title": "Lock wait (ms → /1000 for seconds)",
       "type": "table",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "topk(20, jfr_monitor_enter_wait_milliseconds)",
           "format": "table",
           "instant": true,
@@ -111,9 +125,11 @@
     {
       "title": "Outside TLAB by class (optional; needs process jfc)",
       "type": "table",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "topk(20, jfr_outside_tlab_bytes_by_class)",
           "format": "table",
           "instant": true,
@@ -124,9 +140,11 @@
     {
       "title": "Allocation requiring GC by method (optional)",
       "type": "table",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "topk(20, jfr_alloc_requiring_gc_bytes_by_method)",
           "format": "table",
           "instant": true,
@@ -137,7 +155,22 @@
   ],
   "schemaVersion": 39,
   "tags": ["jfr", "opensabe"],
-  "templating": { "list": [] },
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Prometheus",
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      }
+    ]
+  },
   "time": { "from": "now-15m", "to": "now" },
   "timezone": "browser",
   "title": "JFR Runtime (passive consumer)",
