@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -57,6 +58,7 @@ final class JfrMetricsPublisher {
     private final AtomicLong oldObjectHeap = new AtomicLong(0);
     private final AtomicReference<Double> zStallSeconds = new AtomicReference<>(0d);
     private final List<Meter> fixedMeters = new ArrayList<>();
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     JfrMetricsPublisher(MeterRegistry registry, int topN) {
         this.registry = registry;
@@ -78,11 +80,17 @@ final class JfrMetricsPublisher {
                 .register(registry));
     }
 
-    void setRepositoryAttached(boolean attached) {
+    synchronized void setRepositoryAttached(boolean attached) {
+        if (closed.get()) {
+            return;
+        }
         repositoryAttached.set(attached ? 1L : 0L);
     }
 
-    void publishEventSeen(Set<String> seenThisWindow) {
+    synchronized void publishEventSeen(Set<String> seenThisWindow) {
+        if (closed.get()) {
+            return;
+        }
         Set<String> keep = seenThisWindow == null ? Set.of() : seenThisWindow;
         for (String name : keep) {
             eventSeen.computeIfAbsent(name, this::registerEventSeen).value.set(1L);
@@ -94,7 +102,10 @@ final class JfrMetricsPublisher {
         }
     }
 
-    void setCircuitOpen(String eventName, boolean open) {
+    synchronized void setCircuitOpen(String eventName, boolean open) {
+        if (closed.get()) {
+            return;
+        }
         circuitOpen.computeIfAbsent(eventName, this::registerCircuitOpen).value.set(open ? 1L : 0L);
     }
 
@@ -102,7 +113,10 @@ final class JfrMetricsPublisher {
         setCircuitOpen("_stream_", open);
     }
 
-    void publishLabeled(String metric, String tagName, TopNWindowStore.Snapshot snapshot) {
+    synchronized void publishLabeled(String metric, String tagName, TopNWindowStore.Snapshot snapshot) {
+        if (closed.get()) {
+            return;
+        }
         Set<MeterKey> keep = new HashSet<>();
         int i = 0;
         for (Map.Entry<String, Long> entry : snapshot.sums().entrySet()) {
@@ -116,7 +130,10 @@ final class JfrMetricsPublisher {
         removeMissing(metric, tagName, keep);
     }
 
-    void publishLabeledMax(String metric, String tagName, TopNWindowStore.Snapshot snapshot) {
+    synchronized void publishLabeledMax(String metric, String tagName, TopNWindowStore.Snapshot snapshot) {
+        if (closed.get()) {
+            return;
+        }
         Set<MeterKey> keep = new HashSet<>();
         int i = 0;
         for (Map.Entry<String, Long> entry : snapshot.maxes().entrySet()) {
@@ -130,7 +147,10 @@ final class JfrMetricsPublisher {
         removeMissing(metric, tagName, keep);
     }
 
-    void publishMonitor(TopNWindowStore.Snapshot waitMillis, TopNWindowStore.Snapshot counts) {
+    synchronized void publishMonitor(TopNWindowStore.Snapshot waitMillis, TopNWindowStore.Snapshot counts) {
+        if (closed.get()) {
+            return;
+        }
         Set<MeterKey> keepWait = new HashSet<>();
         Set<MeterKey> keepCount = new HashSet<>();
         int i = 0;
@@ -155,26 +175,39 @@ final class JfrMetricsPublisher {
         removeMissingMonitor(MONITOR_COUNT, keepCount);
     }
 
-    void setOldObjectHeap(long bytes) {
+    synchronized void setOldObjectHeap(long bytes) {
+        if (closed.get()) {
+            return;
+        }
         oldObjectHeap.set(bytes);
     }
 
-    void setZStallSeconds(double seconds) {
+    synchronized void setZStallSeconds(double seconds) {
+        if (closed.get()) {
+            return;
+        }
         zStallSeconds.set(seconds);
     }
 
-    void setAggregatorKeys(long keys) {
+    synchronized void setAggregatorKeys(long keys) {
+        if (closed.get()) {
+            return;
+        }
         aggregatorKeys.set(keys);
     }
 
-    void addDropped(long dropped) {
+    synchronized void addDropped(long dropped) {
+        if (closed.get()) {
+            return;
+        }
         droppedTotal.addAndGet(dropped);
     }
 
     /**
      * Removes all gauges registered by this publisher so a replacement consumer can re-register cleanly.
      */
-    void unregisterAll() {
+    synchronized void unregisterAll() {
+        closed.set(true);
         for (Holder holder : holders.values()) {
             registry.remove(holder.meter.getId());
         }

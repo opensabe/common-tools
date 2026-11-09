@@ -106,6 +106,11 @@ final class JfrConsumerCircuitBreaker {
         global.reset();
     }
 
+    /** Opens the stream circuit for {@link #cooldownNanos()} (handler unsubscribe only). */
+    void tripStream() {
+        tripStream(System.nanoTime());
+    }
+
     int openEventCount() {
         int count = 0;
         for (AtomicBoolean flag : open.values()) {

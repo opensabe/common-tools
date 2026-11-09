@@ -153,8 +153,8 @@
       ]
     },
     {
-      "title": "Z allocation stall seconds (0 ≠ proof of no stall)",
-      "description": "Window sum of jdk.ZAllocationStall durations. Metric is registered when enabled; 0 means no events in the window (not proof that stalls did not occur).",
+      "title": "Z allocation stall seconds (0 ≠ proof of no stall / consumer)",
+      "description": "Window sum of jdk.ZAllocationStall. Gauge registers with global opensabe.jfr.metrics.enabled (not the per-event z-stall toggle). 0 means no events in the window — not proof that stalls did not occur, and not proof that Z-stall consumption is enabled.",
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 38 },

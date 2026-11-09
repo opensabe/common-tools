@@ -72,8 +72,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     private final TopNWindowStore monitorCountByKey;
     private final AtomicLong zStallNanos = new AtomicLong();
     private final AtomicLong oldObjectHeap = new AtomicLong();
-    private final AtomicReference<Set<String>> seenEventsRef =
-            new AtomicReference<>(ConcurrentHashMap.newKeySet());
+    private final Set<String> seenEvents = ConcurrentHashMap.newKeySet();
 
     private final AtomicReference<ScheduledExecutorService> schedulerRef = new AtomicReference<>();
     private final AtomicReference<EventStream> streamRef = new AtomicReference<>();
@@ -82,6 +81,8 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
     /** Coordinates streamRef install/close with repository_attached gauge updates. */
     private final Object streamLock = new Object();
+    /** Coordinates event-seen markers with window drain so markers and samples stay in the same window. */
+    private final Object windowLock = new Object();
     private final Map<String, Consumer<RecordedEvent>> handlers = new ConcurrentHashMap<>();
     private final Map<String, Long> trippedAt = new ConcurrentHashMap<>();
     private final AtomicLong streamTrippedAt = new AtomicLong(0L);
@@ -179,7 +180,8 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (!running.get() || destroyed.get() || streamRef.get() != null) {
             return;
         }
-        if (circuitBreaker.isStreamOpen()) {
+        // Block scheduled retries while a stream/event cooldown is in effect (maintainCircuits owns recovery).
+        if (streamTrippedAt.get() > 0L || circuitBreaker.isStreamOpen()) {
             return;
         }
         if (System.nanoTime() > attachDeadlineNanos) {
@@ -275,8 +277,10 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             if (!circuitBreaker.tryAcquire(eventName)) {
                 return;
             }
-            seenEventsRef.get().add(eventName);
-            handler.accept(event);
+            synchronized (windowLock) {
+                seenEvents.add(eventName);
+                handler.accept(event);
+            }
         };
         handlers.put(eventName, wrapped);
         stream.onEvent(eventName, wrapped);
@@ -339,19 +343,44 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     }
 
     private void flushWindow() {
-        if (!running.get()) {
-            return;
+        Set<String> publishedSeen;
+        TopNWindowStore.Snapshot allocClass;
+        TopNWindowStore.Snapshot allocMethod;
+        TopNWindowStore.Snapshot outside;
+        TopNWindowStore.Snapshot reqGc;
+        TopNWindowStore.Snapshot oldObjects;
+        TopNWindowStore.Snapshot execution;
+        TopNWindowStore.Snapshot monitorWait;
+        TopNWindowStore.Snapshot monitorCount;
+        long heap;
+        double zStall;
+        long dropped;
+        synchronized (windowLock) {
+            if (!running.get() || destroyed.get()) {
+                return;
+            }
+            publishedSeen = Set.copyOf(seenEvents);
+            seenEvents.clear();
+            allocClass = allocSampleByClass.drainTopN(topN);
+            allocMethod = allocSampleByMethod.drainTopN(topN);
+            outside = outsideTlabByClass.drainTopN(topN);
+            reqGc = allocReqGcByMethod.drainTopN(topN);
+            oldObjects = oldObjectByClass.drainTopN(topN);
+            execution = executionByMethod.drainTopN(topN);
+            monitorWait = monitorWaitByKey.drainTopN(topN);
+            monitorCount = monitorCountByKey.drainTopN(topN);
+            heap = oldObjectHeap.get();
+            zStall = zStallNanos.getAndSet(0L) / 1_000_000_000d;
+            dropped = allocClass.droppedKeys()
+                    + allocMethod.droppedKeys()
+                    + outside.droppedKeys()
+                    + reqGc.droppedKeys()
+                    + oldObjects.droppedKeys()
+                    + execution.droppedKeys()
+                    + monitorWait.droppedKeys()
+                    + monitorCount.droppedKeys()
+                    + circuitBreaker.drainDropped();
         }
-        Set<String> publishedSeen = seenEventsRef.getAndSet(ConcurrentHashMap.newKeySet());
-
-        TopNWindowStore.Snapshot allocClass = allocSampleByClass.drainTopN(topN);
-        TopNWindowStore.Snapshot allocMethod = allocSampleByMethod.drainTopN(topN);
-        TopNWindowStore.Snapshot outside = outsideTlabByClass.drainTopN(topN);
-        TopNWindowStore.Snapshot reqGc = allocReqGcByMethod.drainTopN(topN);
-        TopNWindowStore.Snapshot oldObjects = oldObjectByClass.drainTopN(topN);
-        TopNWindowStore.Snapshot execution = executionByMethod.drainTopN(topN);
-        TopNWindowStore.Snapshot monitorWait = monitorWaitByKey.drainTopN(topN);
-        TopNWindowStore.Snapshot monitorCount = monitorCountByKey.drainTopN(topN);
 
         publisher.publishEventSeen(publishedSeen);
         publisher.publishLabeled(JfrMetricsPublisher.ALLOC_SAMPLE_BY_CLASS, "class", allocClass);
@@ -362,8 +391,8 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         publisher.publishLabeled(JfrMetricsPublisher.OLD_OBJECT_SAMPLES, "class", oldObjects);
         publisher.publishLabeled(JfrMetricsPublisher.EXECUTION_SAMPLES, "method", execution);
         publisher.publishMonitor(nanosToMilliSnapshot(monitorWait), monitorCount);
-        publisher.setOldObjectHeap(oldObjectHeap.get());
-        publisher.setZStallSeconds(zStallNanos.getAndSet(0L) / 1_000_000_000d);
+        publisher.setOldObjectHeap(heap);
+        publisher.setZStallSeconds(zStall);
         publisher.setAggregatorKeys(
                 (long) allocClass.sums().size()
                         + allocMethod.sums().size()
@@ -372,16 +401,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
                         + oldObjects.sums().size()
                         + execution.sums().size()
                         + monitorWait.sums().size());
-        publisher.addDropped(
-                allocClass.droppedKeys()
-                        + allocMethod.droppedKeys()
-                        + outside.droppedKeys()
-                        + reqGc.droppedKeys()
-                        + oldObjects.droppedKeys()
-                        + execution.droppedKeys()
-                        + monitorWait.droppedKeys()
-                        + monitorCount.droppedKeys()
-                        + circuitBreaker.drainDropped());
+        publisher.addDropped(dropped);
     }
 
     private static TopNWindowStore.Snapshot nanosToMilliSnapshot(TopNWindowStore.Snapshot nanos) {
@@ -443,6 +463,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (circuitBreaker.openEventCount() >= 2) {
             closeStreamOnly();
             streamTrippedAt.set(now);
+            circuitBreaker.tripStream();
             publisher.setStreamCircuitOpen(true);
             return;
         }
@@ -492,7 +513,15 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         ScheduledExecutorService scheduler = schedulerRef.getAndSet(null);
         if (scheduler != null) {
             scheduler.shutdownNow();
+            try {
+                scheduler.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            }
         }
-        publisher.unregisterAll();
+        // After scheduler drain: no in-flight flush can re-register gauges.
+        synchronized (windowLock) {
+            publisher.unregisterAll();
+        }
     }
 }

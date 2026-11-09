@@ -37,4 +37,20 @@ class JfrConsumerCircuitBreakerTest {
         assertFalse(breaker.tryAcquire("jdk.ObjectAllocationSample"));
         assertTrue(breaker.isEventOpen("jdk.ObjectAllocationSample"));
     }
+
+    @Test
+    void tripStreamBlocksAcquireUntilCleared() {
+        JfrMetricsProperties.CircuitBreaker props = new JfrMetricsProperties.CircuitBreaker();
+        props.setMaxPerSecond(10_000);
+        props.setGlobalMaxPerSecond(10_000);
+        props.setCooldown(Duration.ofSeconds(30));
+        JfrConsumerCircuitBreaker breaker = new JfrConsumerCircuitBreaker(props);
+        assertTrue(breaker.tryAcquire("jdk.ExecutionSample"));
+        breaker.tripStream();
+        assertTrue(breaker.isStreamOpen());
+        assertFalse(breaker.tryAcquire("jdk.ExecutionSample"));
+        breaker.clearStream();
+        assertFalse(breaker.isStreamOpen());
+        assertTrue(breaker.tryAcquire("jdk.ExecutionSample"));
+    }
 }
