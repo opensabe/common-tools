@@ -72,13 +72,16 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     private final TopNWindowStore monitorCountByKey;
     private final AtomicLong zStallNanos = new AtomicLong();
     private final AtomicLong oldObjectHeap = new AtomicLong();
-    private final Set<String> seenEvents = ConcurrentHashMap.newKeySet();
+    private final AtomicReference<Set<String>> seenEventsRef =
+            new AtomicReference<>(ConcurrentHashMap.newKeySet());
 
     private final AtomicReference<ScheduledExecutorService> schedulerRef = new AtomicReference<>();
     private final AtomicReference<EventStream> streamRef = new AtomicReference<>();
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
+    /** Coordinates streamRef install/close with repository_attached gauge updates. */
+    private final Object streamLock = new Object();
     private final Map<String, Consumer<RecordedEvent>> handlers = new ConcurrentHashMap<>();
     private final Map<String, Long> trippedAt = new ConcurrentHashMap<>();
     private final AtomicLong streamTrippedAt = new AtomicLong(0L);
@@ -200,36 +203,39 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             AtomicBoolean closedEarly = new AtomicBoolean(false);
             EventStream registered = stream;
             stream.onClose(() -> {
-                closedEarly.set(true);
-                if (streamRef.compareAndSet(registered, null)) {
-                    publisher.setRepositoryAttached(false);
+                synchronized (streamLock) {
+                    closedEarly.set(true);
+                    if (streamRef.compareAndSet(registered, null)) {
+                        publisher.setRepositoryAttached(false);
+                    }
                 }
             });
             stream.startAsync();
-            if (!running.get() || destroyed.get()) {
-                closeQuietly(stream);
-                return;
-            }
-            if (!streamRef.compareAndSet(null, stream)) {
-                closeQuietly(stream);
-                return;
-            }
-            // onClose may have fired before CAS; refuse to keep a closed stream as attached.
-            if (closedEarly.get() || !running.get() || destroyed.get()) {
-                if (streamRef.compareAndSet(stream, null)) {
-                    closeQuietly(stream);
+            boolean installed = false;
+            synchronized (streamLock) {
+                if (closedEarly.get() || !running.get() || destroyed.get()) {
+                    // refuse closed / stopped streams
+                } else if (streamRef.compareAndSet(null, stream)) {
+                    publisher.setRepositoryAttached(true);
+                    circuitBreaker.clearStream();
+                    for (String eventName : Map.copyOf(trippedAt).keySet()) {
+                        circuitBreaker.clearEvent(eventName);
+                        publisher.setCircuitOpen(eventName, false);
+                    }
+                    trippedAt.clear();
+                    publisher.setStreamCircuitOpen(false);
+                    installed = true;
                 }
-                publisher.setRepositoryAttached(false);
+            }
+            if (!installed) {
+                closeQuietly(stream);
+                synchronized (streamLock) {
+                    if (streamRef.get() == null) {
+                        publisher.setRepositoryAttached(false);
+                    }
+                }
                 return;
             }
-            publisher.setRepositoryAttached(true);
-            circuitBreaker.clearStream();
-            for (String eventName : Map.copyOf(trippedAt).keySet()) {
-                circuitBreaker.clearEvent(eventName);
-                publisher.setCircuitOpen(eventName, false);
-            }
-            trippedAt.clear();
-            publisher.setStreamCircuitOpen(false);
             log.info("Attached passive JFR EventStream to repository {}", repository);
         } catch (IOException ex) {
             closeQuietly(stream);
@@ -269,7 +275,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             if (!circuitBreaker.tryAcquire(eventName)) {
                 return;
             }
-            seenEvents.add(eventName);
+            seenEventsRef.get().add(eventName);
             handler.accept(event);
         };
         handlers.put(eventName, wrapped);
@@ -336,8 +342,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (!running.get()) {
             return;
         }
-        Set<String> publishedSeen = Set.copyOf(seenEvents);
-        seenEvents.clear();
+        Set<String> publishedSeen = seenEventsRef.getAndSet(ConcurrentHashMap.newKeySet());
 
         TopNWindowStore.Snapshot allocClass = allocSampleByClass.drainTopN(topN);
         TopNWindowStore.Snapshot allocMethod = allocSampleByMethod.drainTopN(topN);
@@ -459,11 +464,12 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     }
 
     private void closeStreamOnly() {
-        EventStream stream = streamRef.getAndSet(null);
-        if (stream != null) {
-            closeQuietly(stream);
+        EventStream stream;
+        synchronized (streamLock) {
+            stream = streamRef.getAndSet(null);
             publisher.setRepositoryAttached(false);
         }
+        closeQuietly(stream);
     }
 
     private static void closeQuietly(EventStream stream) {
@@ -487,5 +493,6 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (scheduler != null) {
             scheduler.shutdownNow();
         }
+        publisher.unregisterAll();
     }
 }

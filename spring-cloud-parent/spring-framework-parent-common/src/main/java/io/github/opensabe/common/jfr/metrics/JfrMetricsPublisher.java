@@ -15,7 +15,9 @@
  */
 package io.github.opensabe.common.jfr.metrics;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,25 +56,26 @@ final class JfrMetricsPublisher {
     private final ConcurrentHashMap<String, Holder> circuitOpen = new ConcurrentHashMap<>();
     private final AtomicLong oldObjectHeap = new AtomicLong(0);
     private final AtomicReference<Double> zStallSeconds = new AtomicReference<>(0d);
+    private final List<Meter> fixedMeters = new ArrayList<>();
 
     JfrMetricsPublisher(MeterRegistry registry, int topN) {
         this.registry = registry;
         this.topN = topN;
-        Gauge.builder("jfr_metrics_repository_attached", repositoryAttached, AtomicLong::get)
+        fixedMeters.add(Gauge.builder("jfr_metrics_repository_attached", repositoryAttached, AtomicLong::get)
                 .description("1 when EventStream is attached to a disk JFR repository")
-                .register(registry);
-        Gauge.builder("jfr_metrics_aggregator_keys", aggregatorKeys, AtomicLong::get)
+                .register(registry));
+        fixedMeters.add(Gauge.builder("jfr_metrics_aggregator_keys", aggregatorKeys, AtomicLong::get)
                 .description("Approximate distinct aggregation keys in the last window")
-                .register(registry);
-        Gauge.builder("jfr_metrics_dropped_total", droppedTotal, AtomicLong::get)
+                .register(registry));
+        fixedMeters.add(Gauge.builder("jfr_metrics_dropped_total", droppedTotal, AtomicLong::get)
                 .description("Cumulative events/keys dropped by consumer circuit breaker or map cap since publisher creation")
-                .register(registry);
-        Gauge.builder(OLD_OBJECT_HEAP, oldObjectHeap, AtomicLong::get)
+                .register(registry));
+        fixedMeters.add(Gauge.builder(OLD_OBJECT_HEAP, oldObjectHeap, AtomicLong::get)
                 .description("Latest observed OldObjectSample lastKnownHeapUsage (global heap, not per-class)")
-                .register(registry);
-        Gauge.builder(Z_STALL, zStallSeconds, AtomicReference::get)
+                .register(registry));
+        fixedMeters.add(Gauge.builder(Z_STALL, zStallSeconds, AtomicReference::get)
                 .description("ZAllocationStall duration seconds in last window; 0 when no stall events (not proof of zero stalls)")
-                .register(registry);
+                .register(registry));
     }
 
     void setRepositoryAttached(boolean attached) {
@@ -166,6 +169,28 @@ final class JfrMetricsPublisher {
 
     void addDropped(long dropped) {
         droppedTotal.addAndGet(dropped);
+    }
+
+    /**
+     * Removes all gauges registered by this publisher so a replacement consumer can re-register cleanly.
+     */
+    void unregisterAll() {
+        for (Holder holder : holders.values()) {
+            registry.remove(holder.meter.getId());
+        }
+        holders.clear();
+        for (Holder holder : eventSeen.values()) {
+            registry.remove(holder.meter.getId());
+        }
+        eventSeen.clear();
+        for (Holder holder : circuitOpen.values()) {
+            registry.remove(holder.meter.getId());
+        }
+        circuitOpen.clear();
+        for (Meter meter : fixedMeters) {
+            registry.remove(meter.getId());
+        }
+        fixedMeters.clear();
     }
 
     private Holder registerEventSeen(String name) {

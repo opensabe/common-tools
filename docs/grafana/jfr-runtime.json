@@ -151,6 +151,21 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "title": "Z allocation stall seconds (0 ≠ proof of no stall)",
+      "description": "Window sum of jdk.ZAllocationStall durations. Metric is registered when enabled; 0 means no events in the window (not proof that stalls did not occur).",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 38 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "jfr_z_allocation_stall_seconds",
+          "legendFormat": "z_stall_seconds",
+          "refId": "A"
+        }
+      ]
     }
   ],
   "schemaVersion": 39,
