@@ -53,4 +53,25 @@ class JfrConsumerCircuitBreakerTest {
         assertFalse(breaker.isStreamOpen());
         assertTrue(breaker.tryAcquire("jdk.ExecutionSample"));
     }
+
+    @Test
+    void clearAllEventsRecoversOrphansOutsideTrippedSet() {
+        JfrMetricsProperties.CircuitBreaker props = new JfrMetricsProperties.CircuitBreaker();
+        props.setMaxPerSecond(1);
+        props.setGlobalMaxPerSecond(10_000);
+        props.setCooldown(Duration.ofSeconds(1));
+        JfrConsumerCircuitBreaker breaker = new JfrConsumerCircuitBreaker(props);
+        assertTrue(breaker.tryAcquire("a"));
+        assertFalse(breaker.tryAcquire("a"));
+        assertTrue(breaker.tryAcquire("b"));
+        assertFalse(breaker.tryAcquire("b"));
+        assertTrue(breaker.isEventOpen("a"));
+        assertTrue(breaker.isEventOpen("b"));
+        assertTrue(breaker.openEventCount() >= 2);
+        breaker.clearAllEvents();
+        assertFalse(breaker.isEventOpen("a"));
+        assertFalse(breaker.isEventOpen("b"));
+        assertTrue(breaker.tryAcquire("a"));
+        assertTrue(breaker.tryAcquire("b"));
+    }
 }

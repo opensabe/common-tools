@@ -106,6 +106,13 @@ final class JfrConsumerCircuitBreaker {
         global.reset();
     }
 
+    /** Clears every per-event open flag (used after stream cooldown recovery). */
+    void clearAllEvents() {
+        for (String eventName : open.keySet()) {
+            clearEvent(eventName);
+        }
+    }
+
     /** Opens the stream circuit for {@link #cooldownNanos()} (handler unsubscribe only). */
     void tripStream() {
         tripStream(System.nanoTime());

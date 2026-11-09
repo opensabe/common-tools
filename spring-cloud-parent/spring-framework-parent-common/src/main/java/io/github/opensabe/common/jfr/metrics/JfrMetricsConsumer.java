@@ -219,13 +219,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
                     // refuse closed / stopped streams
                 } else if (streamRef.compareAndSet(null, stream)) {
                     publisher.setRepositoryAttached(true);
-                    circuitBreaker.clearStream();
-                    for (String eventName : Map.copyOf(trippedAt).keySet()) {
-                        circuitBreaker.clearEvent(eventName);
-                        publisher.setCircuitOpen(eventName, false);
-                    }
-                    trippedAt.clear();
-                    publisher.setStreamCircuitOpen(false);
+                    resetAllCircuits();
                     installed = true;
                 }
             }
@@ -428,13 +422,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
 
         if (streamRef.get() == null && streamTrippedAt.get() > 0L) {
             if (now - streamTrippedAt.get() >= cooldown) {
-                circuitBreaker.clearStream();
-                for (String eventName : Map.copyOf(trippedAt).keySet()) {
-                    circuitBreaker.clearEvent(eventName);
-                    publisher.setCircuitOpen(eventName, false);
-                }
-                trippedAt.clear();
-                publisher.setStreamCircuitOpen(false);
+                resetAllCircuits();
                 streamTrippedAt.set(0L);
                 tryAttach();
             }
@@ -482,6 +470,23 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             }
             trippedAt.remove(eventName);
         }
+    }
+
+    /**
+     * After stream cooldown (or successful reattach), clear stream + every per-event open flag —
+     * including events that tripped between openSnapshot and openEventCount checks and never entered {@code trippedAt}.
+     */
+    private void resetAllCircuits() {
+        circuitBreaker.clearStream();
+        circuitBreaker.clearAllEvents();
+        for (String eventName : Map.copyOf(trippedAt).keySet()) {
+            publisher.setCircuitOpen(eventName, false);
+        }
+        for (Map.Entry<String, Boolean> entry : circuitBreaker.openSnapshot().entrySet()) {
+            publisher.setCircuitOpen(entry.getKey(), false);
+        }
+        trippedAt.clear();
+        publisher.setStreamCircuitOpen(false);
     }
 
     private void closeStreamOnly() {
