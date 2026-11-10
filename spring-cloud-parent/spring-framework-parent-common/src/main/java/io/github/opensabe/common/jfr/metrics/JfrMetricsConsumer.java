@@ -79,6 +79,8 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
+    /** Bumped on each start/stop so in-flight attach cannot install after stop/restart. */
+    private final AtomicLong lifecycleGeneration = new AtomicLong(0L);
     /** Coordinates streamRef install/close with repository_attached gauge updates. */
     private final Object streamLock = new Object();
     /** Coordinates event-seen markers with window drain so markers and samples stay in the same window. */
@@ -114,6 +116,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (!properties.isEnabled() || destroyed.get() || !started.compareAndSet(false, true)) {
             return;
         }
+        lifecycleGeneration.incrementAndGet();
         running.set(true);
         ScheduledExecutorService scheduler = ensureScheduler();
         attachDeadlineNanos = System.nanoTime() + properties.getRepository().getAttachTimeout().toNanos();
@@ -132,6 +135,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
      */
     @Override
     public void stop() {
+        lifecycleGeneration.incrementAndGet();
         running.set(false);
         cancelTasks();
         closeStreamOnly();
@@ -187,6 +191,7 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
         if (streamTrippedAt.get() > 0L || circuitBreaker.isStreamOpen()) {
             return;
         }
+        long generation = lifecycleGeneration.get();
         if (System.nanoTime() > attachDeadlineNanos) {
             publisher.setRepositoryAttached(false);
             attachDeadlineNanos = System.nanoTime() + properties.getRepository().getAttachTimeout().toNanos();
@@ -218,8 +223,12 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
             stream.startAsync();
             boolean installed = false;
             synchronized (streamLock) {
-                if (closedEarly.get() || !running.get() || destroyed.get()) {
-                    // refuse closed / stopped streams
+                // Generation mismatch: stop/restart raced ahead of this install — close orphan stream.
+                if (lifecycleGeneration.get() != generation
+                        || closedEarly.get()
+                        || !running.get()
+                        || destroyed.get()) {
+                    // refuse closed / stopped / stale-generation streams
                 } else if (streamRef.compareAndSet(null, stream)) {
                     publisher.setRepositoryAttached(true);
                     resetAllCircuits();
