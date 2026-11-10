@@ -137,22 +137,18 @@ class JfrMetricsConsumerPerfCompareTest {
      */
     private static void verifyEventStreamOwnershipEdges(
             JfrMetricsConsumer consumer, SimpleMeterRegistry registry) throws InterruptedException {
-        // Happy path through the real enabled-leg preamble (without measuring).
+        // Keep the pre-start foreign snapshot; do not refresh it after stop.
         OwnedConsumerCpu.markForeignEventStreams();
         consumer.start();
         awaitAttached(registry, Duration.ofSeconds(15));
-        OwnedConsumerCpu.beginSession();
-        for (int i = 0; i < 50 && !OwnedConsumerCpu.hasOwnedEventStream(); i++) {
-            OwnedConsumerCpu.adoptReplacementsOnce();
-            Thread.sleep(20L);
-        }
-        ensureOwnedEventStreamOrFail();
 
-        // Stream exits after attach gauge is true, before identity is collected for a new session.
+        // EventStream exits after attach succeeds, before beginSession identity collection.
         consumer.stop();
         Thread.sleep(SETTLE_MS);
-        OwnedConsumerCpu.endSession();
-        OwnedConsumerCpu.markForeignEventStreams();
+        assertThat(OwnedConsumerCpu.hasNonForeignLiveEventStream())
+                .as("EventStream worker must be gone after stop, before beginSession")
+                .isFalse();
+
         OwnedConsumerCpu.beginSession();
         for (int i = 0; i < 10 && !OwnedConsumerCpu.hasOwnedEventStream(); i++) {
             OwnedConsumerCpu.adoptReplacementsOnce();
@@ -168,8 +164,7 @@ class JfrMetricsConsumerPerfCompareTest {
                 .as("measure path fails when EventStream exits after attach before identity")
                 .isNotNull();
 
-        // Re-attach: shared gate must pass again.
-        OwnedConsumerCpu.markForeignEventStreams();
+        // Re-attach with the same foreign snapshot: new EventStream id must be owned.
         consumer.start();
         awaitAttached(registry, Duration.ofSeconds(15));
         OwnedConsumerCpu.beginSession();
@@ -181,7 +176,7 @@ class JfrMetricsConsumerPerfCompareTest {
         consumer.stop();
         OwnedConsumerCpu.endSession();
         System.out.println(
-                "ownership-edge verification: post-attach-exit→ensureOwnedEventStreamOrFail=FAIL(OK), re-attach=OK");
+                "ownership-edge verification: attach→stop-before-beginSession→gate=FAIL(OK), re-attach=OK");
     }
 
     private static ScenarioResult runInterleaved(
@@ -388,6 +383,7 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("- Enabled legs fail fast if no live EventStream worker is owned after attach; sampler blocks on a latch until process/sampler CPU baselines are taken together\n");
         sb.append("- `wall` ratios use **workload-only** wall (flush-cover wait is excluded from wall, still included in consumer/process CPU sampling)\n");
         sb.append("- Sampler work is refresh-only (equal baseline/enabled poll cost); sampler CPU is subtracted from process CPU\n");
+        sb.append("- Bound: non-zero consumer CPU is a consume-side estimate (scheduler + owned EventStream), not proof a specific event type from this workload was delivered\n");
         long enabledFirst = results.stream()
                 .mapToLong(r -> r.enabledFirstPairs())
                 .sum();
@@ -572,6 +568,22 @@ class JfrMetricsConsumerPerfCompareTest {
         static boolean hasOwnedEventStream() {
             ThreadMXBean bean = ManagementFactory.getThreadMXBean();
             for (Long id : OWNED) {
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info != null && looksLikeEventStream(info.getThreadName())
+                        && bean.getThreadCpuTime(id) >= 0L) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /** True if any live EventStream-named thread is not in the pre-start FOREIGN set. */
+        static boolean hasNonForeignLiveEventStream() {
+            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+            for (long id : bean.getAllThreadIds()) {
+                if (FOREIGN.contains(id)) {
+                    continue;
+                }
                 ThreadInfo info = bean.getThreadInfo(id);
                 if (info != null && looksLikeEventStream(info.getThreadName())
                         && bean.getThreadCpuTime(id) >= 0L) {
