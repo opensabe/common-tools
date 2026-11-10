@@ -66,6 +66,8 @@ class JfrMetricsConsumerPerfCompareTest {
 
     private static final int SAMPLES = 9;
     private static final long SETTLE_MS = 250L;
+    /** Keep sampler running after the workload so async EventStream batches can land. */
+    private static final long FLUSH_COVER_MS = 500L;
     private static final int WORKER_THREADS = Math.max(2, Runtime.getRuntime().availableProcessors() / 2);
     /**
      * When a scenario measures allocation itself (esp. multi-thread), it stores the byte delta here
@@ -172,6 +174,10 @@ class JfrMetricsConsumerPerfCompareTest {
             OwnedConsumerCpu.adoptReplacementsOnce();
             Thread.sleep(20L);
         }
+        if (!OwnedConsumerCpu.hasOwnedEventStream()) {
+            throw new AssertionError(
+                    "no live EventStream worker owned after attach; consumer-CPU sample would be incomplete");
+        }
         // Measure immediately afterward so consume work overlaps the workload (same
         // post-stop settle as baseline; no long idle settle that drains the backlog).
         return measure(() -> blackhole(scenario.run(scenario.measureUnits(), WORKER_THREADS)), enabledFirst);
@@ -185,9 +191,13 @@ class JfrMetricsConsumerPerfCompareTest {
         WORKLOAD_ALLOC_BYTES.set(-1L);
 
         java.util.concurrent.atomic.AtomicBoolean sampling = new java.util.concurrent.atomic.AtomicBoolean(true);
+        java.util.concurrent.atomic.AtomicBoolean baselinesReady = new java.util.concurrent.atomic.AtomicBoolean(false);
         java.util.concurrent.atomic.AtomicLong samplerCpuEnd = new java.util.concurrent.atomic.AtomicLong(-1L);
         Thread sampler = new Thread(() -> {
             try {
+                while (sampling.get() && !baselinesReady.get()) {
+                    Thread.onSpinWait();
+                }
                 while (sampling.get()) {
                     // Refresh only — no adopt/scan divergence between baseline and enabled legs.
                     OwnedConsumerCpu.totalCpuNanos();
@@ -209,12 +219,19 @@ class JfrMetricsConsumerPerfCompareTest {
         sampler.start();
         @SuppressWarnings("deprecation")
         long samplerThreadId = sampler.getId();
-        // Align process + sampler baselines after the sampler is running.
+        // Capture both baselines while the sampler is paused, then release it.
         long processCpuBefore = processCpuNanos();
         long samplerCpuBefore = threadCpuNanos(samplerThreadId);
+        baselinesReady.set(true);
         long wallBefore = System.nanoTime();
         try {
             work.run();
+            // Cover async EventStream delivery across ≥1 publish flush interval.
+            OwnedConsumerCpu.adoptReplacementsOnce();
+            Thread.sleep(FLUSH_COVER_MS);
+            OwnedConsumerCpu.adoptReplacementsOnce();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } finally {
             sampling.set(false);
             try {
@@ -248,7 +265,7 @@ class JfrMetricsConsumerPerfCompareTest {
     private static JfrMetricsProperties enabledProperties() {
         JfrMetricsProperties properties = new JfrMetricsProperties();
         properties.setEnabled(true);
-        properties.getPublish().setFlushInterval(Duration.ofSeconds(1));
+        properties.getPublish().setFlushInterval(Duration.ofMillis(200));
         properties.getPublish().setTopN(30);
         properties.getRepository().setAttachTimeout(Duration.ofSeconds(20));
         properties.getRepository().setRetryInterval(Duration.ofMillis(200));
@@ -297,13 +314,15 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("- JFR repository present: `").append(env.jfrRepositoryPresent()).append("`\n");
         sb.append("- Samples/scenario (interleaved A/B): `").append(SAMPLES).append("`\n");
         sb.append("- Worker threads (LOCK/MIXED): `").append(WORKER_THREADS).append("`\n");
-        sb.append("- Settle both legs: `").append(SETTLE_MS).append("ms`; A/B order alternates per accepted pair\n\n");
+        sb.append("- Settle both legs: `").append(SETTLE_MS).append("ms`; A/B order alternates per accepted pair\n");
+        sb.append("- Post-work flush cover: `").append(FLUSH_COVER_MS).append("ms` (publish flush interval 200ms)\n\n");
         sb.append("Both legs use the same disk Flight Recording. Delta ≈ consume-side cost only.\n\n");
         sb.append("## Reading the ratios\n\n");
         sb.append("- `wall/process CPU/alloc ratio ≈ 1.0` → consume-side overhead negligible on that workload\n");
         sb.append("- `consumer CPU p50` tracks session-owned thread ids (`jfr-metrics-consumer` + EventStream ids born after pre-start mark); sampler refreshes last CPU on a nominal 1ms sleep\n");
-        sb.append("- Limits: poll gaps follow `Thread.sleep(1)` + scheduling (not a hard 1ms error bound); very short-lived threads may be missed; EventStream identity is appearance-after-mark (not a public JDK API)\n");
-        sb.append("- Replacement adopt runs once per measure (outside the sampler); sampler work is refresh-only so baseline/enabled poll cost matches; sampler CPU is subtracted from process CPU\n");
+        sb.append("- Limits: poll gaps follow `Thread.sleep(1)` + scheduling (not a hard 1ms error bound); mid-measure EventStream replacements are re-adopted around the flush-cover window, not every poll; identity is appearance-after-mark\n");
+        sb.append("- Enabled legs fail fast if no live EventStream worker is owned after attach; sampler stays paused until process/sampler CPU baselines are taken together\n");
+        sb.append("- Sampler work is refresh-only (equal baseline/enabled poll cost); sampler CPU is subtracted from process CPU\n");
         long enabledFirst = results.stream()
                 .mapToLong(r -> r.enabledFirstPairs())
                 .sum();
