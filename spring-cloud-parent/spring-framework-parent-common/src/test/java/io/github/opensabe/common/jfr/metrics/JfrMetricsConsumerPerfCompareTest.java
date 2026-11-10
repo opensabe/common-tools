@@ -180,15 +180,23 @@ class JfrMetricsConsumerPerfCompareTest {
         WORKLOAD_ALLOC_BYTES.set(-1L);
 
         java.util.concurrent.atomic.AtomicBoolean sampling = new java.util.concurrent.atomic.AtomicBoolean(true);
+        java.util.concurrent.atomic.AtomicLong samplerCpuEnd = new java.util.concurrent.atomic.AtomicLong(-1L);
         Thread sampler = new Thread(() -> {
-            while (sampling.get()) {
-                OwnedConsumerCpu.totalCpuNanos();
-                try {
-                    Thread.sleep(1L);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
+            try {
+                while (sampling.get()) {
+                    OwnedConsumerCpu.totalCpuNanos();
+                    try {
+                        Thread.sleep(1L);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
+            } finally {
+                // Capture CPU before the thread exits — getThreadCpuTime is unavailable after death.
+                @SuppressWarnings("deprecation")
+                long selfId = Thread.currentThread().getId();
+                samplerCpuEnd.set(threadCpuNanos(selfId));
             }
         }, "jfr-perf-cpu-sampler");
         sampler.setDaemon(true);
@@ -208,7 +216,10 @@ class JfrMetricsConsumerPerfCompareTest {
         }
 
         long wall = System.nanoTime() - wallBefore;
-        long samplerCpu = Math.max(0L, threadCpuNanos(samplerThreadId) - samplerCpuBefore);
+        long samplerEnd = samplerCpuEnd.get();
+        long samplerCpu = samplerEnd >= 0L
+                ? Math.max(0L, samplerEnd - samplerCpuBefore)
+                : Math.max(0L, threadCpuNanos(samplerThreadId) - samplerCpuBefore);
         // Exclude harness sampler CPU from process delta (same both legs).
         long processCpu = Math.max(0L, processCpuNanos() - processCpuBefore - samplerCpu);
         long consumerCpu = Math.max(0L, OwnedConsumerCpu.totalCpuNanos() - consumerCpuBefore);
@@ -280,7 +291,8 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("## Reading the ratios\n\n");
         sb.append("- `wall/process CPU/alloc ratio ≈ 1.0` → consume-side overhead negligible on that workload\n");
         sb.append("- `consumer CPU p50` tracks session-owned thread ids (`jfr-metrics-consumer` + EventStream ids born after pre-start mark); 1ms sampler retains last CPU if an owned thread exits mid-sample\n");
-        sb.append("- Sampler thread CPU is subtracted from process CPU on both legs; EventStream worker identity is not a public JDK API (appearance-after-mark)\n");
+        sb.append("- Limits: up to ~1ms of CPU after the last poll before an owned thread exits may be missed; EventStream worker identity is not a public JDK API (appearance-after-mark)\n");
+        sb.append("- Sampler records its own CPU before exit and that delta is subtracted from process CPU on both legs\n");
         long enabledFirst = results.stream()
                 .mapToLong(r -> r.enabledFirstPairs())
                 .sum();
