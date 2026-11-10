@@ -125,12 +125,16 @@ class JfrMetricsConsumerPerfCompareTest {
 
         for (int i = 0; i < SAMPLES; i++) {
             consumer.stop();
+            OwnedConsumerCpu.endSession();
             // Settle after stop so baseline is not charged lingering consumer CPU.
-            Thread.sleep(150L);
+            Thread.sleep(250L);
             baselines.add(measure(() -> blackhole(scenario.run(scenario.measureUnits(), WORKER_THREADS))));
 
+            // Snapshot foreign EventStream thread ids before this consumer starts.
+            OwnedConsumerCpu.markForeignEventStreams();
             consumer.start();
             awaitAttached(registry, Duration.ofSeconds(15));
+            OwnedConsumerCpu.beginSession();
             enabled.add(measure(() -> blackhole(scenario.run(scenario.measureUnits(), WORKER_THREADS))));
         }
 
@@ -142,7 +146,7 @@ class JfrMetricsConsumerPerfCompareTest {
     private static Sample measure(Runnable work) {
         GcSnapshot gcBefore = GcSnapshot.capture();
         long processCpuBefore = processCpuNanos();
-        ConsumerCpuSnapshot consumerCpuBefore = ConsumerCpuSnapshot.capture();
+        long consumerCpuBefore = OwnedConsumerCpu.totalCpuNanos();
         long wallBefore = System.nanoTime();
         WORKLOAD_ALLOC_BYTES.set(-1L);
 
@@ -150,7 +154,7 @@ class JfrMetricsConsumerPerfCompareTest {
 
         long wall = System.nanoTime() - wallBefore;
         long processCpu = processCpuNanos() - processCpuBefore;
-        long consumerCpu = ConsumerCpuSnapshot.capture().deltaFrom(consumerCpuBefore);
+        long consumerCpu = Math.max(0L, OwnedConsumerCpu.totalCpuNanos() - consumerCpuBefore);
         long allocated = WORKLOAD_ALLOC_BYTES.get();
         GcSnapshot gcAfter = GcSnapshot.capture();
         return new Sample(
@@ -216,7 +220,7 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("Both legs use the same disk Flight Recording. Delta ≈ consume-side cost only.\n\n");
         sb.append("## Reading the ratios\n\n");
         sb.append("- `wall/process CPU/alloc ratio ≈ 1.0` → consume-side overhead negligible on that workload\n");
-        sb.append("- `consumer CPU p50` sums CPU of `jfr-metrics-consumer` **and** `JFR Event Stream*` threads\n");
+        sb.append("- `consumer CPU p50` tracks this harness’s owned thread ids (`jfr-metrics-consumer` + EventStream threads that appear after this consumer starts); last CPU retained on exit\n");
         sb.append("- `alloc` is measured inside the workload (per-worker `getCurrentThreadAllocatedBytes`), not via live-thread snapshots\n");
         sb.append("- `dropped` / `keys` are Micrometer gauges after the scenario’s last enabled leg\n");
         sb.append("- Short GC Δ noise is normal; prefer wall/CPU/alloc ratios across scenarios\n\n");
@@ -309,12 +313,6 @@ class JfrMetricsConsumerPerfCompareTest {
         return 0L;
     }
 
-    private static boolean isConsumerSideThread(String name) {
-        return "jfr-metrics-consumer".equals(name)
-                || name.startsWith("JFR Event Stream")
-                || name.contains("JFR Event Stream");
-    }
-
     @SuppressWarnings("deprecation")
     private static long currentThreadAllocatedBytes() {
         ThreadMXBean bean = ManagementFactory.getThreadMXBean();
@@ -329,36 +327,108 @@ class JfrMetricsConsumerPerfCompareTest {
         return allocated < 0L ? -1L : allocated;
     }
 
-    private record ConsumerCpuSnapshot(java.util.Map<Long, Long> cpuByThread) {
-        static ConsumerCpuSnapshot capture() {
+    /**
+     * Tracks CPU for threads owned by this harness’s consumer session only.
+     * <p>
+     * Call {@link #markForeignEventStreams()} before {@code consumer.start()}, then
+     * {@link #beginSession()} after attach. Ownership is by thread id: the named
+     * {@code jfr-metrics-consumer} scheduler plus EventStream worker threads that were
+     * <em>not</em> present before start (identity via appearance, not global name match).
+     * {@link #totalCpuNanos()} keeps last-seen CPU if an owned thread exits mid-sample.
+     * {@link #endSession()} clears ownership so baseline legs read 0.
+     */
+    private static final class OwnedConsumerCpu {
+        private static final java.util.Set<Long> FOREIGN = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        private static final java.util.Set<Long> OWNED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        private static final java.util.concurrent.ConcurrentHashMap<Long, Long> LAST_CPU =
+                new java.util.concurrent.ConcurrentHashMap<>();
+        private static volatile boolean sessionActive;
+
+        private OwnedConsumerCpu() {
+        }
+
+        /** Snapshot EventStream-named thread ids before this consumer starts. */
+        static void markForeignEventStreams() {
+            FOREIGN.clear();
             ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-            java.util.Map<Long, Long> map = new java.util.HashMap<>();
+            for (long id : bean.getAllThreadIds()) {
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info != null && looksLikeEventStream(info.getThreadName())) {
+                    FOREIGN.add(id);
+                }
+            }
+        }
+
+        static void beginSession() {
+            OWNED.clear();
+            LAST_CPU.clear();
+            sessionActive = true;
+            adoptOwnedThreads();
+            totalCpuNanos();
+        }
+
+        static void endSession() {
+            if (sessionActive) {
+                totalCpuNanos();
+            }
+            sessionActive = false;
+            OWNED.clear();
+            LAST_CPU.clear();
+            FOREIGN.clear();
+        }
+
+        static long totalCpuNanos() {
+            if (!sessionActive && OWNED.isEmpty()) {
+                return 0L;
+            }
+            adoptOwnedThreads();
+            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
             if (!bean.isThreadCpuTimeSupported()) {
-                return new ConsumerCpuSnapshot(map);
+                return 0L;
             }
             if (!bean.isThreadCpuTimeEnabled()) {
                 bean.setThreadCpuTimeEnabled(true);
             }
-            for (long id : bean.getAllThreadIds()) {
-                ThreadInfo info = bean.getThreadInfo(id);
-                if (info == null || !isConsumerSideThread(info.getThreadName())) {
-                    continue;
-                }
+            for (Long id : OWNED) {
                 long cpu = bean.getThreadCpuTime(id);
-                if (cpu > 0L) {
-                    map.put(id, cpu);
+                if (cpu >= 0L) {
+                    LAST_CPU.merge(id, cpu, Math::max);
                 }
             }
-            return new ConsumerCpuSnapshot(map);
-        }
-
-        long deltaFrom(ConsumerCpuSnapshot before) {
             long sum = 0L;
-            for (java.util.Map.Entry<Long, Long> entry : cpuByThread.entrySet()) {
-                long prev = before.cpuByThread.getOrDefault(entry.getKey(), 0L);
-                sum += Math.max(0L, entry.getValue() - prev);
+            for (Long id : OWNED) {
+                sum += LAST_CPU.getOrDefault(id, 0L);
             }
             return sum;
+        }
+
+        private static void adoptOwnedThreads() {
+            if (!sessionActive) {
+                return;
+            }
+            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+            for (long id : bean.getAllThreadIds()) {
+                if (FOREIGN.contains(id) || OWNED.contains(id)) {
+                    continue;
+                }
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info == null) {
+                    continue;
+                }
+                String name = info.getThreadName();
+                if ("jfr-metrics-consumer".equals(name)
+                        || (looksLikeEventStream(name) && !FOREIGN.contains(id))) {
+                    OWNED.add(id);
+                }
+            }
+        }
+
+        /**
+         * Heuristic only to discover candidate EventStream workers; ownership still requires
+         * the thread id was absent at {@link #markForeignEventStreams()} time.
+         */
+        private static boolean looksLikeEventStream(String name) {
+            return name != null && name.startsWith("JFR Event Stream");
         }
     }
 
