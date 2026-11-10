@@ -417,17 +417,19 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
 
     private void discardPendingWindow() {
         seenEvents.clear();
-        allocSampleByClass.drainTopN(topN);
-        allocSampleByMethod.drainTopN(topN);
-        outsideTlabByClass.drainTopN(topN);
-        allocReqGcByMethod.drainTopN(topN);
-        oldObjectByClass.drainTopN(topN);
-        executionByMethod.drainTopN(topN);
-        monitorWaitByKey.drainTopN(topN);
-        monitorCountByKey.drainTopN(topN);
+        long dropped = allocSampleByClass.drainTopN(topN).droppedKeys()
+                + allocSampleByMethod.drainTopN(topN).droppedKeys()
+                + outsideTlabByClass.drainTopN(topN).droppedKeys()
+                + allocReqGcByMethod.drainTopN(topN).droppedKeys()
+                + oldObjectByClass.drainTopN(topN).droppedKeys()
+                + executionByMethod.drainTopN(topN).droppedKeys()
+                + monitorWaitByKey.drainTopN(topN).droppedKeys()
+                + monitorCountByKey.drainTopN(topN).droppedKeys()
+                + circuitBreaker.drainDropped();
         zStallNanos.set(0L);
         oldObjectHeap.set(0L);
-        circuitBreaker.drainDropped();
+        // Samples are discarded on stop, but cumulative drop counters still credit.
+        publisher.addDropped(dropped);
     }
 
     private static TopNWindowStore.Snapshot nanosToMilliSnapshot(TopNWindowStore.Snapshot nanos) {
