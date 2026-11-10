@@ -191,13 +191,11 @@ class JfrMetricsConsumerPerfCompareTest {
         WORKLOAD_ALLOC_BYTES.set(-1L);
 
         java.util.concurrent.atomic.AtomicBoolean sampling = new java.util.concurrent.atomic.AtomicBoolean(true);
-        java.util.concurrent.atomic.AtomicBoolean baselinesReady = new java.util.concurrent.atomic.AtomicBoolean(false);
+        java.util.concurrent.CountDownLatch baselinesReady = new java.util.concurrent.CountDownLatch(1);
         java.util.concurrent.atomic.AtomicLong samplerCpuEnd = new java.util.concurrent.atomic.AtomicLong(-1L);
         Thread sampler = new Thread(() -> {
             try {
-                while (sampling.get() && !baselinesReady.get()) {
-                    Thread.onSpinWait();
-                }
+                baselinesReady.await();
                 while (sampling.get()) {
                     // Refresh only — no adopt/scan divergence between baseline and enabled legs.
                     OwnedConsumerCpu.totalCpuNanos();
@@ -208,6 +206,8 @@ class JfrMetricsConsumerPerfCompareTest {
                         break;
                     }
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             } finally {
                 // Capture CPU before the thread exits — getThreadCpuTime is unavailable after death.
                 @SuppressWarnings("deprecation")
@@ -219,14 +219,19 @@ class JfrMetricsConsumerPerfCompareTest {
         sampler.start();
         @SuppressWarnings("deprecation")
         long samplerThreadId = sampler.getId();
-        // Capture both baselines while the sampler is paused, then release it.
+        // Capture both baselines while the sampler is blocked, then release it.
         long processCpuBefore = processCpuNanos();
         long samplerCpuBefore = threadCpuNanos(samplerThreadId);
-        baselinesReady.set(true);
+        baselinesReady.countDown();
         long wallBefore = System.nanoTime();
         try {
             work.run();
-            // Cover async EventStream delivery across ≥1 publish flush interval.
+        } finally {
+            // Workload wall excludes flush cover so short scenarios are not diluted toward 1.0.
+        }
+        long wallWorkload = System.nanoTime() - wallBefore;
+        try {
+            // Cover async EventStream delivery across ≥1 publish flush interval (still sampled).
             OwnedConsumerCpu.adoptReplacementsOnce();
             Thread.sleep(FLUSH_COVER_MS);
             OwnedConsumerCpu.adoptReplacementsOnce();
@@ -245,7 +250,6 @@ class JfrMetricsConsumerPerfCompareTest {
             }
         }
 
-        long wall = System.nanoTime() - wallBefore;
         long samplerEnd = samplerCpuEnd.get();
         long samplerCpu = Math.max(0L, samplerEnd - samplerCpuBefore);
         // Exclude harness sampler CPU from process delta (same both legs).
@@ -254,7 +258,7 @@ class JfrMetricsConsumerPerfCompareTest {
         long allocated = WORKLOAD_ALLOC_BYTES.get();
         GcSnapshot gcAfter = GcSnapshot.capture();
         return new Sample(
-                wall,
+                wallWorkload,
                 processCpu,
                 consumerCpu,
                 allocated,
@@ -321,7 +325,8 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("- `wall/process CPU/alloc ratio ≈ 1.0` → consume-side overhead negligible on that workload\n");
         sb.append("- `consumer CPU p50` tracks session-owned thread ids (`jfr-metrics-consumer` + EventStream ids born after pre-start mark); sampler refreshes last CPU on a nominal 1ms sleep\n");
         sb.append("- Limits: poll gaps follow `Thread.sleep(1)` + scheduling (not a hard 1ms error bound); mid-measure EventStream replacements are re-adopted around the flush-cover window, not every poll; identity is appearance-after-mark\n");
-        sb.append("- Enabled legs fail fast if no live EventStream worker is owned after attach; sampler stays paused until process/sampler CPU baselines are taken together\n");
+        sb.append("- Enabled legs fail fast if no live EventStream worker is owned after attach; sampler blocks on a latch until process/sampler CPU baselines are taken together\n");
+        sb.append("- `wall` ratios use **workload-only** wall (flush-cover wait is excluded from wall, still included in consumer/process CPU sampling)\n");
         sb.append("- Sampler work is refresh-only (equal baseline/enabled poll cost); sampler CPU is subtracted from process CPU\n");
         long enabledFirst = results.stream()
                 .mapToLong(r -> r.enabledFirstPairs())
