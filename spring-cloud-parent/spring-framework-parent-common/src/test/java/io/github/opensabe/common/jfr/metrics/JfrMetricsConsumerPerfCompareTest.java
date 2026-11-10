@@ -150,7 +150,30 @@ class JfrMetricsConsumerPerfCompareTest {
         long wallBefore = System.nanoTime();
         WORKLOAD_ALLOC_BYTES.set(-1L);
 
-        work.run();
+        java.util.concurrent.atomic.AtomicBoolean sampling = new java.util.concurrent.atomic.AtomicBoolean(true);
+        Thread sampler = new Thread(() -> {
+            while (sampling.get()) {
+                OwnedConsumerCpu.totalCpuNanos();
+                try {
+                    Thread.sleep(5L);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        }, "jfr-perf-cpu-sampler");
+        sampler.setDaemon(true);
+        sampler.start();
+        try {
+            work.run();
+        } finally {
+            sampling.set(false);
+            try {
+                sampler.join(2_000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
 
         long wall = System.nanoTime() - wallBefore;
         long processCpu = processCpuNanos() - processCpuBefore;
@@ -220,7 +243,7 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("Both legs use the same disk Flight Recording. Delta ≈ consume-side cost only.\n\n");
         sb.append("## Reading the ratios\n\n");
         sb.append("- `wall/process CPU/alloc ratio ≈ 1.0` → consume-side overhead negligible on that workload\n");
-        sb.append("- `consumer CPU p50` tracks this harness’s owned thread ids (`jfr-metrics-consumer` + EventStream threads that appear after this consumer starts); last CPU retained on exit\n");
+        sb.append("- `consumer CPU p50` tracks session-owned thread ids (`jfr-metrics-consumer` + EventStream ids born after pre-start mark); 5ms sampler retains CPU across mid-sample exits; baseline measures residual owned ids after stop\n");
         sb.append("- `alloc` is measured inside the workload (per-worker `getCurrentThreadAllocatedBytes`), not via live-thread snapshots\n");
         sb.append("- `dropped` / `keys` are Micrometer gauges after the scenario’s last enabled leg\n");
         sb.append("- Short GC Δ noise is normal; prefer wall/CPU/alloc ratios across scenarios\n\n");
@@ -331,11 +354,12 @@ class JfrMetricsConsumerPerfCompareTest {
      * Tracks CPU for threads owned by this harness’s consumer session only.
      * <p>
      * Call {@link #markForeignEventStreams()} before {@code consumer.start()}, then
-     * {@link #beginSession()} after attach. Ownership is by thread id: the named
-     * {@code jfr-metrics-consumer} scheduler plus EventStream worker threads that were
-     * <em>not</em> present before start (identity via appearance, not global name match).
-     * {@link #totalCpuNanos()} keeps last-seen CPU if an owned thread exits mid-sample.
-     * {@link #endSession()} clears ownership so baseline legs read 0.
+     * {@link #beginSession()} after attach (one-shot adopt of {@code jfr-metrics-consumer}
+     * plus non-foreign EventStream workers). During an active session, new EventStream
+     * threads are adopted only as <em>replacements</em> when a previously owned EventStream
+     * id is dead. {@link #totalCpuNanos()} refreshes last-seen CPU (callers should poll
+     * during work so mid-sample exits keep accrued time). {@link #endSession()} freezes
+     * adoption but keeps owned ids so baseline legs measure any residual CPU honestly.
      */
     private static final class OwnedConsumerCpu {
         private static final java.util.Set<Long> FOREIGN = java.util.concurrent.ConcurrentHashMap.newKeySet();
@@ -363,28 +387,114 @@ class JfrMetricsConsumerPerfCompareTest {
             OWNED.clear();
             LAST_CPU.clear();
             sessionActive = true;
-            adoptOwnedThreads();
+            adoptInitialOwnedThreads();
             totalCpuNanos();
         }
 
         static void endSession() {
-            if (sessionActive) {
+            if (sessionActive || !OWNED.isEmpty()) {
                 totalCpuNanos();
             }
+            // Freeze adoption; keep OWNED/LAST_CPU so baseline can observe residual CPU.
             sessionActive = false;
-            OWNED.clear();
-            LAST_CPU.clear();
             FOREIGN.clear();
         }
 
         static long totalCpuNanos() {
-            if (!sessionActive && OWNED.isEmpty()) {
+            if (OWNED.isEmpty() && !sessionActive) {
                 return 0L;
             }
-            adoptOwnedThreads();
+            if (sessionActive) {
+                adoptReplacementsIfNeeded();
+            }
+            refreshLastCpu();
+            long sum = 0L;
+            for (Long id : OWNED) {
+                sum += LAST_CPU.getOrDefault(id, 0L);
+            }
+            return sum;
+        }
+
+        private static void adoptInitialOwnedThreads() {
+            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+            for (long id : bean.getAllThreadIds()) {
+                if (FOREIGN.contains(id)) {
+                    continue;
+                }
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info == null) {
+                    continue;
+                }
+                String name = info.getThreadName();
+                if ("jfr-metrics-consumer".equals(name) || looksLikeEventStream(name)) {
+                    OWNED.add(id);
+                }
+            }
+        }
+
+        /**
+         * Adopt a replacement only when a previously owned scheduler/EventStream id is dead.
+         * Prevents picking up unrelated EventStreams that start while ours are still live.
+         */
+        private static void adoptReplacementsIfNeeded() {
+            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+            boolean liveScheduler = false;
+            boolean ownedEventStream = false;
+            boolean liveEventStream = false;
+            for (Long id : OWNED) {
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info == null || bean.getThreadCpuTime(id) < 0L) {
+                    continue;
+                }
+                String name = info.getThreadName();
+                if ("jfr-metrics-consumer".equals(name)) {
+                    liveScheduler = true;
+                } else if (looksLikeEventStream(name)) {
+                    ownedEventStream = true;
+                    liveEventStream = true;
+                }
+            }
+            for (Long id : OWNED) {
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info != null && looksLikeEventStream(info.getThreadName())) {
+                    ownedEventStream = true;
+                    break;
+                }
+            }
+            if (!liveScheduler) {
+                adoptFirstMatch(bean, "scheduler");
+            }
+            // Late initial attach: EventStream may appear slightly after beginSession.
+            // Replacement: only if we previously owned an EventStream that has since died.
+            if (!ownedEventStream || !liveEventStream) {
+                adoptFirstMatch(bean, "eventstream");
+            }
+        }
+
+        private static void adoptFirstMatch(ThreadMXBean bean, String kind) {
+            for (long id : bean.getAllThreadIds()) {
+                if (OWNED.contains(id) || FOREIGN.contains(id)) {
+                    continue;
+                }
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info == null) {
+                    continue;
+                }
+                String name = info.getThreadName();
+                boolean match = "scheduler".equals(kind)
+                        ? "jfr-metrics-consumer".equals(name)
+                        : looksLikeEventStream(name);
+                if (match) {
+                    OWNED.add(id);
+                    return;
+                }
+            }
+        }
+
+        private static void refreshLastCpu() {
             ThreadMXBean bean = ManagementFactory.getThreadMXBean();
             if (!bean.isThreadCpuTimeSupported()) {
-                return 0L;
+                return;
             }
             if (!bean.isThreadCpuTimeEnabled()) {
                 bean.setThreadCpuTimeEnabled(true);
@@ -395,37 +505,12 @@ class JfrMetricsConsumerPerfCompareTest {
                     LAST_CPU.merge(id, cpu, Math::max);
                 }
             }
-            long sum = 0L;
-            for (Long id : OWNED) {
-                sum += LAST_CPU.getOrDefault(id, 0L);
-            }
-            return sum;
-        }
-
-        private static void adoptOwnedThreads() {
-            if (!sessionActive) {
-                return;
-            }
-            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-            for (long id : bean.getAllThreadIds()) {
-                if (FOREIGN.contains(id) || OWNED.contains(id)) {
-                    continue;
-                }
-                ThreadInfo info = bean.getThreadInfo(id);
-                if (info == null) {
-                    continue;
-                }
-                String name = info.getThreadName();
-                if ("jfr-metrics-consumer".equals(name)
-                        || (looksLikeEventStream(name) && !FOREIGN.contains(id))) {
-                    OWNED.add(id);
-                }
-            }
         }
 
         /**
          * Heuristic only to discover candidate EventStream workers; ownership still requires
-         * the thread id was absent at {@link #markForeignEventStreams()} time.
+         * the thread id was absent at {@link #markForeignEventStreams()} time (or is a
+         * replacement for a dead owned EventStream).
          */
         private static boolean looksLikeEventStream(String name) {
             return name != null && name.startsWith("JFR Event Stream");
