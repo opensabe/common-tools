@@ -167,16 +167,21 @@ class JfrMetricsConsumerPerfCompareTest {
         consumer.start();
         awaitAttached(registry, Duration.ofSeconds(15));
         OwnedConsumerCpu.beginSession();
-        // Measure immediately after attach so consume work overlaps the workload (same
-        // post-stop settle as baseline; no second idle settle that drains the backlog).
+        // EventStream worker may appear slightly after attach; wait briefly before measure.
+        for (int i = 0; i < 50 && !OwnedConsumerCpu.hasOwnedEventStream(); i++) {
+            OwnedConsumerCpu.adoptReplacementsOnce();
+            Thread.sleep(20L);
+        }
+        // Measure immediately afterward so consume work overlaps the workload (same
+        // post-stop settle as baseline; no long idle settle that drains the backlog).
         return measure(() -> blackhole(scenario.run(scenario.measureUnits(), WORKER_THREADS)), enabledFirst);
     }
 
     private static Sample measure(Runnable work, boolean enabledFirst) {
         GcSnapshot gcBefore = GcSnapshot.capture();
-        long processCpuBefore = processCpuNanos();
+        // One-shot replacement adopt outside the sampler so both legs share equal poll cost.
+        OwnedConsumerCpu.adoptReplacementsOnce();
         long consumerCpuBefore = OwnedConsumerCpu.totalCpuNanos();
-        long wallBefore = System.nanoTime();
         WORKLOAD_ALLOC_BYTES.set(-1L);
 
         java.util.concurrent.atomic.AtomicBoolean sampling = new java.util.concurrent.atomic.AtomicBoolean(true);
@@ -184,6 +189,7 @@ class JfrMetricsConsumerPerfCompareTest {
         Thread sampler = new Thread(() -> {
             try {
                 while (sampling.get()) {
+                    // Refresh only — no adopt/scan divergence between baseline and enabled legs.
                     OwnedConsumerCpu.totalCpuNanos();
                     try {
                         Thread.sleep(1L);
@@ -203,7 +209,10 @@ class JfrMetricsConsumerPerfCompareTest {
         sampler.start();
         @SuppressWarnings("deprecation")
         long samplerThreadId = sampler.getId();
+        // Align process + sampler baselines after the sampler is running.
+        long processCpuBefore = processCpuNanos();
         long samplerCpuBefore = threadCpuNanos(samplerThreadId);
+        long wallBefore = System.nanoTime();
         try {
             work.run();
         } finally {
@@ -213,13 +222,15 @@ class JfrMetricsConsumerPerfCompareTest {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+            if (sampler.isAlive() || samplerCpuEnd.get() < 0L) {
+                // Join timed out or finally did not publish — do not guess sampler CPU.
+                samplerCpuEnd.compareAndSet(-1L, samplerCpuBefore);
+            }
         }
 
         long wall = System.nanoTime() - wallBefore;
         long samplerEnd = samplerCpuEnd.get();
-        long samplerCpu = samplerEnd >= 0L
-                ? Math.max(0L, samplerEnd - samplerCpuBefore)
-                : Math.max(0L, threadCpuNanos(samplerThreadId) - samplerCpuBefore);
+        long samplerCpu = Math.max(0L, samplerEnd - samplerCpuBefore);
         // Exclude harness sampler CPU from process delta (same both legs).
         long processCpu = Math.max(0L, processCpuNanos() - processCpuBefore - samplerCpu);
         long consumerCpu = Math.max(0L, OwnedConsumerCpu.totalCpuNanos() - consumerCpuBefore);
@@ -290,9 +301,9 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("Both legs use the same disk Flight Recording. Delta ≈ consume-side cost only.\n\n");
         sb.append("## Reading the ratios\n\n");
         sb.append("- `wall/process CPU/alloc ratio ≈ 1.0` → consume-side overhead negligible on that workload\n");
-        sb.append("- `consumer CPU p50` tracks session-owned thread ids (`jfr-metrics-consumer` + EventStream ids born after pre-start mark); 1ms sampler retains last CPU if an owned thread exits mid-sample\n");
-        sb.append("- Limits: up to ~1ms of CPU after the last poll before an owned thread exits may be missed; EventStream worker identity is not a public JDK API (appearance-after-mark)\n");
-        sb.append("- Sampler records its own CPU before exit and that delta is subtracted from process CPU on both legs\n");
+        sb.append("- `consumer CPU p50` tracks session-owned thread ids (`jfr-metrics-consumer` + EventStream ids born after pre-start mark); sampler refreshes last CPU on a nominal 1ms sleep\n");
+        sb.append("- Limits: poll gaps follow `Thread.sleep(1)` + scheduling (not a hard 1ms error bound); very short-lived threads may be missed; EventStream identity is appearance-after-mark (not a public JDK API)\n");
+        sb.append("- Replacement adopt runs once per measure (outside the sampler); sampler work is refresh-only so baseline/enabled poll cost matches; sampler CPU is subtracted from process CPU\n");
         long enabledFirst = results.stream()
                 .mapToLong(r -> r.enabledFirstPairs())
                 .sum();
@@ -467,12 +478,28 @@ class JfrMetricsConsumerPerfCompareTest {
             FOREIGN.clear();
         }
 
+        /** One-shot adopt for late/replacement workers; call outside the 1ms sampler loop. */
+        static void adoptReplacementsOnce() {
+            if (sessionActive) {
+                adoptReplacementsIfNeeded();
+            }
+        }
+
+        static boolean hasOwnedEventStream() {
+            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+            for (Long id : OWNED) {
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info != null && looksLikeEventStream(info.getThreadName())
+                        && bean.getThreadCpuTime(id) >= 0L) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         static long totalCpuNanos() {
             if (OWNED.isEmpty() && !sessionActive) {
                 return 0L;
-            }
-            if (sessionActive) {
-                adoptReplacementsIfNeeded();
             }
             refreshLastCpu();
             long sum = 0L;
