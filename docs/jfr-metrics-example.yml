@@ -1,0 +1,46 @@
+# 示例配置（给人看的；不要当成默认自动加载的 application.yml）
+# 升级时：先开 enabled，确认进程已有 disk JFR，再按需关事件或调熔断。
+
+opensabe:
+  jfr:
+    metrics:
+      # 全局开关。false = 不消费、无线程。默认 false。
+      enabled: true
+
+      publish:
+        # 每个指标每个窗口保留的 Top-N
+        top-n: 30
+        flush-interval: 15s
+
+      stack:
+        # 优先取这些包下的帧作为 method 标签；空则跳过 jdk/java/sun/reactor
+        business-packages:
+          - com.example
+
+      repository:
+        attach-timeout: 30s
+        retry-interval: 5s
+
+      circuit-breaker:
+        # 只停消费，不改 JVM 录制
+        max-per-second: 500
+        global-max-per-second: 2000
+        cooldown: 1m
+
+      consume:
+        # false = 不订阅（不解析），不是去关 JFR 事件
+        allocation-sample:
+          enabled: true
+        outside-tlab:
+          enabled: true
+          min-size: 64KB          # 仅聚合过滤
+        allocation-requiring-gc:
+          enabled: true
+        old-objects:
+          enabled: true
+        execution-sample:
+          enabled: true
+        monitor-enter:
+          enabled: true
+        zgc-allocation-stall:
+          enabled: true
