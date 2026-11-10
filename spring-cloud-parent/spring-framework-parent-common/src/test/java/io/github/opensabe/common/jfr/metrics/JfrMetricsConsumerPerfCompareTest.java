@@ -66,6 +66,11 @@ class JfrMetricsConsumerPerfCompareTest {
 
     private static final int SAMPLES = 9;
     private static final int WORKER_THREADS = Math.max(2, Runtime.getRuntime().availableProcessors() / 2);
+    /**
+     * When a scenario measures allocation itself (esp. multi-thread), it stores the byte delta here
+     * so {@link #measure} does not rely on live-thread snapshots after workers exit.
+     */
+    private static final AtomicLong WORKLOAD_ALLOC_BYTES = new AtomicLong(-1L);
 
     @Test
     @Timeout(value = 30, unit = TimeUnit.MINUTES)
@@ -137,22 +142,22 @@ class JfrMetricsConsumerPerfCompareTest {
     private static Sample measure(Runnable work) {
         GcSnapshot gcBefore = GcSnapshot.capture();
         long processCpuBefore = processCpuNanos();
-        long consumerCpuBefore = cpuNanosForThread("jfr-metrics-consumer");
+        ConsumerCpuSnapshot consumerCpuBefore = ConsumerCpuSnapshot.capture();
         long wallBefore = System.nanoTime();
-        AllocSnapshot allocBefore = AllocSnapshot.captureAllThreads();
+        WORKLOAD_ALLOC_BYTES.set(-1L);
 
         work.run();
 
-        AllocSnapshot allocAfter = AllocSnapshot.captureAllThreads();
         long wall = System.nanoTime() - wallBefore;
         long processCpu = processCpuNanos() - processCpuBefore;
-        long consumerCpu = Math.max(0L, cpuNanosForThread("jfr-metrics-consumer") - consumerCpuBefore);
+        long consumerCpu = ConsumerCpuSnapshot.capture().deltaFrom(consumerCpuBefore);
+        long allocated = WORKLOAD_ALLOC_BYTES.get();
         GcSnapshot gcAfter = GcSnapshot.capture();
         return new Sample(
                 wall,
                 Math.max(0L, processCpu),
                 consumerCpu,
-                allocAfter.minus(allocBefore),
+                allocated,
                 gcAfter.minus(gcBefore));
     }
 
@@ -209,9 +214,10 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("- Samples/scenario (interleaved A/B): `").append(SAMPLES).append("`\n");
         sb.append("- Worker threads (LOCK/MIXED): `").append(WORKER_THREADS).append("`\n\n");
         sb.append("Both legs use the same disk Flight Recording. Delta ≈ consume-side cost only.\n\n");
-        sb.append("### Reading the ratios\n\n");
+        sb.append("## Reading the ratios\n\n");
         sb.append("- `wall/process CPU/alloc ratio ≈ 1.0` → consume-side overhead negligible on that workload\n");
-        sb.append("- `consumer CPU p50` is CPU time of thread `jfr-metrics-consumer` during each enabled sample\n");
+        sb.append("- `consumer CPU p50` sums CPU of `jfr-metrics-consumer` **and** `JFR Event Stream*` threads\n");
+        sb.append("- `alloc` is measured inside the workload (per-worker `getCurrentThreadAllocatedBytes`), not via live-thread snapshots\n");
         sb.append("- `dropped` / `keys` are Micrometer gauges after the scenario’s last enabled leg\n");
         sb.append("- Short GC Δ noise is normal; prefer wall/CPU/alloc ratios across scenarios\n\n");
 
@@ -266,7 +272,24 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("  -Djfr.perf.compare=true\n");
         sb.append("```\n\n");
         sb.append("CI excludes tag `jfr-perf` via `jfr.perf.excludedGroups` (default) and requires ")
-                .append("`jfr.perf.compare=true`.\n");
+                .append("`jfr.perf.compare=true`.\n\n");
+
+        double maxWall = results.stream().mapToDouble(ScenarioResult::wallRatioP50).filter(d -> !Double.isNaN(d)).max().orElse(Double.NaN);
+        double maxCpu = results.stream().mapToDouble(ScenarioResult::processCpuRatioP50).filter(d -> !Double.isNaN(d)).max().orElse(Double.NaN);
+        sb.append("## Conclusion (this capture)\n\n");
+        sb.append("| Signal | Observation |\n|---|---|\n");
+        sb.append("| Wall p50 ratio (max) | **").append(fmtRatio(maxWall)).append("** |\n");
+        sb.append("| Process CPU p50 ratio (max) | **").append(fmtRatio(maxCpu)).append("** |\n");
+        sb.append("| Consumer-side CPU p50 | see per-scenario (scheduler + EventStream) |\n");
+        sb.append("| Dropped | see summary |\n");
+        if (!Double.isNaN(maxWall) && maxWall < 1.15d && !Double.isNaN(maxCpu) && maxCpu < 1.15d) {
+            sb.append("\n**Verdict:** Under default.jfc disk recording, consume-side overhead is **negligible** ")
+                    .append("vs recording-only baseline on this machine.\n");
+        } else {
+            sb.append("\n**Verdict:** Review scenario ratios above; some workloads exceed the ~15% noise band.\n");
+        }
+        sb.append("\nThis does **not** measure the cost of enabling heavier jfc events (OutsideTLAB etc.); ")
+                .append("that cost is on the recorder, not this module.\n");
         return sb.toString();
     }
 
@@ -286,22 +309,57 @@ class JfrMetricsConsumerPerfCompareTest {
         return 0L;
     }
 
-    private static long cpuNanosForThread(String name) {
+    private static boolean isConsumerSideThread(String name) {
+        return "jfr-metrics-consumer".equals(name)
+                || name.startsWith("JFR Event Stream")
+                || name.contains("JFR Event Stream");
+    }
+
+    @SuppressWarnings("deprecation")
+    private static long currentThreadAllocatedBytes() {
         ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-        if (!bean.isThreadCpuTimeSupported()) {
-            return 0L;
+        if (!(bean instanceof com.sun.management.ThreadMXBean sun)
+                || !sun.isThreadAllocatedMemorySupported()) {
+            return -1L;
         }
-        if (!bean.isThreadCpuTimeEnabled()) {
-            bean.setThreadCpuTimeEnabled(true);
+        if (!sun.isThreadAllocatedMemoryEnabled()) {
+            sun.setThreadAllocatedMemoryEnabled(true);
         }
-        for (long id : bean.getAllThreadIds()) {
-            ThreadInfo info = bean.getThreadInfo(id);
-            if (info != null && name.equals(info.getThreadName())) {
-                long cpu = bean.getThreadCpuTime(id);
-                return cpu < 0L ? 0L : cpu;
+        long allocated = sun.getThreadAllocatedBytes(Thread.currentThread().getId());
+        return allocated < 0L ? -1L : allocated;
+    }
+
+    private record ConsumerCpuSnapshot(java.util.Map<Long, Long> cpuByThread) {
+        static ConsumerCpuSnapshot capture() {
+            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+            java.util.Map<Long, Long> map = new java.util.HashMap<>();
+            if (!bean.isThreadCpuTimeSupported()) {
+                return new ConsumerCpuSnapshot(map);
             }
+            if (!bean.isThreadCpuTimeEnabled()) {
+                bean.setThreadCpuTimeEnabled(true);
+            }
+            for (long id : bean.getAllThreadIds()) {
+                ThreadInfo info = bean.getThreadInfo(id);
+                if (info == null || !isConsumerSideThread(info.getThreadName())) {
+                    continue;
+                }
+                long cpu = bean.getThreadCpuTime(id);
+                if (cpu > 0L) {
+                    map.put(id, cpu);
+                }
+            }
+            return new ConsumerCpuSnapshot(map);
         }
-        return 0L;
+
+        long deltaFrom(ConsumerCpuSnapshot before) {
+            long sum = 0L;
+            for (java.util.Map.Entry<Long, Long> entry : cpuByThread.entrySet()) {
+                long prev = before.cpuByThread.getOrDefault(entry.getKey(), 0L);
+                sum += Math.max(0L, entry.getValue() - prev);
+            }
+            return sum;
+        }
     }
 
     private static String fmtRatio(double ratio) {
@@ -378,12 +436,17 @@ class JfrMetricsConsumerPerfCompareTest {
 
             @Override
             long run(int units, int workers) {
+                long before = currentThreadAllocatedBytes();
                 long sink = 0L;
                 byte[] buf = null;
                 for (int i = 0; i < units; i++) {
                     buf = new byte[768 + (i & 0x7ff)];
                     sink += buf.length;
                     sink ^= buf[i & (buf.length - 1)];
+                }
+                long after = currentThreadAllocatedBytes();
+                if (before >= 0L && after >= before) {
+                    WORKLOAD_ALLOC_BYTES.set(after - before);
                 }
                 return sink;
             }
@@ -401,10 +464,15 @@ class JfrMetricsConsumerPerfCompareTest {
 
             @Override
             long run(int units, int workers) {
+                long before = currentThreadAllocatedBytes();
                 long sink = 0x9e3779b97f4a7c15L;
                 for (int i = 0; i < units; i++) {
                     sink = Long.rotateLeft(sink ^ (i * 0xbf58476d1ce4e5b9L), 13);
                     sink *= 0x94d049bb133111ebL;
+                }
+                long after = currentThreadAllocatedBytes();
+                if (before >= 0L && after >= before) {
+                    WORKLOAD_ALLOC_BYTES.set(after - before);
                 }
                 return sink;
             }
@@ -461,6 +529,7 @@ class JfrMetricsConsumerPerfCompareTest {
         private static long runContended(int units, int workers, boolean lockOnly) {
             ReentrantLock lock = new ReentrantLock();
             AtomicLong sink = new AtomicLong();
+            AtomicLong allocated = new AtomicLong();
             int perWorker = Math.max(1, units / workers);
             ExecutorService pool = Executors.newFixedThreadPool(workers);
             CountDownLatch start = new CountDownLatch(1);
@@ -469,6 +538,7 @@ class JfrMetricsConsumerPerfCompareTest {
                 pool.execute(() -> {
                     try {
                         start.await();
+                        long allocBefore = currentThreadAllocatedBytes();
                         long local = 0L;
                         byte[] buf = null;
                         for (int i = 0; i < perWorker; i++) {
@@ -491,6 +561,10 @@ class JfrMetricsConsumerPerfCompareTest {
                             local ^= buf[0];
                         }
                         sink.addAndGet(local);
+                        long allocAfter = currentThreadAllocatedBytes();
+                        if (allocBefore >= 0L && allocAfter >= allocBefore) {
+                            allocated.addAndGet(allocAfter - allocBefore);
+                        }
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     } finally {
@@ -509,6 +583,7 @@ class JfrMetricsConsumerPerfCompareTest {
             } finally {
                 pool.shutdownNow();
             }
+            WORKLOAD_ALLOC_BYTES.set(allocated.get());
             return sink.get();
         }
     }
@@ -543,35 +618,6 @@ class JfrMetricsConsumerPerfCompareTest {
 
         GcDelta minus(GcSnapshot before) {
             return new GcDelta(Math.max(0L, count - before.count), Math.max(0L, timeMs - before.timeMs));
-        }
-    }
-
-    private record AllocSnapshot(long bytes) {
-        @SuppressWarnings("deprecation")
-        static AllocSnapshot captureAllThreads() {
-            ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-            if (!(bean instanceof com.sun.management.ThreadMXBean sun)
-                    || !sun.isThreadAllocatedMemorySupported()) {
-                return new AllocSnapshot(-1L);
-            }
-            if (!sun.isThreadAllocatedMemoryEnabled()) {
-                sun.setThreadAllocatedMemoryEnabled(true);
-            }
-            long sum = 0L;
-            for (long id : sun.getAllThreadIds()) {
-                long allocated = sun.getThreadAllocatedBytes(id);
-                if (allocated > 0L) {
-                    sum += allocated;
-                }
-            }
-            return new AllocSnapshot(sum);
-        }
-
-        long minus(AllocSnapshot before) {
-            if (bytes < 0L || before.bytes < 0L) {
-                return -1L;
-            }
-            return Math.max(0L, bytes - before.bytes);
         }
     }
 
