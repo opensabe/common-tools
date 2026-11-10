@@ -123,19 +123,33 @@ class JfrMetricsConsumerPerfCompareTest {
         List<Sample> baselines = new ArrayList<>(SAMPLES);
         List<Sample> enabled = new ArrayList<>(SAMPLES);
 
-        for (int i = 0; i < SAMPLES; i++) {
+        int attempts = 0;
+        int maxAttempts = SAMPLES * 4;
+        while (baselines.size() < SAMPLES && attempts < maxAttempts) {
+            attempts++;
             consumer.stop();
             OwnedConsumerCpu.endSession();
-            // Settle after stop so baseline is not charged lingering consumer CPU.
+            // Settle after stop so baseline can observe residual owned-thread CPU honestly.
             Thread.sleep(250L);
-            baselines.add(measure(() -> blackhole(scenario.run(scenario.measureUnits(), WORKER_THREADS))));
+            Sample baseline = measure(() -> blackhole(scenario.run(scenario.measureUnits(), WORKER_THREADS)));
 
             // Snapshot foreign EventStream thread ids before this consumer starts.
             OwnedConsumerCpu.markForeignEventStreams();
             consumer.start();
             awaitAttached(registry, Duration.ofSeconds(15));
             OwnedConsumerCpu.beginSession();
-            enabled.add(measure(() -> blackhole(scenario.run(scenario.measureUnits(), WORKER_THREADS))));
+            Sample enabledSample = measure(() -> blackhole(scenario.run(scenario.measureUnits(), WORKER_THREADS)));
+            // Drop pairs where owned threads exited/replaced mid-sample (incomplete CPU).
+            if (!enabledSample.valid()) {
+                continue;
+            }
+            baselines.add(baseline);
+            enabled.add(enabledSample);
+        }
+        if (baselines.size() < SAMPLES) {
+            throw new AssertionError(
+                    "only " + baselines.size() + "/" + SAMPLES
+                            + " valid consumer-CPU samples after " + attempts + " attempts");
         }
 
         Thread.sleep(1_200L);
@@ -146,6 +160,7 @@ class JfrMetricsConsumerPerfCompareTest {
     private static Sample measure(Runnable work) {
         GcSnapshot gcBefore = GcSnapshot.capture();
         long processCpuBefore = processCpuNanos();
+        OwnedConsumerCpu.clearIncomplete();
         long consumerCpuBefore = OwnedConsumerCpu.totalCpuNanos();
         long wallBefore = System.nanoTime();
         WORKLOAD_ALLOC_BYTES.set(-1L);
@@ -155,7 +170,7 @@ class JfrMetricsConsumerPerfCompareTest {
             while (sampling.get()) {
                 OwnedConsumerCpu.totalCpuNanos();
                 try {
-                    Thread.sleep(5L);
+                    Thread.sleep(1L);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return;
@@ -178,6 +193,7 @@ class JfrMetricsConsumerPerfCompareTest {
         long wall = System.nanoTime() - wallBefore;
         long processCpu = processCpuNanos() - processCpuBefore;
         long consumerCpu = Math.max(0L, OwnedConsumerCpu.totalCpuNanos() - consumerCpuBefore);
+        boolean valid = !OwnedConsumerCpu.isIncomplete();
         long allocated = WORKLOAD_ALLOC_BYTES.get();
         GcSnapshot gcAfter = GcSnapshot.capture();
         return new Sample(
@@ -185,7 +201,8 @@ class JfrMetricsConsumerPerfCompareTest {
                 Math.max(0L, processCpu),
                 consumerCpu,
                 allocated,
-                gcAfter.minus(gcBefore));
+                gcAfter.minus(gcBefore),
+                valid);
     }
 
     private static JfrMetricsProperties enabledProperties() {
@@ -243,7 +260,8 @@ class JfrMetricsConsumerPerfCompareTest {
         sb.append("Both legs use the same disk Flight Recording. Delta ≈ consume-side cost only.\n\n");
         sb.append("## Reading the ratios\n\n");
         sb.append("- `wall/process CPU/alloc ratio ≈ 1.0` → consume-side overhead negligible on that workload\n");
-        sb.append("- `consumer CPU p50` tracks session-owned thread ids (`jfr-metrics-consumer` + EventStream ids born after pre-start mark); 5ms sampler retains CPU across mid-sample exits; baseline measures residual owned ids after stop\n");
+        sb.append("- `consumer CPU p50` tracks session-owned thread ids (`jfr-metrics-consumer` + EventStream ids born after pre-start mark); 1ms sampler; pairs where owned threads exit/replace mid-sample are **invalidated and retried**\n");
+        sb.append("- EventStream worker identity is not a public JDK API; ownership is appearance-after-mark (best effort). Baseline measures residual owned ids after stop\n");
         sb.append("- `alloc` is measured inside the workload (per-worker `getCurrentThreadAllocatedBytes`), not via live-thread snapshots\n");
         sb.append("- `dropped` / `keys` are Micrometer gauges after the scenario’s last enabled leg\n");
         sb.append("- Short GC Δ noise is normal; prefer wall/CPU/alloc ratios across scenarios\n\n");
@@ -358,17 +376,29 @@ class JfrMetricsConsumerPerfCompareTest {
      * plus non-foreign EventStream workers). During an active session, new EventStream
      * threads are adopted only as <em>replacements</em> when a previously owned EventStream
      * id is dead. {@link #totalCpuNanos()} refreshes last-seen CPU (callers should poll
-     * during work so mid-sample exits keep accrued time). {@link #endSession()} freezes
-     * adoption but keeps owned ids so baseline legs measure any residual CPU honestly.
+     * during work). Mid-sample owned exit/replace sets {@link #isIncomplete()} so the
+     * harness can invalidate that sample. {@link #endSession()} freezes adoption but keeps
+     * owned ids so baseline legs measure residual CPU honestly.
      */
     private static final class OwnedConsumerCpu {
         private static final java.util.Set<Long> FOREIGN = java.util.concurrent.ConcurrentHashMap.newKeySet();
         private static final java.util.Set<Long> OWNED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        private static final java.util.Set<Long> LIVE = java.util.concurrent.ConcurrentHashMap.newKeySet();
         private static final java.util.concurrent.ConcurrentHashMap<Long, Long> LAST_CPU =
                 new java.util.concurrent.ConcurrentHashMap<>();
+        private static final java.util.concurrent.atomic.AtomicBoolean INCOMPLETE =
+                new java.util.concurrent.atomic.AtomicBoolean();
         private static volatile boolean sessionActive;
 
         private OwnedConsumerCpu() {
+        }
+
+        static void clearIncomplete() {
+            INCOMPLETE.set(false);
+        }
+
+        static boolean isIncomplete() {
+            return INCOMPLETE.get();
         }
 
         /** Snapshot EventStream-named thread ids before this consumer starts. */
@@ -385,7 +415,9 @@ class JfrMetricsConsumerPerfCompareTest {
 
         static void beginSession() {
             OWNED.clear();
+            LIVE.clear();
             LAST_CPU.clear();
+            INCOMPLETE.set(false);
             sessionActive = true;
             adoptInitialOwnedThreads();
             totalCpuNanos();
@@ -398,6 +430,7 @@ class JfrMetricsConsumerPerfCompareTest {
             // Freeze adoption; keep OWNED/LAST_CPU so baseline can observe residual CPU.
             sessionActive = false;
             FOREIGN.clear();
+            INCOMPLETE.set(false);
         }
 
         static long totalCpuNanos() {
@@ -464,9 +497,11 @@ class JfrMetricsConsumerPerfCompareTest {
             if (!liveScheduler) {
                 adoptFirstMatch(bean, "scheduler");
             }
-            // Late initial attach: EventStream may appear slightly after beginSession.
-            // Replacement: only if we previously owned an EventStream that has since died.
-            if (!ownedEventStream || !liveEventStream) {
+            if (!ownedEventStream) {
+                // Late initial attach — EventStream may appear slightly after beginSession.
+                adoptFirstMatch(bean, "eventstream");
+            } else if (!liveEventStream) {
+                // Replacement; refreshLastCpu already flags INCOMPLETE when the prior id left LIVE.
                 adoptFirstMatch(bean, "eventstream");
             }
         }
@@ -502,7 +537,11 @@ class JfrMetricsConsumerPerfCompareTest {
             for (Long id : OWNED) {
                 long cpu = bean.getThreadCpuTime(id);
                 if (cpu >= 0L) {
+                    LIVE.add(id);
                     LAST_CPU.merge(id, cpu, Math::max);
+                } else if (sessionActive && LIVE.remove(id)) {
+                    // Owned thread was live earlier in this sample and has now exited.
+                    INCOMPLETE.set(true);
                 }
             }
         }
@@ -748,7 +787,8 @@ class JfrMetricsConsumerPerfCompareTest {
             long processCpuNanos,
             long consumerCpuNanos,
             long allocatedBytes,
-            GcDelta gc) {
+            GcDelta gc,
+            boolean valid) {
     }
 
     private record GcDelta(long count, long timeMs) {
