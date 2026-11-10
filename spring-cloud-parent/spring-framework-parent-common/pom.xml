@@ -26,6 +26,9 @@
         <swagger.version>2.2.31</swagger.version>
         <org.jetbrains.anotations.version>26.0.2</org.jetbrains.anotations.version>
         <micrometer.context.propagation.version>1.0.4</micrometer.context.propagation.version>
+        <!-- Default excludes manual A/B harness from CI / plain `mvn test`. -->
+        <jfr.perf.excludedGroups>jfr-perf</jfr.perf.excludedGroups>
+        <jfr.perf.compare>false</jfr.perf.compare>
     </properties>
 
     <dependencies>
@@ -158,6 +161,11 @@
                         -javaagent:${org.mockito:mockito-core:jar}
                         -XX:StartFlightRecording=disk=true,name=jfrmetrics,settings=default
                     </argLine>
+                    <!-- Opt-in: -Djfr.perf.excludedGroups= -Djfr.perf.compare=true -->
+                    <excludedGroups>${jfr.perf.excludedGroups}</excludedGroups>
+                    <systemPropertyVariables>
+                        <jfr.perf.compare>${jfr.perf.compare}</jfr.perf.compare>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

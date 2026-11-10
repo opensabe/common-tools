@@ -80,6 +80,24 @@ opensabe:
 
 若进程 jfc 打开了 OutsideTLAB / InNewTLAB，JVM 记事件成本本模块停不掉。
 
+## 开销对比测试（手动，CI 不跑）
+
+全场景 A/B 压测：`ALLOC` / `CPU` / `LOCK` / `MIXED`。录制始终开启，只交错开关消费；采集墙钟 p50/p95、进程 CPU、全线程分配、消费线程 CPU、GC、以及 `dropped` / `aggregatorKeys`。
+
+**CI 排除（双保险）：**
+
+1. surefire 默认 `jfr.perf.excludedGroups=jfr-perf`
+2. 测试仅在 `-Djfr.perf.compare=true` 时启用
+
+```bash
+mvn -pl spring-cloud-parent/spring-framework-parent-common -am test \
+  -Dtest=JfrMetricsConsumerPerfCompareTest \
+  -Djfr.perf.excludedGroups= \
+  -Djfr.perf.compare=true
+```
+
+结果写入 [jfr-metrics-perf-results.md](jfr-metrics-perf-results.md)（可用 `-Djfr.perf.report=/abs/path.md` 覆盖）。业务流量压测仍建议另做一轮。
+
 ## Grafana
 
 导入 [grafana/jfr-runtime.json](grafana/jfr-runtime.json)。PromQL 示例：
