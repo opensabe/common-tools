@@ -35,8 +35,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -215,13 +213,11 @@ class JfrMetricsConsumerPerfCompareTest {
                 samplerCpuEnd.set(threadCpuNanos(selfId));
             }
         }, "jfr-perf-cpu-sampler");
+        // Process baseline before the sampler starts; new sampler thread CPU starts at 0.
+        long processCpuBefore = processCpuNanos();
         sampler.setDaemon(true);
         sampler.start();
-        @SuppressWarnings("deprecation")
-        long samplerThreadId = sampler.getId();
-        // Capture both baselines while the sampler is blocked, then release it.
-        long processCpuBefore = processCpuNanos();
-        long samplerCpuBefore = threadCpuNanos(samplerThreadId);
+        long samplerCpuBefore = 0L;
         baselinesReady.countDown();
         long wallBefore = System.nanoTime();
         try {
@@ -752,7 +748,7 @@ class JfrMetricsConsumerPerfCompareTest {
                 return sink;
             }
         },
-        LOCK("multi-thread contended ReentrantLock (JavaMonitorEnter pressure)") {
+        LOCK("multi-thread contended synchronized monitor (JavaMonitorEnter pressure)") {
             @Override
             int warmupUnits() {
                 return 200_000;
@@ -768,7 +764,7 @@ class JfrMetricsConsumerPerfCompareTest {
                 return runContended(units, workers, true);
             }
         },
-        MIXED("multi-thread mix of alloc + CPU + short locks") {
+        MIXED("multi-thread mix of alloc + CPU + short synchronized monitors") {
             @Override
             int warmupUnits() {
                 return 250_000;
@@ -802,7 +798,8 @@ class JfrMetricsConsumerPerfCompareTest {
         abstract long run(int units, int workers);
 
         private static long runContended(int units, int workers, boolean lockOnly) {
-            ReentrantLock lock = new ReentrantLock();
+            // Use intrinsic monitors so default.jfc records jdk.JavaMonitorEnter (ReentrantLock does not).
+            Object monitor = new Object();
             AtomicLong sink = new AtomicLong();
             AtomicLong allocated = new AtomicLong();
             int perWorker = Math.max(1, units / workers);
@@ -818,12 +815,9 @@ class JfrMetricsConsumerPerfCompareTest {
                         byte[] buf = null;
                         for (int i = 0; i < perWorker; i++) {
                             if (lockOnly || (i & 0x1f) == 0) {
-                                lock.lock();
-                                try {
+                                synchronized (monitor) {
                                     local ^= i;
                                     Thread.onSpinWait();
-                                } finally {
-                                    lock.unlock();
                                 }
                             }
                             if (!lockOnly) {
