@@ -95,6 +95,8 @@ class JfrMetricsConsumerPerfCompareTest {
             }
             consumer.stop();
 
+            verifyEventStreamOwnershipEdges(consumer, registry);
+
             for (Scenario scenario : Scenario.values()) {
                 results.add(runInterleaved(scenario, consumer, registry));
             }
@@ -111,10 +113,68 @@ class JfrMetricsConsumerPerfCompareTest {
 
         assertThat(results).isNotEmpty();
         assertThat(results).allMatch(r -> r.enabled().attached());
+        // Consume work must show up in the enabled-leg consumer CPU window (flush-cover included).
+        assertThat(results)
+                .allMatch(r -> r.consumerCpuP50() > 0L,
+                        "enabled consumer CPU p50 must be > 0 (events/consume window empty)");
         // Catastrophic-only guard (manual perf gate lives in the written report).
         assertThat(results)
                 .allMatch(r -> r.wallRatioP50() < 5.0d,
                         "unexpected >5× wall p50 overhead in a scenario");
+    }
+
+    /**
+     * Runtime check for the attach → EventStream-gone → re-attach ownership edge cases.
+     */
+    private static void verifyEventStreamOwnershipEdges(
+            JfrMetricsConsumer consumer, SimpleMeterRegistry registry) throws InterruptedException {
+        OwnedConsumerCpu.markForeignEventStreams();
+        consumer.start();
+        awaitAttached(registry, Duration.ofSeconds(15));
+        OwnedConsumerCpu.beginSession();
+        for (int i = 0; i < 50 && !OwnedConsumerCpu.hasOwnedEventStream(); i++) {
+            OwnedConsumerCpu.adoptReplacementsOnce();
+            Thread.sleep(20L);
+        }
+        assertThat(OwnedConsumerCpu.hasOwnedEventStream())
+                .as("EventStream owned after attach")
+                .isTrue();
+
+        consumer.stop();
+        OwnedConsumerCpu.endSession();
+        Thread.sleep(SETTLE_MS);
+        // After stop, with no restart: beginSession must not own a live EventStream worker.
+        OwnedConsumerCpu.markForeignEventStreams();
+        OwnedConsumerCpu.beginSession();
+        assertThat(OwnedConsumerCpu.hasOwnedEventStream())
+                .as("no live EventStream after stop before re-attach")
+                .isFalse();
+        AssertionError failFast = null;
+        try {
+            if (!OwnedConsumerCpu.hasOwnedEventStream()) {
+                throw new AssertionError(
+                        "no live EventStream worker owned after attach; consumer-CPU sample would be incomplete");
+            }
+        } catch (AssertionError expected) {
+            failFast = expected;
+        }
+        assertThat(failFast).as("enabled measure fails without EventStream").isNotNull();
+
+        // Re-attach: replacement/new EventStream must be owned again.
+        OwnedConsumerCpu.markForeignEventStreams();
+        consumer.start();
+        awaitAttached(registry, Duration.ofSeconds(15));
+        OwnedConsumerCpu.beginSession();
+        for (int i = 0; i < 50 && !OwnedConsumerCpu.hasOwnedEventStream(); i++) {
+            OwnedConsumerCpu.adoptReplacementsOnce();
+            Thread.sleep(20L);
+        }
+        assertThat(OwnedConsumerCpu.hasOwnedEventStream())
+                .as("EventStream owned again after re-attach")
+                .isTrue();
+        consumer.stop();
+        OwnedConsumerCpu.endSession();
+        System.out.println("ownership-edge verification: fail-without-stream=OK, re-attach-owned=OK");
     }
 
     private static ScenarioResult runInterleaved(
