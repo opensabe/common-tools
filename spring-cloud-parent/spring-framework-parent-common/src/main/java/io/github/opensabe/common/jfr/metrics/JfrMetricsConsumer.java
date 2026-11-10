@@ -402,10 +402,16 @@ public class JfrMetricsConsumer implements SmartLifecycle, DisposableBean {
                             + oldObjects.sums().size()
                             + execution.sums().size()
                             + monitorWait.sums().size());
-            publisher.addDropped(dropped);
         } catch (RuntimeException ex) {
             // Keep the scheduled flush alive; this window's drained samples are dropped.
             log.warn("JFR metrics window publish failed (continuing): {}", ex.toString());
+        } finally {
+            // Always credit drained drop counters even if labeled publish failed mid-window.
+            try {
+                publisher.addDropped(dropped);
+            } catch (RuntimeException ignored) {
+                // best-effort cumulative counter
+            }
         }
     }
 
