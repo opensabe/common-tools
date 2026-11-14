@@ -23,4 +23,9 @@ public class MQSendConfig {
     @Builder.Default
     private Boolean isCompressEnabled = false;
 
+    /**
+     * RocketMQ delay level. null/0 = no delay; 1..18 = classic delay levels.
+     * Actual delay duration is defined by Broker messageDelayLevel.
+     */
+    private Integer delayLevel;
 }

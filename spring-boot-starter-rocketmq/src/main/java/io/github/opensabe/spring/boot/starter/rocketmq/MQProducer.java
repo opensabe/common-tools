@@ -119,4 +119,26 @@ public interface MQProducer {
      * @return
      */
     SendResult sendWithoutRetry(String topic, String hashKey, String baseMQMessage, String traceIdString);
+
+    /**
+     * 同步发送延时消息（非有序）。
+     * delayLevel: 1..18；0 表示不延时。
+     */
+    void sendDelay(String topic, Object o, int delayLevel);
+
+    void sendDelay(String topic, Object o, MessageDelayLevel delayLevel);
+
+    /**
+     * 异步发送延时消息（非有序）。
+     */
+    void sendDelayAsync(String topic, Object o, int delayLevel);
+
+    void sendDelayAsync(String topic, Object o, MessageDelayLevel delayLevel);
+
+    /**
+     * 同步发送延时消息；若 hashKey 非空则走有序+延时（语义较弱，慎用）。
+     */
+    void sendDelay(String topic, Object o, String hashKey, int delayLevel);
+
+    void sendDelayAsync(String topic, Object o, String hashKey, SendCallback sendCallback, int delayLevel);
 }

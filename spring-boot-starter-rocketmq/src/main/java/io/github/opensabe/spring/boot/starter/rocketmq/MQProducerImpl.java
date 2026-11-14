@@ -47,6 +47,26 @@ public class MQProducerImpl implements MQProducer {
         this.globalSecretManager = globalSecretManager;
     }
 
+    private static final int MAX_CLASSIC_DELAY_LEVEL = 18;
+
+    /**
+     * @return normalized delayLevel; 0 means no delay
+     */
+    private int resolveDelayLevel(MQSendConfig mqSendConfig) {
+        Integer delayLevel = mqSendConfig == null ? null : mqSendConfig.getDelayLevel();
+        if (delayLevel == null || delayLevel == 0) {
+            return 0;
+        }
+        if (delayLevel < 0) {
+            throw new IllegalArgumentException("delayLevel must be >= 0, got " + delayLevel);
+        }
+        if (delayLevel > MAX_CLASSIC_DELAY_LEVEL) {
+            log.warn("MQProducerImpl-resolveDelayLevel: delayLevel {} > {}, broker may clamp to maxLevel",
+                    delayLevel, MAX_CLASSIC_DELAY_LEVEL);
+        }
+        return delayLevel;
+    }
+
 
     @Override
     public void send(String topic, Object o) {
@@ -222,8 +242,11 @@ public class MQProducerImpl implements MQProducer {
         String traceId = traceContext.traceId();
         String spanId = traceContext.spanId();
         try {
+            final int delayLevel = resolveDelayLevel(mqSendConfigFinal);
+            final long sendTimeout = rocketMQTemplate.getProducer().getSendMsgTimeout();
+
             SendResult sendResult;
-            log.info("Try send to MQ, topic: {}, hashKey: {}, isAsync: {}, data: {}", () -> topic, () -> hashKey, () -> isAsync, o::toString);
+            log.info("Try send to MQ, topic: {}, hashKey: {}, isAsync: {}, delayLevel: {}, data: {}", () -> topic, () -> hashKey, () -> isAsync, () -> delayLevel, o::toString);
             BaseMQMessage baseMQMessage;
             if (o instanceof BaseMQMessage) {
                 baseMQMessage = (BaseMQMessage) o;
@@ -271,16 +294,28 @@ public class MQProducerImpl implements MQProducer {
                     }
                 };
                 if (StringUtils.isNotBlank(hashKey)) {
-                    rocketMQTemplate.asyncSendOrderly(topic, message, hashKey, sendCallbackForAsync);
+                    if (delayLevel > 0) {
+                        rocketMQTemplate.asyncSendOrderly(topic, message, hashKey, sendCallbackForAsync, sendTimeout, delayLevel);
+                    } else {
+                        rocketMQTemplate.asyncSendOrderly(topic, message, hashKey, sendCallbackForAsync);
+                    }
                 } else {
-                    rocketMQTemplate.asyncSend(topic, message, sendCallbackForAsync);
+                    if (delayLevel > 0) {
+                        rocketMQTemplate.asyncSend(topic, message, sendCallbackForAsync, sendTimeout, delayLevel);
+                    } else {
+                        rocketMQTemplate.asyncSend(topic, message, sendCallbackForAsync);
+                    }
                 }
             } else {
                 try {
                     if (StringUtils.isNotBlank(hashKey)) {
-                        sendResult = rocketMQTemplate.syncSendOrderly(topic, message, hashKey);
+                        sendResult = delayLevel > 0
+                                ? rocketMQTemplate.syncSendOrderly(topic, message, hashKey, sendTimeout, delayLevel)
+                                : rocketMQTemplate.syncSendOrderly(topic, message, hashKey);
                     } else {
-                        sendResult = rocketMQTemplate.syncSend(topic, message);
+                        sendResult = delayLevel > 0
+                                ? rocketMQTemplate.syncSend(topic, message, sendTimeout, delayLevel)
+                                : rocketMQTemplate.syncSend(topic, message);
                     }
                     handleSendResult(
                             mqSendConfigFinal, topic, hashKey, traceId, baseMQMessageFinal,
@@ -378,5 +413,35 @@ public class MQProducerImpl implements MQProducer {
             mqFailLogEntity.setRetryNum(rocketMQTemplate.getProducer().getRetryTimesWhenSendFailed());
             persistent.persistentMessage(mqFailLogEntity);
         }
+    }
+
+    @Override
+    public void sendDelay(String topic, Object o, int delayLevel) {
+        send(topic, o, null, false, null, null, MQSendConfig.builder().delayLevel(delayLevel).build());
+    }
+
+    @Override
+    public void sendDelay(String topic, Object o, MessageDelayLevel delayLevel) {
+        sendDelay(topic, o, delayLevel.getLevel());
+    }
+
+    @Override
+    public void sendDelayAsync(String topic, Object o, int delayLevel) {
+        send(topic, o, null, true, null, null, MQSendConfig.builder().delayLevel(delayLevel).build());
+    }
+
+    @Override
+    public void sendDelayAsync(String topic, Object o, MessageDelayLevel delayLevel) {
+        sendDelayAsync(topic, o, delayLevel.getLevel());
+    }
+
+    @Override
+    public void sendDelay(String topic, Object o, String hashKey, int delayLevel) {
+        send(topic, o, hashKey, false, null, null, MQSendConfig.builder().delayLevel(delayLevel).build());
+    }
+
+    @Override
+    public void sendDelayAsync(String topic, Object o, String hashKey, SendCallback sendCallback, int delayLevel) {
+        send(topic, o, hashKey, true, null, sendCallback, MQSendConfig.builder().delayLevel(delayLevel).build());
     }
 }
