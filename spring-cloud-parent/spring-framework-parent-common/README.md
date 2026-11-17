@@ -35,3 +35,15 @@ Micrometer 社区做了很多兼容各种框架的工作，我们首先添加依
 Hooks.enableAutomaticContextPropagation();
 ```
 以上代码的作用是，在 WebFlux 的各种操作符的时候，会自动把当前的 Context 传递到下游中。
+
+# JFR → Prometheus（只消费）
+
+被动消费进程已有磁盘 JFR，导出有界 Top-N Gauge。默认 `opensabe.jfr.metrics.enabled=false`。
+
+升级与配置说明见仓库根目录：
+
+- [docs/jfr-metrics.md](../../docs/jfr-metrics.md)
+- [docs/jfr-metrics-example.yml](../../docs/jfr-metrics-example.yml)
+- [docs/grafana/jfr-runtime.json](../../docs/grafana/jfr-runtime.json)
+
+本模块 **不** 启动或改写 JFR 录制；进程需自行 `-XX:StartFlightRecording`（`disk=true`）。

@@ -3,3 +3,4 @@ io.github.opensabe.common.auto.SpringCustomizedAutoConfiguration
 io.github.opensabe.common.auto.ValidationAutoConfiguration
 io.github.opensabe.common.internalcall.InternalCallAutoConfiguration
 io.github.opensabe.common.http.HttpPathSecurityAutoConfiguration
+io.github.opensabe.common.jfr.metrics.JfrMetricsAutoConfiguration
